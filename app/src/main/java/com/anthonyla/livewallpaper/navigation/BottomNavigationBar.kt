@@ -1,6 +1,5 @@
 package com.anthonyla.livewallpaper.navigation
 
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -15,6 +14,11 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+
+/**
+ * Implementation of the bottom navigation bar composable
+ * Three screens = Wallpaper, Collection, Configure
+ */
 @Composable
 fun BottomNavigationBar(
     navController: NavController,

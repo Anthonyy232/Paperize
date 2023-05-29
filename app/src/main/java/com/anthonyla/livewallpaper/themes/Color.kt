@@ -1,4 +1,4 @@
-package com.anthonyla.livewallpaper.theming
+package com.anthonyla.livewallpaper.themes
 
 import androidx.compose.ui.graphics.Color
 

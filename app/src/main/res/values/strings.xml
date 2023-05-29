@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">LiveWallpaper</string>
     <string name="library">Library</string>
-    <string name="setting">Setting</string>
+    <string name="configure">Configure</string>
     <string name="wallpaper">Wallpaper</string>
 </resources>

@@ -5,6 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun Setting(modifier: Modifier = Modifier) {
-    Text(text = "setting")
+fun Configure(modifier: Modifier = Modifier) {
+    Text(text = "configure")
 }

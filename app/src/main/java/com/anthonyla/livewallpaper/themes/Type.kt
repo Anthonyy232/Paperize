@@ -1,4 +1,4 @@
-package com.anthonyla.livewallpaper.theming
+package com.anthonyla.livewallpaper.themes
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
