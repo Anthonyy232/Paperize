@@ -15,8 +15,8 @@ import com.anthonyla.livewallpaper.ui.Wallpaper
  */
 fun NavGraphBuilder.bottomNav(navController: NavController, modifier: Modifier = Modifier) {
     navigation(startDestination = BottomNavScreens.Wallpaper.route, route = "bottomNavigation") {
-        composable(BottomNavScreens.Wallpaper.route) { Wallpaper() }
-        composable(BottomNavScreens.Library.route) { Library() }
-        composable(BottomNavScreens.Configure.route) { Configure() }
+        composable(BottomNavScreens.Wallpaper.route) { Wallpaper(navController) }
+        composable(BottomNavScreens.Library.route) { Library(navController) }
+        composable(BottomNavScreens.Configure.route) { Configure(navController) }
     }
 }

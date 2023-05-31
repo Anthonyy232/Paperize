@@ -4,6 +4,8 @@ import android.app.Activity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
@@ -13,6 +15,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.anthonyla.livewallpaper.data.settings.SettingsViewModel
 import com.anthonyla.livewallpaper.navigation.BottomNavScreens
 import com.anthonyla.livewallpaper.navigation.BottomNavigationBar
 import com.anthonyla.livewallpaper.navigation.bottomNav
@@ -20,7 +23,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LiveWallpaperApp(modifier: Modifier = Modifier) {
+fun LiveWallpaperApp(settingsViewModel: SettingsViewModel, modifier: Modifier = Modifier) {
     SetTransparentSystemBars()
 
     // Bottom navigation
