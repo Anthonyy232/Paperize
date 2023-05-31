@@ -1,12 +1,17 @@
 package com.anthonyla.livewallpaper.navigation
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarDefaults.containerColor
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
@@ -25,7 +30,11 @@ fun BottomNavigationBar(
     screens: List<BottomNavScreens>
 ) {
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = containerColor,
+        contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor),
+        tonalElevation = NavigationBarDefaults.Elevation,
+        windowInsets = NavigationBarDefaults.windowInsets,
+        modifier = Modifier
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
