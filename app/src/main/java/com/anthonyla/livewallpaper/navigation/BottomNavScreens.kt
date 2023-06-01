@@ -17,4 +17,5 @@ sealed class BottomNavScreens(val route: String, @StringRes val resourceId: Int,
     object Wallpaper : BottomNavScreens("wallpaper", R.string.wallpaper, Icons.Filled.Home)
     object Library : BottomNavScreens("library", R.string.library, Icons.Filled.List)
     object Configure : BottomNavScreens("configure", R.string.configure, Icons.Filled.Settings)
+
 }

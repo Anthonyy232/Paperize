@@ -18,27 +18,31 @@ import androidx.navigation.compose.rememberNavController
 import com.anthonyla.livewallpaper.data.settings.SettingsViewModel
 import com.anthonyla.livewallpaper.navigation.BottomNavScreens
 import com.anthonyla.livewallpaper.navigation.BottomNavigationBar
+import com.anthonyla.livewallpaper.navigation.TopBar
 import com.anthonyla.livewallpaper.navigation.bottomNav
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveWallpaperApp(settingsViewModel: SettingsViewModel, modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+
     SetTransparentSystemBars()
 
     // Bottom navigation
-    val navController = rememberNavController()
     val bottomNavOptions = listOf(
         BottomNavScreens.Wallpaper,
         BottomNavScreens.Library,
         BottomNavScreens.Configure
     )
     Scaffold (
+        topBar = {
+            TopBar(navController = navController)
+        },
         bottomBar = {
             BottomNavigationBar(navController = navController, screens = bottomNavOptions)
         },
-    ) {
-        innerPadding -> NavHost (
+    ) { innerPadding -> NavHost (
             navController,
             startDestination = "bottomNavigation",
             Modifier.padding(innerPadding)
