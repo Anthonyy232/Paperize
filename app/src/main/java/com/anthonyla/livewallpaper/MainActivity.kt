@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             LiveWallpaperTheme (isDarkMode(), isDynamicTheming()) {
                 Surface(elevation = 5.dp) {
-                    LiveWallpaperApp(settingsViewModel)
+                    LiveWallpaperApp(isDarkMode(), settingsViewModel)
                 }
             }
         }
