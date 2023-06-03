@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_LiveWallpaper)
         setContent {
             LiveWallpaperTheme (isDarkMode(), isDynamicTheming()) {
                 Surface(elevation = 5.dp) {

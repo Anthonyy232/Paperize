@@ -1,6 +1,7 @@
 package com.anthonyla.livewallpaper.themes
 
 import android.os.Build
+import androidx.compose.material.darkColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
@@ -119,6 +120,7 @@ fun LiveWallpaperTheme(
     useDynamicTheme: Boolean,
     content: @Composable () -> Unit
 ) { // Check if dynamic theming is enabled in settings
+
     val context = LocalContext.current
     val colors = when {((Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)) && useDynamicTheme -> {
             if (useDarkTheme) dynamicDarkColorScheme(context)
