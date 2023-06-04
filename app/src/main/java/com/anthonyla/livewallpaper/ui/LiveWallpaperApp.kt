@@ -1,11 +1,8 @@
 package com.anthonyla.livewallpaper.ui
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -19,7 +16,7 @@ import com.anthonyla.livewallpaper.data.settings.SettingsViewModel
 import com.anthonyla.livewallpaper.navigation.BottomNavScreens
 import com.anthonyla.livewallpaper.navigation.BottomNavigationBar
 import com.anthonyla.livewallpaper.navigation.TopBar
-import com.anthonyla.livewallpaper.navigation.bottomNav
+import com.anthonyla.livewallpaper.navigation.navGraph
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +49,7 @@ fun LiveWallpaperApp(
             startDestination = "bottomNavigation",
             Modifier.padding(innerPadding)
         ) {
-            bottomNav(navController)
+            navGraph(navController)
         }
     }
 }

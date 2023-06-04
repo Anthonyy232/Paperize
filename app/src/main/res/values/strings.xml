@@ -4,4 +4,6 @@
     <string name="configure">Configure</string>
     <string name="wallpaper">Wallpaper</string>
     <string name="MoreVertIcon">Options</string>
+    <string name="dropdownmenu_settings">Settings</string>
+    <string name="settings">settings</string>
 </resources>
