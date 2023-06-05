@@ -40,9 +40,7 @@ fun TopBar (
         scrollBehavior = null,
         actions = {
             IconButton(
-                onClick = {
-                    expanded = !expanded
-                }
+                onClick = { expanded = !expanded }
             ) {
                 Icon(
                     imageVector = Icons.Rounded.MoreVert,
@@ -50,11 +48,12 @@ fun TopBar (
                 )
                 DropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = {expanded = false},
+                    onDismissRequest = { expanded = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.dropdownmenu_settings)) },
                         onClick = {
+                            expanded = false
                             navController.navigate(SettingsNavScreens.Settings.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -63,6 +62,10 @@ fun TopBar (
                                 restoreState = true
                             }
                         }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Contact") },
+                        onClick = { /*do something*/ }
                     )
                 }
             }
