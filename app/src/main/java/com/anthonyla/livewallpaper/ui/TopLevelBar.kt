@@ -1,8 +1,6 @@
-package com.anthonyla.livewallpaper.navigation
+package com.anthonyla.livewallpaper.ui
 
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -24,10 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.anthonyla.livewallpaper.R
+import com.anthonyla.livewallpaper.navigation.SettingsNavScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar (
+fun TopLevelBar (
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
