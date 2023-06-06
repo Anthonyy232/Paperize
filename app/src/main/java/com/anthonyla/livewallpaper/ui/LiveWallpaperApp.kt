@@ -17,9 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.anthonyla.livewallpaper.data.settings.SettingsViewModel
-import com.anthonyla.livewallpaper.navigation.BottomNavScreens
-import com.anthonyla.livewallpaper.navigation.BottomNavigationBar
-import com.anthonyla.livewallpaper.navigation.navGraph
+import com.anthonyla.livewallpaper.data.navigation.BottomNavScreens
+import com.anthonyla.livewallpaper.data.navigation.navGraph
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable

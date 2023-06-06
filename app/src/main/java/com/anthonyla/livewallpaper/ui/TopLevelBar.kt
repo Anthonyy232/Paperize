@@ -2,6 +2,7 @@ package com.anthonyla.livewallpaper.ui
 
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -15,6 +16,7 @@ import androidx.compose.material3.TopAppBarDefaults.windowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -22,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.anthonyla.livewallpaper.R
-import com.anthonyla.livewallpaper.navigation.SettingsNavScreens
+import com.anthonyla.livewallpaper.data.navigation.SettingsNavScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,10 +41,11 @@ fun TopLevelBar (
         scrollBehavior = null,
         actions = {
             IconButton(
-                onClick = { expanded = !expanded }
+                onClick = {
+                    expanded = !expanded }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.MoreVert,
+                    imageVector = Icons.Filled.MoreVert,
                     contentDescription = stringResource(R.string.MoreVertIcon)
                 )
                 DropdownMenu(

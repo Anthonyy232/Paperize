@@ -1,4 +1,4 @@
-package com.anthonyla.livewallpaper.navigation
+package com.anthonyla.livewallpaper.data.navigation
 
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController

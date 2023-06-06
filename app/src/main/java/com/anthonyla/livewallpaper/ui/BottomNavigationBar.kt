@@ -1,4 +1,4 @@
-package com.anthonyla.livewallpaper.navigation
+package com.anthonyla.livewallpaper.ui
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.anthonyla.livewallpaper.data.navigation.BottomNavScreens
 
 
 /**
@@ -49,9 +50,13 @@ fun BottomNavigationBar(
                         fontWeight = FontWeight.SemiBold,
                     ) },
                 icon = {
-                    Icon(screen.icon,
-                        contentDescription = "${stringResource(id = screen.resourceId)} Icon",
-                    ) },
+                    if (currentDestination != null) {
+                        Icon(imageVector =
+                        if (currentDestination.route == screen.route) screen.filledIcon else screen.unfilledIcon,
+                            contentDescription = "${stringResource(id = screen.resourceId)} Icon",
+                        )
+                    }
+                },
                 alwaysShowLabel = false,
                 onClick = {
                     navController.navigate(screen.route) {
