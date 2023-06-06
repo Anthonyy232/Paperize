@@ -1,9 +1,7 @@
 package com.anthonyla.livewallpaper.ui
 
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -20,10 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.anthonyla.livewallpaper.R
+import com.anthonyla.livewallpaper.data.Contact
 import com.anthonyla.livewallpaper.data.navigation.SettingsNavScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +33,12 @@ fun TopLevelBar (
     modifier: Modifier = Modifier
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    var toContact by rememberSaveable { mutableStateOf(false) }
+    if (toContact) {
+        Contact(LocalContext.current)
+        toContact = false
+        expanded = false
+    }
     CenterAlignedTopAppBar(
         title = {},
         navigationIcon = {},
@@ -67,7 +73,7 @@ fun TopLevelBar (
                     )
                     DropdownMenuItem(
                         text = { Text("Contact") },
-                        onClick = { /*do something*/ }
+                        onClick = { toContact = true }
                     )
                 }
             }

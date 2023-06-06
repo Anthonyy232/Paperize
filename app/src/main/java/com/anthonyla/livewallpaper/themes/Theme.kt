@@ -131,7 +131,8 @@ fun LiveWallpaperTheme(
     }
     MaterialTheme(
         colorScheme = colors,
-        typography = typography,
-        content = content
+        typography = MaterialTheme.typography,
+        content = content,
+        shapes = MaterialTheme.shapes
     )
 }
