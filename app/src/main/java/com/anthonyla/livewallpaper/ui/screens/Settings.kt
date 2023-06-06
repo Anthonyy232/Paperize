@@ -1,4 +1,4 @@
-package com.anthonyla.livewallpaper.ui
+package com.anthonyla.livewallpaper.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.anthonyla.livewallpaper.ui.SettingsTopBar
 
 @Composable
 fun Settings(navController: NavController, modifier: Modifier = Modifier) {

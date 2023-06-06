@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat.startActivity
 
-
 @Composable
 fun Contact(context: Context) {
     val email = "anthonyyla.dev@gmail.com"

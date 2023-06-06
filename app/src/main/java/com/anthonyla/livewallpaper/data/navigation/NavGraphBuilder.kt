@@ -5,10 +5,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.anthonyla.livewallpaper.ui.Library
-import com.anthonyla.livewallpaper.ui.Configure
-import com.anthonyla.livewallpaper.ui.Settings
-import com.anthonyla.livewallpaper.ui.Wallpaper
+import com.anthonyla.livewallpaper.ui.screens.Library
+import com.anthonyla.livewallpaper.ui.screens.Configure
+import com.anthonyla.livewallpaper.ui.screens.Settings
+import com.anthonyla.livewallpaper.ui.screens.Wallpaper
 
 /**
  * The Nav graph builder links the routes for the different screens in the app
