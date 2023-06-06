@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.anthonyla.livewallpaper"
+    namespace = "com.anthonyla.paperize"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.anthonyla.livewallpaper"
+        applicationId = "com.anthonyla.paperize"
         minSdk = 26
         targetSdk = 33
         versionCode = 1
@@ -61,12 +61,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.3-beta")
     implementation("androidx.navigation:navigation-compose:2.7.0-alpha01")
     implementation("androidx.compose.material:material:1.5.0-beta01")
     implementation("androidx.datastore:datastore:1.1.0-alpha04")
     implementation("androidx.datastore:datastore-preferences:1.1.0-alpha04")
     implementation("androidx.compose.material:material-icons-extended:1.5.0-beta01")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.31.3-beta")
+    implementation("com.google.accompanist:accompanist-adaptive:0.31.3-beta")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.3-beta")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -74,8 +76,8 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation("com.google.dagger:hilt-android:2.44.2")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:2.46.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.46.1")
 }
 
 kapt {
