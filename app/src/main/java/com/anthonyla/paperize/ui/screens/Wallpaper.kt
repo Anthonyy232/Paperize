@@ -18,7 +18,9 @@ fun Wallpaper(navController: NavController, modifier: Modifier = Modifier) {
     Scaffold(
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = it),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

@@ -10,15 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.anthonyla.paperize.ui.SettingsTopBar
 
 @Composable
 fun Settings(navController: NavController, modifier: Modifier = Modifier) {
-    Scaffold(
-        topBar = {
-            SettingsTopBar(navController = navController)
-        },
-    ) {
+    Scaffold() {
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues = it),
             verticalArrangement = Arrangement.Center,

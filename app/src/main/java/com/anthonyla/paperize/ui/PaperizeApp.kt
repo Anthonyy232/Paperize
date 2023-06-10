@@ -14,11 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.anthonyla.paperize.data.settings.SettingsViewModel
 import com.anthonyla.paperize.data.navigation.BottomNavScreens
 import com.anthonyla.paperize.data.navigation.navGraph
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -50,14 +50,14 @@ fun PaperizeApp(
 
     Scaffold (
         topBar = {
-            if (topLevel) TopLevelBar(navController = navController)
+            TopAppBar(navController = navController, topLevel)
         },
         bottomBar = {
             if (topLevel) BottomNavigationBar(
                 navController = navController,
                 screens = bottomNavOptions
             ) }
-    ) { innerPadding -> NavHost (
+    ) { innerPadding -> AnimatedNavHost (
             navController,
             startDestination = "bottomNavigation",
             Modifier.padding(innerPadding)
