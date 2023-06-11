@@ -49,7 +49,7 @@ fun TopAppBar (
         navigationIcon = {
             if(!isTopLevel){
                 IconButton(
-                    onClick = { if (navController.previousBackStackEntry != null) navController.navigateUp() }
+                    onClick = { navController.navigateUp() }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -64,8 +64,7 @@ fun TopAppBar (
         actions = {
             if (isTopLevel) {
                 IconButton(
-                    onClick = {
-                        expanded = !expanded }
+                    onClick = { expanded = !expanded }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
@@ -80,9 +79,6 @@ fun TopAppBar (
                             onClick = {
                                 expanded = false
                                 navController.navigate(SettingsNavScreens.Settings.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
                                     launchSingleTop = true
                                     restoreState = true
                                 }

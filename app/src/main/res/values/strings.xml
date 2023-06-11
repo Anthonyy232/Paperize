@@ -7,4 +7,5 @@
     <string name="dropdownmenu_settings">Settings</string>
     <string name="settings">settings</string>
     <string name="settings_back">Back</string>
+    <string name="LibraryFloatingButton">Add a new library</string>
 </resources>
