@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.data.navigation.SettingsNavScreens
