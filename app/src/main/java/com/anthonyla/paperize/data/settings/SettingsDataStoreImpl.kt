@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.anthonyla.paperize.data.settings.SettingsConstants.SETTINGS_DATASTORE
+import com.anthonyla.paperize.core.SettingsConstants.SETTINGS_DATASTORE
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
