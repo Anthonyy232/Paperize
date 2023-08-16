@@ -25,13 +25,6 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.SettingsNavScreens
 
-/**
- * Top app bar for main screens
- *
- * @param navController Controller for screen navigation
- * @param isTopLevel To display back button or not
- * @param modifier
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar (

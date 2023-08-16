@@ -9,4 +9,7 @@
     <string name="settings_back">Back</string>
     <string name="LibraryFloatingButton">Add a new library</string>
     <string name="set_wallpaper_description">Enable Paperize live wallpaper</string>
+    <string name="add_wallpaper">Add wallpaper</string>
+    <string name="add_images">Add images</string>
+    <string name="add_folder">Add folder</string>
 </resources>

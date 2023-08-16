@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.library
+package com.anthonyla.paperize.feature.wallpaper.presentation.album
 
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 

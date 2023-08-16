@@ -10,15 +10,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.anthonyla.paperize.core.presentation.components.BottomNavigationBar
 import com.anthonyla.paperize.core.presentation.components.SetTransparentSystemBars
 import com.anthonyla.paperize.core.presentation.components.TopAppBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.BottomNavScreens
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.navGraph
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -27,7 +27,7 @@ fun PaperizeApp(
     modifier: Modifier = Modifier
 ) {
     SetTransparentSystemBars(viewModel.isDarkMode())
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
 
     // Hide top level bar and bottom navigation bar when the current screen is not the top level screen
     var topLevel by rememberSaveable { mutableStateOf(true) }
@@ -51,7 +51,7 @@ fun PaperizeApp(
                 )
             )
         }
-    ) { innerPadding -> AnimatedNavHost (
+    ) { innerPadding -> NavHost (
             navController,
             startDestination = "bottomNavigation",
             Modifier.padding(innerPadding)

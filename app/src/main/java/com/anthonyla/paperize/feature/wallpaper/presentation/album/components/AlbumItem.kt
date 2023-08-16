@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.library.components
+package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
