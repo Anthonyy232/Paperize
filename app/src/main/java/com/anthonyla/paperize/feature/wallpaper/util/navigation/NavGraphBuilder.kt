@@ -6,14 +6,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_edit_albums.ImageAddScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.library.LibraryScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.configure.ConfigureScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper.WallpaperScreen
-
-/**
- * The Nav graph builder links the routes for the different screens in the app
- */
 
 @ExperimentalAnimationApi
 fun NavGraphBuilder.navGraph(navController: NavController, modifier: Modifier = Modifier) {
@@ -22,5 +19,6 @@ fun NavGraphBuilder.navGraph(navController: NavController, modifier: Modifier = 
         composable(BottomNavScreens.Library.route) { LibraryScreen(navController) }
         composable(BottomNavScreens.Configure.route) { ConfigureScreen(navController) }
         composable(SettingsNavScreens.Settings.route) { SettingsScreen(navController) }
+        composable(AddEditNavScreens.ImageAdd.route) { ImageAddScreen(navController) }
     }
 }

@@ -13,14 +13,11 @@ import androidx.navigation.NavController
 
 @Composable
 fun ConfigureScreen(navController: NavController, modifier: Modifier = Modifier) {
-    Scaffold(
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Configure")
-        }
+        Text(text = "Configure")
     }
 }

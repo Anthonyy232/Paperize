@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.anthonyla.paperize.core.presentation.components.SetTransparentSystemBars
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 
 
@@ -136,4 +137,5 @@ fun PaperizeTheme(
         content = content,
         shapes = MaterialTheme.shapes
     )
+    SetTransparentSystemBars(viewModel.isDarkMode())
 }

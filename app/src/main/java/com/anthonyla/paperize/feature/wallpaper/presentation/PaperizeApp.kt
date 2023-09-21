@@ -9,40 +9,53 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.anthonyla.paperize.core.presentation.components.BottomNavigationBar
-import com.anthonyla.paperize.core.presentation.components.SetTransparentSystemBars
-import com.anthonyla.paperize.core.presentation.components.TopAppBar
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
+import com.anthonyla.paperize.core.presentation.components.TopBar
+import com.anthonyla.paperize.feature.wallpaper.presentation.library.components.AnimatedFab
+import com.anthonyla.paperize.feature.wallpaper.presentation.library.components.FabMenuOptions
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddEditNavScreens
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.BottomNavScreens
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.SettingsNavScreens
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.navGraph
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PaperizeApp(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
-) {
-    SetTransparentSystemBars(viewModel.isDarkMode())
-    val navController = rememberNavController()
-
-    // Hide top level bar and bottom navigation bar when the current screen is not the top level screen
-    var topLevel by rememberSaveable { mutableStateOf(true) }
+fun PaperizeApp(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    topLevel = when (navBackStackEntry?.destination?.route) {
-        BottomNavScreens.Wallpaper.route,
-        BottomNavScreens.Library.route,
-        BottomNavScreens.Configure.route -> true
-        else -> false
-    }
 
     Scaffold (
-        topBar = { TopAppBar(navController = navController, topLevel) },
+        topBar = {
+            val showBackButton = navBackStackEntry?.destination?.route in listOf(
+                SettingsNavScreens.Settings.route,
+                AddEditNavScreens.ImageAdd.route
+            )
+            val showDropDownMenu = navBackStackEntry?.destination?.route in listOf(
+                BottomNavScreens.Wallpaper.route,
+                BottomNavScreens.Library.route,
+                BottomNavScreens.Configure.route
+            )
+            val showTitle = when (navBackStackEntry?.destination?.route) {
+                SettingsNavScreens.Settings.route -> "Settings"
+                AddEditNavScreens.ImageAdd.route -> ""
+                else -> ""
+            }
+            TopBar(
+                navController = navController,
+                title = showTitle,
+                showBackButton = showBackButton,
+                showMenuButton = showDropDownMenu
+            )
+        },
         bottomBar = {
-            if (topLevel) BottomNavigationBar(
+            val showNavigationBar = navBackStackEntry?.destination?.route in listOf(
+                BottomNavScreens.Wallpaper.route,
+                BottomNavScreens.Library.route,
+                BottomNavScreens.Configure.route
+            )
+            if (showNavigationBar) BottomNavigationBar(
                 navController = navController,
                 screens = listOf(
                     BottomNavScreens.Wallpaper,
@@ -50,13 +63,32 @@ fun PaperizeApp(
                     BottomNavScreens.Configure
                 )
             )
+        },
+        floatingActionButton = {
+            // Show floating action button if current screen is in the list
+            val showFabButton = navBackStackEntry?.destination?.route in listOf(
+                BottomNavScreens.Library.route,
+            )
+            var optionClicked by rememberSaveable { mutableStateOf("") }
+            if (showFabButton) {
+                AnimatedFab(FabMenuOptions()) {
+                    optionClicked = it
+                    val options = FabMenuOptions()
+                    when (optionClicked) {
+                        options.imageOption.id ->
+                            navController.navigate(AddEditNavScreens.ImageAdd.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        options.folderOption.id -> null
+                    }
+                }
+            }
         }
     ) { innerPadding -> NavHost (
             navController,
             startDestination = "bottomNavigation",
             Modifier.padding(innerPadding)
-        ) {
-            navGraph(navController)
-        }
+        ) { navGraph(navController) }
     }
 }

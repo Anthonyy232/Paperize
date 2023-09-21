@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
 @Composable
-fun AnimatedFloatingActionButton(menuOptions: FabMenuOptions, onClick: (String) -> Unit) {
+fun AnimatedFab(menuOptions: FabMenuOptions, onClick: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val fabTransition = updateTransition(targetState = expanded, label = "")
 
@@ -60,8 +60,8 @@ fun AnimatedFloatingActionButton(menuOptions: FabMenuOptions, onClick: (String) 
     ) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn(tween(500, 0, FastOutSlowInEasing)),
-            exit = fadeOut(tween(500, 0, FastOutSlowInEasing)),
+            enter = fadeIn(tween(400, 0, FastOutSlowInEasing)),
+            exit = fadeOut(tween(400, 0, FastOutSlowInEasing)),
         ) {
             Column(
                 modifier = Modifier

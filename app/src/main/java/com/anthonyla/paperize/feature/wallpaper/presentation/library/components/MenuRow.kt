@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MenuRow(text: String, icon: ImageVector?, expansion: Dp, onClick: (Boolean) -> Unit) {
+fun MenuRow(text: String, icon: ImageVector?, expansion: Dp, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .width(expansion)
-            .clickable { onClick(true) },
+            .clickable { onClick() },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

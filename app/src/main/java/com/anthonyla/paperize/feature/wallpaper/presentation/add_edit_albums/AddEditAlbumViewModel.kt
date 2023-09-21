@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.library
+package com.anthonyla.paperize.feature.wallpaper.presentation.add_edit_albums
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -22,5 +22,18 @@ class AddEditAlbumViewModel @Inject constructor(
         object SaveAlbum
     }
 
+    fun onEvent(event: AddEditAlbumEvent) {
+        when(event) {
+            is AddEditAlbumEvent.AddTitle -> {
+                _albumName.value = event.value
+            }
+            is AddEditAlbumEvent.AddImages -> {
+
+            }
+            is AddEditAlbumEvent.SaveAlbum -> {
+
+            }
+        }
+    }
 
 }

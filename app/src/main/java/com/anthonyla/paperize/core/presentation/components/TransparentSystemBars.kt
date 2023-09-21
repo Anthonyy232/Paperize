@@ -8,11 +8,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-/**
- * Set transparent system bars
- *
- * @param darkMode Used for changing system icon color for visibility
- */
 @Composable
 fun SetTransparentSystemBars(darkMode: Boolean) {
     val systemUiController = rememberSystemUiController()

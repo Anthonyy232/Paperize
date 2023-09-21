@@ -14,13 +14,11 @@ import androidx.navigation.NavController
 
 @Composable
 fun SettingsScreen(navController: NavController, modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
-    Scaffold() {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Settings")
-        }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Settings")
     }
 }

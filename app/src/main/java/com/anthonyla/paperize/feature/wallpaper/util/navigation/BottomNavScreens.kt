@@ -11,9 +11,6 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.anthonyla.paperize.R
 
-/**
- * List of screens for the bottom navigation bar
- */
 sealed class BottomNavScreens(val route: String, @StringRes val resourceId: Int, val unfilledIcon: ImageVector, val filledIcon: ImageVector) {
     object Wallpaper : BottomNavScreens("wallpaper_screen", R.string.wallpaper_screen, Icons.Outlined.Home, Icons.Filled.Home)
     object Library : BottomNavScreens("library_screen", R.string.library_screen,  Icons.Outlined.AddToPhotos,  Icons.Filled.AddToPhotos)

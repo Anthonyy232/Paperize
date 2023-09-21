@@ -3,6 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.navigation.compose.rememberNavController
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -14,7 +15,8 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_Paperize)
         setContent {
             PaperizeTheme() {
-                PaperizeApp()
+                val navController = rememberNavController()
+                PaperizeApp(navController)
             }
         }
     }
