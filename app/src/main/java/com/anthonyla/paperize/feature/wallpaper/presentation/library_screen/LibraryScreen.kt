@@ -48,20 +48,18 @@ fun LibraryScreen(
 
     var selectedImageUris by rememberSaveable(Unit) { mutableStateOf(listOf<String>()) }
     var inSelectionMode by rememberSaveable { mutableStateOf(false) }
+
     /*
     If user selects all images available for deletion, add it to the list and clear the UI state
      */
     if (selectAll) {
         selectedImageUris = selectedImageUris.toMutableList().apply {
             clear()
-            wallpaperState.wallpapers.forEach {
-                add(it.imageUri)
-            }
+            wallpaperState.wallpapers.forEach { add(it.imageUri) }
         }.toImmutableList()
-        selectAllDone()
         onUpdateItemCount(selectedImageUris.size)
-        if (selectedImageUris.size >= wallpaperState.wallpapers.size)
-            onAllSelected(true)
+        selectAllDone()
+        onAllSelected(true)
     }
 
     /*
@@ -70,12 +68,13 @@ fun LibraryScreen(
      */
     if (deleteImages) {
         onDeleteImagesClick(selectedImageUris)
-        inSelectionMode = false
-        onSelectionMode(false)
         selectedImageUris = selectedImageUris.toMutableList().apply {
             clear()
         }.toImmutableList()
         onUpdateItemCount(0)
+        inSelectionMode = false
+        onSelectionMode(false)
+        onAllSelected(selectedImageUris.size >= wallpaperState.wallpapers.size)
     }
 
     /*
@@ -83,12 +82,13 @@ fun LibraryScreen(
     turn off selection mode and clear the selected list
      */
     BackHandler(inSelectionMode) {
-        inSelectionMode = false
-        onSelectionMode(false)
         selectedImageUris = selectedImageUris.toMutableList().apply {
             clear()
         }.toImmutableList()
         onUpdateItemCount(0)
+        inSelectionMode = false
+        onSelectionMode(false)
+        onAllSelected(selectedImageUris.size >= wallpaperState.wallpapers.size)
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -138,8 +138,7 @@ fun LibraryScreen(
                                     }
                                     onSelectionMode(true)
                                     onUpdateItemCount(selectedImageUris.size)
-                                    if (selectedImageUris.size >= wallpaperState.wallpapers.size)
-                                        onAllSelected(true)
+                                    onAllSelected(selectedImageUris.size >= wallpaperState.wallpapers.size)
                                 },
                                 onSelection = {
                                     selectedImageUris = if (selectedImageUris.contains(wallpaper.imageUri)) {
@@ -152,8 +151,7 @@ fun LibraryScreen(
                                         }.toImmutableList()
                                     }
                                     onUpdateItemCount(selectedImageUris.size)
-                                    if (selectedImageUris.size >= wallpaperState.wallpapers.size)
-                                        onAllSelected(true)
+                                    onAllSelected(selectedImageUris.size >= wallpaperState.wallpapers.size)
                                 }
                             )
                         }
