@@ -1,20 +1,84 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.themes
 
+import android.app.Activity
+import android.graphics.Color.TRANSPARENT
 import android.os.Build
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.anthonyla.paperize.core.presentation.components.SetTransparentSystemBars
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
+import com.example.compose.md_theme_dark_background
+import com.example.compose.md_theme_dark_error
+import com.example.compose.md_theme_dark_errorContainer
+import com.example.compose.md_theme_dark_inverseOnSurface
+import com.example.compose.md_theme_dark_inversePrimary
+import com.example.compose.md_theme_dark_inverseSurface
+import com.example.compose.md_theme_dark_onBackground
+import com.example.compose.md_theme_dark_onError
+import com.example.compose.md_theme_dark_onErrorContainer
+import com.example.compose.md_theme_dark_onPrimary
+import com.example.compose.md_theme_dark_onPrimaryContainer
+import com.example.compose.md_theme_dark_onSecondary
+import com.example.compose.md_theme_dark_onSecondaryContainer
+import com.example.compose.md_theme_dark_onSurface
+import com.example.compose.md_theme_dark_onSurfaceVariant
+import com.example.compose.md_theme_dark_onTertiary
+import com.example.compose.md_theme_dark_onTertiaryContainer
+import com.example.compose.md_theme_dark_outline
+import com.example.compose.md_theme_dark_outlineVariant
+import com.example.compose.md_theme_dark_primary
+import com.example.compose.md_theme_dark_primaryContainer
+import com.example.compose.md_theme_dark_scrim
+import com.example.compose.md_theme_dark_secondary
+import com.example.compose.md_theme_dark_secondaryContainer
+import com.example.compose.md_theme_dark_surface
+import com.example.compose.md_theme_dark_surfaceTint
+import com.example.compose.md_theme_dark_surfaceVariant
+import com.example.compose.md_theme_dark_tertiary
+import com.example.compose.md_theme_dark_tertiaryContainer
+import com.example.compose.md_theme_light_background
+import com.example.compose.md_theme_light_error
+import com.example.compose.md_theme_light_errorContainer
+import com.example.compose.md_theme_light_inverseOnSurface
+import com.example.compose.md_theme_light_inversePrimary
+import com.example.compose.md_theme_light_inverseSurface
+import com.example.compose.md_theme_light_onBackground
+import com.example.compose.md_theme_light_onError
+import com.example.compose.md_theme_light_onErrorContainer
+import com.example.compose.md_theme_light_onPrimary
+import com.example.compose.md_theme_light_onPrimaryContainer
+import com.example.compose.md_theme_light_onSecondary
+import com.example.compose.md_theme_light_onSecondaryContainer
+import com.example.compose.md_theme_light_onSurface
+import com.example.compose.md_theme_light_onSurfaceVariant
+import com.example.compose.md_theme_light_onTertiary
+import com.example.compose.md_theme_light_onTertiaryContainer
+import com.example.compose.md_theme_light_outline
+import com.example.compose.md_theme_light_outlineVariant
+import com.example.compose.md_theme_light_primary
+import com.example.compose.md_theme_light_primaryContainer
+import com.example.compose.md_theme_light_scrim
+import com.example.compose.md_theme_light_secondary
+import com.example.compose.md_theme_light_secondaryContainer
+import com.example.compose.md_theme_light_surface
+import com.example.compose.md_theme_light_surfaceTint
+import com.example.compose.md_theme_light_surfaceVariant
+import com.example.compose.md_theme_light_tertiary
+import com.example.compose.md_theme_light_tertiaryContainer
 
 
 private val LightColors = lightColorScheme(
@@ -82,60 +146,37 @@ private val DarkColors = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
-val typography = Typography(
-    headlineSmall = TextStyle(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp
-    ),
-    titleLarge = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    bodyLarge = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.15.sp
-    ),
-    bodyMedium = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp
-    ),
-    labelMedium = TextStyle(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-)
-
 
 @Composable
 fun PaperizeTheme(
-    viewModel: SettingsViewModel = hiltViewModel(),
+    isDarkMode: Boolean,
+    isDynamicTheming: Boolean,
     content: @Composable () -> Unit
 ) {
-    // Check if dynamic theming is enabled in settings
     val context = LocalContext.current
-    val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val colors = when {supported && viewModel.isDynamicTheming() -> {
-            if (viewModel.isDarkMode()) dynamicDarkColorScheme(context)
-            else dynamicLightColorScheme(context)
-        }
-        viewModel.isDynamicTheming() -> DarkColors
+
+    val colors = when {
+        isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)
+        isDynamicTheming && dynamicThemingSupported && !isDarkMode -> dynamicLightColorScheme(context)
+        isDarkMode -> DarkColors
         else -> LightColors
     }
+
     MaterialTheme(
         colorScheme = colors,
         typography = MaterialTheme.typography,
         content = content,
         shapes = MaterialTheme.shapes
     )
-    SetTransparentSystemBars(viewModel.isDarkMode())
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = TRANSPARENT
+            SystemBarStyle.light(TRANSPARENT, TRANSPARENT)
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkMode
+        }
+    }
 }
+val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S

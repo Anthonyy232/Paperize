@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Paperize</string>
-    <string name="library_screen">Library</string>
-    <string name="configure_screen">Configure</string>
-    <string name="wallpaper_screen">Wallpaper</string>
     <string name="MoreVertIcon">Options</string>
     <string name="dropdownmenu_settings">Settings</string>
-    <string name="settings_screen">settings</string>
+    <string name="home_screen">Home</string>
+    <string name="wallpaper_screen">Wallpaper</string>
+    <string name="library_screen">Library</string>
+    <string name="settings_screen">Settings</string>
     <string name="settings_back">Back</string>
     <string name="LibraryFloatingButton">Add a new library</string>
     <string name="set_wallpaper_description">Enable Paperize live wallpaper</string>
@@ -13,4 +13,11 @@
     <string name="add_images">Add images</string>
     <string name="add_folder">Add folder</string>
     <string name="add_image">add_image\n</string>
+    <string name="appname">Paperize</string>
+    <string name="contact_button">Contact</string>
+    <string name="image_is_selected">Image is selected</string>
+    <string name="image_is_not_selected">Image is not selected</string>
+    <string name="select_all_images_for_deletion">Select all images for deletion</string>
+    <string name="delete_confirmation">Delete confirmation</string>
+    <string name="all_images_selected_for_deletion">All images selected for deletion</string>
 </resources>

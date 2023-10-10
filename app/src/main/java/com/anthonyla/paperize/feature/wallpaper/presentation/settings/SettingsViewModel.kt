@@ -1,60 +1,68 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.anthonyla.paperize.core.SettingsConstants.DARK_MODE_TYPE
-import com.anthonyla.paperize.core.SettingsConstants.DYNAMIC_THEME_TYPE
-import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
+import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.SettingsConstants
+import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor (
-    private val settingsDataStoreImpl: SettingsDataStoreImpl
+    private val settingsDataStoreImpl: SettingsDataStore
 ): ViewModel() {
-    fun setDarkMode(status: Boolean?) = runBlocking {
-        when (status) {
-            true -> { settingsDataStoreImpl.putBoolean(DARK_MODE_TYPE, true) }
-            false -> { settingsDataStoreImpl.putBoolean(DARK_MODE_TYPE, false) }
-            null -> { settingsDataStoreImpl.deleteBoolean(DARK_MODE_TYPE) }
+    var shouldNotBypassSplashScreen by mutableStateOf(true)
+    private val _state = mutableStateOf(SettingsState(null, false))
+    val state: State<SettingsState> = _state
+    private var currentGetJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            refreshSettings()
         }
     }
 
-    private fun getDarkMode() = runBlocking {
-        return@runBlocking settingsDataStoreImpl.getBoolean(DARK_MODE_TYPE)
-    }
-
-    fun setDynamic (status: Boolean?) = runBlocking {
-        when (status) {
-            true -> { settingsDataStoreImpl.putBoolean(DYNAMIC_THEME_TYPE, true) }
-            false -> { settingsDataStoreImpl.putBoolean(DYNAMIC_THEME_TYPE, false) }
-            null -> { settingsDataStoreImpl.deleteBoolean(DYNAMIC_THEME_TYPE) }
+    fun onEvent(event: SettingsEvent) {
+        when (event) {
+            is SettingsEvent.SetDarkMode -> {
+                viewModelScope.launch {
+                    when (event.darkMode) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, false) }
+                        null -> { settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE) }
+                    }
+                    refreshSettings()
+                }
+            }
+            is SettingsEvent.SetDynamicTheming -> {
+                viewModelScope.launch {
+                    when (event.dynamicTheming) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, false) }
+                    }
+                    refreshSettings()
+                }
+            }
         }
     }
 
-    private fun getDynamicTheme() = runBlocking {
-        return@runBlocking settingsDataStoreImpl.getBoolean(DYNAMIC_THEME_TYPE)
-    }
-
-    fun resetSettings() = runBlocking {
-        settingsDataStoreImpl.clearPreferences()
-    }
-
-    @Composable
-    fun isDarkMode(): Boolean {
-        return when (getDarkMode()) {
-            true -> true
-            false -> false
-            null -> isSystemInDarkTheme()
-        }
-    }
-
-    fun isDynamicTheming(): Boolean {
-        return when (getDynamicTheme()) {
-            true, null -> true
-            false -> false
+    private fun refreshSettings() {
+        currentGetJob?.cancel()
+        currentGetJob = viewModelScope.launch {
+            _state.value = state.value.copy(
+                darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE),
+                dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
+                    true -> true
+                    false, null -> false
+                }
+            )
+            shouldNotBypassSplashScreen = false
         }
     }
 }

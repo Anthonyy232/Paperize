@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-
     <uses-feature
         android:name="android.software.live_wallpaper"
         android:required="true" />
@@ -11,6 +9,7 @@
     <application
         android:allowBackup="true"
         android:name=".App"
+        android:persistent="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -24,7 +23,6 @@
         <activity
             android:name=".feature.wallpaper.presentation.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Paperize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

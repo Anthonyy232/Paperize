@@ -1,94 +1,88 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.anthonyla.paperize.core.presentation.components.BottomNavigationBar
-import com.anthonyla.paperize.core.presentation.components.TopBar
-import com.anthonyla.paperize.feature.wallpaper.presentation.library.components.AnimatedFab
-import com.anthonyla.paperize.feature.wallpaper.presentation.library.components.FabMenuOptions
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddEditNavScreens
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.BottomNavScreens
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.SettingsNavScreens
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.navGraph
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.anthonyla.paperize.data.Contact
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
+import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper.WallpaperEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper.WallpaperViewModel
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PaperizeApp(navController: NavHostController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+fun PaperizeApp(
+    wallpaperViewModel: WallpaperViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
 
-    Scaffold (
-        topBar = {
-            val showBackButton = navBackStackEntry?.destination?.route in listOf(
-                SettingsNavScreens.Settings.route,
-                AddEditNavScreens.ImageAdd.route
-            )
-            val showDropDownMenu = navBackStackEntry?.destination?.route in listOf(
-                BottomNavScreens.Wallpaper.route,
-                BottomNavScreens.Library.route,
-                BottomNavScreens.Configure.route
-            )
-            val showTitle = when (navBackStackEntry?.destination?.route) {
-                SettingsNavScreens.Settings.route -> "Settings"
-                AddEditNavScreens.ImageAdd.route -> ""
-                else -> ""
-            }
-            TopBar(
-                navController = navController,
-                title = showTitle,
-                showBackButton = showBackButton,
-                showMenuButton = showDropDownMenu
-            )
-        },
-        bottomBar = {
-            val showNavigationBar = navBackStackEntry?.destination?.route in listOf(
-                BottomNavScreens.Wallpaper.route,
-                BottomNavScreens.Library.route,
-                BottomNavScreens.Configure.route
-            )
-            if (showNavigationBar) BottomNavigationBar(
-                navController = navController,
-                screens = listOf(
-                    BottomNavScreens.Wallpaper,
-                    BottomNavScreens.Library,
-                    BottomNavScreens.Configure
-                )
-            )
-        },
-        floatingActionButton = {
-            // Show floating action button if current screen is in the list
-            val showFabButton = navBackStackEntry?.destination?.route in listOf(
-                BottomNavScreens.Library.route,
-            )
-            var optionClicked by rememberSaveable { mutableStateOf("") }
-            if (showFabButton) {
-                AnimatedFab(FabMenuOptions()) {
-                    optionClicked = it
-                    val options = FabMenuOptions()
-                    when (optionClicked) {
-                        options.imageOption.id ->
-                            navController.navigate(AddEditNavScreens.ImageAdd.route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        options.folderOption.id -> null
-                    }
-                }
+    /** Image picker **/
+    val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments(),
+        onResult = { uris: List<Uri> ->
+            for (uri in uris) {
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                wallpaperViewModel.onEvent(WallpaperEvent.AddWallpaper(uri.toString()))
             }
         }
-    ) { innerPadding -> NavHost (
-            navController,
-            startDestination = "bottomNavigation",
-            Modifier.padding(innerPadding)
-        ) { navGraph(navController) }
+    )
+
+    val wallpaperState = wallpaperViewModel.state.value
+    val settingsState = settingsViewModel.state.value
+    val navController = rememberNavController()
+    var toContact by rememberSaveable { mutableStateOf(false) }
+    if (toContact) { Contact(LocalContext.current) }
+
+    NavHost(
+        navController = navController,
+        startDestination = NavScreens.Home.route,
+        modifier = Modifier.navigationBarsPadding()
+    ) {
+        composable(NavScreens.Home.route) {
+            HomeScreen(
+                wallpaperState = wallpaperState,
+                settingsState = settingsState,
+                onSettingsClick = { navController.navigate(NavScreens.Settings.route) },
+                onContactClick = { toContact = true },
+                onLaunchImagePhotoPicker = {
+                    multiplePhotoPickerLauncher.launch(arrayOf("image/*"))
+                },
+                onDeleteImagesClick = { image ->
+                    image.forEach {
+                        wallpaperViewModel.onEvent(WallpaperEvent.DeleteWallpaper(it))
+                    }
+                }
+            )
+        }
+        composable(NavScreens.Settings.route) {
+            SettingsScreen(
+                settingsState = settingsState,
+                onBackClick = { navController.navigateUp() },
+                onDynamicThemingClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
+                },
+                onDarkModeClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
+                }
+            )
+        }
     }
 }

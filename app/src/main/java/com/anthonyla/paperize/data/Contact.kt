@@ -20,5 +20,4 @@ fun Contact(context: Context) {
     val emailIntent = Intent(Intent.ACTION_SENDTO)
     emailIntent.setData(Uri.parse(mailto))
     startActivity(context, emailIntent, null)
-
 }
