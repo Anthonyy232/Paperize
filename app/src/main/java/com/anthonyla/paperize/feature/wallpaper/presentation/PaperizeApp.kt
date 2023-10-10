@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,7 +19,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.anthonyla.paperize.data.Contact
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
@@ -56,14 +57,15 @@ fun PaperizeApp(
         startDestination = NavScreens.Home.route,
         modifier = Modifier.navigationBarsPadding()
     ) {
-        composable(NavScreens.Home.route) {
+        composable(
+            route = NavScreens.Home.route
+        ) {
             HomeScreen(
                 wallpaperState = wallpaperState,
                 settingsState = settingsState,
                 onSettingsClick = { navController.navigate(NavScreens.Settings.route) },
                 onContactClick = { toContact = true },
-                onLaunchImagePhotoPicker = {
-                    multiplePhotoPickerLauncher.launch(arrayOf("image/*"))
+                onLaunchImagePhotoPicker = { multiplePhotoPickerLauncher.launch(arrayOf("image/*"))
                 },
                 onDeleteImagesClick = { image ->
                     image.forEach {
@@ -72,7 +74,21 @@ fun PaperizeApp(
                 }
             )
         }
-        composable(NavScreens.Settings.route) {
+        composable(
+            route = NavScreens.Settings.route,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(500)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(500)
+                )
+            }
+        ) {
             SettingsScreen(
                 settingsState = settingsState,
                 onBackClick = { navController.navigateUp() },

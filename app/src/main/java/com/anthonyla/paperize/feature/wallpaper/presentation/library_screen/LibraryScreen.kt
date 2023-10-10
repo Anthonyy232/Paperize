@@ -45,11 +45,12 @@ fun LibraryScreen(
     onDeleteImagesClick: (List<String>) -> Unit
 ) {
     val lazyListState = rememberLazyStaggeredGridState()
-    var selectedImageUris by rememberSaveable(Unit) {
-        mutableStateOf(listOf<String>())
-    }
-    var inSelectionMode by rememberSaveable { mutableStateOf(false) }
 
+    var selectedImageUris by rememberSaveable(Unit) { mutableStateOf(listOf<String>()) }
+    var inSelectionMode by rememberSaveable { mutableStateOf(false) }
+    /*
+    If user selects all images available for deletion, add it to the list and clear the UI state
+     */
     if (selectAll) {
         selectedImageUris = selectedImageUris.toMutableList().apply {
             clear()
@@ -63,10 +64,24 @@ fun LibraryScreen(
             onAllSelected(true)
     }
 
+    /*
+    If user deletes the selected item,
+    pass the list back for deletion and clear the UI state
+     */
     if (deleteImages) {
         onDeleteImagesClick(selectedImageUris)
+        inSelectionMode = false
+        onSelectionMode(false)
+        selectedImageUris = selectedImageUris.toMutableList().apply {
+            clear()
+        }.toImmutableList()
+        onUpdateItemCount(0)
     }
 
+    /*
+     If user does a back press while in selection mode,
+    turn off selection mode and clear the selected list
+     */
     BackHandler(inSelectionMode) {
         inSelectionMode = false
         onSelectionMode(false)

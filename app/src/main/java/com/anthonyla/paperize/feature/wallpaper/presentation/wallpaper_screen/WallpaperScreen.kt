@@ -31,17 +31,6 @@ fun WallpaperScreen(settingsState: SettingsState, wallpaperState: WallpaperState
                     .padding(it),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Wallpaper")
-                Text(settingsState.darkMode.toString())
-                var test by rememberSaveable { mutableStateOf(false) }
-                Button(
-                    onClick = {
-                        //settingsViewModel.onEvent(SettingsEvent.SetDarkMode(test))
-                        test = !test
-                    }
-                ) {
-
-                }
             }
         }
     )
