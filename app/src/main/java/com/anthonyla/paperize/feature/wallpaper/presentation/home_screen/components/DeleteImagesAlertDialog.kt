@@ -17,16 +17,10 @@ fun DeleteImagesAlertDialog(
 ) {
     AlertDialog(
         icon = {
-            Icon(Icons.Outlined.Delete,
-                contentDescription = stringResource(R.string.delete_confirmation)
-            )
+            Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.delete_confirmation))
         },
-        title = {
-            Text(text = "Delete wallpapers?")
-        },
-        text = {
-            Text(text = "Are you sure you want to delete these wallpapers?")
-        },
+        title = { Text(text = "Delete these?") },
+        text = { Text(text = "Are you sure you want to delete these wallpapers?") },
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
             TextButton(onClick = { onConfirmation() }) {

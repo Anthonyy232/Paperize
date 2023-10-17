@@ -5,14 +5,12 @@ import android.content.Context
 import androidx.room.Room
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
-import com.anthonyla.paperize.feature.wallpaper.data.data_source.WallpaperDatabase
-import com.anthonyla.paperize.feature.wallpaper.data.repository.WallpaperRepositoryImpl
-import com.anthonyla.paperize.feature.wallpaper.domain.repository.WallpaperRepository
-import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
-import com.anthonyla.paperize.feature.wallpaper.use_case.AddWallpaper
-import com.anthonyla.paperize.feature.wallpaper.use_case.WallpaperUseCases
-import com.anthonyla.paperize.feature.wallpaper.use_case.DeleteWallpaper
-import com.anthonyla.paperize.feature.wallpaper.use_case.GetWallpapers
+import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDatabase
+import com.anthonyla.paperize.feature.wallpaper.data.repository.AlbumRepositoryImpl
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.use_case.AddAlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.use_case.AlbumsUseCases
+import com.anthonyla.paperize.feature.wallpaper.use_case.GetAllAlbumsWithWallpaper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,31 +23,30 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideWallpaperDatabase(app: Application): WallpaperDatabase {
+    fun provideAlbumDatabase(app: Application): AlbumDatabase {
         return Room.databaseBuilder(
             app,
-            WallpaperDatabase::class.java,
-            WallpaperDatabase.DATABASE_NAME
+            AlbumDatabase::class.java,
+            AlbumDatabase.DATABASE_NAME
         ).build()
     }
 
     @Provides
     @Singleton
-    fun provideWallpaperRepository(
-        db: WallpaperDatabase
-    ): WallpaperRepository {
-        return WallpaperRepositoryImpl(db.wallpaperDao)
+    fun provideAlbumRepository(
+        db: AlbumDatabase
+    ): AlbumRepository {
+        return AlbumRepositoryImpl(db.albumDao)
     }
 
     @Provides
     @Singleton
     fun provideWallpaperUseCases(
-        repository: WallpaperRepository
-    ): WallpaperUseCases {
-        return WallpaperUseCases (
-            getWallpapers = GetWallpapers(repository),
-            deleteWallpaper = DeleteWallpaper(repository),
-            addWallpaper = AddWallpaper(repository),
+        repository: AlbumRepository
+    ): AlbumsUseCases {
+        return AlbumsUseCases (
+            getAllAlbumsWithWallpaper = GetAllAlbumsWithWallpaper(repository),
+            addAlbumWithWallpaper = AddAlbumWithWallpaper(repository)
         )
     }
 
@@ -62,7 +59,5 @@ object AppModule {
     @Provides
     fun provideContext(
         @ApplicationContext context: Context,
-    ): Context {
-        return context
-    }
+    ): Context { return context }
 }

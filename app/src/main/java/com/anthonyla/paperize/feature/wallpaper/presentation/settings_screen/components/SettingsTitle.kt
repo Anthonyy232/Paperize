@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.anthonyla.paperize.R
 
 @Composable
-fun Title(
+fun SettingsTitle(
     largeTopAppBarHeight: Dp,
     smallTopAppBarHeight: Dp,
     paddingMedium: Dp,

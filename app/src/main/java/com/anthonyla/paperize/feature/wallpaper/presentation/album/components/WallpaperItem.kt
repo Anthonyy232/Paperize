@@ -1,6 +1,5 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper.components
+package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
-import android.net.Uri
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -29,46 +28,50 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.anthonyla.paperize.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WallpaperItem(
-    selected: Boolean,
+    wallpaperUri: String,
+    itemSelected: Boolean,
     selectionMode: Boolean,
-    image: Uri,
-    onSelectionListClick: () -> Unit,
-    onSelection: () -> Unit
+    onActivateSelectionMode: (Boolean) -> Unit,
+    onItemSelection: () -> Unit,
+    onImageViewClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val haptics = LocalHapticFeedback.current
-    val transition = updateTransition(selected, label = "")
+    val transition = updateTransition(itemSelected, label = "")
 
     val paddingTransition by transition.animateDp(label = "") { selected ->
         if (selected) 5.dp else 0.dp
     }
     val roundedCornerShapeTransition by transition.animateDp(label = "") { selected ->
-        if (selected) 18.dp else 10.dp
+        if (selected) 24.dp else 16.dp
     }
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (selectionMode) { onSelection() }
-                    else { /*zoom into photo*/ }
+                    if (selectionMode) { onItemSelection() }
+                    else { onImageViewClick() }
                 },
                 onLongClick = {
                     if (!selectionMode) {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onSelectionListClick()
+                        onActivateSelectionMode(true)
+                        onItemSelection()
                     }
                 }
             )
     ) {
         AsyncImage(
-            model = image,
+            model = wallpaperUri.toUri(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -77,7 +80,7 @@ fun WallpaperItem(
         )
         if (selectionMode) {
             val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
-            if (selected) {
+            if (itemSelected) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.image_is_selected),

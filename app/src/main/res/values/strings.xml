@@ -20,4 +20,10 @@
     <string name="select_all_images_for_deletion">Select all images for deletion</string>
     <string name="delete_confirmation">Delete confirmation</string>
     <string name="all_images_selected_for_deletion">All images selected for deletion</string>
+    <string name="add_album">Add album</string>
+    <string name="add_wallpaper_screen">Add Wallpaper Screen</string>
+    <string name="enter_the_name_of_the_album">Enter the name of the album</string>
+    <string name="album_name">Album Name</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 </resources>

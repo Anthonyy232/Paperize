@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
@@ -17,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val addAlbumViewModel: AddAlbumViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature
-        android:name="android.software.live_wallpaper"
+        android:name="android.software.paperize"
         android:required="true" />
 
     <application
@@ -40,7 +40,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/live_wallpaper" />
+                android:resource="@xml/paperize" />
         </service>
     </application>
 </manifest>

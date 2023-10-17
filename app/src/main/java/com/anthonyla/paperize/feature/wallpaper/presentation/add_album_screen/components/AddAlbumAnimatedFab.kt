@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.components
+package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.updateTransition
@@ -36,9 +36,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.components.MenuRow
 
 @Composable
-fun AnimatedFab(menuOptions: FabMenuOptions, onImageClick: () -> Unit, onFolderClick: () -> Unit) {
+fun AddAlbumAnimatedFab(menuOptions: AddAlbumFabMenuOptions, onImageClick: () -> Unit, onFolderClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val fabTransition = updateTransition(targetState = expanded, label = "")
 

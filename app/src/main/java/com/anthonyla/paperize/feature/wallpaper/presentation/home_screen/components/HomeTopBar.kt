@@ -48,13 +48,10 @@ import com.anthonyla.paperize.R
 @Composable
 fun HomeTopBar (
     showSelectionModeAppBar: Boolean,
-    allSelected: Boolean,
     selectionCount: Int,
     modifier: Modifier = Modifier,
     onSettingsClick: () -> Unit,
     onContactClick: () -> Unit,
-    onSelectAllClick: () -> Unit,
-    deleteImagesOnClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
@@ -99,7 +96,7 @@ fun HomeTopBar (
                     onDismissRequest = { showAlertDialog = false },
                     onConfirmation = {
                         showAlertDialog = false
-                        deleteImagesOnClick()
+                        //deleteImagesOnClick()
                     }
                 )
                 IconButton(
@@ -121,10 +118,10 @@ fun HomeTopBar (
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = onSelectAllClick
+                        onClick = { }
                     ) {
                         val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
-                        if (allSelected) {
+                        if (true) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = stringResource(R.string.all_images_selected_for_deletion),
