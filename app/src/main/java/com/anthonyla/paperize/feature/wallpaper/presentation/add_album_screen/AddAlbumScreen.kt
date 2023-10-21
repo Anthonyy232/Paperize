@@ -3,6 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,13 +45,15 @@ fun AddAlbumScreen(
     viewModel: AddAlbumViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
+    onShowWallpaperView: (String) -> Unit
     ) {
-    viewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
-
     val context = LocalContext.current
     val lazyListState = rememberLazyStaggeredGridState()
     val state = viewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
+
+    if (state.value.initialAlbumName.isEmpty())
+        viewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
 
     BackHandler {
         if (selectionMode) {
@@ -147,57 +150,45 @@ fun AddAlbumScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    if (state.value.folders.isNotEmpty()) {
-                        items (items = state.value.folders, key = { folder -> folder.folderUri}
-                        ) { folder ->
-                            FolderItem(
-                                folder = folder,
-                                itemSelected = state.value.selectedFolders.contains(folder.folderUri),
-                                selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
-                                onItemSelection = {
-                                    if (!state.value.selectedFolders.contains(folder.folderUri)) {
-                                        viewModel.onEvent(AddAlbumEvent.SelectFolder(folder.folderUri))
-                                    } else {
-                                        viewModel.onEvent(AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri))
-                                    } },
-                                modifier = Modifier.padding(4.dp)
-                            )
-                        }
+                    items (items = state.value.folders, key = { folder -> folder.folderUri}
+                    ) { folder ->
+                        FolderItem(
+                            folder = folder,
+                            itemSelected = state.value.selectedFolders.contains(folder.folderUri),
+                            selectionMode = selectionMode,
+                            onActivateSelectionMode = { selectionMode = it },
+                            onItemSelection = {
+                                if (!state.value.selectedFolders.contains(folder.folderUri)) {
+                                    viewModel.onEvent(AddAlbumEvent.SelectFolder(folder.folderUri))
+                                } else {
+                                    viewModel.onEvent(AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri))
+                                } },
+                            modifier = Modifier.padding(4.dp)
+                        )
                     }
-                    if (state.value.wallpapers.isNotEmpty()) {
-                        items (items = state.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri}
-                        ) { wallpaper ->
-                            WallpaperItem(
-                                wallpaperUri = wallpaper.wallpaperUri,
-                                itemSelected = state.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
-                                selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
-                                onItemSelection = {
-                                    viewModel.onEvent(
-                                        if (!state.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
-                                            AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
-                                        else
-                                            AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
-                                    )
-                                },
-                                onImageViewClick = {
-
-                                },
-                                modifier = Modifier.padding(4.dp)
-                            )
-                        }
+                    items (items = state.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri}
+                    ) { wallpaper ->
+                        WallpaperItem(
+                            wallpaperUri = wallpaper.wallpaperUri,
+                            itemSelected = state.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                            selectionMode = selectionMode,
+                            onActivateSelectionMode = { selectionMode = it },
+                            onItemSelection = {
+                                viewModel.onEvent(
+                                    if (!state.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                        AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
+                                    else
+                                        AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                )
+                            },
+                            onWallpaperViewClick = {
+                                onShowWallpaperView(wallpaper.wallpaperUri)
+                            },
+                            modifier = Modifier.padding(4.dp)
+                        )
                     }
                 }
             )
         }
     )
-}
-
-fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-    val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
-    return folderDocumentFile?.listFiles()?.map { it.uri.toString() } ?: emptyList()
-}
-fun getFolderNameFromUri(folderUri: String, context: Context): String? {
-    return DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
 }

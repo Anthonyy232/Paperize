@@ -3,7 +3,10 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 import android.app.Application
 import android.content.Context
+import android.webkit.MimeTypeMap
 import androidx.compose.runtime.mutableStateListOf
+import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -93,20 +96,22 @@ class AddAlbumViewModel @Inject constructor(
             is AddAlbumEvent.AddFolder -> {
                 viewModelScope.launch {
                     if (!state.value.folders.any { it.folderUri == event.directoryUri }) {
-                        val wallpapers = getWallpaperFromFolder(event.directoryUri, context)
+                        val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
-                        _state.update { it.copy(
-                            folders = it.folders.plus(
-                                Folder(
-                                    initialAlbumName = it.initialAlbumName,
-                                    folderName = folderName,
-                                    folderUri = event.directoryUri,
-                                    coverUri = wallpapers.random(),
-                                    wallpapers = wallpapers
-                                )
-                            ),
-                        ) }
-                        updateIsEmpty()
+                        if (wallpapers.isNotEmpty()) {
+                            _state.update { it.copy(
+                                folders = it.folders.plus(
+                                    Folder(
+                                        initialAlbumName = it.initialAlbumName,
+                                        folderName = folderName,
+                                        folderUri = event.directoryUri,
+                                        coverUri = wallpapers.random(),
+                                        wallpapers = wallpapers
+                                    )
+                                ),
+                            ) }
+                            updateIsEmpty()
+                        }
                     }
                 }
             }
@@ -205,6 +210,7 @@ class AddAlbumViewModel @Inject constructor(
             }
         }
     }
+
     private fun updateIsEmpty() {
         viewModelScope.launch {
             _state.update { it.copy(
@@ -219,6 +225,31 @@ class AddAlbumViewModel @Inject constructor(
                 allSelected = it.selectedFolders.size + it.selectedWallpapers.size >= it.wallpapers.size + it.folders.size
             ) }
         }
+    }
+
+    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
+        val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
+        return listFilesRecursive(folderDocumentFile, context)
+    }
+
+    private fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
+        val files = mutableListOf<String>()
+        parent?.listFiles()?.forEach { file ->
+            if (file.isDirectory) {
+                files.addAll(listFilesRecursive(file, context))
+            } else {
+                val extension = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
+                val allowedExtensions = listOf("jpg", "png", "heif", "webp")
+                if (extension in allowedExtensions) {
+                    files.add(file.uri.toString())
+                }
+            }
+        }
+        return files
+    }
+
+    private fun getFolderNameFromUri(folderUri: String, context: Context): String? {
+        return DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
     }
 }
 

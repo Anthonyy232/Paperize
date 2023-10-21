@@ -1,7 +1,12 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,10 +26,13 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.Ad
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun PaperizeApp(
@@ -57,14 +65,17 @@ fun PaperizeApp(
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(500)
+                    animationSpec = tween(300)
                 )
             },
             exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(500)
-                )
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) {backStackEntry ->
             backStackEntry.arguments?.getString("initialAlbumName").let {
@@ -77,7 +88,30 @@ fun PaperizeApp(
                         },
                         onConfirmation = {
                             addAlbumViewModel.onEvent(AddAlbumEvent.SaveAlbum)
+                        },
+                        onShowWallpaperView = { wallpaper ->
+                            val encodedWallpaper = URLEncoder.encode(wallpaper, StandardCharsets.UTF_8.toString())
+                            navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
                         }
+                    )
+                }
+            }
+        }
+        composable(
+            route = NavScreens.WallpaperView.route.plus("/{wallpaperUri}"),
+            arguments = listOf(navArgument("wallpaperUri") { type = NavType.StringType }),
+            enterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            }
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("wallpaperUri").let {
+                if (it != null) {
+                    WallpaperViewScreen(
+                        wallpaperUri = it,
+                        onBackClick = { navController.navigateUp() },
                     )
                 }
             }
@@ -87,13 +121,13 @@ fun PaperizeApp(
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(500)
+                    animationSpec = tween(300)
                 )
             },
             exitTransition = {
                 slideOutOfContainer(
                     AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(500)
+                    animationSpec = tween(300)
                 )
             }
         ) {

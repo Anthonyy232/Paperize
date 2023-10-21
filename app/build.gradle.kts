@@ -71,6 +71,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0-alpha02")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
+    implementation("net.engawapg.lib:zoomable:1.5.1")
+    implementation("net.engawapg.lib:zoomable:1.5.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

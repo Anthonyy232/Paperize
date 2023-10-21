@@ -149,8 +149,8 @@ fun AddAlbumSmallTopBar(
         },
         actions = {
             if(!selectionMode) {
-                IconButton(onClick = { onConfirmationClick(editableTitle) }) {
-                    if (!isEmpty) {
+                if (!isEmpty) {
+                    IconButton(onClick = { onConfirmationClick(editableTitle) }) {
                         Icon(
                             imageVector = Icons.Outlined.Add,
                             contentDescription = stringResource(R.string.add_album),

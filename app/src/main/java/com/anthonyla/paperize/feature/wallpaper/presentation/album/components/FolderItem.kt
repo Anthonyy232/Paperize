@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -29,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -64,15 +69,20 @@ fun FolderItem(
         if (selected) 24.dp else 16.dp
     }
 
-    OutlinedCard(
+    Card(
+        elevation = CardDefaults.cardElevation(5.dp),
         modifier = modifier
             .fillMaxSize()
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (selectionMode) { onItemSelection() }
-                    else { /*go to photo screen*/ }
+                    if (selectionMode) {
+                        onItemSelection()
+                    }
+                    else {
+                    /*go to photo screen*/
+                    }
                 },
                 onLongClick = {
                     if (!selectionMode) {
@@ -87,7 +97,7 @@ fun FolderItem(
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            tonalElevation = 5.dp,
+            tonalElevation = 10.dp,
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -98,7 +108,8 @@ fun FolderItem(
                     AsyncImage(
                         modifier = Modifier
                             .height(configuration.screenHeightDp.dp / 4.0f)
-                            .clip(RoundedCornerShape(roundedCornerShapeTransition)),
+                            .clip(RoundedCornerShape(roundedCornerShapeTransition))
+                            .blur(radius = 3.dp),
                         model = folder.coverUri,
                         contentDescription = folder.folderName,
                         alignment = Alignment.Center,
