@@ -227,7 +227,7 @@ class AddAlbumViewModel @Inject constructor(
         }
     }
 
-    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
+    fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
         val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
         return listFilesRecursive(folderDocumentFile, context)
     }
@@ -248,7 +248,7 @@ class AddAlbumViewModel @Inject constructor(
         return files
     }
 
-    private fun getFolderNameFromUri(folderUri: String, context: Context): String? {
+    fun getFolderNameFromUri(folderUri: String, context: Context): String? {
         return DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
     }
 }

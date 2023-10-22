@@ -18,8 +18,8 @@ import com.anthonyla.paperize.R
 
 sealed class NavScreens(val route: String, @StringRes val resourceId: Int, val unfilledIcon: ImageVector, val filledIcon: ImageVector) {
     object Home : NavScreens("home_screen", R.string.home_screen, Icons.Outlined.Image, Icons.Filled.Image)
-    object Wallpaper : NavScreens("wallpaper_screen", R.string.wallpaper_screen, Icons.Outlined.Wallpaper, Icons.Filled.Wallpaper)
     object Settings : NavScreens("settings_screen", R.string.settings_screen, Icons.Outlined.Settings, Icons.Filled.Settings)
     object AddEdit : NavScreens("add_edit_screen", R.string.add_wallpaper_screen, Icons.Outlined.Add, Icons.Filled.Add)
     object WallpaperView : NavScreens("wallpaper_view_screen", R.string.wallpaper_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
+    object AlbumView : NavScreens("album_view_screen", R.string.album_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
 }

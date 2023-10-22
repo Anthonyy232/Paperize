@@ -55,6 +55,7 @@ fun FolderItem(
     selectionMode: Boolean,
     onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
+    onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -77,12 +78,8 @@ fun FolderItem(
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (selectionMode) {
-                        onItemSelection()
-                    }
-                    else {
-                    /*go to photo screen*/
-                    }
+                    if (selectionMode) { onItemSelection() }
+                    else { onFolderViewClick() }
                 },
                 onLongClick = {
                     if (!selectionMode) {

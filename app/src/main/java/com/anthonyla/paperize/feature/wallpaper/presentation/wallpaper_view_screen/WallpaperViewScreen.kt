@@ -24,13 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperViewScreen(
-    wallpaperUri: String,
+    wallpaper: String,
     onBackClick: () -> Unit,
 ) {
     val zoomState = rememberZoomState()
@@ -75,8 +76,8 @@ fun WallpaperViewScreen(
                         .zoomable(zoomState)
                 ) {
                     AsyncImage(
-                        model = wallpaperUri,
-                        contentDescription = "hi",
+                        model = wallpaper,
+                        contentDescription = wallpaper,
                     )
                 }
             }

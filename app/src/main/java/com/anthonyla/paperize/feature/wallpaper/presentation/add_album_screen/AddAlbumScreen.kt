@@ -33,6 +33,7 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumFabMenuOptions
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
@@ -45,7 +46,8 @@ fun AddAlbumScreen(
     viewModel: AddAlbumViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
-    onShowWallpaperView: (String) -> Unit
+    onShowWallpaperView: (String) -> Unit,
+    onShowFolderView: (String, String?, List<String>) -> Unit
     ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyStaggeredGridState()
@@ -163,6 +165,9 @@ fun AddAlbumScreen(
                                 } else {
                                     viewModel.onEvent(AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri))
                                 } },
+                            onFolderViewClick = {
+                                onShowFolderView(folder.folderUri, folder.folderName, folder.wallpapers)
+                            },
                             modifier = Modifier.padding(4.dp)
                         )
                     }

@@ -27,4 +27,5 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="wallpaper_view">Wallpaper View</string>
+    <string name="album_view">Album View</string>
 </resources>
