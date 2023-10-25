@@ -3,10 +3,8 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,9 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anthonyla.paperize.data.Contact
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
@@ -41,13 +39,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun PaperizeApp(
-    addAlbumViewModel: AddAlbumViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    //albumsViewModel: AlbumsViewModel = hiltViewModel()
-) {
-    val addAlbumState = addAlbumViewModel.state.collectAsStateWithLifecycle()
-    val settingsState = settingsViewModel.state.value
+fun PaperizeApp() {
     val navController = rememberNavController()
     var toContact by rememberSaveable { mutableStateOf(false) }
     if (toContact) { Contact(LocalContext.current) }
@@ -89,13 +81,8 @@ fun PaperizeApp(
                 if (it != null) {
                     AddAlbumScreen(
                         initialAlbumName = it,
-                        onBackClick = {
-                            navController.navigateUp()
-                            addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
-                        },
-                        onConfirmation = {
-                            addAlbumViewModel.onEvent(AddAlbumEvent.SaveAlbum)
-                        },
+                        onBackClick = { navController.navigateUp() },
+                        onConfirmation = { navController.navigateUp() },
                         onShowWallpaperView = { wallpaper ->
                             val encodedWallpaper = runBlocking { encodeUri(uri = wallpaper) }
                             navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
@@ -122,7 +109,7 @@ fun PaperizeApp(
             backStackEntry.arguments?.getString("wallpaperUri").let { wallpaper ->
                 if (wallpaper != null) {
                     WallpaperViewScreen(
-                        wallpaper = wallpaper,
+                        wallpaperUri = wallpaper,
                         onBackClick = { navController.navigateUp() },
                     )
                 }
@@ -183,16 +170,7 @@ fun PaperizeApp(
                 )
             }
         ) {
-            SettingsScreen(
-                settingsState = settingsState,
-                onBackClick = { navController.navigateUp() },
-                onDynamicThemingClick = {
-                    settingsViewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
-                },
-                onDarkModeClick = {
-                    settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
-                }
-            )
+            SettingsScreen(onBackClick = { navController.navigateUp() })
         }
     }
 }

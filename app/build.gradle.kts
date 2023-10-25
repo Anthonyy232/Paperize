@@ -24,10 +24,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -69,8 +68,6 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.0-alpha05")
     implementation("androidx.compose.material:material-icons-extended:1.6.0-alpha08")
     implementation("com.google.accompanist:accompanist-adaptive:0.33.2-alpha")
-    implementation("io.coil-kt:coil:2.4.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0-rc01")
     implementation("androidx.compose.animation:animation:1.6.0-alpha08")
     implementation("androidx.core:core-splashscreen:1.1.0-alpha02")
@@ -78,6 +75,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:1.5.1")
+    implementation("com.github.skydoves:landscapist-glide:2.2.10")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -89,4 +87,6 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.0")
     ksp("androidx.room:room-compiler:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
+    implementation("com.lazygeniouz:dfc:1.0.8")
+
 }

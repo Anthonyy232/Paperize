@@ -1,9 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -18,11 +16,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -33,15 +33,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import coil.compose.AsyncImage
+import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.R
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.security.AccessController.getContext
-
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -54,6 +52,7 @@ fun WallpaperItem(
     onWallpaperViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val transition = updateTransition(itemSelected, label = "")
 
@@ -64,34 +63,35 @@ fun WallpaperItem(
         if (selected) 24.dp else 16.dp
     }
 
-
-    val options = BitmapFactory.Options()
-    options.inJustDecodeBounds = true
-    BitmapFactory.decodeStream(
-        LocalContext.current.contentResolver.openInputStream(wallpaperUri.toUri()),
-        null,
-        options
-    )
-    val imageHeight = options.outHeight
-    val imageWidth = options.outWidth
-    val aspectRatio = (imageWidth.toFloat()/imageHeight.toFloat())
+    val dimension = wallpaperUri.toUri().getImageDimensions(context)
+    val aspectRatio = (dimension.first.toFloat()/dimension.second.toFloat())
 
     Box(
         modifier = modifier
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
     ) {
-        AsyncImage (
-            model = wallpaperUri.toUri(),
-            contentDescription = wallpaperUri,
-            contentScale = ContentScale.Crop,
+        GlideImage(
+            imageModel = { wallpaperUri.toUri() },
+            imageOptions = ImageOptions(
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center
+            ),
+            requestBuilder = {
+                Glide
+                    .with(LocalContext.current)
+                    .asBitmap()
+                    .centerInside()
+                    .transition(withCrossFade())
+            },
+            loading = {
+                Box(modifier = Modifier.matchParentSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            },
             modifier = Modifier
                 .aspectRatio(aspectRatio)
                 .combinedClickable(
-                    /*
-                    If in selection mode, a click will select the item.
-                    If not, a click will show an image view.
-                     */
                     onClick = {
                         if (!selectionMode) { onWallpaperViewClick() }
                         else { onItemSelection() }
@@ -103,12 +103,8 @@ fun WallpaperItem(
                             onItemSelection()
                         }
                     }
-                ),
-            )
-        /*
-        If in selection mode and item is selected, show a checkmark circle.
-        If not selected, show an empty circle.
-         */
+                )
+        )
         if (selectionMode) {
             val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
             if (itemSelected) {
@@ -133,41 +129,13 @@ fun WallpaperItem(
     }
 }
 
-fun fileFromContentUri(context: Context, contentUri: Uri): File {
-    // Preparing Temp file name
-    val fileExtension = getFileExtension(context, contentUri)
-    val fileName = "temp_file" + if (fileExtension != null) ".$fileExtension" else ""
+//https://stackoverflow.com/a/73214367
+fun Uri.getImageDimensions(context: Context): Pair<Int, Int> {
+    val inputStream = context.contentResolver.openInputStream(this)!!
+    val exif = ExifInterface(inputStream)
 
-    // Creating Temp file
-    val tempFile = File(context.cacheDir, fileName)
-    tempFile.createNewFile()
+    val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+    val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
 
-    try {
-        val oStream = FileOutputStream(tempFile)
-        val inputStream = context.contentResolver.openInputStream(contentUri)
-
-        inputStream?.let {
-            copy(inputStream, oStream)
-        }
-
-        oStream.flush()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    return tempFile
-}
-
-private fun getFileExtension(context: Context, uri: Uri): String? {
-    val fileType: String? = context.contentResolver.getType(uri)
-    return MimeTypeMap.getSingleton().getExtensionFromMimeType(fileType)
-}
-
-@Throws(IOException::class)
-private fun copy(source: InputStream, target: OutputStream) {
-    val buf = ByteArray(8192)
-    var length: Int
-    while (source.read(buf).also { length = it } > 0) {
-        target.write(buf, 0, length)
-    }
+    return Pair(width, height)
 }

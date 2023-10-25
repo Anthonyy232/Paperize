@@ -21,10 +21,9 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -32,20 +31,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -58,6 +62,7 @@ fun FolderItem(
     onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val haptics = LocalHapticFeedback.current
     val transition = updateTransition(itemSelected, label = "")
@@ -97,20 +102,31 @@ fun FolderItem(
             tonalElevation = 10.dp,
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box {
-                    AsyncImage(
+                    GlideImage(
+                        imageModel = { folder.coverUri?.toUri() },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center
+                        ),
+                        requestBuilder = {
+                            Glide
+                                .with(LocalContext.current)
+                                .asBitmap()
+                                .transition(BitmapTransitionOptions.withCrossFade())
+                        },
+                        loading = {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+                        },
                         modifier = Modifier
                             .height(configuration.screenHeightDp.dp / 4.0f)
                             .clip(RoundedCornerShape(roundedCornerShapeTransition))
-                            .blur(radius = 3.dp),
-                        model = folder.coverUri,
-                        contentDescription = folder.folderName,
-                        alignment = Alignment.Center,
-                        contentScale = ContentScale.Crop,
+                            .blur(radius = 2.dp)
                     )
                     if (selectionMode) {
                         if (itemSelected) {

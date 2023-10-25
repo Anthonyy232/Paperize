@@ -8,18 +8,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ScrollableSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsLargeTopAppBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsTitle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsSmallTopAppBar
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun SettingsScreen(
-    settingsState: SettingsState,
+    viewModel: SettingsViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onDynamicThemingClick: (Boolean) -> Unit,
-    onDarkModeClick: (Boolean?) -> Unit
 ) {
     val scroll: ScrollState = rememberScrollState(0)
     val largeTopAppBarHeight = 152.dp
@@ -32,11 +34,15 @@ fun SettingsScreen(
             modifier = Modifier.height(largeTopAppBarHeight)
         )
         ScrollableSettings(
-            settingsState = settingsState,
+            settingsState = viewModel.state,
             largeTopAppBarHeightPx = largeTopAppBarHeight,
             scroll = scroll,
-            onDynamicThemingClick = onDynamicThemingClick,
-            onDarkModeClick = onDarkModeClick
+            onDynamicThemingClick = {
+                viewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
+            },
+            onDarkModeClick = {
+                viewModel.onEvent(SettingsEvent.SetDarkMode(it))
+            }
         )
         SettingsSmallTopAppBar(onBackClick = onBackClick)
         SettingsTitle(

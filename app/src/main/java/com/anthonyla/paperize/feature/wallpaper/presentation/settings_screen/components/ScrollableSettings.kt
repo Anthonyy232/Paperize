@@ -13,16 +13,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun ScrollableSettings(
-    settingsState: SettingsState,
+    settingsState: StateFlow<SettingsState>,
     largeTopAppBarHeightPx: Dp,
     scroll: ScrollState,
     onDynamicThemingClick: (Boolean) -> Unit,
     onDarkModeClick: (Boolean?) -> Unit
 ) {
+    val state = settingsState.collectAsStateWithLifecycle()
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
@@ -33,17 +36,16 @@ fun ScrollableSettings(
     ) {
         Spacer(Modifier.height(largeTopAppBarHeightPx))
         Spacer(modifier = Modifier.height(16.dp))
-        ListSectionTitle("Appearance")
 
+        ListSectionTitle("Appearance")
         Spacer(modifier = Modifier.height(16.dp))
         DarkModeListItem(
-            settingsState = settingsState,
+            darkMode = state.value.darkMode,
             onDarkModeClick = onDarkModeClick
         )
-
         Spacer(modifier = Modifier.height(16.dp))
         DynamicThemingListItem(
-            settingsState = settingsState,
+            dynamicTheming = state.value.dynamicTheming,
             onDynamicThemingClick = onDynamicThemingClick
         )
     }

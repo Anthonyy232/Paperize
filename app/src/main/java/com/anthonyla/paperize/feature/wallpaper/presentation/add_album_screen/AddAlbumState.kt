@@ -6,8 +6,6 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 
 data class AddAlbumState (
-    val albumWithWallpapers: List<AlbumWithWallpaper> = emptyList(),
-
     val initialAlbumName: String = "",
     val displayedAlbumName: String = "",
     val coverUri: String = "",

@@ -20,14 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 
 @Composable
 fun LibraryScreen(
-    albumState: State<AddAlbumState>,
-    onAddNewAlbumClick: () -> Unit
-) {
+    albumsViewModel: AlbumsViewModel = hiltViewModel(),
+    onAddNewAlbumClick: () -> Unit,
+    ) {
     val albumLazyListState = rememberLazyStaggeredGridState()
 
     Scaffold(
@@ -58,6 +61,7 @@ fun LibraryScreen(
                     verticalItemSpacing = 8.dp,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     content = {
+
                     },
                 )
             }

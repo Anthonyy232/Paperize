@@ -19,12 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
 
 @Composable
-fun DynamicThemingListItem(settingsState: SettingsState, onDynamicThemingClick: (Boolean) -> Unit) {
+fun DynamicThemingListItem(dynamicTheming: Boolean, onDynamicThemingClick: (Boolean) -> Unit) {
     Row {
         ListItem(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .clickable { onDynamicThemingClick(!settingsState.dynamicTheming) },
+                .clickable { onDynamicThemingClick(!dynamicTheming) },
             headlineContent = {
                 Text(
                     text = "Dynamic Theme",
@@ -39,7 +39,7 @@ fun DynamicThemingListItem(settingsState: SettingsState, onDynamicThemingClick: 
             trailingContent = {
                 Switch(
                     modifier = Modifier.semantics { contentDescription = "Dynamic Theme" },
-                    checked = settingsState.dynamicTheming,
+                    checked = dynamicTheming,
                     onCheckedChange = onDynamicThemingClick,
                     enabled = true
                 ) },

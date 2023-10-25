@@ -1,9 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,11 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumFabMenuOptions
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
@@ -42,8 +37,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.Wa
 
 @Composable
 fun AddAlbumScreen(
-    initialAlbumName: String,
     viewModel: AddAlbumViewModel = hiltViewModel(),
+    initialAlbumName: String,
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
@@ -110,6 +105,8 @@ fun AddAlbumScreen(
                 },
                 onConfirmationClick = {
                     viewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
+                    viewModel.onEvent(AddAlbumEvent.SaveAlbum)
+                    viewModel.onEvent(AddAlbumEvent.ClearState)
                     onConfirmation()
                 },
                 onSelectAllClick = {
@@ -146,13 +143,13 @@ fun AddAlbumScreen(
             LazyVerticalStaggeredGrid(
                 state = lazyListState,
                 modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(it),
                 columns = StaggeredGridCells.Fixed(2),
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (items = state.value.folders, key = { folder -> folder.folderUri}
+                    items (items = state.value.folders, key = { folder -> folder.folderUri.hashCode()}
                     ) { folder ->
                         FolderItem(
                             folder = folder,
@@ -171,7 +168,7 @@ fun AddAlbumScreen(
                             modifier = Modifier.padding(4.dp)
                         )
                     }
-                    items (items = state.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri}
+                    items (items = state.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
                     ) { wallpaper ->
                         WallpaperItem(
                             wallpaperUri = wallpaper.wallpaperUri,
@@ -182,8 +179,9 @@ fun AddAlbumScreen(
                                 viewModel.onEvent(
                                     if (!state.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
                                         AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
-                                    else
+                                    else {
                                         AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                    }
                                 )
                             },
                             onWallpaperViewClick = {

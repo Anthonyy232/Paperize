@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val addAlbumViewModel: AddAlbumViewModel by viewModels()
+    private val albumsViewModel: AlbumsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -26,10 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            PaperizeTheme(
-                isDarkMode = isDarkMode(settingsState = settingsViewModel.state.value),
-                isDynamicTheming = isDynamicTheming(settingsState = settingsViewModel.state.value)
-            ) {
+            PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp()
                 }
@@ -37,18 +33,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Composable
-private fun isDarkMode(settingsState: SettingsState): Boolean =
-    when(settingsState.darkMode) {
-        true -> true // User enabled dark mode
-        false -> false // User enabled light mode
-        else -> isSystemInDarkTheme() // System default
-    }
-
-@Composable
-private fun isDynamicTheming(settingsState: SettingsState): Boolean =
-    when(settingsState.dynamicTheming) {
-        true -> true
-        false -> false
-    }

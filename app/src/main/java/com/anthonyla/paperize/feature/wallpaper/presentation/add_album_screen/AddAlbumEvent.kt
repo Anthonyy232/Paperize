@@ -1,11 +1,11 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 sealed class AddAlbumEvent {
-    object SaveAlbum: AddAlbumEvent()
-    object ClearState: AddAlbumEvent()
+    data object SaveAlbum: AddAlbumEvent()
+    data object ClearState: AddAlbumEvent()
 
-    object SelectAll: AddAlbumEvent()
-    object DeselectAll: AddAlbumEvent()
+    data object SelectAll: AddAlbumEvent()
+    data object DeselectAll: AddAlbumEvent()
     data class SetAlbumName(
         val initialAlbumName: String
     ): AddAlbumEvent()

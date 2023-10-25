@@ -4,7 +4,6 @@ import android.app.Activity
 import android.graphics.Color.TRANSPARENT
 import android.os.Build
 import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -12,15 +11,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.example.compose.md_theme_dark_background
 import com.example.compose.md_theme_dark_error
 import com.example.compose.md_theme_dark_errorContainer
@@ -79,6 +75,7 @@ import com.example.compose.md_theme_light_surfaceTint
 import com.example.compose.md_theme_light_surfaceVariant
 import com.example.compose.md_theme_light_tertiary
 import com.example.compose.md_theme_light_tertiaryContainer
+import kotlinx.coroutines.flow.StateFlow
 
 
 private val LightColors = lightColorScheme(
@@ -149,11 +146,14 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun PaperizeTheme(
-    isDarkMode: Boolean,
-    isDynamicTheming: Boolean,
+    settingsState: StateFlow<SettingsState>,
     content: @Composable () -> Unit
 ) {
+    val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    val isDarkMode = isDarkMode(darkMode = state.value.darkMode)
+    val isDynamicTheming = isDynamicTheming(dynamicTheming = state.value.dynamicTheming)
 
     val colors = when {
         isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)
@@ -180,3 +180,17 @@ fun PaperizeTheme(
     }
 }
 val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+@Composable
+private fun isDarkMode(darkMode: Boolean?): Boolean =
+    when(darkMode) {
+        true -> true
+        false -> false
+        else -> isSystemInDarkTheme()
+    }
+
+@Composable
+private fun isDynamicTheming(dynamicTheming: Boolean): Boolean =
+    when(dynamicTheming) {
+        true -> true
+        false -> false
+    }

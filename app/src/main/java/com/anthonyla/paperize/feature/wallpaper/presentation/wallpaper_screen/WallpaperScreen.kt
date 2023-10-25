@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
 
 @Composable
-fun WallpaperScreen(albumState: State<AddAlbumState>) {
+fun WallpaperScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         content = {

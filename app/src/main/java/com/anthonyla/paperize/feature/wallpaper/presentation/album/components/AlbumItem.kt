@@ -1,24 +1,18 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
-import android.net.Uri
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 
 @Composable
 fun AlbumItem(
@@ -39,16 +33,6 @@ fun AlbumItem(
         modifier = Modifier.size(width = 240.dp, height = 100.dp),
         colors = CardDefaults.elevatedCardColors()
     ) {
-        /*
-        AsyncImage(
-            model = albumCover,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        )
-         */
         Text(
             text = "Text",
             modifier = Modifier.padding(16.dp),

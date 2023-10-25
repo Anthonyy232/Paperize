@@ -36,7 +36,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsSt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DarkModeListItem(settingsState: SettingsState, onDarkModeClick: (Boolean?) -> Unit) {
+fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
     val options = listOf(
         Triple("Dark Mode", Icons.Outlined.DarkMode, Icons.Filled.DarkMode),
         Triple("Automatic Device Mode", Icons.Outlined.BrightnessAuto, Icons.Filled.BrightnessAuto),
@@ -44,7 +44,7 @@ fun DarkModeListItem(settingsState: SettingsState, onDarkModeClick: (Boolean?) -
     )
     var selectedIndex by remember {
         mutableIntStateOf(
-            when (settingsState.darkMode) {
+            when (darkMode) {
                 true -> 0
                 false -> 2
                 else -> 1

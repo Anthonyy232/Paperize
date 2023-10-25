@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.tabItems
@@ -35,12 +36,10 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
-    addAlbumViewModel: AddAlbumViewModel = hiltViewModel(),
     onSettingsClick: () -> Unit,
     onContactClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit
 ) {
-    val albumState = addAlbumViewModel.state.collectAsState()
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
 
@@ -104,10 +103,8 @@ fun HomeScreen(
             HorizontalPager(state = pagerState) { index ->
                 when(index) {
                     0 -> WallpaperScreen(
-                        albumState = albumState
                     )
                     1 -> LibraryScreen(
-                        albumState = albumState,
                         onAddNewAlbumClick = { addAlbumDialog = true }
                     )
                 }

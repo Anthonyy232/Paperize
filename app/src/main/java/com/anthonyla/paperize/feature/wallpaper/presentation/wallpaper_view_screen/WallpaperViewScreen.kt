@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_scr
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,18 +22,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperViewScreen(
-    wallpaper: String,
+    wallpaperUri: String,
     onBackClick: () -> Unit,
 ) {
     val zoomState = rememberZoomState()
@@ -75,9 +82,23 @@ fun WallpaperViewScreen(
                         .padding(padding)
                         .zoomable(zoomState)
                 ) {
-                    AsyncImage(
-                        model = wallpaper,
-                        contentDescription = wallpaper,
+                    GlideImage(
+                        imageModel = { wallpaperUri.toUri() },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center
+                        ),
+                        requestBuilder = {
+                            Glide
+                                .with(LocalContext.current)
+                                .asBitmap()
+                                .transition(BitmapTransitionOptions.withCrossFade())
+                        },
+                        loading = {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+                        }
                     )
                 }
             }

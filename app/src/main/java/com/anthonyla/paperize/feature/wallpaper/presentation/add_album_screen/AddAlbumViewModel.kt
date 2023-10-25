@@ -4,25 +4,21 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 import android.app.Application
 import android.content.Context
 import android.webkit.MimeTypeMap
-import androidx.compose.runtime.mutableStateListOf
 import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.use_case.AlbumsUseCases
-import dagger.hilt.android.internal.Contexts.getApplication
+import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.List.copyOf
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,6 +39,30 @@ class AddAlbumViewModel @Inject constructor(
         when (event) {
             is AddAlbumEvent.SaveAlbum -> {
                 viewModelScope.launch {
+                    val albumWithWallpaper = AlbumWithWallpaper(
+                        album = Album(
+                            state.value.initialAlbumName,
+                            state.value.displayedAlbumName,
+                            state.value.coverUri,
+                            state.value.folders
+                        ),
+                        wallpapers = state.value.wallpapers
+                    )
+                    albumsUseCases.addAlbumWithWallpaper(albumWithWallpaper)
+
+                    //Clear viewModel state after adding album
+                    _state.update { it.copy(
+                        initialAlbumName = "",
+                        displayedAlbumName = "",
+                        coverUri = "",
+                        wallpapers = emptyList(),
+                        folders = emptyList(),
+                        selectedFolders = emptyList(),
+                        selectedWallpapers = emptyList(),
+                        isEmpty = false,
+                        allSelected = false,
+                        selectedCount = 0,
+                    ) }
                 }
             }
             is AddAlbumEvent.SetAlbumName -> {
@@ -55,19 +75,21 @@ class AddAlbumViewModel @Inject constructor(
             }
 
             is AddAlbumEvent.ReflectAlbumName -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(
-                        initialAlbumName = event.newAlbumName,
-                        displayedAlbumName = event.newAlbumName,
-                        coverUri = it.coverUri,
-                        wallpapers = it.wallpapers.map { wallpaper ->
-                            wallpaper.copy(initialAlbumName = event.newAlbumName)
-                        },
-                        folders = it.folders.map { folder ->
-                            folder.copy(initialAlbumName = event.newAlbumName)
-                        },
-                    ) }
-                    updateIsEmpty()
+                if (event.newAlbumName != state.value.initialAlbumName) {
+                    viewModelScope.launch {
+                        _state.update { it.copy(
+                            initialAlbumName = event.newAlbumName,
+                            displayedAlbumName = event.newAlbumName,
+                            coverUri = it.coverUri,
+                            wallpapers = it.wallpapers.map { wallpaper ->
+                                wallpaper.copy(initialAlbumName = event.newAlbumName)
+                            },
+                            folders = it.folders.map { folder ->
+                                folder.copy(initialAlbumName = event.newAlbumName)
+                            },
+                        ) }
+                        updateIsEmpty()
+                    }
                 }
             }
             is AddAlbumEvent.AddWallpaper -> {
@@ -227,15 +249,15 @@ class AddAlbumViewModel @Inject constructor(
         }
     }
 
-    fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-        val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
+    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
+        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
         return listFilesRecursive(folderDocumentFile, context)
     }
 
-    private fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
+    private fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
         val files = mutableListOf<String>()
         parent?.listFiles()?.forEach { file ->
-            if (file.isDirectory) {
+            if (file.isDirectory()) {
                 files.addAll(listFilesRecursive(file, context))
             } else {
                 val extension = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
@@ -248,8 +270,7 @@ class AddAlbumViewModel @Inject constructor(
         return files
     }
 
-    fun getFolderNameFromUri(folderUri: String, context: Context): String? {
-        return DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
+    private fun getFolderNameFromUri(folderUri: String, context: Context): String? {
+        return DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
     }
 }
-
