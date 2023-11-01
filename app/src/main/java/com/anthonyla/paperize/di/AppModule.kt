@@ -8,9 +8,6 @@ import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDatabase
 import com.anthonyla.paperize.feature.wallpaper.data.repository.AlbumRepositoryImpl
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
-import com.anthonyla.paperize.feature.wallpaper.use_case.AddAlbumWithWallpaper
-import com.anthonyla.paperize.feature.wallpaper.use_case.AlbumsUseCases
-import com.anthonyla.paperize.feature.wallpaper.use_case.GetAllAlbumsWithWallpaper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,17 +34,6 @@ object AppModule {
         db: AlbumDatabase
     ): AlbumRepository {
         return AlbumRepositoryImpl(db.albumDao)
-    }
-
-    @Provides
-    @Singleton
-    fun provideWallpaperUseCases(
-        repository: AlbumRepository
-    ): AlbumsUseCases {
-        return AlbumsUseCases (
-            getAllAlbumsWithWallpaper = GetAllAlbumsWithWallpaper(repository),
-            addAlbumWithWallpaper = AddAlbumWithWallpaper(repository)
-        )
     }
 
     @Provides

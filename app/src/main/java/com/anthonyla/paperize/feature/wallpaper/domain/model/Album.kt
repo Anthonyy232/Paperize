@@ -8,5 +8,4 @@ data class Album(
     @PrimaryKey(autoGenerate = false) val initialAlbumName: String,
     val displayedAlbumName: String,
     val coverUri: String?,
-    val folders: List<Folder> = emptyList()
 )

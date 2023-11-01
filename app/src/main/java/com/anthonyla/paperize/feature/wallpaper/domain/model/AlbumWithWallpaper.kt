@@ -10,4 +10,9 @@ data class AlbumWithWallpaper(
         entityColumn = "initialAlbumName",
     )
     val wallpapers: List<Wallpaper> = emptyList(),
+    @Relation(
+        parentColumn = "initialAlbumName",
+        entityColumn = "initialAlbumName",
+    )
+    val folders: List<Folder> = emptyList(),
 )

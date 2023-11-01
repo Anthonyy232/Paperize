@@ -70,6 +70,19 @@ fun WallpaperItem(
         modifier = modifier
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
+            .combinedClickable(
+                onClick = {
+                    if (!selectionMode) { onWallpaperViewClick() }
+                    else { onItemSelection() }
+                },
+                onLongClick = {
+                    if (!selectionMode) {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onActivateSelectionMode(true)
+                        onItemSelection()
+                    }
+                }
+            )
     ) {
         GlideImage(
             imageModel = { wallpaperUri.toUri() },
@@ -89,21 +102,7 @@ fun WallpaperItem(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             },
-            modifier = Modifier
-                .aspectRatio(aspectRatio)
-                .combinedClickable(
-                    onClick = {
-                        if (!selectionMode) { onWallpaperViewClick() }
-                        else { onItemSelection() }
-                    },
-                    onLongClick = {
-                        if (!selectionMode) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onActivateSelectionMode(true)
-                            onItemSelection()
-                        }
-                    }
-                )
+            modifier = Modifier.aspectRatio(aspectRatio)
         )
         if (selectionMode) {
             val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)

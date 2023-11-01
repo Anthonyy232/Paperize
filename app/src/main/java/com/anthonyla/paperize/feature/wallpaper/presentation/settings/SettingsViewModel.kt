@@ -30,11 +30,7 @@ class SettingsViewModel @Inject constructor (
 
     private var currentGetJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            refreshSettings()
-        }
-    }
+    init { viewModelScope.launch { refreshSettings() } }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {

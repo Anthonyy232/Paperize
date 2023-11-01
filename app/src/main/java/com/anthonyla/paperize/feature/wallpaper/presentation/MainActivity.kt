@@ -16,12 +16,13 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val addAlbumViewModel: AddAlbumViewModel by viewModels()
     private val albumsViewModel: AlbumsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { settingsViewModel.shouldNotBypassSplashScreen }
+        splashScreen.setKeepOnScreenCondition {
+            settingsViewModel.shouldNotBypassSplashScreen && albumsViewModel.shouldNotBypassSplashScreen
+        }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {

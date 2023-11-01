@@ -8,7 +8,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 
 @Database(
-    entities = [Album::class, Wallpaper::class],
+    entities = [Album::class, Wallpaper::class, Folder::class],
     version = 1
 )
 @TypeConverters(Converters::class)

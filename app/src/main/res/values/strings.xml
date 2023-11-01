@@ -28,4 +28,5 @@
     <string name="save">Save</string>
     <string name="wallpaper_view">Wallpaper View</string>
     <string name="album_view">Album View</string>
+    <string name="folder_view">Folder View</string>
 </resources>

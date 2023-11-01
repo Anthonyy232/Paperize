@@ -38,7 +38,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 fun HomeScreen(
     onSettingsClick: () -> Unit,
     onContactClick: () -> Unit,
-    navigateToAddWallpaperScreen: (String) -> Unit
+    navigateToAddWallpaperScreen: (String) -> Unit,
+    onAlbumViewClick: (String) -> Unit
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -105,7 +106,8 @@ fun HomeScreen(
                     0 -> WallpaperScreen(
                     )
                     1 -> LibraryScreen(
-                        onAddNewAlbumClick = { addAlbumDialog = true }
+                        onAddNewAlbumClick = { addAlbumDialog = true },
+                        onViewAlbum = { onAlbumViewClick(it) }
                     )
                 }
             }

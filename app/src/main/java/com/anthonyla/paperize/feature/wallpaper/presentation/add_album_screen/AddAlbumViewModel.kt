@@ -11,7 +11,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
-import com.anthonyla.paperize.feature.wallpaper.use_case.AlbumsUseCases
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddAlbumViewModel @Inject constructor(
     application: Application,
-    private val albumsUseCases: AlbumsUseCases,
+    private val repository: AlbumRepository,
 ) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<Application>().applicationContext
@@ -34,21 +34,37 @@ class AddAlbumViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5000), AddAlbumState()
     )
 
-
     fun onEvent(event: AddAlbumEvent) {
         when (event) {
             is AddAlbumEvent.SaveAlbum -> {
                 viewModelScope.launch {
+                    val albumCoverUri = when (state.value.isEmpty) {
+                        true -> ""
+                        false -> {
+                            if (state.value.wallpapers.isNotEmpty())
+                                state.value.wallpapers.random().wallpaperUri
+                            else {
+                                state.value.folders.random().coverUri
+                            }
+                        }
+                    }
                     val albumWithWallpaper = AlbumWithWallpaper(
                         album = Album(
-                            state.value.initialAlbumName,
-                            state.value.displayedAlbumName,
-                            state.value.coverUri,
-                            state.value.folders
+                            initialAlbumName = state.value.initialAlbumName,
+                            displayedAlbumName = state.value.displayedAlbumName,
+                            coverUri = albumCoverUri
                         ),
-                        wallpapers = state.value.wallpapers
+                        wallpapers = state.value.wallpapers,
+                        folders = state.value.folders
                     )
-                    albumsUseCases.addAlbumWithWallpaper(albumWithWallpaper)
+
+                    repository.upsertAlbum(albumWithWallpaper.album)
+                    albumWithWallpaper.folders.forEach { folder ->
+                        repository.upsertFolder(folder)
+                    }
+                    albumWithWallpaper.wallpapers.forEach { wallpaper ->
+                        repository.upsertWallpaper(wallpaper)
+                    }
 
                     //Clear viewModel state after adding album
                     _state.update { it.copy(
@@ -120,20 +136,18 @@ class AddAlbumViewModel @Inject constructor(
                     if (!state.value.folders.any { it.folderUri == event.directoryUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
-                        if (wallpapers.isNotEmpty()) {
-                            _state.update { it.copy(
-                                folders = it.folders.plus(
-                                    Folder(
-                                        initialAlbumName = it.initialAlbumName,
-                                        folderName = folderName,
-                                        folderUri = event.directoryUri,
-                                        coverUri = wallpapers.random(),
-                                        wallpapers = wallpapers
-                                    )
-                                ),
-                            ) }
-                            updateIsEmpty()
-                        }
+                        _state.update { it.copy(
+                            folders = it.folders.plus(
+                                Folder(
+                                    initialAlbumName = it.initialAlbumName,
+                                    folderName = folderName,
+                                    folderUri = event.directoryUri,
+                                    coverUri = wallpapers.randomOrNull(),
+                                    wallpapers = wallpapers.ifEmpty { emptyList() }
+                                )
+                            ),
+                        ) }
+                        updateIsEmpty()
                     }
                 }
             }

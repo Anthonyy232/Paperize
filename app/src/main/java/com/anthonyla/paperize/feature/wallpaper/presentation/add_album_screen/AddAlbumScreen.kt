@@ -157,11 +157,14 @@ fun AddAlbumScreen(
                             selectionMode = selectionMode,
                             onActivateSelectionMode = { selectionMode = it },
                             onItemSelection = {
-                                if (!state.value.selectedFolders.contains(folder.folderUri)) {
-                                    viewModel.onEvent(AddAlbumEvent.SelectFolder(folder.folderUri))
-                                } else {
-                                    viewModel.onEvent(AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri))
-                                } },
+                                viewModel.onEvent(
+                                    if (!state.value.selectedFolders.contains(folder.folderUri))
+                                        AddAlbumEvent.SelectFolder(folder.folderUri)
+                                    else {
+                                        AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri)
+                                    }
+                                )
+                            },
                             onFolderViewClick = {
                                 onShowFolderView(folder.folderUri, folder.folderName, folder.wallpapers)
                             },

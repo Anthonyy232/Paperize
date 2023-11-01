@@ -1,13 +1,13 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.library_screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -15,24 +15,23 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.AlbumItem
 
 @Composable
 fun LibraryScreen(
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     onAddNewAlbumClick: () -> Unit,
+    onViewAlbum: (String) -> Unit
     ) {
-    val albumLazyListState = rememberLazyStaggeredGridState()
-
+    val lazyListState = rememberLazyGridState()
+    val state = albumsViewModel.state.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
@@ -49,22 +48,27 @@ fun LibraryScreen(
             }
         },
         content = { it
-            Column(
+            LazyVerticalGrid(
+                state = lazyListState,
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LazyVerticalStaggeredGrid(
-                    state = albumLazyListState,
-                    modifier = Modifier.fillMaxSize(),
-                    columns = StaggeredGridCells.Fixed(3),
-                    contentPadding =  PaddingValues(horizontal = 8.dp, vertical = 16.dp),
-                    verticalItemSpacing = 8.dp,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    content = {
-
-                    },
-                )
-            }
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(4.dp, 4.dp),
+                horizontalArrangement = Arrangement.Start,
+                content = {
+                    items (state.value.albumWithWallpapers, key = {album -> album.album.initialAlbumName}
+                    ) { album ->
+                        AlbumItem(
+                            album = album.album,
+                            itemSelected = false,
+                            selectionMode = false,
+                            onActivateSelectionMode = { /*TODO*/ },
+                            onItemSelection = { /*TODO*/ },
+                            onAlbumViewClick = { onViewAlbum(album.album.initialAlbumName) },
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+                }
+            )
         }
     )
 }

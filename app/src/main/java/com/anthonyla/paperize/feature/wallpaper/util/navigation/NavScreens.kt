@@ -21,5 +21,6 @@ sealed class NavScreens(val route: String, @StringRes val resourceId: Int, val u
     object Settings : NavScreens("settings_screen", R.string.settings_screen, Icons.Outlined.Settings, Icons.Filled.Settings)
     object AddEdit : NavScreens("add_edit_screen", R.string.add_wallpaper_screen, Icons.Outlined.Add, Icons.Filled.Add)
     object WallpaperView : NavScreens("wallpaper_view_screen", R.string.wallpaper_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
+    object FolderView : NavScreens("folder_view_screen", R.string.folder_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
     object AlbumView : NavScreens("album_view_screen", R.string.album_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
 }

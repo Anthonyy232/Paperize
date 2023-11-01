@@ -22,13 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsEvent
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
 import com.google.gson.Gson
@@ -39,7 +37,10 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun PaperizeApp() {
+fun PaperizeApp(
+    albumsViewModel: AlbumsViewModel = hiltViewModel()
+) {
+    val state = albumsViewModel.state.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     var toContact by rememberSaveable { mutableStateOf(false) }
     if (toContact) { Contact(LocalContext.current) }
@@ -55,6 +56,9 @@ fun PaperizeApp() {
                 onContactClick = { toContact = true },
                 navigateToAddWallpaperScreen = {
                     navController.navigate("${NavScreens.AddEdit.route}/$it")
+                },
+                onAlbumViewClick = {
+                    navController.navigate("${NavScreens.AlbumView.route}/$it")
                 }
             )
         }
@@ -90,7 +94,7 @@ fun PaperizeApp() {
                         onShowFolderView = { folder, folderName, wallpapers ->
                             val encodedFolder = runBlocking { encodeUri(uri = folder) }
                             val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                            navController.navigate("${NavScreens.AlbumView.route}/$encodedFolder/$folderName/$encodedWallpapers")
+                            navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
                         }
                     )
                 }
@@ -116,7 +120,7 @@ fun PaperizeApp() {
             }
         }
         composable(
-            route = NavScreens.AlbumView.route.plus("/{folderUri}/{folderName}/{wallpapers}"),
+            route = NavScreens.FolderView.route.plus("/{folderUri}/{folderName}/{wallpapers}"),
             arguments = listOf(
                 navArgument("folderUri") { type = NavType.StringType },
                 navArgument("folderName") { type = NavType.StringType },
@@ -156,6 +160,44 @@ fun PaperizeApp() {
             }
         }
         composable(
+            route = NavScreens.AlbumView.route.plus("/{initialAlbumName}"),
+            arguments = listOf(
+                navArgument("initialAlbumName") { type = NavType.StringType },
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(300)
+                )
+            }
+        ) { backStackEntry ->
+            val initialAlbumName = backStackEntry.arguments?.getString("initialAlbumName")
+            val albumWithWallpaper = state.value.albumWithWallpapers.find { it.album.initialAlbumName == initialAlbumName }
+            if (initialAlbumName != null) {
+                if (albumWithWallpaper != null) {
+                    AlbumViewScreen(
+                        albumWithWallpaper = albumWithWallpaper,
+                        onBackClick = { navController.navigateUp() },
+                        onShowWallpaperView = { wallpaper ->
+                            val encodedWallpaper = runBlocking { encodeUri(uri = wallpaper) }
+                            navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
+                        },
+                        onShowFolderView = { folder, folderName, wallpapers ->
+                            val encodedFolder = runBlocking { encodeUri(uri = folder) }
+                            val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
+                            navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
+                        }
+                    )
+                }
+            }
+        }
+        composable(
             route = NavScreens.Settings.route,
             enterTransition = {
                 slideIntoContainer(
@@ -175,6 +217,7 @@ fun PaperizeApp() {
     }
 }
 
-suspend fun encodeUri(uri: String): String = withContext(Dispatchers.IO) {
-    URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
+suspend fun encodeUri(uri: String): String =
+    withContext(Dispatchers.IO) {
+        URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
 }

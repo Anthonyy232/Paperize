@@ -4,7 +4,9 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
-
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
 android {
     namespace = "com.anthonyla.paperize"
     compileSdk = 34
@@ -27,6 +29,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -88,5 +91,4 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
     implementation("com.lazygeniouz:dfc:1.0.8")
-
 }

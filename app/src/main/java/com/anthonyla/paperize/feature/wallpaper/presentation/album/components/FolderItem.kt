@@ -1,5 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.OvalShape
+import android.graphics.drawable.shapes.RectShape
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
@@ -62,7 +65,6 @@ fun FolderItem(
     onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val haptics = LocalHapticFeedback.current
     val transition = updateTransition(itemSelected, label = "")
@@ -83,8 +85,8 @@ fun FolderItem(
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (selectionMode) { onItemSelection() }
-                    else { onFolderViewClick() }
+                    if (!selectionMode) { onFolderViewClick() }
+                    else { onItemSelection() }
                 },
                 onLongClick = {
                     if (!selectionMode) {
@@ -106,28 +108,30 @@ fun FolderItem(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box {
-                    GlideImage(
-                        imageModel = { folder.coverUri?.toUri() },
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
-                        ),
-                        requestBuilder = {
-                            Glide
-                                .with(LocalContext.current)
-                                .asBitmap()
-                                .transition(BitmapTransitionOptions.withCrossFade())
-                        },
-                        loading = {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-                        },
-                        modifier = Modifier
-                            .height(configuration.screenHeightDp.dp / 4.0f)
-                            .clip(RoundedCornerShape(roundedCornerShapeTransition))
-                            .blur(radius = 2.dp)
-                    )
+                    if (folder.coverUri != null) {
+                        GlideImage(
+                            imageModel = { folder.coverUri.toUri() },
+                            imageOptions = ImageOptions(
+                                contentScale = ContentScale.Crop,
+                                alignment = Alignment.Center
+                            ),
+                            requestBuilder = {
+                                Glide
+                                    .with(LocalContext.current)
+                                    .asBitmap()
+                                    .transition(BitmapTransitionOptions.withCrossFade())
+                            },
+                            loading = {
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
+                            },
+                            modifier = Modifier
+                                .height(configuration.screenHeightDp.dp / 4.0f)
+                                .clip(RoundedCornerShape(roundedCornerShapeTransition))
+                                .blur(radius = 2.dp)
+                        )
+                    }
                     if (selectionMode) {
                         if (itemSelected) {
                             Icon(
@@ -159,7 +163,6 @@ fun FolderItem(
                         fontSize = 16.sp
                     )
                 }
-
                 Text(
                     text = folder.wallpapers.size.toString().plus(" wallpapers"),
                     modifier = Modifier

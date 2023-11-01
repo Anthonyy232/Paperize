@@ -7,6 +7,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
 
@@ -23,9 +24,15 @@ interface AlbumDao {
     @Upsert
     suspend fun upsertWallpaper(wallpaper: Wallpaper)
 
+    @Upsert
+    suspend fun upsertFolder(folder: Folder)
+
     @Delete
     suspend fun deleteAlbum(album: Album)
 
     @Delete
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
+
+    @Delete
+    suspend fun deleteFolder(folder: Folder)
 }

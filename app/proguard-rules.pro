@@ -19,3 +19,19 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keep class kotlin.coroutines.Continuation
+-keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Album {
+ !transient <fields>;
+}
+-keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper {
+ !transient <fields>;
+}
+-keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper {
+ !transient <fields>;
+}
+-keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Folder {
+ !transient <fields>;
+}
