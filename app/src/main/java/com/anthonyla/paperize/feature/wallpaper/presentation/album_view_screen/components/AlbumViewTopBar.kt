@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.DeleteImagesAlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,9 +32,11 @@ fun AlbumViewTopBar(
     title: String,
     onBackClick: () -> Unit,
     onDeleteAlbum: () -> Unit,
+    onTitleChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showAlertDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteAlertDialog by rememberSaveable { mutableStateOf(false) }
+    var showNameChangeDialog by rememberSaveable { mutableStateOf(false) }
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
     TopAppBar(
@@ -55,11 +56,18 @@ fun AlbumViewTopBar(
             }
         },
         actions = {
-            if (showAlertDialog) DeleteAlbumAlertDialog (
-                onDismissRequest = { showAlertDialog = false },
+            if (showDeleteAlertDialog) DeleteAlbumAlertDialog (
+                onDismissRequest = { showDeleteAlertDialog = false },
                 onConfirmation = {
-                    showAlertDialog = false
+                    showDeleteAlertDialog = false
                     onDeleteAlbum()
+                }
+            )
+            if (showNameChangeDialog) AlbumNameDialog (
+                onDismissRequest = { showNameChangeDialog = false },
+                onConfirmation = {
+                    showNameChangeDialog = false
+                    onTitleChange(it)
                 }
             )
             IconButton(onClick = { menuExpanded = true }) {
@@ -79,13 +87,14 @@ fun AlbumViewTopBar(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete_album)) },
                             onClick = {
-                                showAlertDialog = true
+                                showDeleteAlertDialog = true
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.change_name)) },
                             onClick = {
+                                showNameChangeDialog = true
                                 menuExpanded = false
                             }
                         )

@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -200,6 +199,9 @@ fun PaperizeApp(
                         onDeleteAlbum = {
                             albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpaper))
                             navController.navigateUp()
+                        },
+                        onTitleChange = { title, originalAlbumWithWallpaper ->
+                            albumsViewModel.onEvent(AlbumsEvent.ChangeAlbumName(title, originalAlbumWithWallpaper))
                         }
                     )
                 }

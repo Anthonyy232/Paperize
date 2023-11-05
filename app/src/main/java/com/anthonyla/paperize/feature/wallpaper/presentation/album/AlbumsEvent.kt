@@ -8,4 +8,9 @@ sealed class AlbumsEvent {
     data class DeleteAlbumWithWallpapers(
         val albumWithWallpaper: AlbumWithWallpaper
     ): AlbumsEvent()
+
+    data class ChangeAlbumName(
+        val title: String,
+        val albumWithWallpaper: AlbumWithWallpaper
+    ): AlbumsEvent()
 }

@@ -57,6 +57,15 @@ class AlbumsViewModel @Inject constructor (
                     refreshAlbums()
                 }
             }
+            is AlbumsEvent.ChangeAlbumName -> {
+                viewModelScope.launch {
+                    if (!(_state.value.albumWithWallpapers.any { it.album.displayedAlbumName == event.title })) {
+                        repository.updateAlbum(
+                            event.albumWithWallpaper.album.copy(displayedAlbumName = event.title)
+                        )
+                    }
+                }
+            }
             is AlbumsEvent.RefreshAlbums -> {
                 viewModelScope.launch {
                     updateAlbums()
@@ -89,7 +98,7 @@ class AlbumsViewModel @Inject constructor (
                         repository.deleteFolder(folder)
                     } else {
                         val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                        var folderCover: String? = null
+                        val folderCover: String?
                         if (folder.coverUri != null) {
                             val folderCoverFile = DocumentFile.fromSingleUri(context, folder.coverUri.toUri())
                             if (folderCoverFile == null || !folderCoverFile.exists()) {
