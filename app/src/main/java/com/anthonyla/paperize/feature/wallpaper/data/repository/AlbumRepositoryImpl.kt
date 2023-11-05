@@ -38,4 +38,17 @@ class AlbumRepositoryImpl(
     override suspend fun deleteFolder(folder: Folder) {
         dao.deleteFolder(folder)
     }
+
+    override suspend fun updateAlbum(album: Album) {
+        dao.updateAlbum(album)
+    }
+
+    override suspend fun updateFolder(folder: Folder) {
+        dao.updateFolder(folder)
+    }
+
+    override suspend fun updateWallpaper(wallpaper: Wallpaper) {
+        dao.updateWallpaper(wallpaper)
+
+    }
 }

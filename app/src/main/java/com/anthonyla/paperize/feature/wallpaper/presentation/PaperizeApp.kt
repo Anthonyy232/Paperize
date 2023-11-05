@@ -66,10 +66,7 @@ fun PaperizeApp(
             route = NavScreens.AddEdit.route.plus("/{initialAlbumName}"),
             arguments = listOf(navArgument("initialAlbumName") { type = NavType.StringType }),
             enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(300)
-                )
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
             },
             exitTransition = {
                 fadeOut(animationSpec = tween(300, easing = LinearEasing))
@@ -108,6 +105,12 @@ fun PaperizeApp(
             },
             exitTransition = {
                 fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) { backStackEntry ->
             backStackEntry.arguments?.getString("wallpaperUri").let { wallpaper ->
@@ -127,16 +130,16 @@ fun PaperizeApp(
                 navArgument("wallpapers") { type = NavType.StringType }
             ),
             enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(300)
-                )
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
             },
             exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(300)
-                )
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) { backStackEntry ->
             val folderUri = backStackEntry.arguments?.getString("folderUri")
@@ -165,16 +168,16 @@ fun PaperizeApp(
                 navArgument("initialAlbumName") { type = NavType.StringType },
             ),
             enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(300)
-                )
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
             },
             exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(300)
-                )
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) { backStackEntry ->
             val initialAlbumName = backStackEntry.arguments?.getString("initialAlbumName")
@@ -200,16 +203,16 @@ fun PaperizeApp(
         composable(
             route = NavScreens.Settings.route,
             enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(300)
-                )
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
             },
             exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(300)
-                )
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300, easing = LinearEasing))
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) {
             SettingsScreen(onBackClick = { navController.navigateUp() })

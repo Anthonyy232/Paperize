@@ -38,24 +38,24 @@ class AddAlbumViewModel @Inject constructor(
         when (event) {
             is AddAlbumEvent.SaveAlbum -> {
                 viewModelScope.launch {
-                    val albumCoverUri = when (state.value.isEmpty) {
+                    val albumCoverUri = when (_state.value.isEmpty) {
                         true -> ""
                         false -> {
-                            if (state.value.wallpapers.isNotEmpty())
-                                state.value.wallpapers.random().wallpaperUri
+                            if (_state.value.wallpapers.isNotEmpty())
+                                _state.value.wallpapers.random().wallpaperUri
                             else {
-                                state.value.folders.random().coverUri
+                                _state.value.folders.random().coverUri
                             }
                         }
                     }
                     val albumWithWallpaper = AlbumWithWallpaper(
                         album = Album(
-                            initialAlbumName = state.value.initialAlbumName,
-                            displayedAlbumName = state.value.displayedAlbumName,
+                            initialAlbumName = _state.value.initialAlbumName,
+                            displayedAlbumName = _state.value.displayedAlbumName,
                             coverUri = albumCoverUri
                         ),
-                        wallpapers = state.value.wallpapers,
-                        folders = state.value.folders
+                        wallpapers = _state.value.wallpapers,
+                        folders = _state.value.folders
                     )
 
                     repository.upsertAlbum(albumWithWallpaper.album)
@@ -91,7 +91,7 @@ class AddAlbumViewModel @Inject constructor(
             }
 
             is AddAlbumEvent.ReflectAlbumName -> {
-                if (event.newAlbumName != state.value.initialAlbumName) {
+                if (event.newAlbumName != _state.value.initialAlbumName) {
                     viewModelScope.launch {
                         _state.update { it.copy(
                             initialAlbumName = event.newAlbumName,
@@ -110,7 +110,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.AddWallpaper -> {
                 viewModelScope.launch {
-                    if (!state.value.wallpapers.any { it.wallpaperUri == event.wallpaperUri }) {
+                    if (!_state.value.wallpapers.any { it.wallpaperUri == event.wallpaperUri }) {
                         _state.update { it.copy(
                             wallpapers = it.wallpapers.plus(
                                 Wallpaper(it.initialAlbumName, event.wallpaperUri)
@@ -122,7 +122,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.DeleteWallpaper -> {
                 viewModelScope.launch {
-                    val wallpaperToRemove = state.value.wallpapers.find { it.wallpaperUri == event.wallpaperUri }
+                    val wallpaperToRemove = _state.value.wallpapers.find { it.wallpaperUri == event.wallpaperUri }
                     if (wallpaperToRemove != null) {
                         _state.update { it.copy(
                             wallpapers = it.wallpapers.minus(wallpaperToRemove),
@@ -133,7 +133,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.AddFolder -> {
                 viewModelScope.launch {
-                    if (!state.value.folders.any { it.folderUri == event.directoryUri }) {
+                    if (!_state.value.folders.any { it.folderUri == event.directoryUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
                         _state.update { it.copy(
@@ -153,7 +153,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.DeleteFolder -> {
                 viewModelScope.launch {
-                    val folderToRemove = state.value.folders.find { it.folderUri == event.directoryUri }
+                    val folderToRemove = _state.value.folders.find { it.folderUri == event.directoryUri }
                     if (folderToRemove != null) {
                         _state.update { it.copy(
                             folders = it.folders.minus(folderToRemove)
@@ -164,10 +164,10 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.SelectAll -> {
                 viewModelScope.launch {
-                    if (!state.value.allSelected) {
+                    if (!_state.value.allSelected) {
                         _state.update { it.copy(
-                            selectedFolders = state.value.folders.map { folder -> folder.folderUri },
-                            selectedWallpapers = state.value.wallpapers.map { wallpaper -> wallpaper.wallpaperUri },
+                            selectedFolders = _state.value.folders.map { folder -> folder.folderUri },
+                            selectedWallpapers = _state.value.wallpapers.map { wallpaper -> wallpaper.wallpaperUri },
                             selectedCount = it.folders.size + it.wallpapers.size
                         ) }
                         updateAllSelected()
@@ -186,7 +186,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.SelectFolder -> {
                 viewModelScope.launch {
-                    if (!state.value.selectedFolders.any { it == event.directoryUri }) {
+                    if (!_state.value.selectedFolders.any { it == event.directoryUri }) {
                         _state.update { it.copy(
                             selectedFolders = it.selectedFolders.plus(event.directoryUri),
                             selectedCount = it.selectedCount + 1
@@ -197,7 +197,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.SelectWallpaper -> {
                 viewModelScope.launch {
-                    if (!state.value.selectedWallpapers.any { it == event.wallpaperUri }) {
+                    if (!_state.value.selectedWallpapers.any { it == event.wallpaperUri }) {
                         _state.update { it.copy(
                             selectedWallpapers = it.selectedWallpapers.plus(event.wallpaperUri),
                             selectedCount = it.selectedCount + 1
@@ -208,7 +208,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.RemoveFolderFromSelection -> {
                 viewModelScope.launch {
-                    if (state.value.selectedFolders.find { it == event.directoryUri } != null ) {
+                    if (_state.value.selectedFolders.find { it == event.directoryUri } != null ) {
                         _state.update { it.copy(
                             selectedFolders = it.selectedFolders.minus(event.directoryUri),
                             selectedCount = it.selectedCount - 1
@@ -219,7 +219,7 @@ class AddAlbumViewModel @Inject constructor(
             }
             is AddAlbumEvent.RemoveWallpaperFromSelection -> {
                 viewModelScope.launch {
-                    if (state.value.selectedWallpapers.find { it == event.wallpaperUri } != null ) {
+                    if (_state.value.selectedWallpapers.find { it == event.wallpaperUri } != null ) {
                         _state.update { it.copy(
                             selectedWallpapers = it.selectedWallpapers.minus(event.wallpaperUri),
                             selectedCount = it.selectedCount - 1

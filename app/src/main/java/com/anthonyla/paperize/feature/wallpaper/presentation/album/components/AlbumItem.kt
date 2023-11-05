@@ -124,7 +124,6 @@ fun AlbumItem(
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(roundedCornerShapeTransition))
-                            .blur(radius = 2.dp)
                     )
                     if (selectionMode) {
                         if (itemSelected) {

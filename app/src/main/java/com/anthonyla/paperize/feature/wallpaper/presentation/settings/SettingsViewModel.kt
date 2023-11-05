@@ -30,7 +30,12 @@ class SettingsViewModel @Inject constructor (
 
     private var currentGetJob: Job? = null
 
-    init { viewModelScope.launch { refreshSettings() } }
+    init {
+        viewModelScope.launch {
+            refreshSettings()
+            shouldNotBypassSplashScreen = false
+        }
+    }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
@@ -66,7 +71,6 @@ class SettingsViewModel @Inject constructor (
                     false, null -> false
                 }
             ) }
-            shouldNotBypassSplashScreen = false
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
@@ -33,6 +34,16 @@ interface AlbumDao {
     @Delete
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
+
     @Delete
     suspend fun deleteFolder(folder: Folder)
+
+    @Update
+    suspend fun updateAlbum(album: Album)
+
+    @Update
+    suspend fun updateWallpaper(wallpaper: Wallpaper)
+
+    @Update
+    suspend fun updateFolder(folder: Folder)
 }

@@ -129,7 +129,6 @@ fun FolderItem(
                             modifier = Modifier
                                 .height(configuration.screenHeightDp.dp / 4.0f)
                                 .clip(RoundedCornerShape(roundedCornerShapeTransition))
-                                .blur(radius = 2.dp)
                         )
                     }
                     if (selectionMode) {
