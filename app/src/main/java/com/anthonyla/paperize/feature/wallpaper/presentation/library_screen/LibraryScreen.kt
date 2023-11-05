@@ -59,10 +59,6 @@ fun LibraryScreen(
                     ) { album ->
                         AlbumItem(
                             album = album.album,
-                            itemSelected = false,
-                            selectionMode = false,
-                            onActivateSelectionMode = { /*TODO*/ },
-                            onItemSelection = { /*TODO*/ },
                             onAlbumViewClick = { onViewAlbum(album.album.initialAlbumName) },
                             modifier = Modifier.padding(4.dp)
                         )

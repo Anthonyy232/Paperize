@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components
+package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete

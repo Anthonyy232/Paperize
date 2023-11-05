@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
@@ -46,7 +45,19 @@ class AlbumsViewModel @Inject constructor (
 
     fun onEvent(event: AlbumsEvent) {
         when (event) {
-            AlbumsEvent.RefreshAlbums -> {
+            is AlbumsEvent.DeleteAlbumWithWallpapers -> {
+                viewModelScope.launch {
+                    repository.deleteAlbum(event.albumWithWallpaper.album)
+                    event.albumWithWallpaper.folders.forEach {
+                        repository.deleteFolder(it)
+                    }
+                    event.albumWithWallpaper.wallpapers.forEach {
+                        repository.deleteWallpaper(it)
+                    }
+                    refreshAlbums()
+                }
+            }
+            is AlbumsEvent.RefreshAlbums -> {
                 viewModelScope.launch {
                     updateAlbums()
                     refreshAlbums()

@@ -29,4 +29,6 @@
     <string name="wallpaper_view">Wallpaper View</string>
     <string name="album_view">Album View</string>
     <string name="folder_view">Folder View</string>
+    <string name="delete_album">Delete album</string>
+    <string name="change_name">Change name</string>
 </resources>

@@ -23,7 +23,8 @@ fun AlbumViewScreen(
     albumWithWallpaper: AlbumWithWallpaper,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String, String?, List<String>) -> Unit
+    onShowFolderView: (String, String?, List<String>) -> Unit,
+    onDeleteAlbum: () -> Unit
 ) {
     val lazyListState = rememberLazyStaggeredGridState()
     BackHandler { onBackClick() }
@@ -32,6 +33,7 @@ fun AlbumViewScreen(
             AlbumViewTopBar(
                 title = albumWithWallpaper.album.displayedAlbumName,
                 onBackClick = { onBackClick() },
+                onDeleteAlbum = onDeleteAlbum
             )
         },
         content = {
