@@ -34,9 +34,14 @@ interface AlbumDao {
     @Delete
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
-
     @Delete
     suspend fun deleteFolder(folder: Folder)
+
+    @Query("DELETE FROM wallpaper WHERE initialAlbumName=:initialAlbumName")
+    suspend fun cascadeDeleteWallpaper(initialAlbumName: String)
+
+    @Query("DELETE FROM folder WHERE initialAlbumName=:initialAlbumName")
+    suspend fun cascadeDeleteFolder(initialAlbumName: String)
 
     @Update
     suspend fun updateAlbum(album: Album)

@@ -47,13 +47,7 @@ class AlbumsViewModel @Inject constructor (
         when (event) {
             is AlbumsEvent.DeleteAlbumWithWallpapers -> {
                 viewModelScope.launch {
-                    repository.deleteAlbum(event.albumWithWallpaper.album)
-                    event.albumWithWallpaper.folders.forEach {
-                        repository.deleteFolder(it)
-                    }
-                    event.albumWithWallpaper.wallpapers.forEach {
-                        repository.deleteWallpaper(it)
-                    }
+                    repository.cascadeDeleteAlbum(event.albumWithWallpaper.album)
                     refreshAlbums()
                 }
             }
@@ -86,7 +80,7 @@ class AlbumsViewModel @Inject constructor (
                         repository.updateAlbum(albumWithWallpaper.album.copy(coverUri = null))
                     }
                 }
-                // Update wallpaper
+                // Delete wallpaper if the URI is invalid
                 albumWithWallpaper.wallpapers.forEach { wallpaper ->
                     val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                     if (file == null || !file.exists()) { repository.deleteWallpaper(wallpaper) }

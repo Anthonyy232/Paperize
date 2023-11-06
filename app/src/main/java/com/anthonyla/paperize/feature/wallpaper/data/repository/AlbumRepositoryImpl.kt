@@ -51,4 +51,18 @@ class AlbumRepositoryImpl(
         dao.updateWallpaper(wallpaper)
 
     }
+
+    override suspend fun cascadeDeleteAlbum(album: Album) {
+        dao.cascadeDeleteWallpaper(album.initialAlbumName)
+        dao.cascadeDeleteFolder(album.initialAlbumName)
+        dao.deleteAlbum(album)
+    }
+
+    override suspend fun cascadeDeleteFolder(initialAlbumName: String) {
+        dao.cascadeDeleteFolder(initialAlbumName)
+    }
+
+    override suspend fun cascadeDeleteWallpaper(initialAlbumName: String) {
+        dao.cascadeDeleteWallpaper(initialAlbumName)
+    }
 }

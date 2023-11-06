@@ -3,6 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.compon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
@@ -63,10 +65,10 @@ fun HomeTopBar (
                         DropdownMenu(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false },
-                            offset = DpOffset(0.dp, 5.dp)
+                            offset = DpOffset(0.dp, 5.dp),
                         ) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.dropdownmenu_settings)) },
+                                text = { Text(text = stringResource(R.string.dropdownmenu_settings)) },
                                 onClick = {
                                     menuExpanded = false
                                     onSettingsClick()
