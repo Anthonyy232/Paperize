@@ -60,7 +60,7 @@ fun AddAlbumSmallTopBar(
     val state = albumState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     var editableTitle by rememberSaveable { mutableStateOf(title) }
-    var showAlertDialog by rememberSaveable { mutableStateOf(false) }
+    var showSelectionDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -146,15 +146,15 @@ fun AddAlbumSmallTopBar(
                 }
             }
             else {
-                if (showAlertDialog) DeleteImagesAlertDialog (
-                    onDismissRequest = { showAlertDialog = false },
+                if (showSelectionDeleteDialog) DeleteImagesAlertDialog (
+                    onDismissRequest = { showSelectionDeleteDialog = false },
                     onConfirmation = {
-                        showAlertDialog = false
+                        showSelectionDeleteDialog = false
                         onDeleteSelected()
                     }
                 )
                 IconButton(
-                    onClick = { showAlertDialog = true }
+                    onClick = { showSelectionDeleteDialog = true }
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,

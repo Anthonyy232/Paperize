@@ -3,7 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 sealed class AddAlbumEvent {
     data object SaveAlbum: AddAlbumEvent()
     data object ClearState: AddAlbumEvent()
-
+    data object DeleteSelected: AddAlbumEvent()
     data object SelectAll: AddAlbumEvent()
     data object DeselectAll: AddAlbumEvent()
     data class SetAlbumName(
@@ -18,14 +18,6 @@ sealed class AddAlbumEvent {
     data class AddFolder(
         val directoryUri: String
     ): AddAlbumEvent()
-
-    data class DeleteFolder(
-        val directoryUri: String
-    ): AddAlbumEvent()
-    data class DeleteWallpaper(
-        val wallpaperUri: String
-    ): AddAlbumEvent()
-
     data class SelectWallpaper(
         val wallpaperUri: String
     ): AddAlbumEvent()

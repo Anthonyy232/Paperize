@@ -57,14 +57,7 @@ class AddAlbumViewModel @Inject constructor(
                         wallpapers = _state.value.wallpapers,
                         folders = _state.value.folders
                     )
-
-                    repository.upsertAlbum(albumWithWallpaper.album)
-                    albumWithWallpaper.folders.forEach { folder ->
-                        repository.upsertFolder(folder)
-                    }
-                    albumWithWallpaper.wallpapers.forEach { wallpaper ->
-                        repository.upsertWallpaper(wallpaper)
-                    }
+                    repository.upsertAlbumWithWallpapers(albumWithWallpaper)
 
                     //Clear viewModel state after adding album
                     _state.update { it.copy(
@@ -79,6 +72,17 @@ class AddAlbumViewModel @Inject constructor(
                         allSelected = false,
                         selectedCount = 0,
                     ) }
+                }
+            }
+            is AddAlbumEvent.DeleteSelected -> {
+                viewModelScope.launch {
+                    val wallpapersRemoved = _state.value.wallpapers.filterNot { it.wallpaperUri in _state.value.selectedWallpapers }
+                    val foldersRemoved = _state.value.folders.filterNot { it.folderUri in _state.value.selectedFolders }
+                    _state.update { it.copy(
+                        wallpapers = wallpapersRemoved,
+                        folders = foldersRemoved
+                    ) }
+                    updateIsEmpty()
                 }
             }
             is AddAlbumEvent.SetAlbumName -> {
@@ -113,19 +117,12 @@ class AddAlbumViewModel @Inject constructor(
                     if (!_state.value.wallpapers.any { it.wallpaperUri == event.wallpaperUri }) {
                         _state.update { it.copy(
                             wallpapers = it.wallpapers.plus(
-                                Wallpaper(it.initialAlbumName, event.wallpaperUri)
+                                Wallpaper(
+                                    initialAlbumName = it.initialAlbumName,
+                                    wallpaperUri = event.wallpaperUri,
+                                    key = event.wallpaperUri.hashCode() + it.initialAlbumName.hashCode()
+                                )
                             ),
-                        ) }
-                        updateIsEmpty()
-                    }
-                }
-            }
-            is AddAlbumEvent.DeleteWallpaper -> {
-                viewModelScope.launch {
-                    val wallpaperToRemove = _state.value.wallpapers.find { it.wallpaperUri == event.wallpaperUri }
-                    if (wallpaperToRemove != null) {
-                        _state.update { it.copy(
-                            wallpapers = it.wallpapers.minus(wallpaperToRemove),
                         ) }
                         updateIsEmpty()
                     }
@@ -143,20 +140,10 @@ class AddAlbumViewModel @Inject constructor(
                                     folderName = folderName,
                                     folderUri = event.directoryUri,
                                     coverUri = wallpapers.randomOrNull(),
-                                    wallpapers = wallpapers.ifEmpty { emptyList() }
+                                    wallpapers = wallpapers.ifEmpty { emptyList() },
+                                    key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode()
                                 )
                             ),
-                        ) }
-                        updateIsEmpty()
-                    }
-                }
-            }
-            is AddAlbumEvent.DeleteFolder -> {
-                viewModelScope.launch {
-                    val folderToRemove = _state.value.folders.find { it.folderUri == event.directoryUri }
-                    if (folderToRemove != null) {
-                        _state.update { it.copy(
-                            folders = it.folders.minus(folderToRemove)
                         ) }
                         updateIsEmpty()
                     }

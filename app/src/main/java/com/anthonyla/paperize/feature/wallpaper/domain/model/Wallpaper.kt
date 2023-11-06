@@ -6,5 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class Wallpaper(
     val initialAlbumName: String,
-    @PrimaryKey(autoGenerate = false) val wallpaperUri: String
+    val wallpaperUri: String,
+    @PrimaryKey(autoGenerate = false) val key: Int
 )

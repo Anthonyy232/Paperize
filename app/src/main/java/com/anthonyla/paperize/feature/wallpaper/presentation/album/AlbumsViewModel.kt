@@ -66,6 +66,19 @@ class AlbumsViewModel @Inject constructor (
                     refreshAlbums()
                 }
             }
+            is AlbumsEvent.RefreshAlbumCoverUri -> {
+                viewModelScope.launch {
+                    event.albumWithWallpaper.let { album ->
+                        if (!album.wallpapers.any { it.wallpaperUri == album.album.coverUri }) {
+                            repository.updateAlbum(album.album.copy(
+                                coverUri = null
+                            ))
+                        }
+                    }
+                    updateAlbums()
+                    refreshAlbums()
+                }
+            }
         }
     }
 
@@ -104,9 +117,7 @@ class AlbumsViewModel @Inject constructor (
                         repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                     }
                 }
-
             }
-
         }
     }
 

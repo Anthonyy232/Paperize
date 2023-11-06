@@ -9,5 +9,6 @@ data class Folder(
     val folderName: String?,
     val coverUri: String?,
     val wallpapers: List<String> = emptyList(),
-    @PrimaryKey(autoGenerate = false) val folderUri: String
+    val folderUri: String,
+    @PrimaryKey(autoGenerate = false) val key: Int
 )

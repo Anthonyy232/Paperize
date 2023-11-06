@@ -202,6 +202,9 @@ fun PaperizeApp(
                         },
                         onTitleChange = { title, originalAlbumWithWallpaper ->
                             albumsViewModel.onEvent(AlbumsEvent.ChangeAlbumName(title, originalAlbumWithWallpaper))
+                        },
+                        onSelectionDeleted = {
+                            albumsViewModel.onEvent(AlbumsEvent.RefreshAlbumCoverUri(albumWithWallpaper))
                         }
                     )
                 }

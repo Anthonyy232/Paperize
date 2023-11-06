@@ -13,4 +13,7 @@ sealed class AlbumsEvent {
         val title: String,
         val albumWithWallpaper: AlbumWithWallpaper
     ): AlbumsEvent()
+    data class RefreshAlbumCoverUri(
+        val albumWithWallpaper: AlbumWithWallpaper
+    ): AlbumsEvent()
 }

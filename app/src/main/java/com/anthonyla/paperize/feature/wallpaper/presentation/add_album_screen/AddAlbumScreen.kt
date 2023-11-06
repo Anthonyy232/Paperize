@@ -115,13 +115,8 @@ fun AddAlbumScreen(
                 },
                 onDeleteSelected = {
                     selectionMode = false
+                    viewModel.onEvent(AddAlbumEvent.DeleteSelected)
                     viewModel.onEvent(AddAlbumEvent.DeselectAll)
-                    state.value.selectedFolders.forEach { folder ->
-                        viewModel.onEvent(AddAlbumEvent.DeleteFolder(folder))
-                    }
-                    state.value.selectedWallpapers.forEach { wallpaper ->
-                        viewModel.onEvent(AddAlbumEvent.DeleteWallpaper(wallpaper))
-                    }
                 }
             )
         },

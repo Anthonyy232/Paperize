@@ -15,6 +15,12 @@ class AlbumRepositoryImpl(
         return dao.getAlbumsWithWallpapers()
     }
 
+    override suspend fun upsertAlbumWithWallpapers(albumWithWallpaper: AlbumWithWallpaper) {
+        dao.upsertAlbum(albumWithWallpaper.album)
+        dao.upsertWallpaperList(albumWithWallpaper.wallpapers)
+        dao.upsertFolderList(albumWithWallpaper.folders)
+    }
+
     override suspend fun upsertAlbum(album: Album) {
         dao.upsertAlbum(album)
     }
@@ -25,6 +31,14 @@ class AlbumRepositoryImpl(
 
     override suspend fun upsertFolder(folder: Folder) {
         dao.upsertFolder(folder)
+    }
+
+    override suspend fun upsertFolderList(folders: List<Folder>) {
+        dao.upsertFolderList(folders)
+    }
+
+    override suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>) {
+        dao.upsertWallpaperList(wallpapers)
     }
 
     override suspend fun deleteAlbum(album: Album) {
@@ -49,13 +63,12 @@ class AlbumRepositoryImpl(
 
     override suspend fun updateWallpaper(wallpaper: Wallpaper) {
         dao.updateWallpaper(wallpaper)
-
     }
 
     override suspend fun cascadeDeleteAlbum(album: Album) {
+        dao.deleteAlbum(album)
         dao.cascadeDeleteWallpaper(album.initialAlbumName)
         dao.cascadeDeleteFolder(album.initialAlbumName)
-        dao.deleteAlbum(album)
     }
 
     override suspend fun cascadeDeleteFolder(initialAlbumName: String) {
@@ -64,5 +77,13 @@ class AlbumRepositoryImpl(
 
     override suspend fun cascadeDeleteWallpaper(initialAlbumName: String) {
         dao.cascadeDeleteWallpaper(initialAlbumName)
+    }
+
+    override suspend fun deleteFolderList(folders: List<Folder>) {
+        dao.deleteFolderList(folders)
+    }
+
+    override suspend fun deleteWallpaperList(wallpapers: List<Wallpaper>) {
+        dao.deleteWallpaperList(wallpapers)
     }
 }
