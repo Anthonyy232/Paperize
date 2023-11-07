@@ -15,7 +15,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,10 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.tabItems
@@ -101,7 +97,7 @@ fun HomeScreen(
                     )
                 }
             }
-            HorizontalPager(state = pagerState) { index ->
+            HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { index ->
                 when(index) {
                     0 -> WallpaperScreen(
                     )
