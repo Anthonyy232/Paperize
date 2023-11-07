@@ -10,12 +10,16 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,6 +46,7 @@ class AlbumsViewModel @Inject constructor (
             shouldNotBypassSplashScreen = false
         }
     }
+
 
     fun onEvent(event: AlbumsEvent) {
         when (event) {
@@ -126,7 +131,8 @@ class AlbumsViewModel @Inject constructor (
         viewModelScope.launch {
             repository.getAlbumsWithWallpapers().collect { albumWithWallpapers ->
                 _state.update { it.copy(
-                    albumWithWallpapers = albumWithWallpapers
+                    albumWithWallpapers = albumWithWallpapers,
+                    loaded = true
                 ) }
             }
         }

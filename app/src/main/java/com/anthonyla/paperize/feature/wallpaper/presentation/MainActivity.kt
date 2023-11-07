@@ -19,12 +19,15 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,12 +35,12 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition {
-            settingsViewModel.shouldNotBypassSplashScreen && albumsViewModel.shouldNotBypassSplashScreen
-        }
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        splashScreen.setKeepOnScreenCondition {
+            settingsViewModel.shouldNotBypassSplashScreen || albumsViewModel.shouldNotBypassSplashScreen
+        }
         setContent {
+            enableEdgeToEdge()
             val lifecycleEvent = rememberLifecycleEvent()
             LaunchedEffect(lifecycleEvent) {
                 if (lifecycleEvent == Lifecycle.Event.ON_RESUME) {
@@ -46,7 +49,7 @@ class MainActivity : ComponentActivity() {
             }
             PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp()
+                    PaperizeApp(albumsViewModel, settingsViewModel)
                 }
             }
         }

@@ -26,8 +26,10 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewMod
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +40,8 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun PaperizeApp(
-    albumsViewModel: AlbumsViewModel = hiltViewModel()
+    albumsViewModel: AlbumsViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     val state = albumsViewModel.state.collectAsStateWithLifecycle()
     val navController = rememberNavController()
@@ -225,7 +228,16 @@ fun PaperizeApp(
                 fadeOut(animationSpec = tween(300, easing = LinearEasing))
             }
         ) {
-            SettingsScreen(onBackClick = { navController.navigateUp() })
+            SettingsScreen(
+                settingsState = settingsViewModel.state,
+                onBackClick = { navController.navigateUp() },
+                onDarkModeClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
+                },
+                onDynamicThemingClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
+                }
+            )
         }
     }
 }

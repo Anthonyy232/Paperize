@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -41,12 +42,12 @@ fun ScrollableSettings(
         Spacer(modifier = Modifier.height(16.dp))
         DarkModeListItem(
             darkMode = state.value.darkMode,
-            onDarkModeClick = onDarkModeClick
+            onDarkModeClick = { onDarkModeClick(it) }
         )
         Spacer(modifier = Modifier.height(16.dp))
         DynamicThemingListItem(
             dynamicTheming = state.value.dynamicTheming,
-            onDynamicThemingClick = onDynamicThemingClick
+            onDynamicThemingClick = { onDynamicThemingClick(it) }
         )
     }
 }

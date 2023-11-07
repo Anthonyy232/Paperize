@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings.SettingsState
 
 @Composable
 fun DynamicThemingListItem(dynamicTheming: Boolean, onDynamicThemingClick: (Boolean) -> Unit) {

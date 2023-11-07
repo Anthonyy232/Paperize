@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.presentation.settings
+package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,11 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,13 +33,43 @@ class SettingsViewModel @Inject constructor (
 
     init {
         viewModelScope.launch {
-            refreshSettings()
-            shouldNotBypassSplashScreen = false
+            currentGetJob?.cancel()
+            currentGetJob = async {
+                val darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE)
+                val dynamicTheming = settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false
+
+                _state.update { it.copy(
+                    darkMode = darkMode,
+                    dynamicTheming = dynamicTheming,
+                    loaded = true
+                ) }
+
+                if (_state.value.loaded) {
+                    shouldNotBypassSplashScreen = false
+                }
+            }
         }
     }
 
+
+
+
     fun onEvent(event: SettingsEvent) {
         when (event) {
+            is SettingsEvent.RefreshUiState -> {
+                viewModelScope.launch {
+                    currentGetJob?.cancel()
+                    currentGetJob = viewModelScope.launch {
+                        _state.update { it.copy(
+                            darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE),
+                            dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
+                                true -> true
+                                false, null -> false
+                            },
+                        ) }
+                    }
+                }
+            }
             is SettingsEvent.SetDarkMode -> {
                 viewModelScope.launch {
                     when (event.darkMode) {
@@ -69,7 +100,7 @@ class SettingsViewModel @Inject constructor (
                 dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
                     true -> true
                     false, null -> false
-                }
+                },
             ) }
         }
     }
