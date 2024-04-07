@@ -8,7 +8,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
@@ -48,7 +48,7 @@ class AddAlbumViewModel @Inject constructor(
                             }
                         }
                     }
-                    val albumWithWallpaper = AlbumWithWallpaper(
+                    val albumWithWallpaperAndFolder = AlbumWithWallpaperAndFolder(
                         album = Album(
                             initialAlbumName = _state.value.initialAlbumName,
                             displayedAlbumName = _state.value.displayedAlbumName,
@@ -57,7 +57,7 @@ class AddAlbumViewModel @Inject constructor(
                         wallpapers = _state.value.wallpapers,
                         folders = _state.value.folders
                     )
-                    repository.upsertAlbumWithWallpapers(albumWithWallpaper)
+                    repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
 
                     //Clear viewModel state after adding album
                     _state.update { it.copy(

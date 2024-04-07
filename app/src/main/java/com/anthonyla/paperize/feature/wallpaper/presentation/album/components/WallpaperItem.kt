@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -94,7 +95,6 @@ fun WallpaperItem(
                 Glide
                     .with(LocalContext.current)
                     .asBitmap()
-                    .centerInside()
                     .transition(withCrossFade())
             },
             loading = {

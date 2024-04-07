@@ -31,4 +31,9 @@
     <string name="folder_view">Folder View</string>
     <string name="delete_album">Delete</string>
     <string name="change_name">Edit Name</string>
+    <string name="click_to_select_a_different_album">Click to select a different album</string>
+    <string name="no_icon">No icon</string>
+    <string name="no_album_selected">No album selected</string>
+    <string name="wallpaper">" wallpaper"</string>
+    <string name="currently_selected_album">Currently selected album</string>
 </resources>

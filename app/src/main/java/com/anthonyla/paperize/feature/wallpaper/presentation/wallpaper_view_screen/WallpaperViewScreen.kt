@@ -35,6 +35,9 @@ import com.skydoves.landscapist.glide.GlideImage
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 
+/**
+ * WallpaperViewScreen shows a zoomable image that the user clicked on. They can zoom in and out of the image using pinch-to-zoom.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperViewScreen(

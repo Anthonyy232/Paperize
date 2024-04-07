@@ -2,7 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.data.repository
 
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDao
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.Flow
 class AlbumRepositoryImpl(
     private val dao: AlbumDao
 ): AlbumRepository {
-    override fun getAlbumsWithWallpapers(): Flow<List<AlbumWithWallpaper>> {
-        return dao.getAlbumsWithWallpapers()
+    override fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>> {
+        return dao.getAlbumsWithWallpaperAndFolder()
     }
 
-    override suspend fun upsertAlbumWithWallpapers(albumWithWallpaper: AlbumWithWallpaper) {
-        dao.upsertAlbum(albumWithWallpaper.album)
-        dao.upsertWallpaperList(albumWithWallpaper.wallpapers)
-        dao.upsertFolderList(albumWithWallpaper.folders)
+    override suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder) {
+        dao.upsertAlbum(albumWithWallpaperAndFolder.album)
+        dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
+        dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
     }
 
     override suspend fun upsertAlbum(album: Album) {

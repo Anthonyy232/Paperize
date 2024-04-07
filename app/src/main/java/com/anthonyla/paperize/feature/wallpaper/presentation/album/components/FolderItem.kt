@@ -1,11 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.OvalShape
-import android.graphics.drawable.shapes.RectShape
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,14 +23,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -69,7 +63,7 @@ fun FolderItem(
     val haptics = LocalHapticFeedback.current
     val transition = updateTransition(itemSelected, label = "")
 
-    val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
+    val iconSelectionColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
     val paddingTransition by transition.animateDp(label = "") { selected ->
         if (selected) 5.dp else 0.dp
     }
@@ -78,7 +72,7 @@ fun FolderItem(
     }
 
     Card(
-        elevation = CardDefaults.cardElevation(5.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier
             .fillMaxSize()
             .padding(paddingTransition)
@@ -97,81 +91,75 @@ fun FolderItem(
                 }
             ),
         shape = RoundedCornerShape(roundedCornerShapeTransition),
-        border = BorderStroke(1.dp, bgColor)
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            tonalElevation = 10.dp,
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box {
-                    if (folder.coverUri != null) {
-                        GlideImage(
-                            imageModel = { folder.coverUri.toUri() },
-                            imageOptions = ImageOptions(
-                                contentScale = ContentScale.Crop,
-                                alignment = Alignment.Center
-                            ),
-                            requestBuilder = {
-                                Glide
-                                    .with(LocalContext.current)
-                                    .asBitmap()
-                                    .transition(BitmapTransitionOptions.withCrossFade())
-                            },
-                            loading = {
-                                Box(modifier = Modifier.matchParentSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
-                            },
-                            modifier = Modifier
-                                .height(configuration.screenHeightDp.dp / 4.0f)
-                                .clip(RoundedCornerShape(roundedCornerShapeTransition))
-                        )
-                    }
-                    if (selectionMode) {
-                        if (itemSelected) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = stringResource(R.string.image_is_selected),
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .border(2.dp, bgColor, CircleShape)
-                                    .clip(CircleShape)
-                                    .background(bgColor)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.RadioButtonUnchecked,
-                                contentDescription = stringResource(R.string.image_is_not_selected),
-                                tint = Color.White.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(6.dp)
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.padding(6.dp))
-                folder.folderName?.let { name ->
-                    Text(
-                        text = name,
+            Box {
+                if (folder.coverUri != null) {
+                    GlideImage(
+                        imageModel = { folder.coverUri.toUri() },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center
+                        ),
+                        requestBuilder = {
+                            Glide
+                                .with(LocalContext.current)
+                                .asBitmap()
+                                .transition(BitmapTransitionOptions.withCrossFade())
+                        },
+                        loading = {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+                        },
                         modifier = Modifier
-                            .padding(horizontal = 24.dp)
-                            .align(Alignment.Start),
-                        fontSize = 16.sp
+                            .height(configuration.screenHeightDp.dp / 4.0f)
+                            .clip(RoundedCornerShape(roundedCornerShapeTransition))
                     )
                 }
+                if (selectionMode) {
+                    if (itemSelected) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = stringResource(R.string.image_is_selected),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .border(2.dp, iconSelectionColor, CircleShape)
+                                .clip(CircleShape)
+                                .background(iconSelectionColor)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.RadioButtonUnchecked,
+                            contentDescription = stringResource(R.string.image_is_not_selected),
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(6.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.padding(6.dp))
+            folder.folderName?.let { name ->
                 Text(
-                    text = folder.wallpapers.size.toString().plus(" wallpapers"),
+                    text = name,
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
                         .align(Alignment.Start),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.tertiary
+                    fontSize = 16.sp
                 )
-                Spacer(modifier = Modifier.padding(8.dp))
             }
+            Text(
+                text = folder.wallpapers.size.toString().plus(" wallpapers"),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .align(Alignment.Start),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }

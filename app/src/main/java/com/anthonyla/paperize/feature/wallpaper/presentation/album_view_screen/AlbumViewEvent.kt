@@ -1,15 +1,15 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 
 sealed class AlbumViewEvent {
     data object ClearState: AlbumViewEvent()
     data class SelectAll(
-        val albumsWithWallpaper: AlbumWithWallpaper
+        val albumsWithWallpaper: AlbumWithWallpaperAndFolder
     ): AlbumViewEvent()
     data object DeselectAll: AlbumViewEvent()
     data class DeleteSelected(
-        val albumsWithWallpaper: AlbumWithWallpaper
+        val albumsWithWallpaper: AlbumWithWallpaperAndFolder
     ): AlbumViewEvent()
     data class SelectWallpaper(
         val wallpaperUri: String

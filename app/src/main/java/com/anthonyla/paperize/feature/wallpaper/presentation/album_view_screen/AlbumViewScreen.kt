@@ -19,62 +19,62 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.components.AlbumViewTopBar
 
 @Composable
 fun AlbumViewScreen(
-    viewModel: AlbumViewScreenViewModel = hiltViewModel(),
-    albumWithWallpaper: AlbumWithWallpaper,
+    albumViewModel: AlbumViewScreenViewModel = hiltViewModel(),
+    album: AlbumWithWallpaperAndFolder,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
     onShowFolderView: (String, String?, List<String>) -> Unit,
     onDeleteAlbum: () -> Unit,
-    onTitleChange: (String, AlbumWithWallpaper) -> Unit,
+    onTitleChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
     onSelectionDeleted: () -> Unit
 ) {
-    viewModel.onEvent(AlbumViewEvent.SetSize(albumWithWallpaper.wallpapers.size + albumWithWallpaper.folders.size))
+    albumViewModel.onEvent(AlbumViewEvent.SetSize(album.wallpapers.size + album.folders.size))
     val lazyListState = rememberLazyStaggeredGridState()
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val albumState = albumViewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
 
     BackHandler {
         if (selectionMode) {
             selectionMode = false
-            viewModel.onEvent(AlbumViewEvent.DeselectAll)
+            albumViewModel.onEvent(AlbumViewEvent.DeselectAll)
         } else {
             onBackClick()
-            viewModel.onEvent(AlbumViewEvent.ClearState)
+            albumViewModel.onEvent(AlbumViewEvent.ClearState)
         }
     }
 
     Scaffold(
         topBar = {
             AlbumViewTopBar(
-                title = albumWithWallpaper.album.displayedAlbumName,
+                title = album.album.displayedAlbumName,
                 selectionMode = selectionMode,
-                albumState = viewModel.state,
+                albumState = albumViewModel.state,
                 onBackClick = {
-                    viewModel.onEvent(AlbumViewEvent.ClearState)
+                    albumViewModel.onEvent(AlbumViewEvent.ClearState)
                     onBackClick()
                 },
                 onDeleteAlbum = onDeleteAlbum,
-                onTitleChange = { onTitleChange(it, albumWithWallpaper) },
+                onTitleChange = { onTitleChange(it, album) },
                 onSelectAllClick = {
-                    if (!state.value.allSelected) viewModel.onEvent(AlbumViewEvent.SelectAll(albumWithWallpaper))
-                    else viewModel.onEvent(AlbumViewEvent.DeselectAll)
+                    if (!albumState.value.allSelected) albumViewModel.onEvent(AlbumViewEvent.SelectAll(album))
+                    else albumViewModel.onEvent(AlbumViewEvent.DeselectAll)
                 },
                 onDeleteSelected = {
                     selectionMode = false
-                    viewModel.onEvent(AlbumViewEvent.DeleteSelected(albumWithWallpaper))
-                    viewModel.onEvent(AlbumViewEvent.DeselectAll)
+                    albumViewModel.onEvent(AlbumViewEvent.DeleteSelected(album))
+                    albumViewModel.onEvent(AlbumViewEvent.DeselectAll)
                     onSelectionDeleted()
                 }
             )
         },
-        content = {
+        content = { it ->
             LazyVerticalStaggeredGrid(
                 state = lazyListState,
                 modifier = Modifier
@@ -84,16 +84,16 @@ fun AlbumViewScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (items = albumWithWallpaper.folders, key = { folder -> folder.folderUri.hashCode()}
+                    items (items = album.folders, key = { folder -> folder.folderUri.hashCode() }
                     ) { folder ->
                         FolderItem(
                             folder = folder,
-                            itemSelected = state.value.selectedFolders.contains(folder.folderUri),
+                            itemSelected = albumState.value.selectedFolders.contains(folder.folderUri),
                             selectionMode = selectionMode,
                             onActivateSelectionMode = { selectionMode = it },
                             onItemSelection = {
-                                viewModel.onEvent(
-                                    if (!state.value.selectedFolders.contains(folder.folderUri))
+                                albumViewModel.onEvent(
+                                    if (!albumState.value.selectedFolders.contains(folder.folderUri))
                                         AlbumViewEvent.SelectFolder(folder.folderUri)
                                     else {
                                         AlbumViewEvent.RemoveFolderFromSelection(folder.folderUri)
@@ -106,16 +106,16 @@ fun AlbumViewScreen(
                             modifier = Modifier.padding(4.dp)
                         )
                     }
-                    items (items = albumWithWallpaper.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
+                    items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
                     ) { wallpaper ->
                         WallpaperItem(
                             wallpaperUri = wallpaper.wallpaperUri,
-                            itemSelected = state.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                            itemSelected = albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
                             selectionMode = selectionMode,
                             onActivateSelectionMode = { selectionMode = it },
                             onItemSelection = {
-                                viewModel.onEvent(
-                                    if (!state.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                albumViewModel.onEvent(
+                                    if (!albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
                                         AlbumViewEvent.SelectWallpaper(wallpaper.wallpaperUri)
                                     else {
                                         AlbumViewEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)

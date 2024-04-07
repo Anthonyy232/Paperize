@@ -8,11 +8,11 @@ import androidx.core.content.ContextCompat.startActivity
 
 @Composable
 fun Contact(context: Context) {
-    val email = "anthonyyla.dev@gmail.com"
+    val authorEmail = "anthonyyla.dev@gmail.com"
     val cc = ""
     val subject = "[Contact] Paperize - A Wallpaper Changer"
     val bodyText = "This is regarding the Paperize app for Android:\n"
-    val mailto = "mailto:" + Uri.encode(email) +
+    val mailto = "mailto:" + Uri.encode(authorEmail) +
             "?cc=" + Uri.encode(cc) +
             "&subject=" + Uri.encode(subject) +
             "&body=" + Uri.encode(bodyText)

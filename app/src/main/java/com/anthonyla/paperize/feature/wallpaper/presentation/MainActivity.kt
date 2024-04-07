@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,25 +18,26 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val albumsViewModel: AlbumsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
-            settingsViewModel.shouldNotBypassSplashScreen || albumsViewModel.shouldNotBypassSplashScreen
+            settingsViewModel.shouldNotBypassSplashScreen
+                    || albumsViewModel.shouldNotBypassSplashScreen
+                    || wallpaperScreenViewModel.shouldNotBypassSplashScreen
         }
         setContent {
             enableEdgeToEdge()
@@ -45,11 +45,12 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(lifecycleEvent) {
                 if (lifecycleEvent == Lifecycle.Event.ON_RESUME) {
                     albumsViewModel.onEvent(AlbumsEvent.RefreshAlbums)
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.Refresh)
                 }
             }
             PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp(albumsViewModel, settingsViewModel)
+                    PaperizeApp(albumsViewModel, settingsViewModel, wallpaperScreenViewModel)
                 }
             }
         }

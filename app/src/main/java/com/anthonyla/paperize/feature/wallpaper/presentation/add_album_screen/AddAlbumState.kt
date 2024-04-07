@@ -1,7 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
-import androidx.compose.runtime.mutableStateListOf
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 

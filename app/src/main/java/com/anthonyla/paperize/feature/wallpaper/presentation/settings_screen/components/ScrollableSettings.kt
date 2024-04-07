@@ -38,6 +38,8 @@ fun ScrollableSettings(
         Spacer(Modifier.height(largeTopAppBarHeightPx))
         Spacer(modifier = Modifier.height(16.dp))
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         ListSectionTitle("Appearance")
         Spacer(modifier = Modifier.height(16.dp))
         DarkModeListItem(
@@ -49,5 +51,17 @@ fun ScrollableSettings(
             dynamicTheming = state.value.dynamicTheming,
             onDynamicThemingClick = { onDynamicThemingClick(it) }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ListSectionTitle("Privacy")
+        //add crash reporting settings
+        Spacer(modifier = Modifier.height(16.dp))
+        DynamicThemingListItem(
+            dynamicTheming = state.value.dynamicTheming,
+            onDynamicThemingClick = { onDynamicThemingClick(it) }
+        )
+
+        //GPL and License and link to github etc.
     }
 }

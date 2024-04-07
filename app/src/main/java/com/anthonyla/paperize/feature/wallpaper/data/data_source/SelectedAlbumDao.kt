@@ -8,17 +8,16 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AlbumDao {
+interface SelectedAlbumDao {
 
     @Transaction
     @Query("SELECT * FROM album")
-    fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>>
+    fun getSelectedAlbum(): Flow<List<SelectedAlbum>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAlbum(album: Album)
@@ -27,13 +26,7 @@ interface AlbumDao {
     suspend fun upsertWallpaper(wallpaper: Wallpaper)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertFolder(folder: Folder)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertFolderList(folders: List<Folder>)
 
     @Delete
     suspend fun deleteAlbum(album: Album)
@@ -41,26 +34,20 @@ interface AlbumDao {
     @Delete
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
-    @Delete
-    suspend fun deleteFolder(folder: Folder)
-    @Delete
-    suspend fun deleteWallpaperList(wallpapers: List<Wallpaper>)
-
-    @Delete
-    suspend fun deleteFolderList(folders: List<Folder>)
-
     @Query("DELETE FROM wallpaper WHERE initialAlbumName=:initialAlbumName")
     suspend fun cascadeDeleteWallpaper(initialAlbumName: String)
 
-    @Query("DELETE FROM folder WHERE initialAlbumName=:initialAlbumName")
-    suspend fun cascadeDeleteFolder(initialAlbumName: String)
+    @Query("DELETE FROM album")
+    suspend fun deleteAllAlbums()
+    @Query("DELETE FROM wallpaper")
+    suspend fun deleteAllWallpapers()
 
     @Update
     suspend fun updateAlbum(album: Album)
 
-    @Update
-    suspend fun updateWallpaper(wallpaper: Wallpaper)
-
-    @Update
-    suspend fun updateFolder(folder: Folder)
+    @Transaction
+    suspend fun deleteAll() {
+        deleteAllAlbums()
+        deleteAllWallpapers()
+    }
 }

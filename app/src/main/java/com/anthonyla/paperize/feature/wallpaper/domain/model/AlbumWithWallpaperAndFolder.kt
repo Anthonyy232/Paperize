@@ -3,7 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.domain.model
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class AlbumWithWallpaper(
+data class AlbumWithWallpaperAndFolder(
     @Embedded val album: Album,
     @Relation(
         parentColumn = "initialAlbumName",

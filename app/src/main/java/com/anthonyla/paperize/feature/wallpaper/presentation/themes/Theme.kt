@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Color.TRANSPARENT
 import android.os.Build
 import androidx.activity.SystemBarStyle
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme

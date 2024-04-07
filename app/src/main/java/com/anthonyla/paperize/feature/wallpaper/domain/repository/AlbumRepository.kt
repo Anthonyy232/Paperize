@@ -1,14 +1,14 @@
 package com.anthonyla.paperize.feature.wallpaper.domain.repository
 
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
 
 interface AlbumRepository {
-    fun getAlbumsWithWallpapers(): Flow<List<AlbumWithWallpaper>>
-    suspend fun upsertAlbumWithWallpapers(albumWithWallpaper: AlbumWithWallpaper)
+    fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>>
+    suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder)
     suspend fun upsertAlbum(album: Album)
     suspend fun deleteAlbum(album: Album)
     suspend fun updateAlbum(album: Album)

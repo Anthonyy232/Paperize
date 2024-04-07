@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
@@ -35,11 +37,10 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
     onContactClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit,
-    onAlbumViewClick: (String) -> Unit
+    onAlbumViewClick: (String) -> Unit,
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
-
 
     var addAlbumDialog by rememberSaveable { mutableStateOf(false) }
     if (addAlbumDialog) AddAlbumDialog(
@@ -56,13 +57,13 @@ fun HomeScreen(
                 selectionCount = 0,
             )
         }
-    ) {padding ->
+    ) { padding ->
         LaunchedEffect(tabIndex) { pagerState.animateScrollToPage(tabIndex) }
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collect { page -> tabIndex = page }
         }
         Column(modifier = Modifier.padding(padding)) {
-            SecondaryTabRow(
+            TabRow(
                 selectedTabIndex = tabIndex,
                 indicator = { tabPositions ->
                     if (tabIndex < tabPositions.size) {
@@ -99,8 +100,7 @@ fun HomeScreen(
             }
             HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { index ->
                 when(index) {
-                    0 -> WallpaperScreen(
-                    )
+                    0 -> WallpaperScreen()
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },
                         onViewAlbum = { onAlbumViewClick(it) }

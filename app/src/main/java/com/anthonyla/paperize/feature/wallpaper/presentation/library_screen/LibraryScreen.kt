@@ -55,7 +55,7 @@ fun LibraryScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (state.value.albumWithWallpapers, key = {album -> album.album.initialAlbumName}
+                    items (state.value.albumsWithWallpapers, key = { album -> album.album.initialAlbumName}
                     ) { album ->
                         AlbumItem(
                             album = album.album,

@@ -34,8 +34,12 @@ class AlbumViewScreenViewModel @Inject constructor(
                     event.albumsWithWallpaper.let { album ->
                         val folders = album.folders.filter { _state.value.selectedFolders.contains(it.folderUri)}
                         val wallpapers = album.wallpapers.filter { _state.value.selectedWallpapers.contains(it.wallpaperUri)}
+                        val doesContainCover = wallpapers.any { it.wallpaperUri == album.album.coverUri }
                         repository.deleteFolderList(folders)
                         repository.deleteWallpaperList(wallpapers)
+                        if (doesContainCover) {
+                            repository.updateAlbum(album.album.copy(coverUri = null))
+                        }
                     }
                 }
             }

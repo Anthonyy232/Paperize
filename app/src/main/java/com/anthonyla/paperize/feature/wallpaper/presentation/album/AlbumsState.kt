@@ -1,9 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album
 
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper
-
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 
 data class AlbumsState (
-    val albumWithWallpapers: List<AlbumWithWallpaper> = emptyList(),
-    val loaded: Boolean = false
-)
+    val albumsWithWallpapers: List<AlbumWithWallpaperAndFolder> = emptyList()
+    )

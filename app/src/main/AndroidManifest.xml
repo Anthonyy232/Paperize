@@ -5,7 +5,7 @@
     <uses-feature
         android:name="android.software.paperize"
         android:required="true" />
-
+    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
     <application
         android:allowBackup="true"
         android:name=".App"
@@ -31,7 +31,7 @@
         </activity>
 
         <service
-            android:name=".data.configuration.LiveWallpaperService"
+            android:name=".data.configuration.PaperizeWallpaperService"
             android:enabled="true"
             android:permission="android.permission.BIND_WALLPAPER"
             android:exported="true">
