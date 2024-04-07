@@ -6,6 +6,10 @@ import androidx.room.TypeConverters
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 
+/**
+ * Database for selected album
+ * Stores [Album] and [Wallpaper] inside SelectedAlbum
+ */
 @Database(
     entities = [Album::class, Wallpaper::class],
     version = 1

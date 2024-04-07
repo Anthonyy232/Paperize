@@ -32,6 +32,8 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        // Show splash screen until app data is fully loaded and ready to be displayed
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
@@ -40,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     || wallpaperScreenViewModel.shouldNotBypassSplashScreen
         }
         setContent {
-            enableEdgeToEdge()
+            // Refresh albums when the app is resumed
             val lifecycleEvent = rememberLifecycleEvent()
             LaunchedEffect(lifecycleEvent) {
                 if (lifecycleEvent == Lifecycle.Event.ON_RESUME) {
@@ -48,6 +50,7 @@ class MainActivity : ComponentActivity() {
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Refresh)
                 }
             }
+
             PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(albumsViewModel, settingsViewModel, wallpaperScreenViewModel)
@@ -57,6 +60,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Return the latest lifecycle event of the [LifecycleOwner].
+ */
 @Composable
 fun rememberLifecycleEvent(lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current): Lifecycle.Event {
     var state by remember { mutableStateOf(Lifecycle.Event.ON_ANY) }

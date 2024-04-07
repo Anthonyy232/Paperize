@@ -10,6 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 
+/**
+ * AlertDialog for confirmation of deleting an album
+ */
 @Composable
 fun DeleteAlbumAlertDialog(
     onDismissRequest: () -> Unit,

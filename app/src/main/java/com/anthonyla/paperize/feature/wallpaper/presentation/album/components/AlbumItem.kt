@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,9 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
-
+/**
+ * AlbumItem composable is a single item view for the Album list. Shows the thumbnail cover image.
+ */
 @Composable
 fun AlbumItem(
     album: Album,

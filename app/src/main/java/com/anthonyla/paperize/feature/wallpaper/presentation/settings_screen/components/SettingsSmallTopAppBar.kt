@@ -17,6 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
+/**
+ * Small top app bar for settings screen to replace [SettingsLargeTopAppBar] when scrolling down
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsSmallTopAppBar(onBackClick: () -> Unit) {

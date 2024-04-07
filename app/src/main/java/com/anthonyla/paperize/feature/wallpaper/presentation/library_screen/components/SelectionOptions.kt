@@ -2,6 +2,9 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.com
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/**
+ * Data class for selection options
+ */
 data class SelectionOptions(
     val id: String = "",
     val text: String = "",

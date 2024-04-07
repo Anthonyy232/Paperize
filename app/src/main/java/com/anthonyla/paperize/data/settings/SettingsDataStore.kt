@@ -1,5 +1,8 @@
 package com.anthonyla.paperize.data.settings
 
+/**
+ * Interface for the data store that handles the settings for application
+ */
 interface SettingsDataStore {
     suspend fun putBoolean(key: String, value: Boolean)
     suspend fun putString(key: String, value: String)

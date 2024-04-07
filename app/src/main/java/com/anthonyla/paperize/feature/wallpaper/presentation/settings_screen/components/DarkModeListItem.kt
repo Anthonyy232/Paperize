@@ -33,6 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * Three-state selector for dark mode in settings
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
@@ -99,8 +102,7 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                                         else -> null
                                     }
                                 ) },
-                            selected = index == selectedIndex,
-                            icon = { null },
+                            selected = index == selectedIndex
                         ) {
                             Icon(
                                 contentDescription = label.first,

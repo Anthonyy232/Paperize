@@ -47,7 +47,9 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
-
+/**
+ * FolderItem composable is a single item of the folder list. It shows the folder's cover image,
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderItem(

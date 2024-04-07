@@ -1,13 +1,9 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
@@ -20,6 +16,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * A row that contains an icon, text, and an onClick listener.
+ */
 @Composable
 fun MenuRow(text: String, icon: ImageVector?, horizontalExpansion: Dp, onClick: () -> Unit) {
     Row(

@@ -18,6 +18,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * AppModule provides dependencies for the application for Dagger Hilt to inject
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

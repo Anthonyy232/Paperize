@@ -23,6 +23,7 @@
         <activity
             android:name=".feature.wallpaper.presentation.MainActivity"
             android:exported="true"
+            android:enableOnBackInvokedCallback="true"
             android:theme="@style/Theme.Paperize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

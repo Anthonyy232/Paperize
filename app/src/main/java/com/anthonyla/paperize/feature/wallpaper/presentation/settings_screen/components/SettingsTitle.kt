@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import com.anthonyla.paperize.R
 
+/**
+ * Title for the settings screen.
+ */
 @Composable
 fun SettingsTitle(
     largeTopAppBarHeight: Dp,

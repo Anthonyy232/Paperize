@@ -13,6 +13,9 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Data access object for AlbumWithWallpaperAndFolder which is used for application's list of user albums
+ */
 @Dao
 interface AlbumDao {
 

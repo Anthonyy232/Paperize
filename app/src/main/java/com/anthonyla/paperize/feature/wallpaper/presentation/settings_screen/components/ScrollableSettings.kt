@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Scrollable settings screen to wrap all settings components
+ */
 @Composable
 fun ScrollableSettings(
     settingsState: StateFlow<SettingsState>,

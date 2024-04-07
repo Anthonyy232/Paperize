@@ -37,11 +37,13 @@ import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.R
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * A composable that displays a wallpaper item. It shows the wallpaper image and a selection icon when selected
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WallpaperItem(

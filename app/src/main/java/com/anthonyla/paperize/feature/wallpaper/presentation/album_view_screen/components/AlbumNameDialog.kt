@@ -34,6 +34,9 @@ import androidx.compose.ui.window.Dialog
 import com.anthonyla.paperize.R
 import kotlinx.coroutines.android.awaitFrame
 
+/**
+ * Dialog for creating a new album. Input of album name is required.
+ */
 @Composable
 fun AlbumNameDialog(
     onDismissRequest: () -> Unit,

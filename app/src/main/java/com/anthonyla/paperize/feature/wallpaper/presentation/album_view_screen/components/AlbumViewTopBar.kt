@@ -38,11 +38,13 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.DeleteImagesAlertDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewState
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Top bar for the album view screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumViewTopBar(

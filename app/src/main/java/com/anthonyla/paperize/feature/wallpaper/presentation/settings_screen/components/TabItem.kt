@@ -7,12 +7,18 @@ import androidx.compose.material.icons.outlined.AddToPhotos
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/**
+ * Data class representing a tab item
+ */
 data class TabItem(
     val title: String,
     val filledIcon: ImageVector,
     val unfilledIcon: ImageVector,
 )
 
+/**
+ * List of tab items
+ */
 val tabItems = listOf(
     TabItem(
         title = "Wallpaper",

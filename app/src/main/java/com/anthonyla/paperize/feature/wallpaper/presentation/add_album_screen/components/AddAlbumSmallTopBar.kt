@@ -44,6 +44,9 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumState
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Top bar for the Add Album screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAlbumSmallTopBar(

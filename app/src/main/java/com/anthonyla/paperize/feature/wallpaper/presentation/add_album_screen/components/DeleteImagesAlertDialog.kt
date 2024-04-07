@@ -10,6 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 
+/**
+ * AlertDialog to confirm deletion of images
+ */
 @Composable
 fun DeleteImagesAlertDialog(
     onDismissRequest: () -> Unit,

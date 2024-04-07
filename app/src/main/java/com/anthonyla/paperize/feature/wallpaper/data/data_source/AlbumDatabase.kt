@@ -7,6 +7,10 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 
+/**
+ * Database for storing albums, wallpapers, and folders
+ * Stores [Album], [Wallpaper], and [Folder] inside AlbumWithWallpaperAndFolder
+ */
 @Database(
     entities = [Album::class, Wallpaper::class, Folder::class],
     version = 1

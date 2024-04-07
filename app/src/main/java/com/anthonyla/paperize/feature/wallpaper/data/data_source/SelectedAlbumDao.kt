@@ -12,6 +12,9 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Data Access Object for selected album for application to keep track of which album is currently selected for changing wallpapers from
+ */
 @Dao
 interface SelectedAlbumDao {
 

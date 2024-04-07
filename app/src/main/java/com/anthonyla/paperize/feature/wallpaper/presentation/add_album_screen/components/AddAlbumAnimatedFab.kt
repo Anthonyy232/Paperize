@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.components.MenuRow
 
+/**
+ * Animated FAB that expands to show two options: Add image and Add folder
+ */
 @Composable
 fun AddAlbumAnimatedFab(menuOptions: AddAlbumFabMenuOptions, onImageClick: () -> Unit, onFolderClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }

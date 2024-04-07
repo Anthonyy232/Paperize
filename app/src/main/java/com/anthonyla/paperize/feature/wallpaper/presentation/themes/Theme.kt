@@ -4,7 +4,6 @@ import android.app.Activity
 import android.graphics.Color.TRANSPARENT
 import android.os.Build
 import androidx.activity.SystemBarStyle
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -145,6 +144,9 @@ private val DarkColors = darkColorScheme(
 )
 
 
+/**
+ * App theming for dynamic theming when supported and dark mode.
+ */
 @Composable
 fun PaperizeTheme(
     settingsState: StateFlow<SettingsState>,
@@ -155,7 +157,7 @@ fun PaperizeTheme(
 
     val isDarkMode = isDarkMode(darkMode = state.value.darkMode)
     val isDynamicTheming = isDynamicTheming(dynamicTheming = state.value.dynamicTheming)
-
+    val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val colors = when {
         isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)
         isDynamicTheming && dynamicThemingSupported && !isDarkMode -> dynamicLightColorScheme(context)
@@ -163,13 +165,7 @@ fun PaperizeTheme(
         else -> LightColors
     }
 
-    MaterialTheme(
-        colorScheme = colors,
-        typography = MaterialTheme.typography,
-        content = content,
-        shapes = MaterialTheme.shapes
-    )
-
+    // Set the status bar color and system bar style to transparent
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -179,8 +175,15 @@ fun PaperizeTheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkMode
         }
     }
+
+    MaterialTheme(
+        colorScheme = colors,
+        typography = MaterialTheme.typography,
+        content = content,
+        shapes = MaterialTheme.shapes
+    )
 }
-val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
 @Composable
 private fun isDarkMode(darkMode: Boolean?): Boolean =
     when(darkMode) {

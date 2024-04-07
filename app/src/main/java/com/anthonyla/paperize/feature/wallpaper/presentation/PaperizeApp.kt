@@ -47,9 +47,7 @@ fun PaperizeApp(
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
 
-    /**
-     * React to albumState changes and change selectedAlbum's details to keep it from being stale
-     */
+    // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
         selectedState.value.selectedAlbum?.let { selectedAlbum ->
             albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
@@ -60,9 +58,7 @@ fun PaperizeApp(
 
     val navController = rememberNavController()
 
-    /**
-     * Contact author popup with email
-     */
+    // Contact author popup with email
     var toContact by rememberSaveable { mutableStateOf(false) }
     if (toContact) {
         Contact(LocalContext.current)
@@ -167,32 +163,30 @@ fun PaperizeApp(
         ) { backStackEntry ->
             val initialAlbumName = backStackEntry.arguments?.getString("initialAlbumName")
             val albumWithWallpaper = albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == initialAlbumName }
-            if (initialAlbumName != null) {
-                if (albumWithWallpaper != null) {
-                    AlbumViewScreen(
-                        album = albumWithWallpaper,
-                        onBackClick = { navController.navigateUp() },
-                        onShowWallpaperView = { wallpaper ->
-                            val encodedWallpaper = runBlocking { encodeUri(uri = wallpaper) }
-                            navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
-                        },
-                        onShowFolderView = { folder, folderName, wallpapers ->
-                            val encodedFolder = runBlocking { encodeUri(uri = folder) }
-                            val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                            navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
-                        },
-                        onDeleteAlbum = {
-                            albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpaper))
-                            navController.navigateUp()
-                        },
-                        onTitleChange = { title, originalAlbumWithWallpaper ->
-                            albumsViewModel.onEvent(AlbumsEvent.ChangeAlbumName(title, originalAlbumWithWallpaper))
-                        },
-                        onSelectionDeleted = {
-                            albumsViewModel.onEvent(AlbumsEvent.RefreshAlbums)
-                        }
-                    )
-                }
+            if (initialAlbumName != null && albumWithWallpaper != null) {
+                AlbumViewScreen(
+                    album = albumWithWallpaper,
+                    onBackClick = { navController.navigateUp() },
+                    onShowWallpaperView = { wallpaper ->
+                        val encodedWallpaper = runBlocking { encodeUri(uri = wallpaper) }
+                        navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
+                    },
+                    onShowFolderView = { folder, folderName, wallpapers ->
+                        val encodedFolder = runBlocking { encodeUri(uri = folder) }
+                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
+                        navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
+                    },
+                    onDeleteAlbum = {
+                        albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpaper))
+                        navController.navigateUp()
+                    },
+                    onTitleChange = { title, originalAlbumWithWallpaper ->
+                        albumsViewModel.onEvent(AlbumsEvent.ChangeAlbumName(title, originalAlbumWithWallpaper))
+                    },
+                    onSelectionDeleted = {
+                        albumsViewModel.onEvent(AlbumsEvent.RefreshAlbums)
+                    }
+                )
             }
         }
         // Navigate to the settings screen to change app settings
@@ -200,25 +194,21 @@ fun PaperizeApp(
             route = NavScreens.Settings.route,
             enterTransition = {
                 slideInHorizontally(
-                    // Enter by sliding in from offset +fullWidth to 0.
                     initialOffsetX = { fullWidth -> fullWidth },
                 )
             },
             exitTransition = {
                 slideOutHorizontally(
-                    // Exit by sliding out from offset 0 to +fullWidth.
                     targetOffsetX = { fullWidth -> fullWidth },
                 )
             },
             popEnterTransition = {
                 slideInHorizontally(
-                    // Pop Enter by sliding in from offset +fullWidth to 0.
                     initialOffsetX = { fullWidth -> fullWidth },
                 )
             },
             popExitTransition = {
                 slideOutHorizontally(
-                    // Pop Exit by sliding out from offset 0 to +fullWidth.
                     targetOffsetX = { fullWidth -> fullWidth },
                 )
             }
