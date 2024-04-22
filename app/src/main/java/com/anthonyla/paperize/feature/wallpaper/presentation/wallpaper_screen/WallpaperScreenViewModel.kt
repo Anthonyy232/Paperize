@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.workmanager.WorkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WallpaperScreenViewModel @Inject constructor (
     application: Application,
-    private val repository: SelectedAlbumRepository
+    private val repository: SelectedAlbumRepository,
+    private val workerRepository: WorkerRepository
 ) : AndroidViewModel(application) {
     var shouldNotBypassSplashScreen by mutableStateOf(true)
     private val context: Context get() = getApplication<Application>().applicationContext
@@ -49,8 +51,9 @@ class WallpaperScreenViewModel @Inject constructor (
                         folder.wallpapers.map { wallpaper ->
                             Wallpaper(
                                 initialAlbumName = event.albumWithWallpaperAndFolder.album.initialAlbumName,
-                                wallpaperUri = wallpaper,
-                                key = wallpaper.hashCode() + event.albumWithWallpaperAndFolder.album.initialAlbumName.hashCode()
+                                wallpaperUri = wallpaper.first,
+                                key = wallpaper.hashCode() + event.albumWithWallpaperAndFolder.album.initialAlbumName.hashCode(),
+                                isInRotation = wallpaper.second
                             )
                         }
                     }
@@ -60,6 +63,17 @@ class WallpaperScreenViewModel @Inject constructor (
                         wallpapers = wallpapers
                     )
                     repository.upsertSelectedAlbum(newSelectedAlbum)
+                }
+            }
+            is WallpaperEvent.StartWallpaperWorker -> {
+                workerRepository.scheduleWallpaperChanger(event.time)
+            }
+            is WallpaperEvent.StopWallpaperWorker -> {
+                workerRepository.cancelWorker()
+            }
+            is WallpaperEvent.ExitRotation -> {
+                viewModelScope.launch {
+                    repository.upsertWallpaper(event.wallpaper.copy(isInRotation = false))
                 }
             }
             is WallpaperEvent.Refresh -> {

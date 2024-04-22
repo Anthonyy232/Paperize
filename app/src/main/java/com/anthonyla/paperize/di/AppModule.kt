@@ -2,7 +2,9 @@ package com.anthonyla.paperize.di
 
 import android.app.Application
 import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.room.Room
+import androidx.work.WorkerFactory
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDatabase
@@ -11,6 +13,7 @@ import com.anthonyla.paperize.feature.wallpaper.data.repository.AlbumRepositoryI
 import com.anthonyla.paperize.feature.wallpaper.data.repository.SelectedAlbumRepositoryImpl
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.workmanager.WallpaperWorkerFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

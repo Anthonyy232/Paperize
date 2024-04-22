@@ -12,4 +12,8 @@ sealed class AlbumsEvent {
         val title: String,
         val albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder
     ): AlbumsEvent()
+
+    data class InitializeAlbum(
+        val albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder
+    ): AlbumsEvent()
 }

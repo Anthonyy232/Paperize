@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
     private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+
         // Show splash screen until app data is fully loaded and ready to be displayed
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)

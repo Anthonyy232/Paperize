@@ -42,7 +42,7 @@ fun AddAlbumScreen(
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String, String?, List<String>) -> Unit
+    onShowFolderView: (String, String?, List<Pair<String, Boolean>>) -> Unit
     ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyStaggeredGridState()
@@ -106,7 +106,6 @@ fun AddAlbumScreen(
                 onConfirmationClick = {
                     viewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
                     viewModel.onEvent(AddAlbumEvent.SaveAlbum)
-                    viewModel.onEvent(AddAlbumEvent.ClearState)
                     onConfirmation()
                 },
                 onSelectAllClick = {

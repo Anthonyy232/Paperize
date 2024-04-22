@@ -38,6 +38,7 @@ class AddAlbumViewModel @Inject constructor(
         when (event) {
             is AddAlbumEvent.SaveAlbum -> {
                 viewModelScope.launch {
+                    if (_state.value.wallpapers.isEmpty() && _state.value.folders.isEmpty()) { return@launch }
                     val albumCoverUri = when (_state.value.isEmpty) {
                         true -> ""
                         false -> {
@@ -52,10 +53,10 @@ class AddAlbumViewModel @Inject constructor(
                         album = Album(
                             initialAlbumName = _state.value.initialAlbumName,
                             displayedAlbumName = _state.value.displayedAlbumName,
-                            coverUri = albumCoverUri
+                            coverUri = albumCoverUri,
                         ),
                         wallpapers = _state.value.wallpapers,
-                        folders = _state.value.folders
+                        folders = _state.value.folders,
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
 
@@ -120,7 +121,8 @@ class AddAlbumViewModel @Inject constructor(
                                 Wallpaper(
                                     initialAlbumName = it.initialAlbumName,
                                     wallpaperUri = event.wallpaperUri,
-                                    key = event.wallpaperUri.hashCode() + it.initialAlbumName.hashCode()
+                                    key = event.wallpaperUri.hashCode() + it.initialAlbumName.hashCode(),
+                                    isInRotation = true
                                 )
                             ),
                         ) }
@@ -133,15 +135,15 @@ class AddAlbumViewModel @Inject constructor(
                     if (!_state.value.folders.any { it.folderUri == event.directoryUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
-                        _state.update { it.copy(
-                            folders = it.folders.plus(
+                        _state.update { state ->
+                            state.copy( folders = state.folders.plus(
                                 Folder(
-                                    initialAlbumName = it.initialAlbumName,
+                                    initialAlbumName = state.initialAlbumName,
                                     folderName = folderName,
                                     folderUri = event.directoryUri,
                                     coverUri = wallpapers.randomOrNull(),
-                                    wallpapers = wallpapers.ifEmpty { emptyList() },
-                                    key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode()
+                                    wallpapers = wallpapers.map { it to true },
+                                    key = event.directoryUri.hashCode() + state.initialAlbumName.hashCode()
                                 )
                             ),
                         ) }

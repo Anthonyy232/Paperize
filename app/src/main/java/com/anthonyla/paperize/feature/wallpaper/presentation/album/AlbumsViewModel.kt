@@ -68,6 +68,15 @@ class AlbumsViewModel @Inject constructor (
                     refreshAlbums()
                 }
             }
+            is AlbumsEvent.InitializeAlbum -> {
+                viewModelScope.launch {
+                    repository.updateAlbum(
+                        event.albumWithWallpaperAndFolder.album.copy(
+                            initialized = true
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -96,7 +105,7 @@ class AlbumsViewModel @Inject constructor (
                             val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
                             val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
                             val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
-                            repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                            repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers.map { it to true }))
                         }
                     }
                 }
@@ -166,9 +175,9 @@ class AlbumsViewModel @Inject constructor (
         }
         folders.forEach { folder ->
             folder.wallpapers.forEach { wallpaper ->
-                val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
+                val file = DocumentFile.fromSingleUri(context, wallpaper.first.toUri())
                 if (file?.exists() == true) {
-                    return wallpaper
+                    return wallpaper.first
                 }
             }
         }

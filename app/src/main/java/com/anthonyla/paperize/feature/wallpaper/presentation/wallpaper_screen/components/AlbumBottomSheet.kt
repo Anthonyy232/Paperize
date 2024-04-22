@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -54,6 +55,7 @@ fun AlbumBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = modalBottomSheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        windowInsets = WindowInsets(0.dp)
     ) {
         albums.forEach {
             ListItem(

@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.data.data_source
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 /**
  * Converters for Room database to convert list of strings to json string and vice versa
@@ -20,4 +21,18 @@ class Converters {
      */
     @TypeConverter
     fun jsonStringToList(value: String) = gson.fromJson(value, Array<String>::class.java).toList()
+
+    @TypeConverter
+    fun fromPairList(value: List<Pair<String, Boolean>>): String {
+        val gson = Gson()
+        val type = object : TypeToken<List<Pair<String, Boolean>>>() {}.type
+        return gson.toJson(value, type)
+    }
+
+    @TypeConverter
+    fun toPairList(value: String): List<Pair<String, Boolean>> {
+        val gson = Gson()
+        val type = object : TypeToken<List<Pair<String, Boolean>>>() {}.type
+        return gson.fromJson(value, type)
+    }
 }

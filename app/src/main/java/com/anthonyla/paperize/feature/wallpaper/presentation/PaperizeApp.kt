@@ -31,6 +31,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
+import com.anthonyla.paperize.feature.wallpaper.workmanager.WorkerRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -42,21 +43,54 @@ import java.nio.charset.StandardCharsets
 fun PaperizeApp(
     albumsViewModel: AlbumsViewModel,
     settingsViewModel: SettingsViewModel,
-    wallpaperScreenViewModel: WallpaperScreenViewModel
+    wallpaperScreenViewModel: WallpaperScreenViewModel,
+    repository: WorkerRepository
 ) {
+    val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
+        albumState.value.albumsWithWallpapers.forEach {
+            if (!it.album.initialized && (it.wallpapers.isNotEmpty() || it.folders.isNotEmpty())) {
+                albumsViewModel.onEvent(AlbumsEvent.InitializeAlbum(it))
+            }
+            else if (it.album.initialized && it.wallpapers.isEmpty() && it.folders.isEmpty()) {
+                if (navController.currentDestination?.route != NavScreens.Home.route) {
+                    navController.popBackStack(NavScreens.Home.route, false)
+                }
+                albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(it))
+            }
+        }
+
         selectedState.value.selectedAlbum?.let { selectedAlbum ->
             albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
-                ?.let { foundAlbum -> wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(foundAlbum)) }
-                ?: wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                ?.let { foundAlbum -> wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
+                    foundAlbum.copy(
+                        album = foundAlbum.album,
+                        folders = foundAlbum.folders.map { folder ->
+                            folder.copy(
+                                wallpapers = folder.wallpapers.map { wallpaper ->
+                                    Pair(
+                                        wallpaper.first,
+                                        selectedAlbum.wallpapers.find { selectedWallpaper -> selectedWallpaper.wallpaperUri == wallpaper.first }?.isInRotation ?: true
+                                    )
+                                }
+                            )
+                        },
+                        wallpapers = foundAlbum.wallpapers.map {
+                            it.copy(
+                                isInRotation = selectedAlbum.wallpapers.find { wallpaper -> wallpaper.wallpaperUri == it.wallpaperUri }?.isInRotation ?: true
+                            )
+                        }
+                    )
+                )) } ?: run {
+                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                repository.cancelWorker()
+            }
         }
     }
-
-    val navController = rememberNavController()
 
     // Contact author popup with email
     var toContact by rememberSaveable { mutableStateOf(false) }
@@ -73,9 +107,6 @@ fun PaperizeApp(
         // Navigate to the home screen with the navbar and top bar
         composable(
             route = NavScreens.Home.route,
-            exitTransition = {
-                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
-            }
         ) {
             HomeScreen(
                 onSettingsClick = { navController.navigate(NavScreens.Settings.route) },
@@ -98,7 +129,9 @@ fun PaperizeApp(
                     AddAlbumScreen(
                         initialAlbumName = it,
                         onBackClick = { navController.navigateUp() },
-                        onConfirmation = { navController.navigateUp() },
+                        onConfirmation = {
+                            navController.navigateUp()
+                        },
                         onShowWallpaperView = { wallpaper ->
                             val encodedWallpaper = runBlocking { encodeUri(uri = wallpaper) }
                             navController.navigate("${NavScreens.WallpaperView.route}/$encodedWallpaper")
@@ -173,7 +206,7 @@ fun PaperizeApp(
                     },
                     onShowFolderView = { folder, folderName, wallpapers ->
                         val encodedFolder = runBlocking { encodeUri(uri = folder) }
-                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
+                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers.map { it.first })) }
                         navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
                     },
                     onDeleteAlbum = {

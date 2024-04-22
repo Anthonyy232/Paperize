@@ -5,6 +5,8 @@
     <uses-feature
         android:name="android.software.paperize"
         android:required="true" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
     <application
         android:allowBackup="true"
@@ -31,17 +33,9 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".data.configuration.PaperizeWallpaperService"
-            android:enabled="true"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/paperize" />
-        </service>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
     </application>
 </manifest>

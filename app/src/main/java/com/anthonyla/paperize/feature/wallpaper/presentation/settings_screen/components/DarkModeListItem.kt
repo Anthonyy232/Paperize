@@ -87,7 +87,7 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .weight(1f)
-                        .width(100.dp)
+                        .width(125.dp)
                         .height(36.dp)
                 ) {
                     options.forEachIndexed { index, label ->
@@ -105,13 +105,9 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                             selected = index == selectedIndex
                         ) {
                             Icon(
+                                imageVector = if (index == selectedIndex) label.third else label.second,
                                 contentDescription = label.first,
-                                imageVector =
-                                if(selectedIndex != index)
-                                    label.second
-                                else
-                                    label.third,
-                                modifier = Modifier.requiredSize(18.dp)
+                                modifier = if (index != selectedIndex) Modifier.requiredSize(24.dp) else Modifier.requiredSize(12.dp)
                             )
                         }
                     }
