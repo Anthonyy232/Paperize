@@ -22,6 +22,11 @@ interface SelectedAlbumRepository {
     fun getRandomWallpaperInRotation(): Wallpaper?
 
     /**
+     * Get count of wallpapers in rotation
+     */
+    fun countWallpapersInRotation(): Int
+
+    /**
      * Add all wallpapers back into rotation
      */
     suspend fun setAllWallpapersInRotation()

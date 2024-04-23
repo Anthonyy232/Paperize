@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anthonyla.paperize.data.Contact
+import com.anthonyla.paperize.feature.wallpaper.alarmmanager.WallpaperScheduler
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
@@ -31,7 +32,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
-import com.anthonyla.paperize.feature.wallpaper.workmanager.WorkerRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -44,7 +44,7 @@ fun PaperizeApp(
     albumsViewModel: AlbumsViewModel,
     settingsViewModel: SettingsViewModel,
     wallpaperScreenViewModel: WallpaperScreenViewModel,
-    repository: WorkerRepository
+    wallpaperScheduler: WallpaperScheduler
 ) {
     val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
@@ -87,7 +87,7 @@ fun PaperizeApp(
                     )
                 )) } ?: run {
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
-                repository.cancelWorker()
+                wallpaperScheduler.cancelWallpaperChanger()
             }
         }
     }
@@ -116,6 +116,9 @@ fun PaperizeApp(
                 },
                 onAlbumViewClick = {
                     navController.navigate("${NavScreens.AlbumView.route}/$it")
+                },
+                onScheduleWallpaperChanger = { timeInMinutes ->
+                    wallpaperScheduler.scheduleWallpaperChanger(timeInMinutes)
                 }
             )
         }

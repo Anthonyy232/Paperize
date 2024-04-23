@@ -2,13 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
 import android.Manifest
 import android.app.Activity
-import android.app.WallpaperManager
-import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
-import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,22 +18,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
-import java.io.IOException
 
 @Composable
 fun WallpaperScreen(
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
-    wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel()
+    wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
+    onScheduleWallpaperChanger: (Long) -> Unit
 ) {
     val context = LocalContext.current
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
@@ -74,7 +63,7 @@ fun WallpaperScreen(
                             if ((selectedState.value.selectedAlbum?.album?.initialAlbumName ?: "") != album.album.initialAlbumName) {
                                 wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(album))
                             }
-                            wallpaperScreenViewModel.onEvent(WallpaperEvent.StartWallpaperWorker(1))
+                            onScheduleWallpaperChanger(1)
                             openBottomSheet = false
                         }
                     )

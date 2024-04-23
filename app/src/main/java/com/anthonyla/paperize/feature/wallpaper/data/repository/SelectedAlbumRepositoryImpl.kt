@@ -24,6 +24,10 @@ class SelectedAlbumRepositoryImpl(
         return dao.getRandomWallpaperInRotation()
     }
 
+    override fun countWallpapersInRotation(): Int {
+        return dao.countWallpapersInRotation()
+    }
+
     override suspend fun setAllWallpapersInRotation() {
         dao.setAllWallpapersInRotation()
     }

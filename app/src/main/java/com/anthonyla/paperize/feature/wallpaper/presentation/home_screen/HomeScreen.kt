@@ -38,6 +38,7 @@ fun HomeScreen(
     onContactClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit,
     onAlbumViewClick: (String) -> Unit,
+    onScheduleWallpaperChanger: (Long) -> Unit
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -100,7 +101,9 @@ fun HomeScreen(
             }
             HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { index ->
                 when(index) {
-                    0 -> WallpaperScreen()
+                    0 -> WallpaperScreen(
+                        onScheduleWallpaperChanger = { onScheduleWallpaperChanger(it) }
+                    )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },
                         onViewAlbum = { onAlbumViewClick(it) }

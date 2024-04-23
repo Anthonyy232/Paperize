@@ -6,8 +6,8 @@
         android:name="android.software.paperize"
         android:required="true" />
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+
     <application
         android:allowBackup="true"
         android:name=".App"
@@ -21,7 +21,6 @@
         android:theme="@style/Theme.Paperize"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu">
-
         <activity
             android:name=".feature.wallpaper.presentation.MainActivity"
             android:exported="true"
@@ -32,10 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            tools:node="remove" />
+        <receiver android:name=".feature.wallpaper.alarmmanager.WallpaperReceiver" />
     </application>
 </manifest>

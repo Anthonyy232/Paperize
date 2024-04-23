@@ -18,6 +18,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import com.anthonyla.paperize.feature.wallpaper.alarmmanager.WallpaperScheduler
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
         // Show splash screen until app data is fully loaded and ready to be displayed
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val wallpaperScheduler = WallpaperScheduler(this)
         splashScreen.setKeepOnScreenCondition {
             settingsViewModel.shouldNotBypassSplashScreen
                     || albumsViewModel.shouldNotBypassSplashScreen
@@ -54,7 +56,7 @@ class MainActivity : ComponentActivity() {
 
             PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp(albumsViewModel, settingsViewModel, wallpaperScreenViewModel)
+                    PaperizeApp(albumsViewModel, settingsViewModel, wallpaperScreenViewModel, wallpaperScheduler)
                 }
             }
         }
