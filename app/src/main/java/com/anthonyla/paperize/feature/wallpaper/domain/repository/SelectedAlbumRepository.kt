@@ -12,26 +12,6 @@ interface SelectedAlbumRepository {
     fun getSelectedAlbum(): Flow<List<SelectedAlbum>>
 
     /**
-     * Get wallpapers in rotation from database
-     */
-    fun getWallpapersInRotation(): Flow<List<Wallpaper>>
-
-    /**
-     * Get random wallpaper in rotation
-     */
-    fun getRandomWallpaperInRotation(): Wallpaper?
-
-    /**
-     * Get count of wallpapers in rotation
-     */
-    fun countWallpapersInRotation(): Int
-
-    /**
-     * Add all wallpapers back into rotation
-     */
-    suspend fun setAllWallpapersInRotation()
-
-    /**
      * Upsert or insert selectedAlbum to database with its wallpapers
      */
     suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum)

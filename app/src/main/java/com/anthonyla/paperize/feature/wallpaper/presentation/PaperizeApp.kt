@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.alarmmanager.WallpaperScheduler
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
@@ -66,26 +68,26 @@ fun PaperizeApp(
 
         selectedState.value.selectedAlbum?.let { selectedAlbum ->
             albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
-                ?.let { foundAlbum -> wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
-                    foundAlbum.copy(
-                        album = foundAlbum.album,
-                        folders = foundAlbum.folders.map { folder ->
-                            folder.copy(
-                                wallpapers = folder.wallpapers.map { wallpaper ->
-                                    Pair(
-                                        wallpaper.first,
-                                        selectedAlbum.wallpapers.find { selectedWallpaper -> selectedWallpaper.wallpaperUri == wallpaper.first }?.isInRotation ?: true
-                                    )
-                                }
-                            )
-                        },
-                        wallpapers = foundAlbum.wallpapers.map {
-                            it.copy(
-                                isInRotation = selectedAlbum.wallpapers.find { wallpaper -> wallpaper.wallpaperUri == it.wallpaperUri }?.isInRotation ?: true
+                ?.let { foundAlbum ->
+                    val wallpapers: List<Wallpaper> = foundAlbum.wallpapers + foundAlbum.folders.flatMap { folder ->
+                        folder.wallpapers.map { wallpaper ->
+                            Wallpaper(
+                                initialAlbumName = foundAlbum.album.initialAlbumName,
+                                wallpaperUri = wallpaper,
+                                key = wallpaper.hashCode() + foundAlbum.album.initialAlbumName.hashCode(),
                             )
                         }
+                    }
+                    val wallpaperUriSet = wallpapers.map { it.wallpaperUri }.toSet()
+                    val newSelectedAlbum = SelectedAlbum(
+                        album = foundAlbum.album.copy(
+                            wallpapersInQueue = selectedAlbum.album.wallpapersInQueue.filter { it in wallpaperUriSet }
+                        ),
+                        wallpapers = wallpapers
                     )
-                )) } ?: run {
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
+                }
+                ?: run {
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                 wallpaperScheduler.cancelWallpaperChanger()
             }
@@ -118,7 +120,8 @@ fun PaperizeApp(
                     navController.navigate("${NavScreens.AlbumView.route}/$it")
                 },
                 onScheduleWallpaperChanger = { timeInMinutes ->
-                    wallpaperScheduler.scheduleWallpaperChanger(timeInMinutes)
+                    wallpaperScheduler.cancelWallpaperChanger()
+                    wallpaperScheduler.scheduleWallpaperChanger(timeInMinutes, true)
                 }
             )
         }
@@ -209,7 +212,7 @@ fun PaperizeApp(
                     },
                     onShowFolderView = { folder, folderName, wallpapers ->
                         val encodedFolder = runBlocking { encodeUri(uri = folder) }
-                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers.map { it.first })) }
+                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
                         navController.navigate("${NavScreens.FolderView.route}/$encodedFolder/$folderName/$encodedWallpapers")
                     },
                     onDeleteAlbum = {

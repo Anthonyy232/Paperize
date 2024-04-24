@@ -105,7 +105,7 @@ class AlbumsViewModel @Inject constructor (
                             val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
                             val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
                             val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
-                            repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers.map { it to true }))
+                            repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                         }
                     }
                 }
@@ -175,9 +175,9 @@ class AlbumsViewModel @Inject constructor (
         }
         folders.forEach { folder ->
             folder.wallpapers.forEach { wallpaper ->
-                val file = DocumentFile.fromSingleUri(context, wallpaper.first.toUri())
+                val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
                 if (file?.exists() == true) {
-                    return wallpaper.first
+                    return wallpaper
                 }
             }
         }

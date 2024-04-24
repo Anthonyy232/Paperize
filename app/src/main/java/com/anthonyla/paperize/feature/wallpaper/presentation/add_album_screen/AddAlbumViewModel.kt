@@ -122,7 +122,6 @@ class AddAlbumViewModel @Inject constructor(
                                     initialAlbumName = it.initialAlbumName,
                                     wallpaperUri = event.wallpaperUri,
                                     key = event.wallpaperUri.hashCode() + it.initialAlbumName.hashCode(),
-                                    isInRotation = true
                                 )
                             ),
                         ) }
@@ -142,7 +141,7 @@ class AddAlbumViewModel @Inject constructor(
                                     folderName = folderName,
                                     folderUri = event.directoryUri,
                                     coverUri = wallpapers.randomOrNull(),
-                                    wallpapers = wallpapers.map { it to true },
+                                    wallpapers = wallpapers,
                                     key = event.directoryUri.hashCode() + state.initialAlbumName.hashCode()
                                 )
                             ),

@@ -43,29 +43,8 @@ class WallpaperScreenViewModel @Inject constructor (
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
                 viewModelScope.launch {
-                    repository.getSelectedAlbum().firstOrNull()?.let { repository.deleteAll() }
-                    val wallpapers: MutableList<Wallpaper> = event.albumWithWallpaperAndFolder.wallpapers.toMutableList()
-                    val wallpapersFromFolder = event.albumWithWallpaperAndFolder.folders.flatMap { folder ->
-                        folder.wallpapers.map { wallpaper ->
-                            Wallpaper(
-                                initialAlbumName = event.albumWithWallpaperAndFolder.album.initialAlbumName,
-                                wallpaperUri = wallpaper.first,
-                                key = wallpaper.hashCode() + event.albumWithWallpaperAndFolder.album.initialAlbumName.hashCode(),
-                                isInRotation = wallpaper.second
-                            )
-                        }
-                    }
-                    wallpapers.addAll(wallpapersFromFolder)
-                    val newSelectedAlbum = SelectedAlbum(
-                        album = event.albumWithWallpaperAndFolder.album,
-                        wallpapers = wallpapers
-                    )
-                    repository.upsertSelectedAlbum(newSelectedAlbum)
-                }
-            }
-            is WallpaperEvent.ExitRotation -> {
-                viewModelScope.launch {
-                    repository.upsertWallpaper(event.wallpaper.copy(isInRotation = false))
+                    repository.deleteAll()
+                    repository.upsertSelectedAlbum(event.selectedAlbum)
                 }
             }
             is WallpaperEvent.Refresh -> {

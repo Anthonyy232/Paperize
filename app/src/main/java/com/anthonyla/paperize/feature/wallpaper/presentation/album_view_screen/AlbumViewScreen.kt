@@ -30,7 +30,7 @@ fun AlbumViewScreen(
     album: AlbumWithWallpaperAndFolder,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String, String?, List<Pair<String, Boolean>>) -> Unit,
+    onShowFolderView: (String, String?, List<String>) -> Unit,
     onDeleteAlbum: () -> Unit,
     onTitleChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
     onSelectionDeleted: () -> Unit

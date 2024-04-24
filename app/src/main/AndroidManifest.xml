@@ -6,6 +6,7 @@
         android:name="android.software.paperize"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 
     <application

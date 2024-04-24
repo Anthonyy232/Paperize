@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
  * @param initialAlbumName The initial album name.
  * @param folderName The folder name.
  * @param coverUri The cover URI.
- * @param wallpapers The list of wallpaper URI strings paired with inRotation boolean as a <Pair>
+ * @param wallpapers The list of wallpaper URI strings in the folder.
  * @param folderUri The folder directory URI.
  */
 @Entity
@@ -17,7 +17,7 @@ data class Folder(
     val initialAlbumName: String,
     val folderName: String?,
     val coverUri: String?,
-    val wallpapers: List<Pair<String, Boolean>> = emptyList(),
+    val wallpapers: List<String> = emptyList(),
     val folderUri: String,
     @PrimaryKey(autoGenerate = false) val key: Int
 )

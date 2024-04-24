@@ -22,18 +22,6 @@ interface SelectedAlbumDao {
     @Query("SELECT * FROM album")
     fun getSelectedAlbum(): Flow<List<SelectedAlbum>>
 
-    @Query("SELECT * FROM wallpaper WHERE isInRotation = 1")
-    fun getWallpapersInRotation(): Flow<List<Wallpaper>>
-
-    @Query("SELECT * FROM wallpaper ORDER BY RANDOM() LIMIT 1")
-    fun getRandomWallpaperInRotation(): Wallpaper?
-
-    @Query("SELECT COUNT(*) FROM wallpaper WHERE isInRotation = 1")
-    fun countWallpapersInRotation(): Int
-
-    @Query("UPDATE wallpaper SET isInRotation = 1")
-    suspend fun setAllWallpapersInRotation()
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAlbum(album: Album)
 

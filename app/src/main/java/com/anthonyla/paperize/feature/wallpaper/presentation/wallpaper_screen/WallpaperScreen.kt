@@ -20,6 +20,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
@@ -37,7 +39,7 @@ fun WallpaperScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        content = { it
+        content = { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -59,11 +61,23 @@ fun WallpaperScreen(
                             if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
                             }
-
-                            if ((selectedState.value.selectedAlbum?.album?.initialAlbumName ?: "") != album.album.initialAlbumName) {
-                                wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(album))
+                            val wallpapers: List<Wallpaper> = album.wallpapers + album.folders.flatMap { folder ->
+                                folder.wallpapers.map { wallpaper ->
+                                    Wallpaper(
+                                        initialAlbumName = album.album.initialAlbumName,
+                                        wallpaperUri = wallpaper,
+                                        key = wallpaper.hashCode() + album.album.initialAlbumName.hashCode(),
+                                    )
+                                }
                             }
-                            onScheduleWallpaperChanger(1)
+                            val newSelectedAlbum = SelectedAlbum(
+                                album = album.album.copy(
+                                    wallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()
+                                ),
+                                wallpapers = wallpapers
+                            )
+                            wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
+                            onScheduleWallpaperChanger(15)
                             openBottomSheet = false
                         }
                     )

@@ -16,22 +16,6 @@ class SelectedAlbumRepositoryImpl(
         return dao.getSelectedAlbum()
     }
 
-    override fun getWallpapersInRotation(): Flow<List<Wallpaper>> {
-        return dao.getWallpapersInRotation()
-    }
-
-    override fun getRandomWallpaperInRotation(): Wallpaper? {
-        return dao.getRandomWallpaperInRotation()
-    }
-
-    override fun countWallpapersInRotation(): Int {
-        return dao.countWallpapersInRotation()
-    }
-
-    override suspend fun setAllWallpapersInRotation() {
-        dao.setAllWallpapersInRotation()
-    }
-
     override suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum) {
         dao.upsertAlbum(selectedAlbum.album)
         dao.upsertWallpaperList(selectedAlbum.wallpapers)
