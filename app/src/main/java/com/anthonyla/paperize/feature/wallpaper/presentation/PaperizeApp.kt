@@ -1,5 +1,12 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
+import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -18,7 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.anthonyla.paperize.data.Contact
-import com.anthonyla.paperize.feature.wallpaper.alarmmanager.WallpaperScheduler
+import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
@@ -34,6 +41,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
+import com.anthonyla.paperize.feature.wallpaper.wallpaperservice.WallpaperService
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -46,11 +54,11 @@ fun PaperizeApp(
     albumsViewModel: AlbumsViewModel,
     settingsViewModel: SettingsViewModel,
     wallpaperScreenViewModel: WallpaperScreenViewModel,
-    wallpaperScheduler: WallpaperScheduler
 ) {
     val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
@@ -88,11 +96,14 @@ fun PaperizeApp(
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                 }
                 ?: run {
-                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
-                wallpaperScheduler.cancelWallpaperChanger()
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                    Intent(context, WallpaperService::class.java).also {
+                        it.action = WallpaperService.Actions.STOP.toString()
+                        context.startForegroundService(it)
+                    }
+                }
             }
         }
-    }
 
     // Contact author popup with email
     var toContact by rememberSaveable { mutableStateOf(false) }
@@ -120,8 +131,12 @@ fun PaperizeApp(
                     navController.navigate("${NavScreens.AlbumView.route}/$it")
                 },
                 onScheduleWallpaperChanger = { timeInMinutes ->
-                    wallpaperScheduler.cancelWallpaperChanger()
-                    wallpaperScheduler.scheduleWallpaperChanger(timeInMinutes, true)
+                    settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(timeInMinutes))
+                    val intent = Intent(context, WallpaperService::class.java).apply {
+                        action = WallpaperService.Actions.START.toString()
+                        putExtra("timeInMinutes", timeInMinutes)
+                    }
+                    context.startForegroundService(intent)
                 }
             )
         }

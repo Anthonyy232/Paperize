@@ -38,7 +38,7 @@ fun HomeScreen(
     onContactClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit,
     onAlbumViewClick: (String) -> Unit,
-    onScheduleWallpaperChanger: (Long) -> Unit
+    onScheduleWallpaperChanger: (Int) -> Unit
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }

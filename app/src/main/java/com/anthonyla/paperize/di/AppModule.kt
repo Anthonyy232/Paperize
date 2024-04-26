@@ -75,6 +75,7 @@ object AppModule {
     ): SettingsDataStore = SettingsDataStoreImpl(context)
 
     @Provides
+    @Singleton
     fun provideContext(
         @ApplicationContext context: Context,
     ): Context { return context }

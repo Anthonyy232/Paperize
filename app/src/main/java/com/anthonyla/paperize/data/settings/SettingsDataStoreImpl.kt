@@ -27,6 +27,13 @@ class SettingsDataStoreImpl @Inject constructor (private val context: Context): 
         }
     }
 
+    override suspend fun putInt(key: String, value: Int) {
+        val preferencesKey = stringPreferencesKey(key)
+        context.dataStore.edit {
+            it[preferencesKey] = value.toString()
+        }
+    }
+
     override suspend fun getBoolean(key: String): Boolean? {
         val head = context.dataStore.data.first()
         val preferencesKey = booleanPreferencesKey(key)
@@ -44,6 +51,17 @@ class SettingsDataStoreImpl @Inject constructor (private val context: Context): 
         }
     }
 
+    override suspend fun getInt(key: String): Int? {
+        return try {
+            val head = context.dataStore.data.first()
+            val preferencesKey = stringPreferencesKey(key)
+            head[preferencesKey]?.toInt()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            null
+        }
+    }
+
     override suspend fun deleteBoolean(key: String) {
         val preferencesKey = booleanPreferencesKey(key)
         context.dataStore.edit {
@@ -54,6 +72,15 @@ class SettingsDataStoreImpl @Inject constructor (private val context: Context): 
     }
 
     override suspend fun deleteString(key: String) {
+        val preferencesKey = stringPreferencesKey(key)
+        context.dataStore.edit {
+            if (it.contains(preferencesKey)) {
+                it.remove(preferencesKey)
+            }
+        }
+    }
+
+    override suspend fun deleteInt(key: String) {
         val preferencesKey = stringPreferencesKey(key)
         context.dataStore.edit {
             if (it.contains(preferencesKey)) {

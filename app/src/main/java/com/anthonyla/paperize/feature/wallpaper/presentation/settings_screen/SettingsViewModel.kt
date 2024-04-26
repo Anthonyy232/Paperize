@@ -37,11 +37,13 @@ class SettingsViewModel @Inject constructor (
             currentGetJob = async {
                 val darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE)
                 val dynamicTheming = settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false
+                val wallpaperInterval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 
                 _state.update { it.copy(
                     darkMode = darkMode,
                     dynamicTheming = dynamicTheming,
-                    loaded = true
+                    loaded = true,
+                    interval = wallpaperInterval
                 ) }
 
                 if (_state.value.loaded) {
@@ -50,9 +52,6 @@ class SettingsViewModel @Inject constructor (
             }
         }
     }
-
-
-
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
@@ -65,7 +64,7 @@ class SettingsViewModel @Inject constructor (
                             dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
                                 true -> true
                                 false, null -> false
-                            },
+                            }
                         ) }
                     }
                 }
@@ -89,6 +88,22 @@ class SettingsViewModel @Inject constructor (
                     refreshSettings()
                 }
             }
+            is SettingsEvent.SetWallpaperInterval -> {
+                viewModelScope.launch {
+                    settingsDataStoreImpl.putInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL, event.interval)
+                    refreshSettings()
+                }
+            }
+            is SettingsEvent.RefreshWallpaperState -> {
+                viewModelScope.launch {
+                    currentGetJob?.cancel()
+                    currentGetJob = viewModelScope.launch {
+                        _state.update { it.copy(
+                            interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                        ) }
+                    }
+                }
+            }
         }
     }
 
@@ -101,6 +116,7 @@ class SettingsViewModel @Inject constructor (
                     true -> true
                     false, null -> false
                 },
+                interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
             ) }
         }
     }

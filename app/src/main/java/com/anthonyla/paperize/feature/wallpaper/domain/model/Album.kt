@@ -18,5 +18,5 @@ data class Album(
     val displayedAlbumName: String,
     val coverUri: String?,
     val initialized: Boolean = false,
-    val wallpapersInQueue: List<String> = emptyList()
+    val wallpapersInQueue: List<String> = emptyList(),
 )

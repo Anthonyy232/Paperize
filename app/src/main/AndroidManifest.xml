@@ -6,8 +6,10 @@
         android:name="android.software.paperize"
         android:required="true" />
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -32,6 +34,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".feature.wallpaper.alarmmanager.WallpaperReceiver" />
+        <service android:name=".feature.wallpaper.wallpaperservice.WallpaperService" android:foregroundServiceType="mediaPlayback"/>
+        <receiver android:name=".feature.wallpaper.wallpaperservice.WallpaperBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
