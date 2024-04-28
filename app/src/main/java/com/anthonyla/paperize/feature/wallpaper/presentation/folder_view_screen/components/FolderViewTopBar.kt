@@ -24,8 +24,7 @@ import com.anthonyla.paperize.R
 @Composable
 fun FolderViewTopBar(
     title: String,
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onBackClick: () -> Unit
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface),

@@ -11,12 +11,14 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,8 +26,6 @@ class WallpaperScreenViewModel @Inject constructor (
     application: Application,
     private val repository: SelectedAlbumRepository,
 ) : AndroidViewModel(application) {
-    var shouldNotBypassSplashScreen by mutableStateOf(true)
-    private val context: Context get() = getApplication<Application>().applicationContext
     private var _state = MutableStateFlow(WallpaperState())
     val state = _state.stateIn(
         viewModelScope,
@@ -35,7 +35,6 @@ class WallpaperScreenViewModel @Inject constructor (
     init {
         viewModelScope.launch {
             refreshAlbums()
-            shouldNotBypassSplashScreen = false
         }
     }
 
@@ -43,8 +42,10 @@ class WallpaperScreenViewModel @Inject constructor (
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
                 viewModelScope.launch {
-                    repository.deleteAll()
-                    repository.upsertSelectedAlbum(event.selectedAlbum)
+                    withContext(Dispatchers.IO) {
+                        repository.deleteAll()
+                        repository.upsertSelectedAlbum(event.selectedAlbum)
+                    }
                 }
             }
             is WallpaperEvent.Refresh -> {
@@ -52,7 +53,12 @@ class WallpaperScreenViewModel @Inject constructor (
             }
             is WallpaperEvent.Reset -> {
                 viewModelScope.launch {
-                    repository.deleteAll()
+                    withContext(Dispatchers.IO) {
+                        repository.deleteAll()
+                        _state.update {
+                            it.copy(selectedAlbum = null)
+                        }
+                    }
                 }
             }
         }

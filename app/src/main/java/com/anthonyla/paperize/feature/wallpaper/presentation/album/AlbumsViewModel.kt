@@ -28,7 +28,6 @@ class AlbumsViewModel @Inject constructor (
     application: Application,
     private val repository: AlbumRepository
 ) : AndroidViewModel(application) {
-    var shouldNotBypassSplashScreen by mutableStateOf(true)
     private val context: Context
         get() = getApplication<Application>().applicationContext
     private val _state = MutableStateFlow(AlbumsState())
@@ -41,7 +40,6 @@ class AlbumsViewModel @Inject constructor (
         viewModelScope.launch {
             updateAlbums()
             refreshAlbums()
-            shouldNotBypassSplashScreen = false
         }
     }
 

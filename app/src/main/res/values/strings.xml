@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Paperize</string>
-    <string name="MoreVertIcon">Options</string>
+    <string name="SettingsIcon">Options</string>
     <string name="dropdownmenu_settings">Settings</string>
     <string name="home_screen">Home</string>
     <string name="wallpaper_screen">Wallpaper</string>
@@ -36,4 +36,9 @@
     <string name="no_album_selected">No album selected</string>
     <string name="wallpaper">" wallpaper"</string>
     <string name="currently_selected_album">Currently selected album</string>
+    <string name="stop_the_album">Stop the album</string>
+    <string name="more_options">More options</string>
+    <string name="startup">Startup</string>
+    <string name="agree">Agree</string>
+    <string name="welcome">Welcome</string>
 </resources>

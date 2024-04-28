@@ -132,7 +132,7 @@ fun AlbumViewTopBar(
                 IconButton(onClick = { menuExpanded = true }) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.MoreVertIcon)
+                        contentDescription = stringResource(R.string.more_options),
                     )
                     MaterialTheme(
                         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))

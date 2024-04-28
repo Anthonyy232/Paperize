@@ -34,6 +34,7 @@ class WallpaperService: Service() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var runnableCode: Runnable
     private var timeInMinutes: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+    private var setLockWithHome: Boolean = false
 
     companion object {
         var isRunning = false
@@ -56,7 +57,6 @@ class WallpaperService: Service() {
         isRunning = true
         runnableCode = object : Runnable {
             override fun run() {
-                Log.d("PaperizeWallpaperChanger", "Scheduled in: $timeInMinutes")
                 val self = this
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
@@ -75,14 +75,16 @@ class WallpaperService: Service() {
      * Start the service and schedule the wallpaper change
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        isRunning = true
+        handler.removeCallbacks(runnableCode)
         when(intent?.action) {
             Actions.START.toString() -> {
-                timeInMinutes = intent.getIntExtra("timeInMinutes", 1)
+                isRunning = true
+                timeInMinutes = intent.getIntExtra("timeInMinutes", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                setLockWithHome = intent.getBooleanExtra("setLockWithHome", false)
+                Log.d("PaperizeWallpaperChanger", "Service started with interval $timeInMinutes minutes")
                 // Schedule the next wallpaper change
                 runnableCode = object : Runnable {
                     override fun run() {
-                        Log.d("PaperizeWallpaperChanger", "Scheduled in: $timeInMinutes")
                         val self = this
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -98,7 +100,7 @@ class WallpaperService: Service() {
                 handler.post(runnableCode)
             }
             Actions.STOP.toString() -> {
-                handler.removeCallbacks(runnableCode)
+                isRunning = false
                 stopSelf()
             }
         }
@@ -108,7 +110,6 @@ class WallpaperService: Service() {
     /**
      * Clean up the service when it is destroyed
      */
-
     override fun onDestroy() {
         Log.d("PaperizeWallpaperChanger", "Service destroyed")
         super.onDestroy()
@@ -117,28 +118,13 @@ class WallpaperService: Service() {
     }
 
     /**
-     * Restart the service if it is removed
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        Log.d("PaperizeWallpaperChanger", "Service removed by swipe")
-        isRunning = false
-        handler.removeCallbacks(runnableCode)
-        val restartServiceIntent = Intent(applicationContext, this::class.java).apply {
-            action = Actions.START.toString()
-            putExtra("timeInMinutes", timeInMinutes)
-        }
-        restartServiceIntent.setPackage(packageName)
-        applicationContext.startForegroundService(restartServiceIntent)
-        super.onTaskRemoved(rootIntent)
-    } */
-
-    /**
      * Creates a notification for the wallpaper service
      */
-
     private fun createNotification(current: Int = 0, total: Int = 0): Notification {
+
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
             .setContentTitle("Paperize")
-            .setContentText("Changing wallpaper... Album: $current/$total")
+            .setContentText("Rotation: $current/$total wallpapers\nInterval: ${formatTime(timeInMinutes)}")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .build()
     }
@@ -155,7 +141,7 @@ class WallpaperService: Service() {
             notificationManager.notify(1, notification)
             var wallpaper = it.album.wallpapersInQueue.firstOrNull()
             if (wallpaper != null) {
-                setWallpaper(context, wallpaper.toUri())
+                setWallpaper(context, wallpaper.toUri(), setLockWithHome)
                 repository.upsertSelectedAlbum(
                     it.copy(
                         album = it.album.copy(
@@ -168,7 +154,7 @@ class WallpaperService: Service() {
                 val newWallpaperInQueue = it.wallpapers.map { it.wallpaperUri }.shuffled()
                 wallpaper = newWallpaperInQueue.firstOrNull()
                 if (wallpaper != null) {
-                    setWallpaper(context, wallpaper.toUri())
+                    setWallpaper(context, wallpaper.toUri(), setLockWithHome)
                     repository.upsertSelectedAlbum(
                         it.copy(
                             album = it.album.copy(
@@ -184,7 +170,7 @@ class WallpaperService: Service() {
     /**
      * Sets the wallpaper to the given uri
      */
-    private fun setWallpaper(context: Context, wallpaper: Uri) {
+    private fun setWallpaper(context: Context, wallpaper: Uri, setLockWithHome: Boolean) {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -200,9 +186,41 @@ class WallpaperService: Service() {
                     BitmapFactory.decodeStream(inputStream)
                 }
             }
-            bitmap?.let { image -> wallpaperManager.setBitmap(image) }
+            bitmap?.let {
+                image -> wallpaperManager.setBitmap(image, null, true, when (setLockWithHome) {
+                    true -> WallpaperManager.FLAG_LOCK or WallpaperManager.FLAG_SYSTEM
+                    false -> WallpaperManager.FLAG_SYSTEM
+                })
+            }
         } catch (e: IOException) {
             Log.e("PaperizeWallpaperChanger", "Error changing wallpaper", e)
         }
+    }
+
+    /**
+     * Formats the time in minutes to a human readable format
+     */
+    private fun formatTime(timeInMinutes: Int): String {
+        val days = timeInMinutes / (24 * 60)
+        val hours = (timeInMinutes % (24 * 60)) / 60
+        val minutes = timeInMinutes % 60
+
+        val formattedDays = when {
+            days > 1 -> "$days days"
+            days == 1 -> "$days day"
+            else -> ""
+        }
+        val formattedHours = when {
+            hours > 1 -> "$hours hours"
+            hours == 1 -> "$hours hour"
+            else -> ""
+        }
+        val formattedMinutes = when {
+            minutes > 1 -> "$minutes minutes"
+            minutes == 1 -> "$minutes minute"
+            else -> ""
+        }
+
+        return listOf(formattedDays, formattedHours, formattedMinutes).filter { it.isNotEmpty() }.joinToString(", ")
     }
 }

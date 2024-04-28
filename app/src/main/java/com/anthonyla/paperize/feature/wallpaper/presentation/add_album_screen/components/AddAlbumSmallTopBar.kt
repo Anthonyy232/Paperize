@@ -162,7 +162,6 @@ fun AddAlbumSmallTopBar(
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = stringResource(R.string.select_all_images_for_deletion),
-                        tint = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.padding(6.dp)
                     )
                 }

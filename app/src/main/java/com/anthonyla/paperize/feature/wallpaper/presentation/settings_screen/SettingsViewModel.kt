@@ -22,7 +22,6 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor (
     private val settingsDataStoreImpl: SettingsDataStore
 ): ViewModel() {
-    var shouldNotBypassSplashScreen by mutableStateOf(true)
     private val _state = MutableStateFlow(SettingsState())
     val state = _state.stateIn(
         viewModelScope,
@@ -30,31 +29,37 @@ class SettingsViewModel @Inject constructor (
     )
 
     private var currentGetJob: Job? = null
+    var setKeepOnScreenCondition: Boolean = true
 
     init {
-        viewModelScope.launch {
-            currentGetJob?.cancel()
-            currentGetJob = async {
-                val darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE)
-                val dynamicTheming = settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false
-                val wallpaperInterval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+        currentGetJob = viewModelScope.launch {
+            val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
+            val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
+            val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
+            val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
+            val setLockWithHome = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false }
 
-                _state.update { it.copy(
-                    darkMode = darkMode,
-                    dynamicTheming = dynamicTheming,
-                    loaded = true,
-                    interval = wallpaperInterval
-                ) }
-
-                if (_state.value.loaded) {
-                    shouldNotBypassSplashScreen = false
-                }
-            }
+            _state.update { it.copy(
+                darkMode = darkMode.await(),
+                dynamicTheming = dynamicTheming.await(),
+                interval = wallpaperInterval.await(),
+                setLockWithHome = setLockWithHome.await(),
+                firstLaunch = firstLaunch.await()
+            ) }
+            setKeepOnScreenCondition = false
         }
     }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
+            is SettingsEvent.SetFirstLaunch -> {
+                viewModelScope.launch {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_LAUNCH, false)
+                    _state.update { it.copy(
+                        firstLaunch = false
+                    ) }
+                }
+            }
             is SettingsEvent.RefreshUiState -> {
                 viewModelScope.launch {
                     currentGetJob?.cancel()
@@ -76,7 +81,9 @@ class SettingsViewModel @Inject constructor (
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, false) }
                         null -> { settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE) }
                     }
-                    refreshSettings()
+                    _state.update { it.copy(
+                        darkMode = event.darkMode
+                    ) }
                 }
             }
             is SettingsEvent.SetDynamicTheming -> {
@@ -85,13 +92,28 @@ class SettingsViewModel @Inject constructor (
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, false) }
                     }
-                    refreshSettings()
+                    _state.update { it.copy(
+                        dynamicTheming = event.dynamicTheming
+                    ) }
                 }
             }
             is SettingsEvent.SetWallpaperInterval -> {
                 viewModelScope.launch {
                     settingsDataStoreImpl.putInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL, event.interval)
-                    refreshSettings()
+                    _state.update { it.copy(
+                        interval = event.interval
+                    ) }
+                }
+            }
+            is SettingsEvent.SetLockWithHome -> {
+                viewModelScope.launch {
+                    when (event.lockWithHome) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.SET_LOCK_WITH_HOME, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.SET_LOCK_WITH_HOME, false) }
+                    }
+                    _state.update { it.copy(
+                        setLockWithHome = event.lockWithHome
+                    ) }
                 }
             }
             is SettingsEvent.RefreshWallpaperState -> {
@@ -99,7 +121,8 @@ class SettingsViewModel @Inject constructor (
                     currentGetJob?.cancel()
                     currentGetJob = viewModelScope.launch {
                         _state.update { it.copy(
-                            interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                            interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+                            setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
                         ) }
                     }
                 }

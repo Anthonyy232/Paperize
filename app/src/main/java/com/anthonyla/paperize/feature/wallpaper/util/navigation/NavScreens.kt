@@ -6,10 +6,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BrowseGallery
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.BrowseGallery
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Start
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.anthonyla.paperize.R
 
@@ -20,6 +22,7 @@ sealed class NavScreens(val route: String, @StringRes val resourceId: Int, val u
     /**
      * Home screen that the user lands on initially
      */
+    object Startup : NavScreens("startup_screen", R.string.startup, Icons.Outlined.Start, Icons.Filled.Start)
     object Home : NavScreens("home_screen", R.string.home_screen, Icons.Outlined.Image, Icons.Filled.Image)
 
     /**

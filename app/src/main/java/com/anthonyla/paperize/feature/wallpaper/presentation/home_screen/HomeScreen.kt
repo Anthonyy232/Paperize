@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -35,10 +33,10 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 @Composable
 fun HomeScreen(
     onSettingsClick: () -> Unit,
-    onContactClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit,
     onAlbumViewClick: (String) -> Unit,
-    onScheduleWallpaperChanger: (Int) -> Unit
+    onScheduleWallpaperChanger: (Int) -> Unit,
+    onStop: () -> Unit
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -52,10 +50,9 @@ fun HomeScreen(
     Scaffold (
         topBar = {
             HomeTopBar(
-                onSettingsClick = onSettingsClick,
-                onContactClick = onContactClick,
                 showSelectionModeAppBar = false,
                 selectionCount = 0,
+                onSettingsClick = onSettingsClick,
             )
         }
     ) { padding ->
@@ -102,7 +99,8 @@ fun HomeScreen(
             HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { index ->
                 when(index) {
                     0 -> WallpaperScreen(
-                        onScheduleWallpaperChanger = { onScheduleWallpaperChanger(it) }
+                        onScheduleWallpaperChanger = { onScheduleWallpaperChanger(it) },
+                        onStop = { onStop() }
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

@@ -53,7 +53,8 @@ fun WallpaperItem(
     onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
     onWallpaperViewClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    wallpaperDrawable : Bitmap? = null
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -66,7 +67,7 @@ fun WallpaperItem(
         if (selected) 24.dp else 16.dp
     }
 
-    val dimension = wallpaperUri.toUri().getImageDimensions(context)
+    val dimension = wallpaperDrawable?.let { Pair(it.width, it.height) } ?: wallpaperUri.toUri().getImageDimensions(context)
     val aspectRatio = (dimension.first.toFloat()/dimension.second.toFloat())
 
     Box(
@@ -88,7 +89,7 @@ fun WallpaperItem(
             )
     ) {
         GlideImage(
-            imageModel = { wallpaperUri.toUri() },
+            imageModel = { wallpaperDrawable ?: wallpaperUri.toUri() },
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center
@@ -130,7 +131,6 @@ fun WallpaperItem(
     }
 }
 
-//https://stackoverflow.com/a/73214367
 fun Uri.getImageDimensions(context: Context): Pair<Int, Int> {
     val inputStream = context.contentResolver.openInputStream(this)!!
     val exif = ExifInterface(inputStream)

@@ -18,8 +18,12 @@ class WallpaperBootReceiver : BroadcastReceiver() {
             Log.d("PaperizeWallpaperChanger", "Boot completed")
             val serviceIntent = Intent(context, WallpaperService::class.java)
             serviceIntent.action = WallpaperService.Actions.START.toString()
-            val timeInMinutes = runBlocking { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
-            serviceIntent.putExtra("timeInMinutes", timeInMinutes)
+            runBlocking {
+                val timeInMinutes = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                val setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
+                serviceIntent.putExtra("timeInMinutes", timeInMinutes)
+                serviceIntent.putExtra("setLockWithHome", setLockWithHome)
+            }
             context.startForegroundService(serviceIntent);
         }
     }

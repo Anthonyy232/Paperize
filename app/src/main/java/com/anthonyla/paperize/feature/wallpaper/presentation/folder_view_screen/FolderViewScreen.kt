@@ -31,10 +31,9 @@ fun FolderViewScreen(
         topBar = {
             FolderViewTopBar(
                 title = folderName ?: "",
-                onBackClick = {
-                    onBackClick()
-                },
-            )
+            ) {
+                onBackClick()
+            }
         },
         content = {
             LazyVerticalStaggeredGrid(

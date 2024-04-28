@@ -12,8 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,72 +42,77 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun CurrentSelectedAlbum(
     selectedAlbum: SelectedAlbum?,
-    onOpenBottomSheet: () -> Unit
+    onOpenBottomSheet: () -> Unit,
+    onStop: () -> Unit
 ) {
-    Row(
+    ListItem(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-    ) {
-        ListItem(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .clickable { onOpenBottomSheet() },
-            headlineContent = {
+            .padding(16.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onOpenBottomSheet() },
+        headlineContent = {
+            Text(
+                text = selectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),
+                style = MaterialTheme.typography.titleMedium
+            ) },
+        supportingContent = {
+            if (selectedAlbum != null) {
                 Text(
-                    text = selectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),
-                    style = MaterialTheme.typography.titleMedium
-                ) },
-            supportingContent = {
+                    text = (selectedAlbum.wallpapers.size.toString()) + stringResource(R.string.wallpaper),
+                    style = MaterialTheme.typography.bodySmall,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } },
+        leadingContent = {
+            Box (
+                modifier = Modifier.size(60.dp)
+            ) {
                 if (selectedAlbum != null) {
-                    Text(
-                        text = (selectedAlbum.wallpapers.size.toString()) + stringResource(R.string.wallpaper),
-                        style = MaterialTheme.typography.bodySmall,
-                        overflow = TextOverflow.Ellipsis
+                    GlideImage(
+                        imageModel = { selectedAlbum.album.coverUri },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.FillBounds,
+                            alignment = Alignment.Center,
+                        ),
+                        requestBuilder = {
+                            Glide
+                                .with(LocalContext.current)
+                                .asBitmap()
+                                .transition(BitmapTransitionOptions.withCrossFade())
+                        },
+                        loading = {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
+                        },
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(16.dp))
                     )
-                } },
-                leadingContent = {
-                Box (
-                    modifier = Modifier.size(60.dp)
-                ) {
-                    if (selectedAlbum != null) {
-                        GlideImage(
-                            imageModel = { selectedAlbum.album.coverUri },
-                            imageOptions = ImageOptions(
-                                contentScale = ContentScale.FillBounds,
-                                alignment = Alignment.Center,
-                            ),
-                            requestBuilder = {
-                                Glide
-                                    .with(LocalContext.current)
-                                    .asBitmap()
-                                    .transition(BitmapTransitionOptions.withCrossFade())
-                            },
-                            loading = {
-                                Box(modifier = Modifier.matchParentSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
-                            },
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                    } else {
-                        Image(
-                            imageVector = Icons.Default.RadioButtonUnchecked,
-                            contentDescription = stringResource(R.string.no_icon),
-                            modifier = Modifier.fillMaxSize()
-                        )
+                } else {
+                    Image(
+                        imageVector = Icons.Default.RadioButtonUnchecked,
+                        contentDescription = stringResource(R.string.no_icon),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        },
+        trailingContent = {
+            Row {
+                if (selectedAlbum != null) {
+                    IconButton(onClick = { onStop() }) {
+                        Icon(imageVector = Icons.Default.Stop, contentDescription = stringResource(R.string.stop_the_album))
                     }
                 }
-            },
-            trailingContent = {
-                Icon(
-                    contentDescription = stringResource(R.string.click_to_select_a_different_album),
-                    imageVector = Icons.Filled.ArrowDropDown,
-                )
-            },
-            tonalElevation = 5.dp
-        )
-    }
+                IconButton(onClick = { onOpenBottomSheet() }) {
+                    Icon(
+                        contentDescription = stringResource(R.string.click_to_select_a_different_album),
+                        imageVector = Icons.Filled.ArrowDropDown,
+                    )
+                }
+            }
+        },
+        tonalElevation = 5.dp
+    )
 }
