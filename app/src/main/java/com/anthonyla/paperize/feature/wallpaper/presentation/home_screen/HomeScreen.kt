@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -96,15 +97,19 @@ fun HomeScreen(
                     )
                 }
             }
-            HorizontalPager(state = pagerState, beyondBoundsPageCount = 1) { index ->
+            HorizontalPager(
+                state = pagerState,
+                outOfBoundsPageCount = 0,
+                userScrollEnabled = true,
+            ) { index ->
                 when(index) {
                     0 -> WallpaperScreen(
-                        onScheduleWallpaperChanger = { onScheduleWallpaperChanger(it) },
-                        onStop = { onStop() }
+                        onScheduleWallpaperChanger = onScheduleWallpaperChanger,
+                        onStop = onStop
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },
-                        onViewAlbum = { onAlbumViewClick(it) }
+                        onViewAlbum = onAlbumViewClick
                     )
                 }
             }

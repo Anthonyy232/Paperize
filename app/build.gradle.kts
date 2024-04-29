@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id ("com.mikepenz.aboutlibraries.plugin")
 }
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -82,6 +83,9 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.4.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation("com.mikepenz:aboutlibraries-core:11.1.3")
+    implementation("com.mikepenz:aboutlibraries-compose-m3:11.1.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.0-alpha03")

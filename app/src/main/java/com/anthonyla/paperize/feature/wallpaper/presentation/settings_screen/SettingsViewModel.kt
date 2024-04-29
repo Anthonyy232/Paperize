@@ -1,21 +1,22 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,13 +39,19 @@ class SettingsViewModel @Inject constructor (
             val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
             val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
             val setLockWithHome = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false }
+            val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
+            val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
+            val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
 
             _state.update { it.copy(
                 darkMode = darkMode.await(),
                 dynamicTheming = dynamicTheming.await(),
                 interval = wallpaperInterval.await(),
                 setLockWithHome = setLockWithHome.await(),
-                firstLaunch = firstLaunch.await()
+                firstLaunch = firstLaunch.await(),
+                lastSetTime = lastSetTime.await(),
+                nextSetTime = nextSetTime.await(),
+                animate = animate.await()
             ) }
             setKeepOnScreenCondition = false
         }
@@ -60,18 +67,27 @@ class SettingsViewModel @Inject constructor (
                     ) }
                 }
             }
-            is SettingsEvent.RefreshUiState -> {
-                viewModelScope.launch {
-                    currentGetJob?.cancel()
-                    currentGetJob = viewModelScope.launch {
-                        _state.update { it.copy(
-                            darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE),
-                            dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
-                                true -> true
-                                false, null -> false
-                            }
-                        ) }
-                    }
+            is SettingsEvent.Refresh -> {
+                currentGetJob = viewModelScope.launch {
+                    val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
+                    val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
+                    val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
+                    val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
+                    val setLockWithHome = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false }
+                    val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
+                    val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
+                    val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
+
+                    _state.update { it.copy(
+                        darkMode = darkMode.await(),
+                        dynamicTheming = dynamicTheming.await(),
+                        interval = wallpaperInterval.await(),
+                        setLockWithHome = setLockWithHome.await(),
+                        firstLaunch = firstLaunch.await(),
+                        lastSetTime = lastSetTime.await(),
+                        nextSetTime = nextSetTime.await(),
+                        animate = animate.await()
+                    ) }
                 }
             }
             is SettingsEvent.SetDarkMode -> {
@@ -97,11 +113,30 @@ class SettingsViewModel @Inject constructor (
                     ) }
                 }
             }
+            is SettingsEvent.SetAnimate -> {
+                viewModelScope.launch {
+                    when (event.animate) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ANIMATE_TYPE, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ANIMATE_TYPE, false) }
+                    }
+                    _state.update { it.copy(
+                        animate = event.animate
+                    ) }
+                }
+            }
             is SettingsEvent.SetWallpaperInterval -> {
                 viewModelScope.launch {
+                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yy hh:mm\na")
+                    val time = LocalDateTime.now()
+                    val formattedLastSetTime = time.format(formatter)
+                    val formattedNextSetTime = time.plusMinutes(event.interval.toLong()).format(formatter)
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, formattedLastSetTime)
+                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, formattedNextSetTime)
                     settingsDataStoreImpl.putInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL, event.interval)
                     _state.update { it.copy(
-                        interval = event.interval
+                        interval = event.interval,
+                        lastSetTime = formattedLastSetTime,
+                        nextSetTime = formattedNextSetTime
                     ) }
                 }
             }
@@ -116,31 +151,6 @@ class SettingsViewModel @Inject constructor (
                     ) }
                 }
             }
-            is SettingsEvent.RefreshWallpaperState -> {
-                viewModelScope.launch {
-                    currentGetJob?.cancel()
-                    currentGetJob = viewModelScope.launch {
-                        _state.update { it.copy(
-                            interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-                            setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
-                        ) }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun refreshSettings() {
-        currentGetJob?.cancel()
-        currentGetJob = viewModelScope.launch {
-            _state.update { it.copy(
-                darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE),
-                dynamicTheming = when(settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)) {
-                    true -> true
-                    false, null -> false
-                },
-                interval = settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
-            ) }
         }
     }
 }

@@ -41,4 +41,18 @@
     <string name="startup">Startup</string>
     <string name="agree">Agree</string>
     <string name="welcome">Welcome</string>
+    <string name="notifications">Notifications</string>
+    <string name="continue_button">I\'m In</string>
+    <string name="notification_permission_is_required_for_this_app_to_work_properly">Notification permission is required for this app to work properly</string>
+    <string name="allow">Allow</string>
+    <string name="notification_info_message">Notifications are required for this app to work properly. If not given, the system may terminate the app as a service. You can mute notifications in the settings later through notifications channel categories.</string>
+    <string name="set_as_lock_screen">Set as lock screen</string>
+    <string name="lock_screen">Lock screen</string>
+    <string name="home">Home screen</string>
+    <string name="last_change">Last change</string>
+    <string name="next_change">Next change</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_screen">Privacy Screen</string>
+    <string name="licenses">Licenses</string>
+    <string name="licenses_screen">Licenses Screen</string>
 </resources>

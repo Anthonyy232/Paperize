@@ -6,6 +6,7 @@ import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -26,19 +27,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class WallpaperService: Service() {
     @Inject lateinit var repository: SelectedAlbumRepository
+    @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var runnableCode: Runnable
     private var timeInMinutes: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
-    private var setLockWithHome: Boolean = false
 
-    companion object {
-        var isRunning = false
-    }
     enum class Actions {
         START,
         STOP
@@ -54,7 +54,6 @@ class WallpaperService: Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(1, createNotification(0, 0))
-        isRunning = true
         runnableCode = object : Runnable {
             override fun run() {
                 val self = this
@@ -78,10 +77,7 @@ class WallpaperService: Service() {
         handler.removeCallbacks(runnableCode)
         when(intent?.action) {
             Actions.START.toString() -> {
-                isRunning = true
                 timeInMinutes = intent.getIntExtra("timeInMinutes", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                setLockWithHome = intent.getBooleanExtra("setLockWithHome", false)
-                Log.d("PaperizeWallpaperChanger", "Service started with interval $timeInMinutes minutes")
                 // Schedule the next wallpaper change
                 runnableCode = object : Runnable {
                     override fun run() {
@@ -100,7 +96,10 @@ class WallpaperService: Service() {
                 handler.post(runnableCode)
             }
             Actions.STOP.toString() -> {
-                isRunning = false
+                CoroutineScope(Dispatchers.IO).launch {
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, "")
+                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, "")
+                }
                 stopSelf()
             }
         }
@@ -113,15 +112,17 @@ class WallpaperService: Service() {
     override fun onDestroy() {
         Log.d("PaperizeWallpaperChanger", "Service destroyed")
         super.onDestroy()
-        isRunning = false
         handler.removeCallbacks(runnableCode)
+        CoroutineScope(Dispatchers.IO).launch {
+            settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, "")
+            settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, "")
+        }
     }
 
     /**
      * Creates a notification for the wallpaper service
      */
     private fun createNotification(current: Int = 0, total: Int = 0): Notification {
-
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
             .setContentTitle("Paperize")
             .setContentText("Rotation: $current/$total wallpapers\nInterval: ${formatTime(timeInMinutes)}")
@@ -134,6 +135,11 @@ class WallpaperService: Service() {
      * If none left, reshuffle the wallpapers and pick the first one
      */
     private suspend fun changeWallpaper(context: Context) {
+        val formatter = DateTimeFormatter.ofPattern("MM/dd/yy hh:mm\na")
+        val time = LocalDateTime.now()
+        settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, time.format(formatter))
+        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, time.plusMinutes(timeInMinutes.toLong()).format(formatter))
+        val setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
         val album = repository.getSelectedAlbum().first().firstOrNull()
         album?.let {
             val notification = createNotification(it.album.wallpapersInQueue.size, it.wallpapers.size)

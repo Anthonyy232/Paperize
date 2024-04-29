@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,14 +44,14 @@ fun AddAlbumScreen(
     onConfirmation: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
     onShowFolderView: (String, String?, List<String>) -> Unit
-    ) {
+) {
     val context = LocalContext.current
-    val lazyListState = rememberLazyStaggeredGridState()
+    val lazyGridState = rememberLazyStaggeredGridState()
     val state = viewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
-
-    if (state.value.initialAlbumName.isEmpty())
+    if (state.value.initialAlbumName.isEmpty()) {
         viewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
+    }
 
     BackHandler {
         if (selectionMode) {
@@ -67,12 +68,14 @@ fun AddAlbumScreen(
         contract = ActivityResultContracts.OpenMultipleDocuments(),
         onResult = { uris: List<Uri> ->
             for (uri in uris) {
-                val takeFlags: Int =
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                viewModel.onEvent(
-                    AddAlbumEvent.AddWallpaper(wallpaperUri = uri.toString())
-                )
+                val persistedUriPermissions = context.contentResolver.persistedUriPermissions
+                if (persistedUriPermissions.any { it.uri == uri }) {
+                    viewModel.onEvent(AddAlbumEvent.AddWallpaper(wallpaperUri = uri.toString()))
+                } else {
+                    Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
+                }
             }
         }
     )
@@ -81,13 +84,15 @@ fun AddAlbumScreen(
     val folderPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree(),
         onResult = { uri: Uri? ->
-            val takeFlags: Int =
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             if (uri != null) {
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                viewModel.onEvent(
-                    AddAlbumEvent.AddFolder(directoryUri = uri.toString())
-                )
+                val persistedUriPermissions = context.contentResolver.persistedUriPermissions
+                if (persistedUriPermissions.any { it.uri == uri }) {
+                    viewModel.onEvent(AddAlbumEvent.AddFolder(directoryUri = uri.toString()))
+                } else {
+                    Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
+                }
             }
         }
     )
@@ -106,6 +111,7 @@ fun AddAlbumScreen(
                 onConfirmationClick = {
                     viewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
                     viewModel.onEvent(AddAlbumEvent.SaveAlbum)
+                    viewModel.onEvent(AddAlbumEvent.ClearState)
                     onConfirmation()
                 },
                 onSelectAllClick = {
@@ -121,21 +127,20 @@ fun AddAlbumScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible =
-                !lazyListState.isScrollInProgress || lazyListState.firstVisibleItemScrollOffset < 0,
+                visible = !lazyGridState.isScrollInProgress || lazyGridState.firstVisibleItemScrollOffset < 0,
                 enter = scaleIn(tween(400, 50, FastOutSlowInEasing)),
                 exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
             ) {
-                AddAlbumAnimatedFab(
-                    menuOptions = AddAlbumFabMenuOptions(),
-                    onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                    onFolderClick = { folderPickerLauncher.launch(null) }
-                )
             }
+            AddAlbumAnimatedFab(
+                menuOptions = AddAlbumFabMenuOptions(),
+                onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                onFolderClick = { folderPickerLauncher.launch(null) }
+            )
         },
         content = {
             LazyVerticalStaggeredGrid(
-                state = lazyListState,
+                state = lazyGridState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),

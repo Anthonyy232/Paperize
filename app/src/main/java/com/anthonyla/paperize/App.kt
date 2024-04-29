@@ -14,7 +14,7 @@ import dagger.hilt.android.HiltAndroidApp
 class App: Application() {
     override fun onCreate() {
         super.onCreate()
-        val channel = NotificationChannel("wallpaper_service_channel", "Paperize", NotificationManager.IMPORTANCE_NONE)
+        val channel = NotificationChannel("wallpaper_service_channel", "Paperize", NotificationManager.IMPORTANCE_LOW)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }

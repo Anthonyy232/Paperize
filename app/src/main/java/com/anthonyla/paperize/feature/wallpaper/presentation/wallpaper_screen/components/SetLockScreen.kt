@@ -1,16 +1,14 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 
 @Composable
@@ -32,17 +33,18 @@ fun SetLockScreenSwitch(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Surface(
-        tonalElevation = 5.dp,
+        tonalElevation = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
             .clip(RoundedCornerShape(16.dp))
     ) {
         Column (horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Row {
+            Row (horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Set as lock screen",
-                    modifier = Modifier.padding(16.dp)
+                    text = stringResource(R.string.set_as_lock_screen),
+                    modifier = Modifier.padding(16.dp),
+                    fontWeight = FontWeight.W500
                 )
                 Switch(
                     checked = checked,
@@ -61,7 +63,7 @@ fun SetLockScreenSwitch(
                             .padding(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Lock screen")
+                        Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
                         if (albumUri != null) {
                             WallpaperItem(
                                 wallpaperUri = albumUri,
@@ -80,7 +82,7 @@ fun SetLockScreenSwitch(
                             .padding(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Home screen")
+                        Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
                         if (albumUri != null) {
                             WallpaperItem(
                                 wallpaperUri = albumUri,

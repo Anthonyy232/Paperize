@@ -1,11 +1,15 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -21,11 +25,14 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewMod
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.LicensesScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.startup.StartupScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.notifications_screen.NotificationScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.privacy_screen.PrivacyScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.startup_screen.StartupScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavConstants.INITIAL_OFFSET
@@ -34,8 +41,10 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitio
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
 import com.anthonyla.paperize.feature.wallpaper.wallpaperservice.WallpaperService
 import com.google.gson.Gson
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URLEncoder
@@ -51,6 +60,7 @@ fun PaperizeApp(
     val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
@@ -107,6 +117,7 @@ fun PaperizeApp(
         startDestination = if (firstLaunch) NavScreens.Startup.route else NavScreens.Home.route,
         modifier = Modifier.navigationBarsPadding()
     ) {
+        // Navigate to the startup screen to show the privacy policy and notification screen
         composable(
             route = NavScreens.Startup.route,
             enterTransition = {
@@ -124,11 +135,46 @@ fun PaperizeApp(
         ) {
             StartupScreen(
                 onAgree = {
-                    settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
-                    navController.navigate(NavScreens.Home.route)
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                        settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
+                        navController.navigate(NavScreens.Home.route) {
+                            popUpTo(NavScreens.Startup.route) { inclusive = true }
+                            popUpTo(NavScreens.Notification.route) { inclusive = true }
+                        }
+                    }
+                    else {
+                        navController.navigate(NavScreens.Notification.route)
+                    }
                 }
             )
         }
+        // Navigate to the notification screen to ask for notification permission
+        composable(
+            route = NavScreens.Notification.route,
+            enterTransition = {
+                sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
+            },
+            exitTransition = {
+                sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popEnterTransition = {
+                sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popExitTransition = {
+                sharedXTransitionOut(target = { (it * INITIAL_OFFSET).toInt() })
+            },
+        ) {
+            NotificationScreen(
+                onAgree = {
+                    settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
+                    navController.navigate(NavScreens.Home.route) {
+                        popUpTo(NavScreens.Startup.route) { inclusive = true }
+                        popUpTo(NavScreens.Notification.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        // Navigate to the home screen to view all albums and wallpapers
         composable(
             route = NavScreens.Home.route,
             enterTransition = {
@@ -157,7 +203,6 @@ fun PaperizeApp(
                     val intent = Intent(context, WallpaperService::class.java).apply {
                         action = WallpaperService.Actions.START.toString()
                         putExtra("timeInMinutes", timeInMinutes)
-                        putExtra("setLockWithHome", settingsViewModel.state.value.setLockWithHome)
                     }
                     context.startForegroundService(intent)
                 },
@@ -344,7 +389,56 @@ fun PaperizeApp(
                 },
                 onDynamicThemingClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
-                }
+                },
+                onAnimateClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetAnimate(it))
+                },
+                onPrivacyClick = {
+                    navController.navigate(NavScreens.Privacy.route)
+                },
+                onLicenseClick = {
+                    navController.navigate(NavScreens.Licenses.route)
+                },
+            )
+        }
+        // Navigate to the privacy screen to view the privacy policy
+        composable(
+            route = NavScreens.Privacy.route,
+            enterTransition = {
+                sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
+            },
+            exitTransition = {
+                sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popEnterTransition = {
+                sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popExitTransition = {
+                sharedXTransitionOut(target = { (it * INITIAL_OFFSET).toInt() })
+            },
+        ) {
+            PrivacyScreen(
+                onBackClick = { navController.navigateUp() },
+            )
+        }
+        // Navigate to the licenses screen to view the licenses of the libraries used
+        composable(
+            route = NavScreens.Licenses.route,
+            enterTransition = {
+                sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
+            },
+            exitTransition = {
+                sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popEnterTransition = {
+                sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
+            },
+            popExitTransition = {
+                sharedXTransitionOut(target = { (it * INITIAL_OFFSET).toInt() })
+            },
+        ) {
+            LicensesScreen(
+                onBackClick = { navController.navigateUp() },
             )
         }
     }

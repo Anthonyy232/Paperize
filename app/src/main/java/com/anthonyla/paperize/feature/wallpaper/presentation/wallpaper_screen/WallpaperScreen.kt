@@ -30,6 +30,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewMod
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SetLockScreenSwitch
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
@@ -91,27 +92,62 @@ fun WallpaperScreen(
                         }
                     )
                 }
-                item {
-                    AnimatedVisibility(
-                        visible = selectedState.value.selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
-                        TimeSliders(
-                            timeInMinutes = settingsState.value.interval,
-                            onTimeChange = { days, hours, minutes ->
-                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(totalMinutes))
-                                onScheduleWallpaperChanger(totalMinutes)
+                if (settingsState.value.animate) {
+                    item {
+                        AnimatedVisibility(
+                            visible = selectedState.value.selectedAlbum != null,
+                            enter = slideInVertically(initialOffsetY = { -it }),
+                            exit = fadeOut()
+                        ) {
+                            if (selectedState.value.selectedAlbum != null) {
+                                CurrentAndNextChange(
+                                    settingsState.value.lastSetTime,
+                                    settingsState.value.nextSetTime
+                                )
                             }
-                        )
+                        }
+                        AnimatedVisibility(
+                            visible = selectedState.value.selectedAlbum != null,
+                            enter = slideInVertically(initialOffsetY = { -it }),
+                            exit = fadeOut()
+                        ) {
+                            if (selectedState.value.selectedAlbum != null) {
+                                SetLockScreenSwitch(
+                                    albumUri = selectedState.value.selectedAlbum!!.album.coverUri,
+                                    checked = settingsState.value.setLockWithHome,
+                                    onCheckedChange = { isChecked ->
+                                        settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(isChecked))
+                                    }
+                                )
+                            }
+                        }
+                        AnimatedVisibility(
+                            visible = selectedState.value.selectedAlbum != null,
+                            enter = slideInVertically(initialOffsetY = { -it }),
+                            exit = fadeOut()
+                        ) {
+                            TimeSliders(
+                                timeInMinutes = settingsState.value.interval,
+                                onTimeChange = { days, hours, minutes ->
+                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                    settingsViewModel.onEvent(
+                                        SettingsEvent.SetWallpaperInterval(totalMinutes)
+                                    )
+                                    onScheduleWallpaperChanger(totalMinutes)
+                                }
+                            )
+                        }
                     }
-
-                    AnimatedVisibility(
-                        visible = selectedState.value.selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
+                } else {
+                    item {
+                        if (selectedState.value.selectedAlbum != null) {
+                            CurrentAndNextChange(
+                                settingsState.value.lastSetTime,
+                                settingsState.value.nextSetTime
+                            )
+                        }
+                    }
+                    item {
                         if (selectedState.value.selectedAlbum != null) {
                             SetLockScreenSwitch(
                                 albumUri = selectedState.value.selectedAlbum!!.album.coverUri,
@@ -121,6 +157,20 @@ fun WallpaperScreen(
                                 }
                             )
                         }
+                    }
+                    item {
+                        TimeSliders(
+                            timeInMinutes = settingsState.value.interval,
+                            onTimeChange = { days, hours, minutes ->
+                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                settingsViewModel.onEvent(
+                                    SettingsEvent.SetWallpaperInterval(
+                                        totalMinutes
+                                    )
+                                )
+                                onScheduleWallpaperChanger(totalMinutes)
+                            }
+                        )
                     }
                 }
             }
@@ -145,8 +195,6 @@ fun WallpaperScreen(
                             ),
                             wallpapers = wallpapers
                         )
-                        wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
-                        onScheduleWallpaperChanger(settingsState.value.interval)
                         openBottomSheet = false
                         scope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
@@ -156,6 +204,8 @@ fun WallpaperScreen(
                                 duration = SnackbarDuration.Short
                             )
                         }
+                        wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
+                        onScheduleWallpaperChanger(settingsState.value.interval)
                     }
                 )
             }

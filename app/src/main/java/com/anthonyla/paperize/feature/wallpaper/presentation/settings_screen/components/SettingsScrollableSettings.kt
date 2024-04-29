@@ -11,24 +11,30 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
+import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Scrollable settings screen to wrap all settings components
  */
 @Composable
-fun ScrollableSettings(
+fun SettingsScrollableSettings(
     settingsState: StateFlow<SettingsState>,
     largeTopAppBarHeightPx: Dp,
     scroll: ScrollState,
     onDynamicThemingClick: (Boolean) -> Unit,
-    onDarkModeClick: (Boolean?) -> Unit
+    onDarkModeClick: (Boolean?) -> Unit,
+    onAnimateClick: (Boolean) -> Unit,
+    onPrivacyClick: () -> Unit,
+    onLicenseClick: () -> Unit
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
@@ -55,15 +61,18 @@ fun ScrollableSettings(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        ListSectionTitle("Privacy")
-        //add crash reporting settings
-        Spacer(modifier = Modifier.height(16.dp))
-        DynamicThemingListItem(
-            dynamicTheming = state.value.dynamicTheming,
-            onDynamicThemingClick = { onDynamicThemingClick(it) }
+        AnimationListItem(
+            animate = state.value.animate,
+            onAnimateClick = { onAnimateClick(it) }
         )
 
-        //GPL and License and link to github etc.
+        Spacer(modifier = Modifier.height(16.dp))
+        ListSectionTitle("About")
+        Spacer(modifier = Modifier.height(16.dp))
+        PrivacyPolicyListItem (onPrivacyPolicyClick = onPrivacyClick)
+        Spacer(modifier = Modifier.height(16.dp))
+        LicenseListItem(onLicenseClick = onLicenseClick)
+        Spacer(modifier = Modifier.height(16.dp))
+        //GPL and License and link to github etc, contact, terms of service, privacy policy
     }
 }

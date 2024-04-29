@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,7 +39,7 @@ fun TimeSliders(
     var job by remember { mutableStateOf<Job?>(null) }
 
     Surface(
-        tonalElevation = 5.dp,
+        tonalElevation = 10.dp,
         modifier = Modifier
             .padding(16.dp)
             .clip(RoundedCornerShape(16.dp))
@@ -68,7 +69,8 @@ fun TimeSliders(
 
             Text(
                 text = formattedTime,
-                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 12.dp))
+                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 12.dp)),
+                fontWeight = FontWeight.W500
             )
 
             Slider(

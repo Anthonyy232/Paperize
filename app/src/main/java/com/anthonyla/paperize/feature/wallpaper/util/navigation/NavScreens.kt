@@ -5,11 +5,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BrowseGallery
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Newspaper
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.BrowseGallery
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Newspaper
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Start
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,12 +29,31 @@ sealed class NavScreens(val route: String, @StringRes val resourceId: Int, val u
      * Home screen that the user lands on initially
      */
     object Startup : NavScreens("startup_screen", R.string.startup, Icons.Outlined.Start, Icons.Filled.Start)
+
+    /**
+     * Notification screen for the application to ask for permission
+     */
+    object Notification : NavScreens("notification_screen", R.string.notifications, Icons.Outlined.Notifications, Icons.Filled.Notifications)
+
+    /**
+     * Home screen that the user lands on initially containing the wallpapers and albums
+     */
     object Home : NavScreens("home_screen", R.string.home_screen, Icons.Outlined.Image, Icons.Filled.Image)
 
     /**
      * Settings screen for the application
      */
     object Settings : NavScreens("settings_screen", R.string.settings_screen, Icons.Outlined.Settings, Icons.Filled.Settings)
+
+    /**
+     * License screen for the application
+     */
+    object Licenses : NavScreens("licenses_screen", R.string.licenses_screen, Icons.Outlined.Newspaper, Icons.Filled.Newspaper)
+
+    /**
+     * Settings screen for the application
+     */
+    object Privacy : NavScreens("privacy_screen", R.string.privacy_screen, Icons.Outlined.PrivacyTip, Icons.Filled.PrivacyTip)
 
     /**
      * Add/Edit screen for album when adding or editing

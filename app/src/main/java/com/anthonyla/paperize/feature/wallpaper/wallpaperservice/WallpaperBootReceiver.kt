@@ -24,7 +24,7 @@ class WallpaperBootReceiver : BroadcastReceiver() {
                 serviceIntent.putExtra("timeInMinutes", timeInMinutes)
                 serviceIntent.putExtra("setLockWithHome", setLockWithHome)
             }
-            context.startForegroundService(serviceIntent);
+            context.startForegroundService(serviceIntent)
         }
     }
 }
