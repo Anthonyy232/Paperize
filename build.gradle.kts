@@ -1,5 +1,4 @@
 buildscript {
-    val agp_version by extra("8.3.1")
     repositories {
         google()
     }

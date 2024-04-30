@@ -214,13 +214,15 @@ fun AlbumViewScreen(
                             onWallpaperViewClick = {
                                 onShowWallpaperView(wallpaper.wallpaperUri)
                             },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                ),
-                            )
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .animateItem(
+                                    placementSpec = tween(
+                                        durationMillis = 800,
+                                        delayMillis = 0,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                )
                         )
                     }
                 }
