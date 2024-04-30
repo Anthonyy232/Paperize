@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -70,15 +69,14 @@ fun AddAlbumScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments(),
         onResult = { uris: List<Uri> ->
-            for (uri in uris) {
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            val uriList = uris.mapNotNull { uri ->
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
                 val persistedUriPermissions = context.contentResolver.persistedUriPermissions
-                if (persistedUriPermissions.any { it.uri == uri }) {
-                    addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpaper(wallpaperUri = uri.toString()))
-                } else {
-                    Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
-                }
+                if (persistedUriPermissions.any { it.uri == uri }) uri.toString() else null
+            }
+            if (uriList.isNotEmpty()) {
+                addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
             }
         }
     )
@@ -92,9 +90,7 @@ fun AddAlbumScreen(
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
                 val persistedUriPermissions = context.contentResolver.persistedUriPermissions
                 if (persistedUriPermissions.any { it.uri == uri }) {
-                    addAlbumViewModel.onEvent(AddAlbumEvent.AddFolder(directoryUri = uri.toString()))
-                } else {
-                    Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
+                    addAlbumViewModel.onEvent(AddAlbumEvent.AddFolder(uri.toString()))
                 }
             }
         }
@@ -137,8 +133,14 @@ fun AddAlbumScreen(
                 ) {
                     AddAlbumAnimatedFab(
                         menuOptions = AddAlbumFabMenuOptions(),
-                        onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                        onFolderClick = { folderPickerLauncher.launch(null) },
+                        onImageClick = {
+                            selectionMode = false
+                            imagePickerLauncher.launch(arrayOf("image/*"))
+                        },
+                        onFolderClick = {
+                            selectionMode = false
+                            folderPickerLauncher.launch(null)
+                        },
                         animate = true
                     )
                 }
@@ -146,8 +148,14 @@ fun AddAlbumScreen(
             else {
                 AddAlbumAnimatedFab(
                     menuOptions = AddAlbumFabMenuOptions(),
-                    onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                    onFolderClick = { folderPickerLauncher.launch(null) },
+                    onImageClick = {
+                        selectionMode = false
+                        imagePickerLauncher.launch(arrayOf("image/*"))
+                    },
+                    onFolderClick = {
+                        selectionMode = false
+                        folderPickerLauncher.launch(null)
+                    },
                     animate = false
                 )
             }

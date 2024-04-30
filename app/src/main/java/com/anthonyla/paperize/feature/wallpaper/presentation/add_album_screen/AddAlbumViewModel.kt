@@ -113,40 +113,52 @@ class AddAlbumViewModel @Inject constructor(
                     }
                 }
             }
-            is AddAlbumEvent.AddWallpaper -> {
+            is AddAlbumEvent.AddWallpapers -> {
                 viewModelScope.launch {
-                    if (!_state.value.wallpapers.any { it.wallpaperUri == event.wallpaperUri }) {
-                        _state.update { it.copy(
-                            wallpapers = it.wallpapers.plus(
-                                Wallpaper(
-                                    initialAlbumName = it.initialAlbumName,
-                                    wallpaperUri = event.wallpaperUri,
-                                    key = event.wallpaperUri.hashCode() + it.initialAlbumName.hashCode(),
-                                )
-                            ),
-                        ) }
-                        updateIsEmpty()
+                    val newWallpaperUris = event.wallpaperUris.filterNot { it in _state.value.wallpapers.map { wallpaper -> wallpaper.wallpaperUri } }
+                    val newWallpapers = newWallpaperUris.map { uri ->
+                        Wallpaper(
+                            initialAlbumName = _state.value.initialAlbumName,
+                            wallpaperUri = uri,
+                            key = uri.hashCode() + _state.value.initialAlbumName.hashCode(),
+                        )
+                    }
+                    _state.update {
+                        it.copy(
+                            selectedFolders = emptyList(),
+                            selectedWallpapers = emptyList(),
+                            allSelected = false,
+                            selectedCount = 0,
+                            wallpapers = it.wallpapers.plus(newWallpapers),
+                            isEmpty = false
+                        )
                     }
                 }
             }
             is AddAlbumEvent.AddFolder -> {
                 viewModelScope.launch {
-                    if (!_state.value.folders.any { it.folderUri == event.directoryUri }) {
+                    if (event.directoryUri !in _state.value.folders.map { it.folderUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
-                        _state.update { state ->
-                            state.copy( folders = state.folders.plus(
-                                Folder(
-                                    initialAlbumName = state.initialAlbumName,
-                                    folderName = folderName,
-                                    folderUri = event.directoryUri,
-                                    coverUri = wallpapers.randomOrNull(),
-                                    wallpapers = wallpapers,
-                                    key = event.directoryUri.hashCode() + state.initialAlbumName.hashCode()
+                        _state.update {
+                            it.copy(
+                                selectedFolders = emptyList(),
+                                selectedWallpapers = emptyList(),
+                                allSelected = false,
+                                selectedCount = 0,
+                                isEmpty = false,
+                                folders = it.folders.plus(
+                                    Folder(
+                                        initialAlbumName = it.initialAlbumName,
+                                        folderName = folderName,
+                                        folderUri = event.directoryUri,
+                                        coverUri = wallpapers.randomOrNull(),
+                                        wallpapers = wallpapers,
+                                        key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode()
+                                    )
                                 )
-                            ),
-                        ) }
-                        updateIsEmpty()
+                            )
+                        }
                     }
                 }
             }

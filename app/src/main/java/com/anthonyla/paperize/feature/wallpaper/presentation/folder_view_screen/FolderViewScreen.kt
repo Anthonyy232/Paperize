@@ -20,7 +20,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.
 
 @Composable
 fun FolderViewScreen(
-    folder: String,
     folderName: String?,
     wallpapers: List<String>,
     onBackClick: () -> Unit,

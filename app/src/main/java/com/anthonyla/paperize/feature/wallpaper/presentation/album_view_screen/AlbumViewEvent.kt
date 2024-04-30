@@ -11,6 +11,17 @@ sealed class AlbumViewEvent {
     data class DeleteSelected(
         val albumsWithWallpaper: AlbumWithWallpaperAndFolder
     ): AlbumViewEvent()
+
+    data class AddWallpapers(
+        val album: AlbumWithWallpaperAndFolder,
+        val wallpaperUris: List<String>
+    ): AlbumViewEvent()
+
+    data class AddFolder(
+        val album: AlbumWithWallpaperAndFolder,
+        val directoryUri: String
+    ): AlbumViewEvent()
+
     data class SelectWallpaper(
         val wallpaperUri: String
     ): AlbumViewEvent()

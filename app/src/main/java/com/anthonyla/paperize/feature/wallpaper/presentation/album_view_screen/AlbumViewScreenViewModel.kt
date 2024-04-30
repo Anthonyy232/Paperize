@@ -3,9 +3,14 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import android.app.Application
 import android.content.Context
+import android.webkit.MimeTypeMap
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
+import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -153,6 +158,57 @@ class AlbumViewScreenViewModel @Inject constructor(
                     }
                 }
             }
+
+            is AlbumViewEvent.AddWallpapers -> {
+                viewModelScope.launch {
+                    val newWallpaperUris = event.wallpaperUris.filterNot { it in event.album.wallpapers.map { wallpaper -> wallpaper.wallpaperUri } }
+                    val newWallpapers = newWallpaperUris.map { uri ->
+                        Wallpaper(
+                            initialAlbumName = event.album.album.initialAlbumName,
+                            wallpaperUri = uri,
+                            key = uri.hashCode() + event.album.album.initialAlbumName.hashCode(),
+                        )
+                    }
+                    repository.upsertWallpaperList(newWallpapers)
+                    _state.update {
+                        it.copy(
+                            selectedFolders = emptyList(),
+                            selectedWallpapers = emptyList(),
+                            allSelected = false,
+                            selectedCount = 0,
+                            maxSize = _state.value.maxSize + newWallpapers.size
+                        )
+                    }
+                }
+            }
+
+            is AlbumViewEvent.AddFolder -> {
+                viewModelScope.launch {
+                    if (event.directoryUri !in event.album.folders.map { it.folderUri }) {
+                        val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
+                        val folderName = getFolderNameFromUri(event.directoryUri, context)
+                        repository.upsertFolder(
+                            Folder(
+                                folderUri = event.directoryUri,
+                                folderName = folderName,
+                                initialAlbumName = event.album.album.initialAlbumName,
+                                key = event.directoryUri.hashCode() + event.album.album.initialAlbumName.hashCode(),
+                                coverUri = wallpapers.randomOrNull(),
+                                wallpapers = wallpapers
+                            )
+                        )
+                        _state.update {
+                            it.copy(
+                                selectedFolders = emptyList(),
+                                selectedWallpapers = emptyList(),
+                                allSelected = false,
+                                selectedCount = 0,
+                                maxSize = _state.value.maxSize + 1
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -164,5 +220,30 @@ class AlbumViewScreenViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
+        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
+        return listFilesRecursive(folderDocumentFile, context)
+    }
+
+    private fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
+        val files = mutableListOf<String>()
+        parent?.listFiles()?.forEach { file ->
+            if (file.isDirectory()) {
+                files.addAll(listFilesRecursive(file, context))
+            } else {
+                val extension = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
+                val allowedExtensions = listOf("jpg", "png", "heif", "webp")
+                if (extension in allowedExtensions) {
+                    files.add(file.uri.toString())
+                }
+            }
+        }
+        return files
+    }
+
+    private fun getFolderNameFromUri(folderUri: String, context: Context): String? {
+        return DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
     }
 }

@@ -12,8 +12,8 @@ sealed class AddAlbumEvent {
     data class ReflectAlbumName(
         val newAlbumName: String
     ): AddAlbumEvent()
-    data class AddWallpaper(
-        val wallpaperUri: String
+    data class AddWallpapers(
+        val wallpaperUris: List<String>
     ): AddAlbumEvent()
     data class AddFolder(
         val directoryUri: String
