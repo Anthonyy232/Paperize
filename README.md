@@ -29,11 +29,11 @@
 
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
 
-Playstore and Fdroid will be added soon
+Playstore and F-Droid will be added soon
 
 ## Technologies
 
-- [Kotlin]([https://kotlinlang.org/)) - A programming language that is used for Android app development
+- [Kotlin]([https://kotlinlang.org/) - A programming language that is used for Android app development
 - [Jetpack Compose](https://developer.android.com/develop/ui/compose) - A declarative UI toolkit for building native Android UI
 - [Material 3](https://m3.material.io/) - A UI design system git for modern UI guidelines
 - [Dagger Hilt](https://dagger.dev/hilt/) - A dependency injection library
