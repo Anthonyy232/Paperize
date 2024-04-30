@@ -9,12 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +40,13 @@ fun SettingsScrollableSettings(
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    var toContact by rememberSaveable { mutableStateOf(false) }
+    if (toContact) {
+        Contact(context)
+        toContact = false
+    }
+
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
@@ -73,6 +85,7 @@ fun SettingsScrollableSettings(
         Spacer(modifier = Modifier.height(16.dp))
         LicenseListItem(onLicenseClick = onLicenseClick)
         Spacer(modifier = Modifier.height(16.dp))
+        ContactListItem(onContactClick = { toContact = true })
         //GPL and License and link to github etc, contact, terms of service, privacy policy
     }
 }

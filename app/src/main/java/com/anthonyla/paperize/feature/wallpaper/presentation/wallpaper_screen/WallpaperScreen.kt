@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -21,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -164,9 +167,7 @@ fun WallpaperScreen(
                             onTimeChange = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                 settingsViewModel.onEvent(
-                                    SettingsEvent.SetWallpaperInterval(
-                                        totalMinutes
-                                    )
+                                    SettingsEvent.SetWallpaperInterval(totalMinutes)
                                 )
                                 onScheduleWallpaperChanger(totalMinutes)
                             }

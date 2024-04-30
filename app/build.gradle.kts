@@ -32,7 +32,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -66,19 +65,19 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:1.6.6")
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.6")
     implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.8.0-alpha07")
     implementation("androidx.compose.material:material:1.6.6")
     implementation("androidx.datastore:datastore:1.1.0")
     implementation("androidx.datastore:datastore-preferences:1.1.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.6")
     implementation("com.google.accompanist:accompanist-adaptive:0.34.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.compose.animation:animation:1.6.6")
+    implementation("androidx.compose.animation:animation:1.7.0-alpha07")
     implementation("androidx.core:core-splashscreen:1.1.0-rc01")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
-    implementation("net.engawapg.lib:zoomable:1.6.1")
+    implementation("net.engawapg.lib:zoomable:1.7.0-beta02")
     implementation("com.github.skydoves:landscapist-glide:2.3.3")
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
     implementation("androidx.hilt:hilt-work:1.2.0")

@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -26,25 +25,22 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.A
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.LicensesScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.notifications_screen.NotificationScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.privacy_screen.PrivacyScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.startup_screen.StartupScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavConstants.INITIAL_OFFSET
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionIn
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
 import com.anthonyla.paperize.feature.wallpaper.wallpaperservice.WallpaperService
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URLEncoder
@@ -60,7 +56,6 @@ fun PaperizeApp(
     val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale

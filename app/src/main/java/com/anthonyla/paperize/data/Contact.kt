@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat.startActivity
 fun Contact(context: Context) {
     val authorEmail = "anthonyyla.dev@gmail.com"
     val cc = ""
-    val subject = "[Contact] Paperize - A Wallpaper Changer"
+    val subject = "[Support] Paperize"
     val bodyText = "This is regarding the Paperize app for Android:\n"
     val mailto = "mailto:" + Uri.encode(authorEmail) +
             "?cc=" + Uri.encode(cc) +

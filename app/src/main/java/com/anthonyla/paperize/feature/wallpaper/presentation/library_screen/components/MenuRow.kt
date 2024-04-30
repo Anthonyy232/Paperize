@@ -40,7 +40,7 @@ fun MenuRow(text: String, icon: ImageVector?, horizontalExpansion: Dp, onClick: 
             text = text,
             overflow = TextOverflow.Visible,
             maxLines = 1,
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier.padding(end = 20.dp)
         )
     }
 }

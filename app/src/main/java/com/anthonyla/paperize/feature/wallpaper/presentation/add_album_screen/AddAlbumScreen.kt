@@ -35,10 +35,12 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 
 @Composable
 fun AddAlbumScreen(
-    viewModel: AddAlbumViewModel = hiltViewModel(),
+    addAlbumViewModel: AddAlbumViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     initialAlbumName: String,
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
@@ -47,19 +49,20 @@ fun AddAlbumScreen(
 ) {
     val context = LocalContext.current
     val lazyGridState = rememberLazyStaggeredGridState()
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val addAlbumState = addAlbumViewModel.state.collectAsStateWithLifecycle()
+    val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
-    if (state.value.initialAlbumName.isEmpty()) {
-        viewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
+    if (addAlbumState.value.initialAlbumName.isEmpty()) {
+        addAlbumViewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
     }
 
     BackHandler {
         if (selectionMode) {
             selectionMode = false
-            viewModel.onEvent(AddAlbumEvent.DeselectAll)
+            addAlbumViewModel.onEvent(AddAlbumEvent.DeselectAll)
         } else {
             onBackClick()
-            viewModel.onEvent(AddAlbumEvent.ClearState)
+            addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
         }
     }
 
@@ -72,7 +75,7 @@ fun AddAlbumScreen(
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
                 val persistedUriPermissions = context.contentResolver.persistedUriPermissions
                 if (persistedUriPermissions.any { it.uri == uri }) {
-                    viewModel.onEvent(AddAlbumEvent.AddWallpaper(wallpaperUri = uri.toString()))
+                    addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpaper(wallpaperUri = uri.toString()))
                 } else {
                     Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
                 }
@@ -89,7 +92,7 @@ fun AddAlbumScreen(
                 context.contentResolver.takePersistableUriPermission(uri, takeFlags)
                 val persistedUriPermissions = context.contentResolver.persistedUriPermissions
                 if (persistedUriPermissions.any { it.uri == uri }) {
-                    viewModel.onEvent(AddAlbumEvent.AddFolder(directoryUri = uri.toString()))
+                    addAlbumViewModel.onEvent(AddAlbumEvent.AddFolder(directoryUri = uri.toString()))
                 } else {
                     Log.e("AddAlbumScreen", "Failed to persist permission for $uri")
                 }
@@ -101,42 +104,53 @@ fun AddAlbumScreen(
         topBar = {
             AddAlbumSmallTopBar(
                 title = initialAlbumName,
-                isEmpty = state.value.isEmpty,
+                isEmpty = addAlbumState.value.isEmpty,
                 selectionMode = selectionMode,
-                albumState = viewModel.state,
+                albumState = addAlbumViewModel.state,
                 onBackClick = {
-                    viewModel.onEvent(AddAlbumEvent.ClearState)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
                     onBackClick()
                 },
                 onConfirmationClick = {
-                    viewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
-                    viewModel.onEvent(AddAlbumEvent.SaveAlbum)
-                    viewModel.onEvent(AddAlbumEvent.ClearState)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
+                    addAlbumViewModel.onEvent(AddAlbumEvent.SaveAlbum)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
                     onConfirmation()
                 },
                 onSelectAllClick = {
-                    if (!state.value.allSelected) viewModel.onEvent(AddAlbumEvent.SelectAll)
-                    else viewModel.onEvent(AddAlbumEvent.DeselectAll)
+                    if (!addAlbumState.value.allSelected) addAlbumViewModel.onEvent(AddAlbumEvent.SelectAll)
+                    else addAlbumViewModel.onEvent(AddAlbumEvent.DeselectAll)
                 },
                 onDeleteSelected = {
                     selectionMode = false
-                    viewModel.onEvent(AddAlbumEvent.DeleteSelected)
-                    viewModel.onEvent(AddAlbumEvent.DeselectAll)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.DeleteSelected)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.DeselectAll)
                 }
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = !lazyGridState.isScrollInProgress || lazyGridState.firstVisibleItemScrollOffset < 0,
-                enter = scaleIn(tween(400, 50, FastOutSlowInEasing)),
-                exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
-            ) {
+            if (settingsState.value.animate) {
+                AnimatedVisibility(
+                    visible = !lazyGridState.isScrollInProgress || lazyGridState.firstVisibleItemScrollOffset < 0,
+                    enter = scaleIn(tween(400, 50, FastOutSlowInEasing)),
+                    exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
+                ) {
+                    AddAlbumAnimatedFab(
+                        menuOptions = AddAlbumFabMenuOptions(),
+                        onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                        onFolderClick = { folderPickerLauncher.launch(null) },
+                        animate = true
+                    )
+                }
             }
-            AddAlbumAnimatedFab(
-                menuOptions = AddAlbumFabMenuOptions(),
-                onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                onFolderClick = { folderPickerLauncher.launch(null) }
-            )
+            else {
+                AddAlbumAnimatedFab(
+                    menuOptions = AddAlbumFabMenuOptions(),
+                    onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                    onFolderClick = { folderPickerLauncher.launch(null) },
+                    animate = false
+                )
+            }
         },
         content = {
             LazyVerticalStaggeredGrid(
@@ -148,16 +162,16 @@ fun AddAlbumScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (items = state.value.folders, key = { folder -> folder.folderUri.hashCode()}
+                    items (items = addAlbumState.value.folders, key = { folder -> folder.folderUri.hashCode()}
                     ) { folder ->
                         FolderItem(
                             folder = folder,
-                            itemSelected = state.value.selectedFolders.contains(folder.folderUri),
+                            itemSelected = addAlbumState.value.selectedFolders.contains(folder.folderUri),
                             selectionMode = selectionMode,
                             onActivateSelectionMode = { selectionMode = it },
                             onItemSelection = {
-                                viewModel.onEvent(
-                                    if (!state.value.selectedFolders.contains(folder.folderUri))
+                                addAlbumViewModel.onEvent(
+                                    if (!addAlbumState.value.selectedFolders.contains(folder.folderUri))
                                         AddAlbumEvent.SelectFolder(folder.folderUri)
                                     else {
                                         AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri)
@@ -170,16 +184,16 @@ fun AddAlbumScreen(
                             modifier = Modifier.padding(4.dp)
                         )
                     }
-                    items (items = state.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
+                    items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
                     ) { wallpaper ->
                         WallpaperItem(
                             wallpaperUri = wallpaper.wallpaperUri,
-                            itemSelected = state.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                            itemSelected = addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
                             selectionMode = selectionMode,
                             onActivateSelectionMode = { selectionMode = it },
                             onItemSelection = {
-                                viewModel.onEvent(
-                                    if (!state.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                addAlbumViewModel.onEvent(
+                                    if (!addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
                                         AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
                                     else {
                                         AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)

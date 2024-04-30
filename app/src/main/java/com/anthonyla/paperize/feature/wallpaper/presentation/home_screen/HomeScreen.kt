@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -99,7 +98,7 @@ fun HomeScreen(
             }
             HorizontalPager(
                 state = pagerState,
-                outOfBoundsPageCount = 0,
+                beyondViewportPageCount = 1,
                 userScrollEnabled = true,
             ) { index ->
                 when(index) {

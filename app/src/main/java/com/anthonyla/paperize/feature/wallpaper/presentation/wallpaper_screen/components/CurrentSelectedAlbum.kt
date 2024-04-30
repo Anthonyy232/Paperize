@@ -52,12 +52,14 @@ fun CurrentSelectedAlbum(
         headlineContent = {
             Text(
                 text = selectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             ) },
         supportingContent = {
             if (selectedAlbum != null) {
                 Text(
-                    text = (selectedAlbum.wallpapers.size.toString()) + stringResource(R.string.wallpaper),
+                    text = "${selectedAlbum.wallpapers.size} ${stringResource(R.string.wallpaper)}",
                     style = MaterialTheme.typography.bodySmall,
                     overflow = TextOverflow.Ellipsis
                 )

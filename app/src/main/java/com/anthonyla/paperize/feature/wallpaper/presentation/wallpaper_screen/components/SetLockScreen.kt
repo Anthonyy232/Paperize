@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -6,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,7 +75,7 @@ fun SetLockScreenSwitch(
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {},
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(4.dp).border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
                             )
                         }
                     }
@@ -91,7 +94,7 @@ fun SetLockScreenSwitch(
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {},
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(4.dp).border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
                             )
                         }
                     }
