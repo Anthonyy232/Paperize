@@ -19,8 +19,8 @@
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/eebec922-70a6-4d54-97d9-ab02cbfb7a36" width="33%" alt="onboarding" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/60a4d68d-5e19-49f2-8822-e702d02651c6" width="33%" alt="wallpaper" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/e106c0dc-23ff-4f4a-adfc-5ebe93219ae0" width="33%" alt="album" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/7093a1ea-91ab-4da8-a82b-43e24d88d376" width="30%" alt="settings" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/54ebd285-8da4-4446-83f1-ba0e7ee9476d" width="30%" alt="adding" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/7093a1ea-91ab-4da8-a82b-43e24d88d376" width="33%" alt="settings" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/54ebd285-8da4-4446-83f1-ba0e7ee9476d" width="33%" alt="adding" />
     <br/>
 </div>
 
