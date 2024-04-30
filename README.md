@@ -33,7 +33,7 @@ Playstore and F-Droid will be added soon
 
 ## Technologies
 
-- [Kotlin]([https://kotlinlang.org/) - A programming language that is used for Android app development
+- [Kotlin](https://kotlinlang.org/) - A programming language that is used for Android app development
 - [Jetpack Compose](https://developer.android.com/develop/ui/compose) - A declarative UI toolkit for building native Android UI
 - [Material 3](https://m3.material.io/) - A UI design system git for modern UI guidelines
 - [Dagger Hilt](https://dagger.dev/hilt/) - A dependency injection library
