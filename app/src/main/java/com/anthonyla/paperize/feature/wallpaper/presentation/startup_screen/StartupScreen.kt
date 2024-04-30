@@ -32,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,7 +48,6 @@ import kotlinx.coroutines.launch
 fun StartupScreen(
     onAgree: () -> Unit
 ) {
-    val context = LocalContext.current
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.onboarding_animation))
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -87,7 +85,7 @@ fun StartupScreen(
                     modifier = Modifier.padding(PaddingValues(vertical = 16.dp))
                 )
                 Text(
-                    text = "Please read and agree to the following privacy policy to use the app.",
+                    text = "Please read and agree to the following privacy notice to use the app.",
                     style = MaterialTheme.typography.bodySmall
                 )
                 Box(
@@ -102,7 +100,7 @@ fun StartupScreen(
                             } },
                         modifier = Modifier.padding(PaddingValues(vertical = 16.dp)),
                     ) {
-                        Text(text = "Privacy Policy", textAlign = TextAlign.Start)
+                        Text(text = "Privacy Notice", textAlign = TextAlign.Start)
                     }
                 }
             }
@@ -116,7 +114,7 @@ fun StartupScreen(
                     } else {
                         scope.launch {
                             val result = snackbarHostState.showSnackbar(
-                                message = "Please read and agree to the privacy policy.",
+                                message = "Please read and agree to the privacy notice.",
                                 actionLabel = "View",
                                 duration = SnackbarDuration.Short,
                             )
@@ -148,13 +146,13 @@ fun StartupScreen(
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Privacy Policy",
+                        text = "Privacy Notice",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
             },
-            text = { PrivacyPolicyText() },
+            text = { PrivacyNoticeText() },
             confirmButton = {
                 Button(
                     onClick = { showToS = false },
@@ -167,31 +165,31 @@ fun StartupScreen(
 }
 
 @Composable
-fun PrivacyPolicyText() {
+fun PrivacyNoticeText() {
     LazyColumn {
         item {
-            SectionText("Introduction", "Welcome to Paperize! This privacy policy outlines how we collect, use, and protect your personal information when you use our mobile application. By using Paperize, you agree to the terms described in this policy.")
+            SectionText("Hello!", "Welcome to Paperize! We respect your privacy and protect your personal info. By using our app, you're okay with our privacy policy.")
         }
         item {
-            SectionText("Data Collection", "Notification Access: Paperize requests notification access to provide you with personalized wallpaper recommendations based on your notifications. We do not store any notification content or personally identifiable information (PII) outside of your device.\n\nLocal Files: Paperize accesses files stored on your device to allow you to set them as wallpapers. We do not upload or transfer these files to any external servers.")
+            SectionText("What We Collect", "We ask for notification access to personalize your wallpapers. We don't store or share your notifications. We also access your local files for wallpapers, but don't upload or transfer them.")
         }
         item {
-            SectionText("Information Usage", "Personal Data: We do not collect or store any personal data such as names, email addresses, or phone numbers.\n\nUsage Analytics: Paperize does not track your usage behavior or collect analytics data.")
+            SectionText("How We Use Info", "We don't collect personal data or track your usage. All your data stays on your device.")
         }
         item {
-            SectionText("Data Security", "On-Device Storage: All data used by Paperize remains on your device. We do not transmit or store any data externally.\n\nEncryption: We use encryption protocols to secure communication between the app and your device.")
+            SectionText("Security", "Your data is safe with us. It stays on your device at all times.")
         }
         item {
-            SectionText("Third-Party Services", "Advertisements: Paperize does not display third-party ads.\n\nExternal Links: Our app may contain links to external websites. Please note that we are not responsible for the privacy practices of these sites.")
+            SectionText("Third-Party Services", "No third-party ads here! We might have external links, but we're not responsible for their privacy practices.")
         }
         item {
-            SectionText("Children’s Privacy", "Paperize is not intended for children under the age of 13. We do not knowingly collect any information from children.")
+            SectionText("For Kids", "Paperize isn't for kids under 13. We don't knowingly collect their info.")
         }
         item {
-            SectionText("Changes to this Policy", "We may update this privacy policy from time to time. Any changes will be reflected in the app and on our website.")
+            SectionText("Policy Updates", "We might update this policy sometimes. You'll see any changes in the app and on GitHub.")
         }
         item {
-            SectionText("Contact Us", "If you have any questions or concerns about this privacy policy, please contact me at anthonyyla.dev@gmail.com.")
+            SectionText("Contact Us", "Got questions or concerns about our privacy policy? Email us at anthonyyla.dev@gmail.com.")
         }
     }
 }
