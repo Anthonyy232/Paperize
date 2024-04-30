@@ -44,6 +44,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.anthonyla.paperize.R
 import kotlinx.coroutines.launch
 
+// Inspired by https://github.com/Ashinch/ReadYou
 @Composable
 fun StartupScreen(
     onAgree: () -> Unit
