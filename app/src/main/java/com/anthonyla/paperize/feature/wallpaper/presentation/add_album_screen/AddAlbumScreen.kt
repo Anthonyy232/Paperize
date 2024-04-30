@@ -181,7 +181,13 @@ fun AddAlbumScreen(
                             onFolderViewClick = {
                                 onShowFolderView(folder.folderUri, folder.folderName, folder.wallpapers)
                             },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                     items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
@@ -203,7 +209,13 @@ fun AddAlbumScreen(
                             onWallpaperViewClick = {
                                 onShowWallpaperView(wallpaper.wallpaperUri)
                             },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                 }

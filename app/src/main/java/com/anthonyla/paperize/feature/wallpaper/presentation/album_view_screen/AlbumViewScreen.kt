@@ -1,6 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -103,7 +105,13 @@ fun AlbumViewScreen(
                             onFolderViewClick = {
                                 onShowFolderView(folder.folderUri, folder.folderName, folder.wallpapers)
                             },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                     items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
@@ -125,7 +133,13 @@ fun AlbumViewScreen(
                             onWallpaperViewClick = {
                                 onShowWallpaperView(wallpaper.wallpaperUri)
                             },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                 }

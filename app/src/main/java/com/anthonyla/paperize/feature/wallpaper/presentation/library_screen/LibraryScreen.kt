@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.library_screen
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -60,7 +62,13 @@ fun LibraryScreen(
                         AlbumItem(
                             album = album.album,
                             onAlbumViewClick = { onViewAlbum(album.album.initialAlbumName) },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                 }

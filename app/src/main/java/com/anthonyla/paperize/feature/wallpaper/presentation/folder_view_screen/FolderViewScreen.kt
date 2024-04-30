@@ -1,6 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +58,13 @@ fun FolderViewScreen(
                             onWallpaperViewClick = {
                                 onShowWallpaperView(wallpaper)
                             },
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(4.dp).animateItem(
+                                placementSpec = tween(
+                                    durationMillis = 800,
+                                    delayMillis = 0,
+                                    easing = FastOutSlowInEasing
+                                ),
+                            )
                         )
                     }
                 }
