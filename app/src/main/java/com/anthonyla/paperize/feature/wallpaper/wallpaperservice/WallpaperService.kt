@@ -6,7 +6,6 @@ import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -30,6 +29,7 @@ import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class WallpaperService: Service() {
@@ -126,7 +126,7 @@ class WallpaperService: Service() {
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
             .setContentTitle("Paperize")
             .setContentText("Rotation: $current/$total wallpapers\nInterval: ${formatTime(timeInMinutes)}")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.notification_icon)
             .build()
     }
 
