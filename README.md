@@ -1,5 +1,6 @@
+
 <div align="center">
-    <img width="300" height="300" style="display: block; border-radius: 9999px;" src="https://github.com/Anthonyy232/Paperize/assets/60626873/e170d5da-9e82-4632-99c8-715b98408b3a">
+    <img width="300" height="300" style="display: block; border-radius: 9999px;" src="https://github.com/Anthonyy232/Paperize/assets/60626873/c40018a1-bc0a-4efd-bd4a-bc83fb23589e">
     <h1>Paperize</h1>
   <p align="center">
 </p>
