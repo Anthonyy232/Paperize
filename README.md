@@ -2,7 +2,6 @@
     <h1>Paperize</h1>
   <p align="center">
 </p>
-</p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
 </div>  
 
