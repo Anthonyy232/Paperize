@@ -43,6 +43,7 @@ Playstore and F-Droid will be added soon
 - [Lottie Compose](https://github.com/airbnb/lottie) - A library that provides Lottie animation support for Jetpack Compose
 - [Landscapist](https://github.com/skydoves/landscapist) - A Compose and KPP image loading library that streamlines Glide, Coil, and Fresco
 - [Zoomable](https://github.com/usuiat/Zoomable) - A library that provides a zoomable and pannable view, which can be used with any view you want
+- [AnimatedFABMenu](https://github.com/rajaumair7890/AnimatedFABMenu) - A animated floating action button with Material 3 design
 
 Thanks to the creators and maintainers of the open-source libraries used in this project.
 
