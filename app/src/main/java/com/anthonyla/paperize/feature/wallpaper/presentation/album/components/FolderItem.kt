@@ -59,7 +59,8 @@ fun FolderItem(
     onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
     onFolderViewClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    animate: Boolean = true
 ) {
     val configuration = LocalConfiguration.current
     val haptics = LocalHapticFeedback.current
@@ -113,8 +114,10 @@ fun FolderItem(
                                 .transition(BitmapTransitionOptions.withCrossFade())
                         },
                         loading = {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            if (animate) {
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
                         },
                         modifier = Modifier

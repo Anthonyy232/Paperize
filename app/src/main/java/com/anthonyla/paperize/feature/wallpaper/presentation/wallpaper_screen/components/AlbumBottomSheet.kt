@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,7 +46,8 @@ fun AlbumBottomSheet(
     onDismiss: () -> Unit,
     currentSelectedAlbum: SelectedAlbum?,
     albums: List<AlbumWithWallpaperAndFolder>,
-    onSelect: (AlbumWithWallpaperAndFolder) -> Unit
+    onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
+    animate: Boolean
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -55,7 +55,6 @@ fun AlbumBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = modalBottomSheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        windowInsets = WindowInsets(0.dp)
     ) {
         albums.forEach {
             ListItem(
@@ -97,9 +96,14 @@ fun AlbumBottomSheet(
                                     .transition(BitmapTransitionOptions.withCrossFade())
                             },
                             loading = {
-                                Box(modifier = Modifier.matchParentSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(
-                                        Alignment.Center))
+                                if (animate) {
+                                    Box(modifier = Modifier.matchParentSize()) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.align(
+                                                Alignment.Center
+                                            )
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier

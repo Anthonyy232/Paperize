@@ -23,7 +23,8 @@ fun FolderViewScreen(
     folderName: String?,
     wallpapers: List<String>,
     onBackClick: () -> Unit,
-    onShowWallpaperView: (String) -> Unit
+    onShowWallpaperView: (String) -> Unit,
+    animate: Boolean
 ) {
     val lazyListState = rememberLazyStaggeredGridState()
     BackHandler { onBackClick() }
@@ -32,9 +33,8 @@ fun FolderViewScreen(
         topBar = {
             FolderViewTopBar(
                 title = folderName ?: "",
-            ) {
-                onBackClick()
-            }
+                onBackClick = onBackClick
+            )
         },
         content = {
             LazyVerticalStaggeredGrid(
@@ -48,23 +48,40 @@ fun FolderViewScreen(
                 content = {
                     items (items = wallpapers, key = { wallpaper -> wallpaper }
                     ) { wallpaper ->
-                        WallpaperItem(
-                            wallpaperUri = wallpaper,
-                            itemSelected = false,
-                            selectionMode = false,
-                            onActivateSelectionMode = {},
-                            onItemSelection = {},
-                            onWallpaperViewClick = {
-                                onShowWallpaperView(wallpaper)
-                            },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
+                        if (animate) {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper,
+                                itemSelected = false,
+                                selectionMode = false,
+                                onActivateSelectionMode = {},
+                                onItemSelection = {},
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper)
+                                },
+                                modifier = Modifier.padding(4.dp).animateItem(
+                                    placementSpec = tween(
+                                        durationMillis = 800,
+                                        delayMillis = 0,
+                                        easing = FastOutSlowInEasing
+                                    ),
                                 ),
+                                animate = true
                             )
-                        )
+                        }
+                        else {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper,
+                                itemSelected = false,
+                                selectionMode = false,
+                                onActivateSelectionMode = {},
+                                onItemSelection = {},
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper)
+                                },
+                                modifier = Modifier.padding(4.dp),
+                                animate = false
+                            )
+                        }
                     }
                 }
             )

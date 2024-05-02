@@ -47,7 +47,7 @@ fun AlbumViewScreen(
     onShowFolderView: (String?, List<String>) -> Unit,
     onDeleteAlbum: () -> Unit,
     onTitleChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
-    onSelectionDeleted: () -> Unit
+    onSelectionDeleted: () -> Unit,
 ) {
     albumViewScreenViewModel.onEvent(AlbumViewEvent.SetSize(album.wallpapers.size + album.folders.size)) // For selectedAll state
     val lazyListState = rememberLazyStaggeredGridState()
@@ -153,7 +153,7 @@ fun AlbumViewScreen(
                         selectionMode = false
                         folderPickerLauncher.launch(null)
                     },
-                    animate = true
+                    animate = false
                 )
             }
         },
@@ -169,61 +169,111 @@ fun AlbumViewScreen(
                 content = {
                     items (items = album.folders, key = { folder -> folder.folderUri.hashCode() }
                     ) { folder ->
-                        FolderItem(
-                            folder = folder,
-                            itemSelected = albumState.value.selectedFolders.contains(folder.folderUri),
-                            selectionMode = selectionMode,
-                            onActivateSelectionMode = { selectionMode = it },
-                            onItemSelection = {
-                                albumViewScreenViewModel.onEvent(
-                                    if (!albumState.value.selectedFolders.contains(folder.folderUri))
-                                        AlbumViewEvent.SelectFolder(folder.folderUri)
-                                    else {
-                                        AlbumViewEvent.RemoveFolderFromSelection(folder.folderUri)
-                                    }
-                                )
-                            },
-                            onFolderViewClick = {
-                                onShowFolderView(folder.folderName, folder.wallpapers)
-                            },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                ),
-                            )
-                        )
-                    }
-                    items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
-                    ) { wallpaper ->
-                        WallpaperItem(
-                            wallpaperUri = wallpaper.wallpaperUri,
-                            itemSelected = albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
-                            selectionMode = selectionMode,
-                            onActivateSelectionMode = { selectionMode = it },
-                            onItemSelection = {
-                                albumViewScreenViewModel.onEvent(
-                                    if (!albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
-                                        AlbumViewEvent.SelectWallpaper(wallpaper.wallpaperUri)
-                                    else {
-                                        AlbumViewEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
-                                    }
-                                )
-                            },
-                            onWallpaperViewClick = {
-                                onShowWallpaperView(wallpaper.wallpaperUri)
-                            },
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .animateItem(
+                        if (settingsState.value.animate) {
+                            FolderItem(
+                                folder = folder,
+                                itemSelected = albumState.value.selectedFolders.contains(folder.folderUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    albumViewScreenViewModel.onEvent(
+                                        if (!albumState.value.selectedFolders.contains(folder.folderUri))
+                                            AlbumViewEvent.SelectFolder(folder.folderUri)
+                                        else {
+                                            AlbumViewEvent.RemoveFolderFromSelection(folder.folderUri)
+                                        }
+                                    )
+                                },
+                                onFolderViewClick = {
+                                    onShowFolderView(folder.folderName, folder.wallpapers)
+                                },
+                                modifier = Modifier.padding(4.dp).animateItem(
                                     placementSpec = tween(
                                         durationMillis = 800,
                                         delayMillis = 0,
                                         easing = FastOutSlowInEasing
+                                    ),
+                                ),
+                                animate = true
+                            )
+                        }
+                        else {
+                            FolderItem(
+                                folder = folder,
+                                itemSelected = albumState.value.selectedFolders.contains(folder.folderUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    albumViewScreenViewModel.onEvent(
+                                        if (!albumState.value.selectedFolders.contains(folder.folderUri))
+                                            AlbumViewEvent.SelectFolder(folder.folderUri)
+                                        else {
+                                            AlbumViewEvent.RemoveFolderFromSelection(folder.folderUri)
+                                        }
                                     )
-                                )
-                        )
+                                },
+                                onFolderViewClick = {
+                                    onShowFolderView(folder.folderName, folder.wallpapers)
+                                },
+                                modifier = Modifier.padding(4.dp),
+                                animate = false
+                            )
+                        }
+                    }
+                    items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
+                    ) { wallpaper ->
+                        if (settingsState.value.animate) {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper.wallpaperUri,
+                                itemSelected = albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    albumViewScreenViewModel.onEvent(
+                                        if (!albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                            AlbumViewEvent.SelectWallpaper(wallpaper.wallpaperUri)
+                                        else {
+                                            AlbumViewEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                        }
+                                    )
+                                },
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper.wallpaperUri)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .animateItem(
+                                        placementSpec = tween(
+                                            durationMillis = 800,
+                                            delayMillis = 0,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    ),
+                                animate = true
+                            )
+                        }
+                        else {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper.wallpaperUri,
+                                itemSelected = albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    albumViewScreenViewModel.onEvent(
+                                        if (!albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                            AlbumViewEvent.SelectWallpaper(wallpaper.wallpaperUri)
+                                        else {
+                                            AlbumViewEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                        }
+                                    )
+                                },
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper.wallpaperUri)
+                                },
+                                modifier = Modifier.padding(4.dp),
+                                animate = false
+                            )
+                        }
                     }
                 }
             )

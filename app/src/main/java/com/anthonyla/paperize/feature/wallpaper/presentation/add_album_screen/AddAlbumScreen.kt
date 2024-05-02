@@ -44,7 +44,7 @@ fun AddAlbumScreen(
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String, String?, List<String>) -> Unit
+    onShowFolderView: (String?, List<String>) -> Unit
 ) {
     val context = LocalContext.current
     val lazyGridState = rememberLazyStaggeredGridState()
@@ -187,7 +187,7 @@ fun AddAlbumScreen(
                                 )
                             },
                             onFolderViewClick = {
-                                onShowFolderView(folder.folderUri, folder.folderName, folder.wallpapers)
+                                onShowFolderView(folder.folderName, folder.wallpapers)
                             },
                             modifier = Modifier.padding(4.dp).animateItem(
                                 placementSpec = tween(
@@ -223,7 +223,8 @@ fun AddAlbumScreen(
                                     delayMillis = 0,
                                     easing = FastOutSlowInEasing
                                 ),
-                            )
+                            ),
+                            animate = settingsState.value.animate
                         )
                     }
                 }

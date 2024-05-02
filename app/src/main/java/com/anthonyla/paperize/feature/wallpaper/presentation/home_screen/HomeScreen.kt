@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.home_screen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -29,14 +28,14 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.Libr
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.tabItems
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     onSettingsClick: () -> Unit,
     navigateToAddWallpaperScreen: (String) -> Unit,
     onAlbumViewClick: (String) -> Unit,
     onScheduleWallpaperChanger: (Int) -> Unit,
-    onStop: () -> Unit
+    onStop: () -> Unit,
+    animate : Boolean
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -108,7 +107,8 @@ fun HomeScreen(
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },
-                        onViewAlbum = onAlbumViewClick
+                        onViewAlbum = onAlbumViewClick,
+                        animate = animate
                     )
                 }
             }

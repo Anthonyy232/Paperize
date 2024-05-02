@@ -1,77 +1,64 @@
 package com.anthonyla.paperize.feature.wallpaper.util.navigation
 
-import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BrowseGallery
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Newspaper
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Start
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.BrowseGallery
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Newspaper
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.PrivacyTip
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Start
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.anthonyla.paperize.R
+import kotlinx.serialization.Serializable
+
 
 /**
- * Enum class for navigation screens in application
+ * Data class for Startup screen
  */
-sealed class NavScreens(val route: String, @StringRes val resourceId: Int, val unfilledIcon: ImageVector, val filledIcon: ImageVector) {
-    /**
-     * Home screen that the user lands on initially
-     */
-    object Startup : NavScreens("startup_screen", R.string.startup, Icons.Outlined.Start, Icons.Filled.Start)
+@Serializable
+object Startup
 
-    /**
-     * Notification screen for the application to ask for permission
-     */
-    object Notification : NavScreens("notification_screen", R.string.notifications, Icons.Outlined.Notifications, Icons.Filled.Notifications)
+/**
+ * Object for Notification screen
+ */
+@Serializable
+object Notification
 
-    /**
-     * Home screen that the user lands on initially containing the wallpapers and albums
-     */
-    object Home : NavScreens("home_screen", R.string.home_screen, Icons.Outlined.Image, Icons.Filled.Image)
+/**
+ * Object for Home screen
+ */
+@Serializable
+object Home
 
-    /**
-     * Settings screen for the application
-     */
-    object Settings : NavScreens("settings_screen", R.string.settings_screen, Icons.Outlined.Settings, Icons.Filled.Settings)
+/**
+ * Object for Settings screen
+ */
+@Serializable
+object Settings
 
-    /**
-     * License screen for the application
-     */
-    object Licenses : NavScreens("licenses_screen", R.string.licenses_screen, Icons.Outlined.Newspaper, Icons.Filled.Newspaper)
+/**
+ * Object for Licenses screen
+ */
+@Serializable
+object Licenses
 
-    /**
-     * Settings screen for the application
-     */
-    object Privacy : NavScreens("privacy_screen", R.string.privacy_screen, Icons.Outlined.PrivacyTip, Icons.Filled.PrivacyTip)
+/**
+ * Object for Privacy screen
+ */
+@Serializable
+object Privacy
 
-    /**
-     * Add/Edit screen for album when adding or editing
-     */
-    object AddEdit : NavScreens("add_edit_screen", R.string.add_wallpaper_screen, Icons.Outlined.Add, Icons.Filled.Add)
+/**
+ * Data class for AlbumView screen
+ */
+@Serializable
+data class AlbumView(val initialAlbumName: String)
 
-    /**
-     * Wallpaper view screen for viewing wallpapers when clicking on a wallpaper
-     */
-    object WallpaperView : NavScreens("wallpaper_view_screen", R.string.wallpaper_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
+/**
+ * Data class for AddEdit screen
+ */
+@Serializable
+data class AddEdit(val wallpaper: String)
 
-    /**
-     * Folder view screen for viewing wallpapers in a folder when clicking on a folder
-     */
-    object FolderView : NavScreens("folder_view_screen", R.string.folder_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
+/**
+ * Data class for WallpaperView screen
+ */
+@Serializable
+data class WallpaperView(val wallpaper: String)
 
-    /**
-     * Album view screen for viewing albums when clicking on an album. Shows wallpapers and folders of the album
-     */
-    object AlbumView : NavScreens("album_view_screen", R.string.album_view, Icons.Outlined.BrowseGallery, Icons.Filled.BrowseGallery)
-}
+/**
+ * Data class for FolderView screen
+ */
+@Serializable
+data class FolderView(val folderName: String?, val wallpapers: List<String>)

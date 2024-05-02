@@ -1,7 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -23,7 +21,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,7 +89,8 @@ fun WallpaperScreen(
                                 }
                                 onStop()
                             }
-                        }
+                        },
+                        animate = settingsState.value.animate
                     )
                 }
                 if (settingsState.value.animate) {
@@ -120,7 +118,8 @@ fun WallpaperScreen(
                                     checked = settingsState.value.setLockWithHome,
                                     onCheckedChange = { isChecked ->
                                         settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(isChecked))
-                                    }
+                                    },
+                                    animate = settingsState.value.animate
                                 )
                             }
                         }
@@ -157,7 +156,8 @@ fun WallpaperScreen(
                                 checked = settingsState.value.setLockWithHome,
                                 onCheckedChange = { isChecked ->
                                     settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(isChecked))
-                                }
+                                },
+                                animate = settingsState.value.animate
                             )
                         }
                     }
@@ -207,7 +207,8 @@ fun WallpaperScreen(
                         }
                         wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                         onScheduleWallpaperChanger(settingsState.value.interval)
-                    }
+                    },
+                    animate = settingsState.value.animate
                 )
             }
         },

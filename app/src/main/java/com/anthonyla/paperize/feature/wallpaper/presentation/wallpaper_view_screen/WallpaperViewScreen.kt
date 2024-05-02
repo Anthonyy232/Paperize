@@ -43,6 +43,7 @@ import net.engawapg.lib.zoomable.zoomable
 fun WallpaperViewScreen(
     wallpaperUri: String,
     onBackClick: () -> Unit,
+    animate : Boolean
 ) {
     val zoomState = rememberZoomState()
     BackHandler { onBackClick() }
@@ -98,8 +99,10 @@ fun WallpaperViewScreen(
                                 .transition(BitmapTransitionOptions.withCrossFade())
                         },
                         loading = {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            if (animate) {
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
                         }
                     )

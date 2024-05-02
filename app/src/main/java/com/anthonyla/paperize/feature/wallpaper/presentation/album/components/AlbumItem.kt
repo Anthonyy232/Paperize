@@ -34,7 +34,8 @@ import com.skydoves.landscapist.glide.GlideImage
 fun AlbumItem(
     album: Album,
     onAlbumViewClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    animate: Boolean = true
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -62,8 +63,10 @@ fun AlbumItem(
                             .transition(BitmapTransitionOptions.withCrossFade())
                     },
                     loading = {
-                        Box(modifier = Modifier.matchParentSize()) {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        if (animate) {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                         }
                     },
                     modifier = Modifier

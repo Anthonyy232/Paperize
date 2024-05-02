@@ -22,11 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -82,6 +85,12 @@ fun AddAlbumAnimatedFab(
 
     if (animate) {
         ElevatedCard(
+            colors = CardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp),
+                contentColor = Color.Transparent,
+                disabledContentColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+            ),
             shape = RoundedCornerShape(28.dp),
             modifier = Modifier
                 .padding(4.dp)
@@ -147,6 +156,12 @@ fun AddAlbumAnimatedFab(
     }
     else {
         ElevatedCard(
+            colors = CardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp),
+                contentColor = Color.Transparent,
+                disabledContentColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+            ),
             shape = RoundedCornerShape(28.dp),
             modifier = Modifier
                 .padding(4.dp)

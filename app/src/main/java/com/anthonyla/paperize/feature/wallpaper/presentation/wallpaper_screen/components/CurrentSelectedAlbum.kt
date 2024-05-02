@@ -42,7 +42,8 @@ import com.skydoves.landscapist.glide.GlideImage
 fun CurrentSelectedAlbum(
     selectedAlbum: SelectedAlbum?,
     onOpenBottomSheet: () -> Unit,
-    onStop: () -> Unit
+    onStop: () -> Unit,
+    animate: Boolean
 ) {
     ListItem(
         modifier = Modifier
@@ -82,8 +83,10 @@ fun CurrentSelectedAlbum(
                                 .transition(BitmapTransitionOptions.withCrossFade())
                         },
                         loading = {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            if (animate) {
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
                         },
                         modifier = Modifier

@@ -54,7 +54,10 @@ fun WallpaperItem(
     onItemSelection: () -> Unit,
     onWallpaperViewClick: () -> Unit,
     modifier: Modifier = Modifier,
-    wallpaperDrawable : Bitmap? = null
+    wallpaperDrawable : Bitmap? = null,
+    aspectRatio: Float? = null,
+    clickable: Boolean = true,
+    animate: Boolean = true
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -68,10 +71,10 @@ fun WallpaperItem(
     }
 
     val dimension = wallpaperDrawable?.let { Pair(it.width, it.height) } ?: wallpaperUri.toUri().getImageDimensions(context)
-    val aspectRatio = (dimension.first.toFloat()/dimension.second.toFloat())
+    val imageAspectRatio = aspectRatio ?: (dimension.first.toFloat() / dimension.second.toFloat())
 
-    Box(
-        modifier = modifier
+    val boxModifier = if (clickable) {
+        modifier
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
@@ -87,6 +90,14 @@ fun WallpaperItem(
                     }
                 }
             )
+    } else {
+        modifier
+            .padding(paddingTransition)
+            .clip(RoundedCornerShape(roundedCornerShapeTransition))
+    }
+
+    Box(
+        modifier = boxModifier
     ) {
         GlideImage(
             imageModel = { wallpaperDrawable ?: wallpaperUri.toUri() },
@@ -101,11 +112,13 @@ fun WallpaperItem(
                     .transition(withCrossFade())
             },
             loading = {
-                Box(modifier = Modifier.matchParentSize()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                if (animate) {
+                    Box(modifier = Modifier.matchParentSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
                 }
             },
-            modifier = Modifier.aspectRatio(aspectRatio)
+            modifier = Modifier.aspectRatio(imageAspectRatio)
         )
         if (selectionMode) {
             val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)

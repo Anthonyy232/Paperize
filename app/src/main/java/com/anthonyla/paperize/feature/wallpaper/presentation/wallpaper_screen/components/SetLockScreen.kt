@@ -33,7 +33,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.Wa
 fun SetLockScreenSwitch(
     albumUri : String?,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    animate: Boolean
 ) {
     Surface(
         tonalElevation = 10.dp,
@@ -75,7 +76,12 @@ fun SetLockScreenSwitch(
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {},
-                                modifier = Modifier.padding(4.dp).border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                aspectRatio = 9f / 19.5f,
+                                clickable = false,
+                                animate = animate
                             )
                         }
                     }
@@ -94,7 +100,12 @@ fun SetLockScreenSwitch(
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {},
-                                modifier = Modifier.padding(4.dp).border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                aspectRatio = 9f / 19.5f,
+                                clickable = false,
+                                animate = animate
                             )
                         }
                     }

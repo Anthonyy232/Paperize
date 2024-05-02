@@ -30,7 +30,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.Al
 fun LibraryScreen(
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     onAddNewAlbumClick: () -> Unit,
-    onViewAlbum: (String) -> Unit
+    onViewAlbum: (String) -> Unit,
+    animate: Boolean
     ) {
     val lazyListState = rememberLazyGridState()
     val state = albumsViewModel.state.collectAsStateWithLifecycle()
@@ -68,7 +69,8 @@ fun LibraryScreen(
                                     delayMillis = 0,
                                     easing = FastOutSlowInEasing
                                 ),
-                            )
+                            ),
+                            animate = animate
                         )
                     }
                 }
