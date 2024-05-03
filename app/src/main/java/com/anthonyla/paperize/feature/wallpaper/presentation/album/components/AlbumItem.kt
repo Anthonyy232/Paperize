@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
@@ -37,6 +39,19 @@ fun AlbumItem(
     modifier: Modifier = Modifier,
     animate: Boolean = true
 ) {
+    fun isValidUri(context: Context, uriString: String?): Boolean {
+        val uri = uriString?.toUri()
+        return try {
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.close()
+            }
+            true
+        } catch (e: Exception) { false }
+    }
+
+    val showCoverUri = album.coverUri != null && isValidUri(LocalContext.current, album.coverUri)
+
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier
@@ -50,29 +65,31 @@ fun AlbumItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box {
-                GlideImage(
-                    imageModel = { album.coverUri },
-                    imageOptions = ImageOptions(
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center
-                    ),
-                    requestBuilder = {
-                        Glide
-                            .with(LocalContext.current)
-                            .asBitmap()
-                            .transition(BitmapTransitionOptions.withCrossFade())
-                    },
-                    loading = {
-                        if (animate) {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                if (showCoverUri) {
+                    GlideImage(
+                        imageModel = { album.coverUri },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center
+                        ),
+                        requestBuilder = {
+                            Glide
+                                .with(LocalContext.current)
+                                .asBitmap()
+                                .transition(BitmapTransitionOptions.withCrossFade())
+                        },
+                        loading = {
+                            if (animate) {
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
-                        }
-                    },
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                )
+                        },
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.padding(6.dp))

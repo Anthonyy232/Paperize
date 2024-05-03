@@ -55,58 +55,114 @@ fun SetLockScreenSwitch(
                     onCheckedChange = onCheckedChange
                 )
             }
-            AnimatedVisibility(
-                visible = checked,
-                enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
-                exit = shrinkVertically(animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing))
-            ) {
-                Row(Modifier.fillMaxWidth()) {
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .padding(4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
-                        if (albumUri != null) {
-                            WallpaperItem(
-                                wallpaperUri = albumUri,
-                                itemSelected = false,
-                                selectionMode = false,
-                                onActivateSelectionMode = {},
-                                onItemSelection = {},
-                                onWallpaperViewClick = {},
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
-                                aspectRatio = 9f / 19.5f,
-                                clickable = false,
-                                animate = animate
-                            )
+            if (animate) {
+                AnimatedVisibility(
+                    visible = checked,
+                    enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
+                    exit = shrinkVertically(animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing))
+                ) {
+                    Row(Modifier.fillMaxWidth()) {
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .padding(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
+                            if (albumUri != null) {
+                                WallpaperItem(
+                                    wallpaperUri = albumUri,
+                                    itemSelected = false,
+                                    selectionMode = false,
+                                    onActivateSelectionMode = {},
+                                    onItemSelection = {},
+                                    onWallpaperViewClick = {},
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                    aspectRatio = 9f / 19.5f,
+                                    clickable = false,
+                                    animate = true
+                                )
+                            }
+                        }
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .padding(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
+                            if (albumUri != null) {
+                                WallpaperItem(
+                                    wallpaperUri = albumUri,
+                                    itemSelected = false,
+                                    selectionMode = false,
+                                    onActivateSelectionMode = {},
+                                    onItemSelection = {},
+                                    onWallpaperViewClick = {},
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                    aspectRatio = 9f / 19.5f,
+                                    clickable = false,
+                                    animate = true
+                                )
+                            }
                         }
                     }
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .padding(4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
-                        if (albumUri != null) {
-                            WallpaperItem(
-                                wallpaperUri = albumUri,
-                                itemSelected = false,
-                                selectionMode = false,
-                                onActivateSelectionMode = {},
-                                onItemSelection = {},
-                                onWallpaperViewClick = {},
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
-                                aspectRatio = 9f / 19.5f,
-                                clickable = false,
-                                animate = animate
-                            )
+                }
+            }
+            else {
+                Row(Modifier.fillMaxWidth()) {
+                    if (checked) {
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .padding(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
+                            if (albumUri != null) {
+                                WallpaperItem(
+                                    wallpaperUri = albumUri,
+                                    itemSelected = false,
+                                    selectionMode = false,
+                                    onActivateSelectionMode = {},
+                                    onItemSelection = {},
+                                    onWallpaperViewClick = {},
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                    aspectRatio = 9f / 19.5f,
+                                    clickable = false,
+                                    animate = false
+                                )
+                            }
+                        }
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .padding(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
+                            if (albumUri != null) {
+                                WallpaperItem(
+                                    wallpaperUri = albumUri,
+                                    itemSelected = false,
+                                    selectionMode = false,
+                                    onActivateSelectionMode = {},
+                                    onItemSelection = {},
+                                    onWallpaperViewClick = {},
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                    aspectRatio = 9f / 19.5f,
+                                    clickable = false,
+                                    animate = false
+                                )
+                            }
                         }
                     }
                 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -68,7 +69,8 @@ fun SettingsScrollableSettings(
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 16.dp, vertical = 24.dp))
+                        modifier = Modifier.padding(PaddingValues(horizontal = 16.dp, vertical = 24.dp)),
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             ) },

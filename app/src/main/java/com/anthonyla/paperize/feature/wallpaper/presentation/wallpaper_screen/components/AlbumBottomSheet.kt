@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
@@ -49,12 +51,25 @@ fun AlbumBottomSheet(
     onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
     animate: Boolean
 ) {
+    fun isValidUri(context: Context, uriString: String?): Boolean {
+        val uri = uriString?.toUri()
+        return try {
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.close()
+            }
+            true
+        } catch (e: Exception) { false }
+    }
+
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = modalBottomSheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.background,
+        tonalElevation = 5.dp
     ) {
         albums.forEach {
             ListItem(
@@ -83,33 +98,36 @@ fun AlbumBottomSheet(
                     Box (
                         modifier = Modifier.size(60.dp)
                     ) {
-                        GlideImage(
-                            imageModel = { it.album.coverUri },
-                            imageOptions = ImageOptions(
-                                contentScale = ContentScale.FillBounds,
-                                alignment = Alignment.Center,
-                            ),
-                            requestBuilder = {
-                                Glide
-                                    .with(LocalContext.current)
-                                    .asBitmap()
-                                    .transition(BitmapTransitionOptions.withCrossFade())
-                            },
-                            loading = {
-                                if (animate) {
-                                    Box(modifier = Modifier.matchParentSize()) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.align(
-                                                Alignment.Center
+                        val showCoverUri = isValidUri(LocalContext.current, it.album.coverUri)
+                        if (showCoverUri) {
+                            GlideImage(
+                                imageModel = { it.album.coverUri },
+                                imageOptions = ImageOptions(
+                                    contentScale = ContentScale.FillBounds,
+                                    alignment = Alignment.Center,
+                                ),
+                                requestBuilder = {
+                                    Glide
+                                        .with(LocalContext.current)
+                                        .asBitmap()
+                                        .transition(BitmapTransitionOptions.withCrossFade())
+                                },
+                                loading = {
+                                    if (animate) {
+                                        Box(modifier = Modifier.matchParentSize()) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.align(
+                                                    Alignment.Center
+                                                )
                                             )
-                                        )
+                                        }
                                     }
-                                }
-                            },
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                        )
+                                },
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                        }
                     }
                 },
                 trailingContent = {

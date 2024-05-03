@@ -37,7 +37,7 @@ import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.R
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -70,9 +70,18 @@ fun WallpaperItem(
         if (selected) 24.dp else 16.dp
     }
 
-    val dimension = wallpaperDrawable?.let { Pair(it.width, it.height) } ?: wallpaperUri.toUri().getImageDimensions(context)
-    val imageAspectRatio = aspectRatio ?: (dimension.first.toFloat() / dimension.second.toFloat())
+    fun isValidUri(context: Context, uriString: String?): Boolean {
+        val uri = uriString?.toUri()
+        return try {
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.close()
+            }
+            true
+        } catch (e: Exception) { false }
+    }
 
+    val showUri = isValidUri(LocalContext.current, wallpaperUri)
     val boxModifier = if (clickable) {
         modifier
             .padding(paddingTransition)
@@ -95,31 +104,32 @@ fun WallpaperItem(
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
     }
-
-    Box(
-        modifier = boxModifier
-    ) {
-        GlideImage(
-            imageModel = { wallpaperDrawable ?: wallpaperUri.toUri() },
-            imageOptions = ImageOptions(
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center
-            ),
-            requestBuilder = {
-                Glide
-                    .with(LocalContext.current)
-                    .asBitmap()
-                    .transition(withCrossFade())
-            },
-            loading = {
-                if (animate) {
-                    Box(modifier = Modifier.matchParentSize()) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    Box(modifier = boxModifier) {
+        if (showUri) {
+            val dimension = wallpaperDrawable?.let { Pair(it.width, it.height) } ?: wallpaperUri.toUri().getImageDimensions(context)
+            val imageAspectRatio = aspectRatio ?: (dimension.first.toFloat() / dimension.second.toFloat())
+            GlideImage(
+                imageModel = { wallpaperDrawable ?: wallpaperUri.toUri() },
+                imageOptions = ImageOptions(
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center
+                ),
+                requestBuilder = {
+                    Glide
+                        .with(LocalContext.current)
+                        .asBitmap()
+                        .transition(BitmapTransitionOptions.withCrossFade())
+                },
+                loading = {
+                    if (animate) {
+                        Box(modifier = Modifier.matchParentSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
                     }
-                }
-            },
-            modifier = Modifier.aspectRatio(imageAspectRatio)
-        )
+                },
+                modifier = Modifier.aspectRatio(imageAspectRatio)
+            )
+        }
         if (selectionMode) {
             val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
             if (itemSelected) {

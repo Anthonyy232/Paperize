@@ -204,12 +204,21 @@ fun PaperizeApp(
                     context.startForegroundService(intent)
                 },
                 onStop = {
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                     Intent(context, WallpaperService::class.java).also {
                         it.action = WallpaperService.Actions.STOP.toString()
                         context.startForegroundService(it)
                     }
                 },
-                animate = settingsState.value.animate
+                animate = settingsState.value.animate,
+                interval = settingsState.value.interval,
+                setLockWithHome = settingsState.value.setLockWithHome,
+                lastSetTime = settingsState.value.lastSetTime,
+                nextSetTime = settingsState.value.nextSetTime,
+                onSetLockWithHome = {
+                    settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(it))
+                },
+                selectedAlbum = selectedState.value.selectedAlbum
             )
         }
         // Navigate to the add album screen to create a new album and add wallpapers to it

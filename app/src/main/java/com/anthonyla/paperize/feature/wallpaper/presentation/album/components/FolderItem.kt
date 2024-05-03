@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
+import android.content.Context
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -74,6 +75,19 @@ fun FolderItem(
         if (selected) 24.dp else 16.dp
     }
 
+    fun isValidUri(context: Context, uriString: String?): Boolean {
+        val uri = uriString?.toUri()
+        return try {
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.close()
+            }
+            true
+        } catch (e: Exception) { false }
+    }
+
+    val showCoverUri = folder.coverUri != null && isValidUri(LocalContext.current, folder.coverUri)
+
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier
@@ -100,9 +114,9 @@ fun FolderItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box {
-                if (folder.coverUri != null) {
+                if (showCoverUri) {
                     GlideImage(
-                        imageModel = { folder.coverUri.toUri() },
+                        imageModel = { folder.coverUri?.toUri() },
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center

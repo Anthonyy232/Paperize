@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
@@ -34,8 +35,14 @@ fun HomeScreen(
     navigateToAddWallpaperScreen: (String) -> Unit,
     onAlbumViewClick: (String) -> Unit,
     onScheduleWallpaperChanger: (Int) -> Unit,
+    onSetLockWithHome: (Boolean) -> Unit,
     onStop: () -> Unit,
-    animate : Boolean
+    animate : Boolean,
+    interval: Int,
+    setLockWithHome: Boolean,
+    lastSetTime: String?,
+    nextSetTime: String?,
+    selectedAlbum: SelectedAlbum?
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -103,7 +110,14 @@ fun HomeScreen(
                 when(index) {
                     0 -> WallpaperScreen(
                         onScheduleWallpaperChanger = onScheduleWallpaperChanger,
-                        onStop = onStop
+                        onStop = onStop,
+                        animate = animate,
+                        interval = interval,
+                        setLockWithHome = setLockWithHome,
+                        lastSetTime = lastSetTime,
+                        nextSetTime = nextSetTime,
+                        onSetLockWithHome = { onSetLockWithHome(it) },
+                        selectedAlbum = selectedAlbum
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

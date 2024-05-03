@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,18 @@ fun WallpaperViewScreen(
     onBackClick: () -> Unit,
     animate : Boolean
 ) {
+    fun isValidUri(context: Context, uriString: String?): Boolean {
+        val uri = uriString?.toUri()
+        return try {
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.close()
+            }
+            true
+        } catch (e: Exception) { false }
+    }
+
+    val showUri = isValidUri(LocalContext.current, wallpaperUri)
     val zoomState = rememberZoomState()
     BackHandler { onBackClick() }
     Scaffold(
@@ -86,26 +99,28 @@ fun WallpaperViewScreen(
                         .padding(padding)
                         .zoomable(zoomState)
                 ) {
-                    GlideImage(
-                        imageModel = { wallpaperUri.toUri() },
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
-                        ),
-                        requestBuilder = {
-                            Glide
-                                .with(LocalContext.current)
-                                .asBitmap()
-                                .transition(BitmapTransitionOptions.withCrossFade())
-                        },
-                        loading = {
-                            if (animate) {
-                                Box(modifier = Modifier.matchParentSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    if (showUri) {
+                        GlideImage(
+                            imageModel = { wallpaperUri.toUri() },
+                            imageOptions = ImageOptions(
+                                contentScale = ContentScale.Crop,
+                                alignment = Alignment.Center
+                            ),
+                            requestBuilder = {
+                                Glide
+                                    .with(LocalContext.current)
+                                    .asBitmap()
+                                    .transition(BitmapTransitionOptions.withCrossFade())
+                            },
+                            loading = {
+                                if (animate) {
+                                    Box(modifier = Modifier.matchParentSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

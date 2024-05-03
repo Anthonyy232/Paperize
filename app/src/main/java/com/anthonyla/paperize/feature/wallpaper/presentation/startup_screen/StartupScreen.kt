@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.sharp.CheckCircleOutline
@@ -65,7 +66,8 @@ fun StartupScreen(
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 8.dp))
+                        modifier = Modifier.padding(PaddingValues(horizontal = 8.dp)),
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             ) },

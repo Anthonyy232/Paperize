@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -42,11 +43,16 @@ fun WallpaperScreen(
     wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     onScheduleWallpaperChanger: (Int) -> Unit,
-    onStop: () -> Unit
+    onSetLockWithHome: (Boolean) -> Unit,
+    onStop: () -> Unit,
+    animate: Boolean,
+    interval: Int,
+    setLockWithHome: Boolean,
+    lastSetTime: String?,
+    nextSetTime: String?,
+    selectedAlbum: SelectedAlbum?
 ) {
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
-    val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
-    val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -58,12 +64,13 @@ fun WallpaperScreen(
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 16.dp, vertical = 24.dp))
+                        modifier = Modifier.padding(PaddingValues(horizontal = 16.dp, vertical = 24.dp)),
+                        shape = RoundedCornerShape(24.dp)
                     )
                 }
             ) },
         modifier = Modifier.fillMaxSize(),
-        content = { it
+        content = { padding ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -72,17 +79,16 @@ fun WallpaperScreen(
             ) {
                 item {
                     CurrentSelectedAlbum(
-                        selectedAlbum = selectedState.value.selectedAlbum,
+                        selectedAlbum = selectedAlbum,
                         onOpenBottomSheet = {
                             if (albumState.value.albumsWithWallpapers.firstOrNull() != null) openBottomSheet = true
                         },
                         onStop = {
-                            if (selectedState.value.selectedAlbum != null) {
-                                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                            if (selectedAlbum != null) {
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar(
-                                        message = "${selectedState.value.selectedAlbum?.album?.displayedAlbumName} has been unselected.",
+                                        message = "${selectedAlbum.album.displayedAlbumName} has been unselected.",
                                         actionLabel = "Dismiss",
                                         duration = SnackbarDuration.Short
                                     )
@@ -90,46 +96,64 @@ fun WallpaperScreen(
                                 onStop()
                             }
                         },
-                        animate = settingsState.value.animate
+                        animate = animate
                     )
                 }
-                if (settingsState.value.animate) {
-                    item {
+                item {
+                    if (animate) {
                         AnimatedVisibility(
-                            visible = selectedState.value.selectedAlbum != null,
+                            visible = selectedAlbum != null,
                             enter = slideInVertically(initialOffsetY = { -it }),
                             exit = fadeOut()
                         ) {
-                            if (selectedState.value.selectedAlbum != null) {
-                                CurrentAndNextChange(
-                                    settingsState.value.lastSetTime,
-                                    settingsState.value.nextSetTime
-                                )
+                            if (selectedAlbum != null) {
+                                CurrentAndNextChange(lastSetTime, nextSetTime)
                             }
                         }
+                    }
+                    else {
+                        if (selectedAlbum != null) {
+                            CurrentAndNextChange(lastSetTime, nextSetTime)
+                        }
+                    }
+                }
+                item {
+                    if (animate) {
                         AnimatedVisibility(
-                            visible = selectedState.value.selectedAlbum != null,
+                            visible = selectedAlbum != null,
                             enter = slideInVertically(initialOffsetY = { -it }),
                             exit = fadeOut()
                         ) {
-                            if (selectedState.value.selectedAlbum != null) {
+                            if (selectedAlbum != null) {
                                 SetLockScreenSwitch(
-                                    albumUri = selectedState.value.selectedAlbum!!.album.coverUri,
-                                    checked = settingsState.value.setLockWithHome,
-                                    onCheckedChange = { isChecked ->
-                                        settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(isChecked))
-                                    },
-                                    animate = settingsState.value.animate
+                                    albumUri = selectedAlbum.album.coverUri,
+                                    checked = setLockWithHome,
+                                    onCheckedChange = { onSetLockWithHome(it) },
+                                    animate = true
                                 )
                             }
                         }
+                    }
+                    else {
+                        if (selectedAlbum != null) {
+                            SetLockScreenSwitch(
+                                albumUri = selectedAlbum.album.coverUri,
+                                checked = setLockWithHome,
+                                onCheckedChange = { onSetLockWithHome(it) },
+                                animate = false
+                            )
+                        }
+                    }
+                }
+                item {
+                    if (animate) {
                         AnimatedVisibility(
-                            visible = selectedState.value.selectedAlbum != null,
+                            visible = selectedAlbum != null,
                             enter = slideInVertically(initialOffsetY = { -it }),
                             exit = fadeOut()
                         ) {
                             TimeSliders(
-                                timeInMinutes = settingsState.value.interval,
+                                timeInMinutes = interval,
                                 onTimeChange = { days, hours, minutes ->
                                     val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                     settingsViewModel.onEvent(
@@ -140,62 +164,44 @@ fun WallpaperScreen(
                             )
                         }
                     }
-                } else {
-                    item {
-                        if (selectedState.value.selectedAlbum != null) {
-                            CurrentAndNextChange(
-                                settingsState.value.lastSetTime,
-                                settingsState.value.nextSetTime
+                    else {
+                        if (selectedAlbum != null) {
+                            TimeSliders(
+                                timeInMinutes = interval,
+                                onTimeChange = { days, hours, minutes ->
+                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                    settingsViewModel.onEvent(
+                                        SettingsEvent.SetWallpaperInterval(totalMinutes)
+                                    )
+                                    onScheduleWallpaperChanger(totalMinutes)
+                                }
                             )
                         }
-                    }
-                    item {
-                        if (selectedState.value.selectedAlbum != null) {
-                            SetLockScreenSwitch(
-                                albumUri = selectedState.value.selectedAlbum!!.album.coverUri,
-                                checked = settingsState.value.setLockWithHome,
-                                onCheckedChange = { isChecked ->
-                                    settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(isChecked))
-                                },
-                                animate = settingsState.value.animate
-                            )
-                        }
-                    }
-                    item {
-                        TimeSliders(
-                            timeInMinutes = settingsState.value.interval,
-                            onTimeChange = { days, hours, minutes ->
-                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                settingsViewModel.onEvent(
-                                    SettingsEvent.SetWallpaperInterval(totalMinutes)
-                                )
-                                onScheduleWallpaperChanger(totalMinutes)
-                            }
-                        )
                     }
                 }
             }
             if (openBottomSheet) {
                 AlbumBottomSheet(
                     albums = albumState.value.albumsWithWallpapers,
-                    currentSelectedAlbum = selectedState.value.selectedAlbum,
+                    currentSelectedAlbum = selectedAlbum,
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
-                        val wallpapers: List<Wallpaper> = album.wallpapers + album.folders.flatMap { folder ->
-                            folder.wallpapers.map { wallpaper ->
+                        val wallpapers: List<Wallpaper> = album.wallpapers + album.folders.asSequence().flatMap { folder ->
+                            folder.wallpapers.asSequence().map { wallpaper ->
                                 Wallpaper(
                                     initialAlbumName = album.album.initialAlbumName,
                                     wallpaperUri = wallpaper,
                                     key = wallpaper.hashCode() + album.album.initialAlbumName.hashCode(),
                                 )
                             }
-                        }
+                        }.toList()
                         val newSelectedAlbum = SelectedAlbum(
                             album = album.album.copy(
                                 wallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()
                             ),
                             wallpapers = wallpapers
                         )
+                        wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                         openBottomSheet = false
                         scope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
@@ -205,10 +211,9 @@ fun WallpaperScreen(
                                 duration = SnackbarDuration.Short
                             )
                         }
-                        wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
-                        onScheduleWallpaperChanger(settingsState.value.interval)
+                        onScheduleWallpaperChanger(interval)
                     },
-                    animate = settingsState.value.animate
+                    animate = animate
                 )
             }
         },
