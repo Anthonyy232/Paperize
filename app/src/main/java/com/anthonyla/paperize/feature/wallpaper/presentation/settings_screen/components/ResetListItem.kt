@@ -67,7 +67,7 @@ fun ResetListItem(onResetClick: () -> Unit) {
                 .clip(RoundedCornerShape(16.dp))
                 .clickable(onClick = { showDialog = true }),
             elevation = CardDefaults.cardElevation(10.dp),
-            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.error)
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.errorContainer)
         ) {
             Row (
                 verticalAlignment = Alignment.CenterVertically,
