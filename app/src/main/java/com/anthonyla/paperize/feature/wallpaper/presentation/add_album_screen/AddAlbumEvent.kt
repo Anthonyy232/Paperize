@@ -2,7 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 sealed class AddAlbumEvent {
     data object SaveAlbum: AddAlbumEvent()
-    data object ClearState: AddAlbumEvent()
+    data object Reset: AddAlbumEvent()
     data object DeleteSelected: AddAlbumEvent()
     data object SelectAll: AddAlbumEvent()
     data object DeselectAll: AddAlbumEvent()

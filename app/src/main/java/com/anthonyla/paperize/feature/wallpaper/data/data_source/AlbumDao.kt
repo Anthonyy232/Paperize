@@ -66,4 +66,20 @@ interface AlbumDao {
 
     @Update
     suspend fun updateFolder(folder: Folder)
+
+    @Query("DELETE FROM album")
+    suspend fun deleteAllAlbums()
+
+    @Query("DELETE FROM wallpaper")
+    suspend fun deleteAllWallpapers()
+
+    @Query("DELETE FROM folder")
+    suspend fun deleteAllFolders()
+
+    @Transaction
+    suspend fun deleteAllData() {
+        deleteAllWallpapers()
+        deleteAllFolders()
+        deleteAllAlbums()
+    }
 }

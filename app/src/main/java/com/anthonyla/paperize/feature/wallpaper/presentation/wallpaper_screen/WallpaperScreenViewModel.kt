@@ -1,20 +1,13 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
 import android.app.Application
-import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -56,7 +49,7 @@ class WallpaperScreenViewModel @Inject constructor (
                     withContext(Dispatchers.IO) {
                         repository.deleteAll()
                         _state.update {
-                            it.copy(selectedAlbum = null)
+                            WallpaperState()
                         }
                     }
                 }

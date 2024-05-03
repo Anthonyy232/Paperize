@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsScrollableSettings
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsTitle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsSmallTopAppBar
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.SettingsTitle
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -20,7 +20,8 @@ fun SettingsScreen(
     onDynamicThemingClick: (Boolean) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
-    onLicenseClick: () -> Unit
+    onLicenseClick: () -> Unit,
+    onResetClick: () -> Unit
 ) {
     val scroll: ScrollState = rememberScrollState(0)
     val largeTopAppBarHeight = 152.dp
@@ -36,7 +37,8 @@ fun SettingsScreen(
             onDynamicThemingClick = onDynamicThemingClick,
             onAnimateClick = onAnimateClick,
             onPrivacyClick = onPrivacyClick,
-            onLicenseClick = onLicenseClick
+            onLicenseClick = onLicenseClick,
+            onResetClick = onResetClick
         )
         SettingsSmallTopAppBar(onBackClick = onBackClick)
         SettingsTitle(

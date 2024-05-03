@@ -17,7 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewScreen
@@ -54,12 +56,21 @@ fun PaperizeApp(
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
+    addAlbumViewModel: AddAlbumViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
     val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    if (settingsState.value.firstLaunch) {
+        val contentResolver = context.contentResolver
+        val persistedUris = contentResolver.persistedUriPermissions
+        for (permission in persistedUris) {
+            contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
+    }
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
@@ -139,8 +150,7 @@ fun PaperizeApp(
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
                         settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
                         navController.navigate(Home) {
-                            popUpTo(Startup) { inclusive = true }
-                            popUpTo(Notification) { inclusive = true }
+                            popUpTo<Startup> { inclusive = true }
                         }
                     }
                     else { navController.navigate(Notification) }
@@ -166,8 +176,7 @@ fun PaperizeApp(
                 onAgree = {
                     settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
                     navController.navigate(Home) {
-                        popUpTo(Startup) { inclusive = true }
-                        popUpTo(Notification) { inclusive = true }
+                        popUpTo<Notification> { inclusive = true }
                     }
                 }
             )
@@ -370,6 +379,24 @@ fun PaperizeApp(
                 onLicenseClick = {
                     navController.navigate(Licenses)
                 },
+                onResetClick = {
+                    navController.navigate(Startup) {
+                        popUpTo<Settings> { inclusive = true }
+                    }
+                    settingsViewModel.onEvent(SettingsEvent.Reset)
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                    albumsViewModel.onEvent(AlbumsEvent.Reset)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
+                    Intent(context, WallpaperService::class.java).also {
+                        it.action = WallpaperService.Actions.STOP.toString()
+                        context.startForegroundService(it)
+                    }
+                    val contentResolver = context.contentResolver
+                    val persistedUris = contentResolver.persistedUriPermissions
+                    for (permission in persistedUris) {
+                        contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    }
+                }
             )
         }
         // Navigate to the privacy screen to view the privacy policy

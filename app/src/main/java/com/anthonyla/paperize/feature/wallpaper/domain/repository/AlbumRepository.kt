@@ -96,4 +96,9 @@ interface AlbumRepository {
      * Delete folder list in one transaction
      */
     suspend fun deleteFolderList(folders: List<Folder>)
+
+    /**
+     * Delete all data in database
+     */
+    suspend fun deleteAllData()
 }

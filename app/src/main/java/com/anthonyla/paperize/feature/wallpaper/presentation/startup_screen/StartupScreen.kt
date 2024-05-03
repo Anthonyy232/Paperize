@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.startup_screen
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +61,12 @@ fun StartupScreen(
     val scope = rememberCoroutineScope()
     var showToS by remember { mutableStateOf(false) }
     var seenToS by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
 
     Scaffold(
         snackbarHost = {

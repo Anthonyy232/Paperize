@@ -86,4 +86,8 @@ class AlbumRepositoryImpl(
     override suspend fun deleteWallpaperList(wallpapers: List<Wallpaper>) {
         dao.deleteWallpaperList(wallpapers)
     }
+
+    override suspend fun deleteAllData() {
+        dao.deleteAllData()
+    }
 }

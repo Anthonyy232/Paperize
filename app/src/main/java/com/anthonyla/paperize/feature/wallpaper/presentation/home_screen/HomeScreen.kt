@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.home_screen
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -21,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
@@ -52,6 +55,12 @@ fun HomeScreen(
         onDismissRequest = { addAlbumDialog = false },
         onConfirmation = { navigateToAddWallpaperScreen(it) }
     )
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
 
     Scaffold (
         topBar = {

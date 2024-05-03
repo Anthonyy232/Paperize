@@ -61,7 +61,7 @@ fun AddAlbumScreen(
             addAlbumViewModel.onEvent(AddAlbumEvent.DeselectAll)
         } else {
             onBackClick()
-            addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
+            addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
         }
     }
 
@@ -104,13 +104,13 @@ fun AddAlbumScreen(
                 selectionMode = selectionMode,
                 albumState = addAlbumViewModel.state,
                 onBackClick = {
-                    addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
                     onBackClick()
                 },
                 onConfirmationClick = {
                     addAlbumViewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
                     addAlbumViewModel.onEvent(AddAlbumEvent.SaveAlbum)
-                    addAlbumViewModel.onEvent(AddAlbumEvent.ClearState)
+                    addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
                     onConfirmation()
                 },
                 onSelectAllClick = {

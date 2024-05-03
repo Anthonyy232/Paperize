@@ -228,7 +228,7 @@ class AddAlbumViewModel @Inject constructor(
                     }
                 }
             }
-            is AddAlbumEvent.ClearState -> {
+            is AddAlbumEvent.Reset -> {
                 viewModelScope.launch {
                     _state.update { it.copy(
                         initialAlbumName = "",

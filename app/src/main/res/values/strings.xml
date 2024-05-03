@@ -57,4 +57,8 @@
     <string name="licenses_screen">Licenses Screen</string>
     <string name="contact">Contact</string>
     <string name="contact_the_author_by_email">Contact the author by email</string>
+    <string name="reset_to_default">Reset to default</string>
+    <string name="reset_all_data">Reset all data</string>
+    <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">Are you sure you want to reset all settings and data to default?</string>
+    <string name="confirm">Confirm</string>
 </resources>

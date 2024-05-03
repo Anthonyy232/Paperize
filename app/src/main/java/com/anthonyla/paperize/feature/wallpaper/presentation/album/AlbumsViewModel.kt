@@ -3,9 +3,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album
 import android.app.Application
 import android.content.Context
 import android.webkit.MimeTypeMap
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
@@ -73,6 +70,12 @@ class AlbumsViewModel @Inject constructor (
                             initialized = true
                         )
                     )
+                }
+            }
+            is AlbumsEvent.Reset -> {
+                viewModelScope.launch {
+                    _state.update { AlbumsState() }
+                    repository.deleteAllData()
                 }
             }
         }

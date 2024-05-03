@@ -47,7 +47,8 @@ fun SettingsScrollableSettings(
     onDarkModeClick: (Boolean?) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
-    onLicenseClick: () -> Unit
+    onLicenseClick: () -> Unit,
+    onResetClick: () -> Unit,
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -143,6 +144,8 @@ fun SettingsScrollableSettings(
                         }
                     },
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                ResetListItem(onResetClick = onResetClick)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         },
