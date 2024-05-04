@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -41,6 +42,13 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { settingsViewModel.setKeepOnScreenCondition }
         setContent {
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
+            if (isFirstLaunch) {
+                val contentResolver = context.contentResolver
+                val persistedUris = contentResolver.persistedUriPermissions
+                for (permission in persistedUris) {
+                    contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                }
+            }
             PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch)

@@ -64,14 +64,6 @@ fun PaperizeApp(
     val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    if (settingsState.value.firstLaunch) {
-        val contentResolver = context.contentResolver
-        val persistedUris = contentResolver.persistedUriPermissions
-        for (permission in persistedUris) {
-            contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        }
-    }
-
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
         albumState.value.albumsWithWallpapers.asSequence().forEach { albumWithWallpapers ->
