@@ -11,7 +11,8 @@
 
 ## Features
 - **Dynamic Wallpaper Changer**: Set your wallpaper to change at specific time intervals
-- **Supports Various Image Types**: Paperize can handle a wide range of image types, offering you flexibility in your wallpaper choices
+  - JPEG, PNG, AVIF, WEBP
+- **Supports Various Image Types**: Paperize can handle a wide range of image types
 - **Folder Support**: Organize your wallpapers into folders for auto-updating
 - **Home and Lock Screen Wallpaper**: Choose to change either your home screen, lock screen, or both
 - **On-Device Storage**: All your wallpapers and settings are stored on your device

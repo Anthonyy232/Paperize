@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -158,8 +159,17 @@ fun Uri.getImageDimensions(context: Context): Pair<Int, Int> {
     val inputStream = context.contentResolver.openInputStream(this)!!
     val exif = ExifInterface(inputStream)
 
-    val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-    val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+    var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+    var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+
+    if (width == 0 || height == 0) {
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeStream(context.contentResolver.openInputStream(this), null, options)
+        width = options.outWidth
+        height = options.outHeight
+    }
 
     return Pair(width, height)
 }
