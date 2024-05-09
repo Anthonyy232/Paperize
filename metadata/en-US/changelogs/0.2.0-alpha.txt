@@ -1,0 +1,9 @@
+v0.2.0-alpha
+Cleaned code and allow adding to previously created albums.
+
+Added functionality to add more wallpapers and folders to already created albums
+Refactored some old code to be cleaner
+Create an issue if there are any bugs or email me (GitHub profile)
+Planning
+Add an app icon 😆
+Look into whether live wallpaper using WallpaperManager (WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER) would work well/be realistic
