@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album
 
 import android.app.Application
 import android.content.Context
-import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
@@ -153,9 +152,8 @@ class AlbumsViewModel @Inject constructor (
             if (file.isDirectory()) {
                 files.addAll(listFilesRecursive(file, context))
             } else {
-                val extension = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
-                val allowedExtensions = listOf("jpg", "png", "heif", "webp")
-                if (extension in allowedExtensions) {
+                val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
+                if (file.extension in allowedExtensions) {
                     files.add(file.uri.toString())
                 }
             }

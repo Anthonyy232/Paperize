@@ -273,7 +273,7 @@ class AddAlbumViewModel @Inject constructor(
             if (file.isDirectory()) {
                 files.addAll(listFilesRecursive(file, context))
             } else {
-                val allowedExtensions = listOf("jpg", "png", "heif", "webp")
+                val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
                 if (file.extension in allowedExtensions) {
                     files.add(file.uri.toString())
                 }
