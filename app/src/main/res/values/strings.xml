@@ -61,4 +61,8 @@
     <string name="reset_all_data">Reset all data</string>
     <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">Are you sure you want to reset all settings and data to default?</string>
     <string name="confirm">Confirm</string>
+    <string name="spotlight_animation">Spotlight animation</string>
+    <string name="circle_2_animation">Circle 2 animation</string>
+    <string name="circle_1_animation">Circle 1 animation</string>
+    <string name="circle_3_animation">Circle 3 animation</string>
 </resources>

@@ -1,8 +1,16 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -33,7 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -54,16 +64,45 @@ fun AddAlbumSmallTopBar(
     title: String,
     isEmpty: Boolean,
     selectionMode: Boolean,
+    showSpotlight: Boolean,
+    albumFirstSet: Boolean,
     onSelectAllClick: () -> Unit,
     onBackClick: () -> Unit,
     onDeleteSelected: () -> Unit,
-    onConfirmationClick: (String) -> Unit,
-    modifier: Modifier = Modifier
-    ) {
+    onConfirmationClick: (String) -> Unit
+) {
     val state = albumState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     var editableTitle by rememberSaveable { mutableStateOf(title) }
     var showSelectionDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = stringResource(R.string.spotlight_animation))
+    val radius1 by infiniteTransition.animateFloat(
+        initialValue = 25f,
+        targetValue = 50f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = stringResource(R.string.circle_1_animation)
+    )
+    val radius2 by infiniteTransition.animateFloat(
+        initialValue = 25f,
+        targetValue = 60f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = stringResource(R.string.circle_2_animation)
+    )
+
+    val radius3 by infiniteTransition.animateFloat(
+        initialValue = 25f,
+        targetValue = 75f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = stringResource(R.string.circle_3_animation)
+    )
+
 
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -109,9 +148,7 @@ fun AddAlbumSmallTopBar(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onSelectAllClick
-                    ) {
+                    IconButton(onClick = onSelectAllClick) {
                         val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
                         if (state.value.allSelected) {
                             Icon(
@@ -139,12 +176,38 @@ fun AddAlbumSmallTopBar(
         actions = {
             if(!selectionMode) {
                 if (!isEmpty) {
-                    IconButton(onClick = { onConfirmationClick(editableTitle) }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Add,
-                            contentDescription = stringResource(R.string.add_album),
-                            modifier = Modifier.padding(6.dp)
-                        )
+                    Box {
+                        val primaryColor = MaterialTheme.colorScheme.inversePrimary
+                        val secondaryColor = MaterialTheme.colorScheme.secondary
+                        IconButton(onClick = { onConfirmationClick(editableTitle) }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Add,
+                                contentDescription = stringResource(R.string.add_album),
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                        if (!albumFirstSet && showSpotlight) {
+                            Canvas(modifier = Modifier.matchParentSize()) {
+                                drawCircle(
+                                    color = primaryColor,
+                                    radius = radius1,
+                                    center = Offset(size.width / 2, size.height / 2),
+                                    style = Stroke(width = 5f)
+                                )
+                                drawCircle(
+                                    color = secondaryColor,
+                                    radius = radius2,
+                                    center = Offset(size.width / 2, size.height / 2),
+                                    style = Stroke(width = 5f)
+                                )
+                                drawCircle(
+                                    color = primaryColor,
+                                    radius = radius3,
+                                    center = Offset(size.width / 2, size.height / 2),
+                                    style = Stroke(width = 5f)
+                                )
+                            }
+                        }
                     }
                 }
             }

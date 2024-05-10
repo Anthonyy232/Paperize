@@ -54,6 +54,7 @@ fun AddAlbumScreen(
     if (addAlbumState.value.initialAlbumName.isEmpty()) {
         addAlbumViewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
     }
+    var showSpotlight by rememberSaveable { mutableStateOf(false) }
 
     BackHandler {
         if (selectionMode) {
@@ -78,6 +79,7 @@ fun AddAlbumScreen(
             if (uriList.isNotEmpty()) {
                 addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
             }
+            showSpotlight = true
         }
     )
 
@@ -93,6 +95,7 @@ fun AddAlbumScreen(
                     addAlbumViewModel.onEvent(AddAlbumEvent.AddFolder(uri.toString()))
                 }
             }
+            showSpotlight = true
         }
     )
 
@@ -103,6 +106,8 @@ fun AddAlbumScreen(
                 isEmpty = addAlbumState.value.isEmpty,
                 selectionMode = selectionMode,
                 albumState = addAlbumViewModel.state,
+                showSpotlight = showSpotlight,
+                albumFirstSet = settingsState.value.firstAlbumSet,
                 onBackClick = {
                     addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
                     onBackClick()

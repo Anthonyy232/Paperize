@@ -249,7 +249,10 @@ fun PaperizeApp(
             AddAlbumScreen(
                 initialAlbumName = addEdit.wallpaper,
                 onBackClick = { navController.navigateUp() },
-                onConfirmation = { navController.navigateUp() },
+                onConfirmation = {
+                    navController.navigateUp()
+                    settingsViewModel.onEvent(SettingsEvent.SetFirstAlbum)
+                },
                 onShowWallpaperView = {
                     navController.navigate(WallpaperView(it))
                 },
