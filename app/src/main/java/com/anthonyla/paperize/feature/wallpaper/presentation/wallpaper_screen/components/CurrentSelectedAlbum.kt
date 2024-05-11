@@ -3,7 +3,9 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,11 +21,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,9 +48,11 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun CurrentSelectedAlbum(
     selectedAlbum: SelectedAlbum?,
+    enableChanger: Boolean,
     onOpenBottomSheet: () -> Unit,
     onStop: () -> Unit,
-    animate: Boolean
+    animate: Boolean,
+    onToggleChanger: (Boolean) -> Unit
 ) {
     fun isValidUri(context: Context, uriString: String?): Boolean {
         val uri = uriString?.toUri()
@@ -62,9 +69,15 @@ fun CurrentSelectedAlbum(
 
     ListItem(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(PaddingValues(vertical = 8.dp, horizontal = 16.dp))
             .clip(RoundedCornerShape(16.dp))
-            .clickable { onOpenBottomSheet() },
+            .clickable {
+                if (selectedAlbum != null) {
+                    onToggleChanger(!enableChanger)
+                } else {
+                    onOpenBottomSheet()
+                }
+            },
         headlineContent = {
             Text(
                 text = selectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),
@@ -119,7 +132,10 @@ fun CurrentSelectedAlbum(
             }
         },
         trailingContent = {
-            Row {
+            Row (
+                horizontalArrangement = Arrangement.spacedBy((-8).dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (selectedAlbum != null) {
                     IconButton(onClick = { onStop() }) {
                         Icon(imageVector = Icons.Default.Stop, contentDescription = stringResource(R.string.stop_the_album))
@@ -129,6 +145,15 @@ fun CurrentSelectedAlbum(
                     Icon(
                         contentDescription = stringResource(R.string.click_to_select_a_different_album),
                         imageVector = Icons.Filled.ArrowDropDown,
+                    )
+                }
+                if (selectedAlbum != null) {
+                    Switch(
+                        checked = enableChanger,
+                        onCheckedChange = onToggleChanger,
+                        modifier = Modifier
+                            .rotate(270f)
+                            .scale(0.75f)
                     )
                 }
             }

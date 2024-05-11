@@ -63,6 +63,7 @@ fun AddAlbumScreen(
         } else {
             onBackClick()
             addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
+            showSpotlight = false
         }
     }
 
@@ -79,7 +80,6 @@ fun AddAlbumScreen(
             if (uriList.isNotEmpty()) {
                 addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
             }
-            showSpotlight = true
         }
     )
 
@@ -95,7 +95,6 @@ fun AddAlbumScreen(
                     addAlbumViewModel.onEvent(AddAlbumEvent.AddFolder(uri.toString()))
                 }
             }
-            showSpotlight = true
         }
     )
 
@@ -107,12 +106,13 @@ fun AddAlbumScreen(
                 selectionMode = selectionMode,
                 albumState = addAlbumViewModel.state,
                 showSpotlight = showSpotlight,
-                albumFirstSet = settingsState.value.firstAlbumSet,
                 onBackClick = {
+                    showSpotlight = false
                     addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
                     onBackClick()
                 },
                 onConfirmationClick = {
+                    showSpotlight = false
                     addAlbumViewModel.onEvent(AddAlbumEvent.ReflectAlbumName(it))
                     addAlbumViewModel.onEvent(AddAlbumEvent.SaveAlbum)
                     addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
@@ -156,10 +156,12 @@ fun AddAlbumScreen(
                     onImageClick = {
                         selectionMode = false
                         imagePickerLauncher.launch(arrayOf("image/*"))
+                        showSpotlight = true
                     },
                     onFolderClick = {
                         selectionMode = false
                         folderPickerLauncher.launch(null)
+                        showSpotlight = true
                     },
                     animate = false
                 )

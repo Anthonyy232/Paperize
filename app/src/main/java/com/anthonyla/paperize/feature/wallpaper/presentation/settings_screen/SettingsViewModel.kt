@@ -35,11 +35,11 @@ class SettingsViewModel @Inject constructor (
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
             val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
             val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
-            val firstAlbumSet = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_ALBUM_SET) ?: false }
             val setLockWithHome = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false }
             val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
             val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
             val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
+            val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
 
             _state.update {
                 it.copy(
@@ -48,10 +48,10 @@ class SettingsViewModel @Inject constructor (
                     interval = wallpaperInterval.await(),
                     setLockWithHome = setLockWithHome.await(),
                     firstLaunch = firstLaunch.await(),
-                    firstAlbumSet = firstAlbumSet.await(),
                     lastSetTime = lastSetTime.await(),
                     nextSetTime = nextSetTime.await(),
-                    animate = animate.await()
+                    animate = animate.await(),
+                    enableChanger = enableChanger.await()
                 )
             }
             setKeepOnScreenCondition = false
@@ -70,12 +70,16 @@ class SettingsViewModel @Inject constructor (
                     }
                 }
             }
-            is SettingsEvent.SetFirstAlbum -> {
+
+            is SettingsEvent.SetChangerToggle -> {
                 viewModelScope.launch {
-                    settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_ALBUM_SET, true)
+                    when (event.toggle) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, false) }
+                    }
                     _state.update {
                         it.copy(
-                            firstAlbumSet = true
+                            enableChanger = event.toggle
                         )
                     }
                 }
@@ -87,11 +91,11 @@ class SettingsViewModel @Inject constructor (
                     val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
                     val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
                     val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
-                    val firstAlbumSet = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_ALBUM_SET) ?: false }
                     val setLockWithHome = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false }
                     val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
                     val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
                     val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
+                    val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
 
                     _state.update {
                         it.copy(
@@ -100,10 +104,10 @@ class SettingsViewModel @Inject constructor (
                             interval = wallpaperInterval.await(),
                             setLockWithHome = setLockWithHome.await(),
                             firstLaunch = firstLaunch.await(),
-                            firstAlbumSet = firstAlbumSet.await(),
                             lastSetTime = lastSetTime.await(),
                             nextSetTime = nextSetTime.await(),
-                            animate = animate.await()
+                            animate = animate.await(),
+                            enableChanger = enableChanger.await()
                         )
                     }
                 }
@@ -190,12 +194,12 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_LAUNCH)
-                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_ALBUM_SET)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.SET_LOCK_WITH_HOME)
                     settingsDataStoreImpl.deleteString(SettingsConstants.LAST_SET_TIME)
                     settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ANIMATE_TYPE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_CHANGER)
                     _state.update {
                         it.copy(
                             darkMode = null,
@@ -203,10 +207,10 @@ class SettingsViewModel @Inject constructor (
                             interval = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
                             setLockWithHome = false,
                             firstLaunch = true,
-                            firstAlbumSet = false,
                             lastSetTime = null,
                             nextSetTime = null,
-                            animate = true
+                            animate = true,
+                            enableChanger = false
                         )
                     }
                 }

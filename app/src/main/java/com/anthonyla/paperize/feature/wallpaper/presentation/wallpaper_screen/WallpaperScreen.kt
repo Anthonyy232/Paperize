@@ -22,9 +22,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
@@ -44,18 +46,21 @@ fun WallpaperScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     onScheduleWallpaperChanger: (Int) -> Unit,
     onSetLockWithHome: (Boolean) -> Unit,
+    onToggleChanger: (Boolean) -> Unit,
     onStop: () -> Unit,
     animate: Boolean,
     interval: Int,
     setLockWithHome: Boolean,
     lastSetTime: String?,
     nextSetTime: String?,
-    selectedAlbum: SelectedAlbum?
+    selectedAlbum: SelectedAlbum?,
+    enableChanger: Boolean
 ) {
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     Scaffold(
         snackbarHost = {
@@ -88,15 +93,29 @@ fun WallpaperScreen(
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar(
-                                        message = "${selectedAlbum.album.displayedAlbumName} has been unselected.",
-                                        actionLabel = "Dismiss",
+                                        message = context.getString(R.string.has_been_unselected, selectedAlbum.album.displayedAlbumName),
+                                        actionLabel = context.getString(R.string.dismiss),
                                         duration = SnackbarDuration.Short
                                     )
                                 }
                                 onStop()
                             }
                         },
-                        animate = animate
+                        animate = animate,
+                        enableChanger = enableChanger,
+                        onToggleChanger = {
+                            if (!it) {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.wallpaper_changer_has_been_disabled),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                            onToggleChanger(it)
+                        }
                     )
                 }
                 item {
@@ -126,7 +145,7 @@ fun WallpaperScreen(
                         ) {
                             if (selectedAlbum != null) {
                                 SetLockScreenSwitch(
-                                    albumUri = selectedAlbum.album.coverUri,
+                                    albumUri = selectedAlbum.album.currentWallpaper,
                                     checked = setLockWithHome,
                                     onCheckedChange = { onSetLockWithHome(it) },
                                     animate = true
@@ -137,7 +156,7 @@ fun WallpaperScreen(
                     else {
                         if (selectedAlbum != null) {
                             SetLockScreenSwitch(
-                                albumUri = selectedAlbum.album.coverUri,
+                                albumUri = selectedAlbum.album.currentWallpaper,
                                 checked = setLockWithHome,
                                 onCheckedChange = { onSetLockWithHome(it) },
                                 animate = false
@@ -156,9 +175,6 @@ fun WallpaperScreen(
                                 timeInMinutes = interval,
                                 onTimeChange = { days, hours, minutes ->
                                     val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    settingsViewModel.onEvent(
-                                        SettingsEvent.SetWallpaperInterval(totalMinutes)
-                                    )
                                     onScheduleWallpaperChanger(totalMinutes)
                                 }
                             )
@@ -170,9 +186,6 @@ fun WallpaperScreen(
                                 timeInMinutes = interval,
                                 onTimeChange = { days, hours, minutes ->
                                     val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    settingsViewModel.onEvent(
-                                        SettingsEvent.SetWallpaperInterval(totalMinutes)
-                                    )
                                     onScheduleWallpaperChanger(totalMinutes)
                                 }
                             )
@@ -195,23 +208,19 @@ fun WallpaperScreen(
                                 )
                             }
                         }.toList()
+                        val shuffledWallpapers = wallpapers.map { it.wallpaperUri }.shuffled()
                         val newSelectedAlbum = SelectedAlbum(
                             album = album.album.copy(
-                                wallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()
+                                wallpapersInQueue = shuffledWallpapers,
+                                currentWallpaper = shuffledWallpapers.firstOrNull()
                             ),
                             wallpapers = wallpapers
                         )
+                        settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
                         wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                         openBottomSheet = false
-                        scope.launch {
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar(
-                                message = "${album.album.displayedAlbumName} has been selected.",
-                                actionLabel = "Dismiss",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
                         onScheduleWallpaperChanger(interval)
+                        onToggleChanger(true)
                     },
                     animate = animate
                 )

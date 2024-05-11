@@ -5,10 +5,10 @@ sealed class SettingsEvent {
     data object Refresh: SettingsEvent()
     data object Reset: SettingsEvent()
     data object SetFirstLaunch: SettingsEvent()
-    data object SetFirstAlbum: SettingsEvent()
     data class SetDarkMode(val darkMode: Boolean?): SettingsEvent()
     data class SetDynamicTheming(val dynamicTheming: Boolean): SettingsEvent()
     data class SetAnimate(val animate: Boolean): SettingsEvent()
     data class SetWallpaperInterval(val interval: Int): SettingsEvent()
     data class SetLockWithHome(val lockWithHome: Boolean): SettingsEvent()
+    data class SetChangerToggle(val toggle: Boolean): SettingsEvent()
 }

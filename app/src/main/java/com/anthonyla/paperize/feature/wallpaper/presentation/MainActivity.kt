@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
@@ -45,8 +44,7 @@ class MainActivity : ComponentActivity() {
                     contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 }
             }
-            val settingsState = settingsViewModel.state.collectAsStateWithLifecycle(this)
-            PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
+            PaperizeTheme(settingsViewModel.state) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch)
                 }

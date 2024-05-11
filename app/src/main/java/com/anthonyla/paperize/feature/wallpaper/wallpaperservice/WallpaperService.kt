@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.wallpaperservice
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
@@ -19,7 +20,9 @@ import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +36,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class WallpaperService: Service() {
-    @Inject lateinit var repository: SelectedAlbumRepository
+    @Inject lateinit var selectedRepository: SelectedAlbumRepository
+    @Inject lateinit var albumRepository: AlbumRepository
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var runnableCode: Runnable
@@ -110,7 +114,6 @@ class WallpaperService: Service() {
      * Clean up the service when it is destroyed
      */
     override fun onDestroy() {
-        Log.d("PaperizeWallpaperChanger", "Service destroyed")
         super.onDestroy()
         handler.removeCallbacks(runnableCode)
         CoroutineScope(Dispatchers.IO).launch {
@@ -123,10 +126,13 @@ class WallpaperService: Service() {
      * Creates a notification for the wallpaper service
      */
     private fun createNotification(current: Int = 0, total: Int = 0): Notification {
+        val intent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
             .setContentTitle("Paperize")
             .setContentText("Rotation: $current/$total wallpapers\nInterval: ${formatTime(timeInMinutes)}")
             .setSmallIcon(R.drawable.notification_icon)
+            .setContentIntent(pendingIntent)
             .build()
     }
 
@@ -140,35 +146,76 @@ class WallpaperService: Service() {
         settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, time.format(formatter))
         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, time.plusMinutes(timeInMinutes.toLong()).format(formatter))
         val setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
-        val album = repository.getSelectedAlbum().first().firstOrNull()
-        album?.let {
-            val notification = createNotification(it.album.wallpapersInQueue.size, it.wallpapers.size)
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(1, notification)
+        val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
+        selectedAlbum?.let { it ->
             var wallpaper = it.album.wallpapersInQueue.firstOrNull()
+            // Pick the next wallpaper in the queue
             if (wallpaper != null) {
-                setWallpaper(context, wallpaper.toUri(), setLockWithHome)
-                repository.upsertSelectedAlbum(
-                    it.copy(
-                        album = it.album.copy(
-                            wallpapersInQueue = it.album.wallpapersInQueue.drop(1)
-                        )
-                    )
-                )
-            }
-            else {
-                val newWallpaperInQueue = it.wallpapers.map { it.wallpaperUri }.shuffled()
-                wallpaper = newWallpaperInQueue.firstOrNull()
-                if (wallpaper != null) {
-                    setWallpaper(context, wallpaper.toUri(), setLockWithHome)
-                    repository.upsertSelectedAlbum(
+                val notification = createNotification(it.album.wallpapersInQueue.size, it.wallpapers.size)
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(1, notification)
+                if (!setWallpaper(context, wallpaper.toUri(), setLockWithHome)) {
+                    selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper }
+                        ?.let { it1 ->
+                            selectedRepository.deleteWallpaper(it1)
+                            selectedRepository.upsertSelectedAlbum(
+                                it.copy(
+                                    album = it.album.copy(
+                                        wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
+                                        currentWallpaper = null
+                                    ),
+                                    wallpapers = it.wallpapers.filter { it == it1 },
+                                )
+                            )
+                            albumRepository.deleteWallpaper(it1)
+                        }
+                }
+                else {
+                    selectedRepository.upsertSelectedAlbum(
                         it.copy(
                             album = it.album.copy(
-                                wallpapersInQueue = newWallpaperInQueue.drop(1)
+                                wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
+                                currentWallpaper = wallpaper
                             )
                         )
                     )
                 }
+            }
+            // No more wallpapers in the queue -- reshuffle the wallpapers
+            else {
+                val notification = createNotification(it.wallpapers.size, it.wallpapers.size)
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(1, notification)
+                val newWallpaperInQueue = it.wallpapers.map { it.wallpaperUri }.shuffled()
+                wallpaper = newWallpaperInQueue.firstOrNull()
+                if (wallpaper != null) {
+                    if (!setWallpaper(context, wallpaper.toUri(), setLockWithHome)) {
+                        selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper }
+                            ?.let { it1 ->
+                                selectedRepository.deleteWallpaper(it1)
+                                selectedRepository.upsertSelectedAlbum(
+                                    it.copy(
+                                        album = it.album.copy(
+                                            wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
+                                            currentWallpaper = null
+                                        ),
+                                        wallpapers = it.wallpapers.filter { it == it1 }
+                                    )
+                                )
+                                albumRepository.deleteWallpaper(it1)
+                            }
+                    }
+                    else {
+                        selectedRepository.upsertSelectedAlbum(
+                            it.copy(
+                                album = it.album.copy(
+                                    wallpapersInQueue = newWallpaperInQueue.drop(1),
+                                    currentWallpaper = wallpaper
+                                )
+                            )
+                        )
+                    }
+                } else { onDestroy() }
             }
         }
     }
@@ -176,7 +223,7 @@ class WallpaperService: Service() {
     /**
      * Sets the wallpaper to the given uri
      */
-    private fun setWallpaper(context: Context, wallpaper: Uri, setLockWithHome: Boolean) {
+    private fun setWallpaper(context: Context, wallpaper: Uri, setLockWithHome: Boolean): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -198,9 +245,8 @@ class WallpaperService: Service() {
                     false -> WallpaperManager.FLAG_SYSTEM
                 })
             }
-        } catch (e: IOException) {
-            Log.e("PaperizeWallpaperChanger", "Error changing wallpaper", e)
-        }
+            return true
+        } catch (e: IOException) { return false }
     }
 
     /**

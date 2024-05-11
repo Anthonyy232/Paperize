@@ -65,7 +65,6 @@ fun AddAlbumSmallTopBar(
     isEmpty: Boolean,
     selectionMode: Boolean,
     showSpotlight: Boolean,
-    albumFirstSet: Boolean,
     onSelectAllClick: () -> Unit,
     onBackClick: () -> Unit,
     onDeleteSelected: () -> Unit,
@@ -186,7 +185,7 @@ fun AddAlbumSmallTopBar(
                                 modifier = Modifier.padding(6.dp)
                             )
                         }
-                        if (!albumFirstSet && showSpotlight) {
+                        if (!showSpotlight) {
                             Canvas(modifier = Modifier.matchParentSize()) {
                                 drawCircle(
                                     color = primaryColor,

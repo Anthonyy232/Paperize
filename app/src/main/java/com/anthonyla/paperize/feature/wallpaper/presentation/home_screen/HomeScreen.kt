@@ -36,13 +36,15 @@ fun HomeScreen(
     onAlbumViewClick: (String) -> Unit,
     onScheduleWallpaperChanger: (Int) -> Unit,
     onSetLockWithHome: (Boolean) -> Unit,
+    onToggleChanger: (Boolean) -> Unit,
     onStop: () -> Unit,
     animate : Boolean,
     interval: Int,
     setLockWithHome: Boolean,
     lastSetTime: String?,
     nextSetTime: String?,
-    selectedAlbum: SelectedAlbum?
+    selectedAlbum: SelectedAlbum?,
+    enableChanger: Boolean
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { tabItems.size }
@@ -116,8 +118,10 @@ fun HomeScreen(
                         setLockWithHome = setLockWithHome,
                         lastSetTime = lastSetTime,
                         nextSetTime = nextSetTime,
-                        onSetLockWithHome = { onSetLockWithHome(it) },
-                        selectedAlbum = selectedAlbum
+                        onSetLockWithHome = onSetLockWithHome,
+                        selectedAlbum = selectedAlbum,
+                        enableChanger = enableChanger,
+                        onToggleChanger = onToggleChanger
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

@@ -72,6 +72,7 @@ fun AlbumBottomSheet(
         tonalElevation = 5.dp
     ) {
         albums.forEach {
+            if (it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size == 0) return@forEach
             ListItem(
                 modifier = Modifier
                     .padding(4.dp)

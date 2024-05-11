@@ -57,7 +57,7 @@ fun SetLockScreenSwitch(
             }
             if (animate) {
                 AnimatedVisibility(
-                    visible = checked,
+                    visible = checked && albumUri != null,
                     enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
                     exit = shrinkVertically(animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing))
                 ) {

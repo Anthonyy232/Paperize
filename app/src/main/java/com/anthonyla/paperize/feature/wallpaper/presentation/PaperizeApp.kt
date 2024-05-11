@@ -77,7 +77,8 @@ fun PaperizeApp(
         albumState.value.albumsWithWallpapers.asSequence().forEach { albumWithWallpapers ->
             if (!albumWithWallpapers.album.initialized && (albumWithWallpapers.wallpapers.isNotEmpty() || albumWithWallpapers.folders.isNotEmpty())) {
                 albumsViewModel.onEvent(AlbumsEvent.InitializeAlbum(albumWithWallpapers))
-            } else if (albumWithWallpapers.album.initialized && albumWithWallpapers.wallpapers.isEmpty() && albumWithWallpapers.folders.isEmpty()) {
+            }
+            else if (albumWithWallpapers.wallpapers.isEmpty() && albumWithWallpapers.folders.isEmpty() && albumWithWallpapers.album.initialized) {
                 if (navController.currentDestination?.route == Home::class.simpleName) {
                     navController.popBackStack<Home>(inclusive = false)
                 }
@@ -86,42 +87,42 @@ fun PaperizeApp(
         }
 
         selectedState.value.selectedAlbum?.let { selectedAlbum ->
-            albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
-                ?.let { foundAlbum ->
-                    val albumNameHashCode = foundAlbum.album.initialAlbumName.hashCode()
-                    val wallpapers: List<Wallpaper> =
-                        foundAlbum.wallpapers + foundAlbum.folders.flatMap { folder ->
-                            folder.wallpapers.map { wallpaper ->
-                                val wallpaperHashCode = wallpaper.hashCode()
-                                Wallpaper(
-                                    initialAlbumName = foundAlbum.album.initialAlbumName,
-                                    wallpaperUri = wallpaper,
-                                    key = wallpaperHashCode + albumNameHashCode,
-                                )
-                            }
+            albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }?.let { foundAlbum ->
+                val albumNameHashCode = foundAlbum.album.initialAlbumName.hashCode()
+                val wallpapers: List<Wallpaper> =
+                    foundAlbum.wallpapers + foundAlbum.folders.flatMap { folder ->
+                        folder.wallpapers.map { wallpaper ->
+                            Wallpaper(
+                                initialAlbumName = foundAlbum.album.initialAlbumName,
+                                wallpaperUri = wallpaper,
+                                key = wallpaper.hashCode() + albumNameHashCode,
+                            )
                         }
-                    val wallpaperUriSet = wallpapers.map { it.wallpaperUri }.toSet()
-                    val newSelectedAlbum = SelectedAlbum(
-                        album = foundAlbum.album.copy(
-                            wallpapersInQueue = selectedAlbum.album.wallpapersInQueue.filter { it in wallpaperUriSet }
-                        ),
-                        wallpapers = wallpapers
-                    )
-                    wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
-                    settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(settingsState.value.interval))
+                    }
+                val wallpaperUriSet = wallpapers.map { it.wallpaperUri }.toSet()
+                val newSelectedAlbum = SelectedAlbum(
+                    album = foundAlbum.album.copy(
+                        wallpapersInQueue = selectedAlbum.album.wallpapersInQueue.filter { it in wallpaperUriSet },
+                        currentWallpaper = selectedAlbum.album.currentWallpaper
+                    ),
+                    wallpapers = wallpapers
+                )
+                wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
+                settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(settingsState.value.interval))
+                if (settingsState.value.enableChanger) {
                     val intent = Intent(context, WallpaperService::class.java).apply {
                         action = WallpaperService.Actions.START.toString()
                         putExtra("timeInMinutes", settingsState.value.interval)
                     }
                     context.startForegroundService(intent)
                 }
-                ?: run {
-                    wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
-                    Intent(context, WallpaperService::class.java).also {
-                        it.action = WallpaperService.Actions.STOP.toString()
-                        context.startForegroundService(it)
-                    }
+            } ?: run {
+                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                Intent(context, WallpaperService::class.java).also {
+                    it.action = WallpaperService.Actions.STOP.toString()
+                    context.startForegroundService(it)
                 }
+            }
         }
     }
 
@@ -206,14 +207,17 @@ fun PaperizeApp(
                 },
                 onScheduleWallpaperChanger = { timeInMinutes ->
                     settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(timeInMinutes))
-                    val intent = Intent(context, WallpaperService::class.java).apply {
-                        action = WallpaperService.Actions.START.toString()
-                        putExtra("timeInMinutes", timeInMinutes)
+                    if (settingsState.value.enableChanger) {
+                        val intent = Intent(context, WallpaperService::class.java).apply {
+                            action = WallpaperService.Actions.START.toString()
+                            putExtra("timeInMinutes", timeInMinutes)
+                        }
+                        context.startForegroundService(intent)
                     }
-                    context.startForegroundService(intent)
                 },
                 onStop = {
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                    settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
                     Intent(context, WallpaperService::class.java).also {
                         it.action = WallpaperService.Actions.STOP.toString()
                         context.startForegroundService(it)
@@ -227,7 +231,24 @@ fun PaperizeApp(
                 onSetLockWithHome = {
                     settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(it))
                 },
-                selectedAlbum = selectedState.value.selectedAlbum
+                selectedAlbum = selectedState.value.selectedAlbum,
+                enableChanger = settingsState.value.enableChanger,
+                onToggleChanger = { enableWallpaperChanger ->
+                    settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
+                    if (enableWallpaperChanger) {
+                        val intent = Intent(context, WallpaperService::class.java).apply {
+                            action = WallpaperService.Actions.START.toString()
+                            putExtra("timeInMinutes", settingsState.value.interval)
+                        }
+                        context.startForegroundService(intent)
+                    }
+                    else {
+                        Intent(context, WallpaperService::class.java).also {
+                            it.action = WallpaperService.Actions.STOP.toString()
+                            context.startForegroundService(it)
+                        }
+                    }
+                }
             )
         }
         // Navigate to the add album screen to create a new album and add wallpapers to it
@@ -249,10 +270,7 @@ fun PaperizeApp(
             AddAlbumScreen(
                 initialAlbumName = addEdit.wallpaper,
                 onBackClick = { navController.navigateUp() },
-                onConfirmation = {
-                    navController.navigateUp()
-                    settingsViewModel.onEvent(SettingsEvent.SetFirstAlbum)
-                },
+                onConfirmation = { navController.navigateUp() },
                 onShowWallpaperView = {
                     navController.navigate(WallpaperView(it))
                 },

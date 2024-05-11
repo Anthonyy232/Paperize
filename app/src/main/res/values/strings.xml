@@ -65,4 +65,15 @@
     <string name="circle_2_animation">Circle 2 animation</string>
     <string name="circle_1_animation">Circle 1 animation</string>
     <string name="circle_3_animation">Circle 3 animation</string>
+    <string name="wallpaper_changer_has_been_enabled">Wallpaper changer has been enabled.</string>
+    <string name="wallpaper_changer_has_been_disabled">Wallpaper changer has been disabled.</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="has_been_unselected">%1$s has been unselected.</string>
+    <string name="interval">Interval | %1$s</string>
+    <string name="minutes">%1$s minutes</string>
+    <string name="minute">%1$s minute</string>
+    <string name="hour">%1$s hour</string>
+    <string name="hours">%1$s hours</string>
+    <string name="day">%1$s day</string>
+    <string name="days">%1$s days</string>
 </resources>

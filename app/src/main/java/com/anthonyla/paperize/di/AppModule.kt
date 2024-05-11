@@ -3,6 +3,8 @@ package com.anthonyla.paperize.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDatabase
@@ -31,7 +33,7 @@ object AppModule {
             app,
             AlbumDatabase::class.java,
             AlbumDatabase.DATABASE_NAME
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
@@ -41,7 +43,7 @@ object AppModule {
             app,
             SelectedAlbumDatabase::class.java,
             SelectedAlbumDatabase.DATABASE_NAME
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
@@ -79,4 +81,10 @@ object AppModule {
     fun provideContext(
         @ApplicationContext context: Context,
     ): Context { return context }
+}
+
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE Album ADD COLUMN currentWallpaper TEXT")
+    }
 }
