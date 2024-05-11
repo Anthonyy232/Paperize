@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,10 +28,9 @@ class SettingsViewModel @Inject constructor (
     )
 
     private var currentGetJob: Job? = null
-    var setKeepOnScreenCondition: Boolean = true
 
     init {
-        currentGetJob = viewModelScope.launch {
+        currentGetJob = viewModelScope.launch(Dispatchers.IO) {
             val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
             val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
@@ -51,17 +51,17 @@ class SettingsViewModel @Inject constructor (
                     lastSetTime = lastSetTime.await(),
                     nextSetTime = nextSetTime.await(),
                     animate = animate.await(),
-                    enableChanger = enableChanger.await()
+                    enableChanger = enableChanger.await(),
+                    isDataLoaded = true
                 )
             }
-            setKeepOnScreenCondition = false
         }
     }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.SetFirstLaunch -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_LAUNCH, false)
                     _state.update {
                         it.copy(
@@ -72,7 +72,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetChangerToggle -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     when (event.toggle) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, false) }
@@ -86,7 +86,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.Refresh -> {
-                currentGetJob = viewModelScope.launch {
+                currentGetJob = viewModelScope.launch(Dispatchers.IO) {
                     val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
                     val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
                     val wallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
@@ -114,7 +114,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetDarkMode -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     when (event.darkMode) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, false) }
@@ -129,7 +129,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetDynamicTheming -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     when (event.dynamicTheming) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, false) }
@@ -143,7 +143,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetAnimate -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     when (event.animate) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ANIMATE_TYPE, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.ANIMATE_TYPE, false) }
@@ -157,7 +157,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetWallpaperInterval -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     val formatter = DateTimeFormatter.ofPattern("MM/dd/yy hh:mm\na")
                     val time = LocalDateTime.now()
                     val formattedLastSetTime = time.format(formatter)
@@ -176,7 +176,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetLockWithHome -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     when (event.lockWithHome) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.SET_LOCK_WITH_HOME, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.SET_LOCK_WITH_HOME, false) }
@@ -190,7 +190,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.Reset -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_LAUNCH)

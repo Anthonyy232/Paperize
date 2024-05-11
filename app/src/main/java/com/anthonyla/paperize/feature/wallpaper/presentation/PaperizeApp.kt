@@ -109,7 +109,7 @@ fun PaperizeApp(
                 )
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                 settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(settingsState.value.interval))
-                if (settingsState.value.enableChanger) {
+                if (settingsState.value.enableChanger) { // Not ideal but no other option to check if service is running (thanks Android)
                     val intent = Intent(context, WallpaperService::class.java).apply {
                         action = WallpaperService.Actions.START.toString()
                         putExtra("timeInMinutes", settingsState.value.interval)

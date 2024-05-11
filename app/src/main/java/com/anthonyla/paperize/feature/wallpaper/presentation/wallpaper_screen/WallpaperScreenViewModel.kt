@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,31 +25,36 @@ class WallpaperScreenViewModel @Inject constructor (
     )
 
     init {
-        viewModelScope.launch {
-            refreshAlbums()
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getSelectedAlbum().collect { selectedAlbum ->
+                _state.update {
+                    it.copy(
+                        selectedAlbum = selectedAlbum.firstOrNull(),
+                        isDataLoaded = true
+                    )
+                }
+            }
         }
     }
 
     fun onEvent(event: WallpaperEvent) {
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
-                viewModelScope.launch {
-                    withContext(Dispatchers.IO) {
-                        repository.deleteAll()
-                        repository.upsertSelectedAlbum(event.selectedAlbum)
-                    }
+                viewModelScope.launch(Dispatchers.IO) {
+                    repository.deleteAll()
+                    repository.upsertSelectedAlbum(event.selectedAlbum)
                 }
             }
             is WallpaperEvent.Refresh -> {
                 refreshAlbums()
             }
             is WallpaperEvent.Reset -> {
-                viewModelScope.launch {
-                    withContext(Dispatchers.IO) {
-                        repository.deleteAll()
-                        _state.update {
-                            WallpaperState()
-                        }
+                viewModelScope.launch(Dispatchers.IO) {
+                    repository.deleteAll()
+                    _state.update {
+                        it.copy(
+                            selectedAlbum = null
+                        )
                     }
                 }
             }
@@ -59,10 +63,10 @@ class WallpaperScreenViewModel @Inject constructor (
 
     // Retrieve album from database into viewModel
     private fun refreshAlbums() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getSelectedAlbum().collect { selectedAlbum ->
                 _state.update { it.copy(
-                    selectedAlbum = selectedAlbum.firstOrNull()
+                    selectedAlbum = selectedAlbum.firstOrNull(),
                 ) }
             }
         }

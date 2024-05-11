@@ -10,6 +10,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -32,22 +33,20 @@ class AlbumsViewModel @Inject constructor (
     )
 
     init {
-        viewModelScope.launch {
-            updateAlbums()
-            refreshAlbums()
-        }
+        updateAlbums()
+        refreshAlbums()
     }
 
 
     fun onEvent(event: AlbumsEvent) {
         when (event) {
             is AlbumsEvent.DeleteAlbumWithWallpapers -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     repository.cascadeDeleteAlbum(event.albumWithWallpaperAndFolder.album)
                 }
             }
             is AlbumsEvent.ChangeAlbumName -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     if (!(_state.value.albumsWithWallpapers.any { it.album.displayedAlbumName == event.title })) {
                         repository.updateAlbum(
                             event.albumWithWallpaperAndFolder.album.copy(displayedAlbumName = event.title)
@@ -56,13 +55,11 @@ class AlbumsViewModel @Inject constructor (
                 }
             }
             is AlbumsEvent.RefreshAlbums -> {
-                viewModelScope.launch {
-                    updateAlbums()
-                    refreshAlbums()
-                }
+                updateAlbums()
+                refreshAlbums()
             }
             is AlbumsEvent.InitializeAlbum -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     repository.updateAlbum(
                         event.albumWithWallpaperAndFolder.album.copy(
                             initialized = true
@@ -71,7 +68,7 @@ class AlbumsViewModel @Inject constructor (
                 }
             }
             is AlbumsEvent.Reset -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     _state.update { AlbumsState() }
                     repository.deleteAllData()
                 }
@@ -83,7 +80,7 @@ class AlbumsViewModel @Inject constructor (
      * Verify and remove stale data in Room database
      */
     private fun updateAlbums() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             var albumWithWallpapers = repository.getAlbumsWithWallpaperAndFolder().first()
             albumWithWallpapers.forEach { albumWithWallpaper ->
                 // Delete wallpaper if the URI is invalid
@@ -125,7 +122,7 @@ class AlbumsViewModel @Inject constructor (
      * Retrieve albums from database into viewModel
      */
     private fun refreshAlbums() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getAlbumsWithWallpaperAndFolder().collect { albumWithWallpapers ->
                 _state.update { it.copy(
                     albumsWithWallpapers = albumWithWallpapers

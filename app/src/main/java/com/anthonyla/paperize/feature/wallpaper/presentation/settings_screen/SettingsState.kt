@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 
 data class SettingsState (
+    val isDataLoaded: Boolean = false,
     val firstLaunch: Boolean = true,
     val darkMode: Boolean? = null,
     val dynamicTheming: Boolean = false,
