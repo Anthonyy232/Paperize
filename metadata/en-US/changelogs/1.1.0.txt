@@ -1,0 +1,8 @@
+v1.1.0
+Added toggle for enabling wallpaper changer
+Added current set wallpaper preview
+Added adaptive icon support
+Updated splash screen loading animation
+Refactored code to be more performant
+Fixed an issue when trying to change wallpaper to an invalid one
+Fixed an issue where users could select an empty album
