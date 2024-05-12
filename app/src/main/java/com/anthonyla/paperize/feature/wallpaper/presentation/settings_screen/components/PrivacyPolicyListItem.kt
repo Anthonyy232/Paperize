@@ -33,7 +33,7 @@ fun PrivacyPolicyListItem(onPrivacyPolicyClick: () -> Unit) {
                 ) },
             supportingContent = {
                 Text(
-                    text = "Click here to view our privacy policy",
+                    text = stringResource(R.string.click_here_to_view_our_privacy_policy),
                     style = MaterialTheme.typography.bodySmall
                 ) },
             trailingContent = {},

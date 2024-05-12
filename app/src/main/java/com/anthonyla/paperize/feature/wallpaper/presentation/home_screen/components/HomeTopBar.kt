@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -45,7 +44,7 @@ fun HomeTopBar (
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        title = { if (!showSelectionModeAppBar) Text(stringResource(R.string.appname)) },
+        title = { if (!showSelectionModeAppBar) Text(stringResource(R.string.app_name)) },
         actions = {
             if (showSelectionModeAppBar) {
                 var showAlertDialog by rememberSaveable { mutableStateOf(false) }
@@ -87,7 +86,7 @@ fun HomeTopBar (
                                 .background(bgColor)
                         )
                     }
-                    Text("$selectionCount selected")
+                    Text(stringResource(R.string.selected_count, selectionCount))
                 }
             } else {
                 IconButton(

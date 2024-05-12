@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -88,7 +90,11 @@ fun StartupScreen(
                 LottieAnimation(
                     composition = composition,
                     progress = { progress },
-                    modifier = Modifier.fillMaxHeight(0.5f)
+                    modifier = Modifier
+                        .fillMaxHeight(0.5f)
+                        .semantics { contentDescription = context.getString(R.string.welcome_animation) },
+                    safeMode = true,
+                    enableMergePaths = true
                 )
                 Icon(
                     imageVector = Icons.Outlined.Info,
@@ -96,7 +102,7 @@ fun StartupScreen(
                     modifier = Modifier.padding(PaddingValues(vertical = 16.dp))
                 )
                 Text(
-                    text = "Please read and agree to the following privacy notice to use the app.",
+                    text = stringResource(R.string.please_read_and_agree_to_the_following_privacy_notice_to_use_the_app),
                     style = MaterialTheme.typography.bodySmall
                 )
                 Box(
@@ -111,7 +117,7 @@ fun StartupScreen(
                             } },
                         modifier = Modifier.padding(PaddingValues(vertical = 16.dp)),
                     ) {
-                        Text(text = "Privacy Notice", textAlign = TextAlign.Start)
+                        Text(text = stringResource(R.string.privacy_notice), textAlign = TextAlign.Start)
                     }
                 }
             }
@@ -125,8 +131,8 @@ fun StartupScreen(
                     } else {
                         scope.launch {
                             val result = snackbarHostState.showSnackbar(
-                                message = "Please read and agree to the privacy notice.",
-                                actionLabel = "View",
+                                message = context.getString(R.string.please_read_and_agree_to_the_privacy_notice),
+                                actionLabel = context.getString(R.string.view),
                                 duration = SnackbarDuration.Short,
                             )
                             when (result) {
@@ -157,7 +163,7 @@ fun StartupScreen(
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Privacy Notice",
+                        text = stringResource(R.string.privacy_notice),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -168,7 +174,7 @@ fun StartupScreen(
                 Button(
                     onClick = { showToS = false },
                 ) {
-                    Text("Dismiss")
+                    Text(stringResource(R.string.dismiss))
                 }
             }
         )
@@ -179,28 +185,35 @@ fun StartupScreen(
 fun PrivacyNoticeText() {
     LazyColumn {
         item {
-            SectionText("Hello!", "Welcome to Paperize! We respect your privacy and protect your personal info. By using our app, you're okay with our privacy policy.")
+            SectionText(stringResource(R.string.hello), stringResource(R.string.welcome_to) + "Paperize! " + stringResource(
+                R.string.we_respect_your_privacy_and_protect_your_personal_info_by_using_our_app_you_re_okay_with_our_privacy_policy
+            ) )
         }
         item {
-            SectionText("What We Collect", "We ask for notification access to personalize your wallpapers. We don't store or share your notifications. We also access your local files for wallpapers, but don't upload or transfer them.")
+            SectionText(stringResource(R.string.what_we_collect),
+                stringResource(R.string.we_ask_for_notification_access_to_personalize_your_wallpapers_we_don_t_store_or_share_your_notifications_we_also_access_your_local_files_for_wallpapers_but_don_t_upload_or_transfer_them))
         }
         item {
-            SectionText("How We Use Info", "We don't collect personal data or track your usage. All your data stays on your device.")
+            SectionText(stringResource(R.string.how_we_use_info),
+                stringResource(R.string.we_don_t_collect_personal_data_or_track_your_usage_all_your_data_stays_on_your_device))
         }
         item {
-            SectionText("Security", "Your data is safe with us. It stays on your device at all times.")
+            SectionText(stringResource(R.string.security),
+                stringResource(R.string.your_data_is_safe_with_us_it_stays_on_your_device_at_all_times))
         }
         item {
-            SectionText("Third-Party Services", "No third-party ads here! We might have external links, but we're not responsible for their privacy practices.")
+            SectionText(stringResource(R.string.third_party_services),
+                stringResource(R.string.no_third_party_ads_here_we_might_have_external_links_but_we_re_not_responsible_for_their_privacy_practices))
         }
         item {
-            SectionText("For Kids", "Paperize isn't for kids under 13. We don't knowingly collect their info.")
+            SectionText(stringResource(R.string.for_kids), "Paperize " + stringResource(R.string.isn_t_for_kids_under_13_we_don_t_knowingly_collect_their_info))
         }
         item {
-            SectionText("Policy Updates", "We might update this policy sometimes. You'll see any changes in the app and on GitHub.")
+            SectionText(stringResource(R.string.policy_updates),
+                stringResource(R.string.we_might_update_this_policy_sometimes_you_ll_see_any_changes_in_the_app_and_on_github))
         }
         item {
-            SectionText("Contact Us", "Got questions or concerns about our privacy policy? Email us at anthonyyla.dev@gmail.com.")
+            SectionText(stringResource(R.string.contact_us), stringResource(R.string.got_questions_or_concerns_about_our_privacy_policy_email_us_at) + "anthonyyla.dev@gmail.com.")
         }
     }
 }

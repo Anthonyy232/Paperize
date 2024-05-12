@@ -13,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.R
 
 /**
  * Scrollable privacy screen to display privacy note
@@ -40,14 +42,19 @@ fun PrivacyScrollableSettings(
 
 @Composable
 fun PrivacyNoticeText() {
-    SectionText("Introduction", "Welcome to Paperize! This privacy notice outlines how we collect, use, and protect your personal information when you use our mobile application. By using Paperize, you agree to the terms described in this notice.")
-    SectionText("Data Collection", "Notification Access: Paperize requests notification access to provide you with personalized wallpaper recommendations based on your notifications. We do not store any notification content or personally identifiable information (PII) outside of your device.\n\nLocal Files: Paperize accesses files stored on your device to allow you to set them as wallpapers. We do not upload or transfer these files to any external servers.")
-    SectionText("Information Usage", "Personal Data: We do not collect or store any personal data such as names, email addresses, or phone numbers.\n\nUsage Analytics: Paperize does not track your usage behavior or collect analytics data.")
-    SectionText("Data Security", "On-Device Storage: All data used by Paperize remains on your device. We do not transmit or store any data externally.")
-    SectionText("Third-Party Services", "Advertisements: Paperize does not display third-party ads.\n\nExternal Links: Our app may contain links to external websites. Please note that we are not responsible for the privacy practices of these sites.")
-    SectionText("Children’s Privacy", "Paperize is not intended for children under the age of 13. We do not knowingly collect any information from children.")
-    SectionText("Changes to this notice", "We may update this privacy notice from time to time. Any changes will be reflected in the app and on our website.")
-    SectionText("Contact Us", "If you have any questions or concerns about this privacy notice, please contact me at anthonyyla.dev@gmail.com.")
+    SectionText(stringResource(R.string.introduction), stringResource(R.string.welcome_t) + " Paperize! " + stringResource(R.string.this_privacy_notice_outlines_how_we_collect_use_and_protect_your_personal_information_when_you_use_our_mobile_application_by_using) + " Paperize, " + stringResource(R.string.you_agree_to_the_terms_described_in_this_notice))
+    SectionText(stringResource(R.string.data_collection),
+        stringResource(R.string.notification_access) + " Paperize " + stringResource(R.string.requests_notification_access_to_provide_you_with_personalized_wallpaper_recommendations_based_on_your_notifications_we_do_not_store_any_notification_content_or_personally_identifiable_information_pii_outside_of_your_device_local_files_we_accesses_files_stored_on_your_device_to_allow_you_to_set_them_as_wallpapers_we_do_not_upload_or_transfer_these_files_to_any_external_servers))
+    SectionText(stringResource(R.string.information_usage),
+        stringResource(R.string.personal_data_we_do_not_collect_or_store_any_personal_data_such_as_names_email_addresses_or_phone_numbers_usage_analytics_we_do_not_track_your_usage_behavior_or_collect_analytics_data))
+    SectionText(stringResource(R.string.data_security),
+        stringResource(R.string.on_device_storage_all_data_used_by) + " Paperize " + stringResource(R.string.remains_on_your_device_we_do_not_transmit_or_store_any_data_externally))
+    SectionText(stringResource(R.string.third_party_services),
+        stringResource(R.string.advertisements) + " Paperize " + stringResource(R.string.does_not_display_third_party_ads_external_links_our_app_may_contain_links_to_external_websites_please_note_that_we_are_not_responsible_for_the_privacy_practices_of_these_sites))
+    SectionText(stringResource(R.string.children_s_privacy), "Paperize " + stringResource(R.string.is_not_intended_for_children_under_the_age_of_13_we_do_not_knowingly_collect_any_information_from_children))
+    SectionText(stringResource(R.string.changes_to_this_notice),
+        stringResource(R.string.we_may_update_this_privacy_notice_from_time_to_time_any_changes_will_be_reflected_in_the_app_and_on_our_website))
+    SectionText(stringResource(R.string.contact_us), stringResource(R.string.if_you_have_any_questions_or_concerns_about_this_privacy_notice_please_contact_me_at) + " anthonyyla.dev@gmail.com.")
 }
 
 @Composable

@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
-import androidx.compose.material.icons.outlined.Newspaper
-import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +32,7 @@ fun LicenseListItem(onLicenseClick: () -> Unit) {
                 ) },
             supportingContent = {
                 Text(
-                    text = "Click here to view the licenses",
+                    text = stringResource(R.string.click_here_to_view_the_licenses),
                     style = MaterialTheme.typography.bodySmall
                 ) },
             trailingContent = {},

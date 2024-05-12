@@ -3,7 +3,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import android.app.Application
 import android.content.Context
-import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,10 +38,10 @@ class AlbumViewScreenViewModel @Inject constructor(
                     event.albumsWithWallpaper.let { album ->
                         val folders = album.folders.filter { _state.value.selectedFolders.contains(it.folderUri)}
                         val wallpapers = album.wallpapers.filter { _state.value.selectedWallpapers.contains(it.wallpaperUri)}
-                        val doesContainCover = wallpapers.any { it.wallpaperUri == album.album.coverUri }
+                        val containsCoverUri = wallpapers.any { it.wallpaperUri == album.album.coverUri }
                         repository.deleteFolderList(folders)
                         repository.deleteWallpaperList(wallpapers)
-                        if (doesContainCover) {
+                        if (containsCoverUri) {
                             repository.updateAlbum(album.album.copy(coverUri = null))
                         }
                     }
@@ -52,15 +51,15 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     event.albumsWithWallpaper.let { album ->
                         if (!_state.value.allSelected) {
-                            _state.update { state ->
-                                state.copy(
+                            _state.update { it ->
+                                it.copy(
                                     selectedFolders = album.folders.map { it.folderUri },
                                     selectedWallpapers = album.wallpapers.map { it.wallpaperUri },
                                     selectedCount = album.folders.size + album.wallpapers.size,
-                                    maxSize = album.folders.size + album.wallpapers.size
+                                    maxSize = album.folders.size + album.wallpapers.size,
+                                    allSelected = true
                                 )
                             }
-                            updateAllSelected()
                         }
                     }
                 }
@@ -83,12 +82,13 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (!_state.value.selectedFolders.any { it == event.directoryUri }) {
                         _state.update {
+                            val folders = it.selectedFolders.plus(event.directoryUri)
                             it.copy(
-                                selectedFolders = it.selectedFolders.plus(event.directoryUri),
-                                selectedCount = it.selectedCount + 1
+                                selectedFolders = folders,
+                                selectedCount = it.selectedCount + 1,
+                                allSelected = folders.size + it.selectedWallpapers.size >= it.maxSize
                             )
                         }
-                        updateAllSelected()
                     }
                 }
             }
@@ -97,12 +97,13 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (!_state.value.selectedWallpapers.any { it == event.wallpaperUri }) {
                         _state.update {
+                            val wallpapers = it.selectedWallpapers.plus(event.wallpaperUri)
                             it.copy(
                                 selectedWallpapers = it.selectedWallpapers.plus(event.wallpaperUri),
-                                selectedCount = it.selectedCount + 1
+                                selectedCount = it.selectedCount + 1,
+                                allSelected = it.selectedFolders.size + wallpapers.size >= it.maxSize
                             )
                         }
-                        updateAllSelected()
                     }
                 }
             }
@@ -111,12 +112,13 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (_state.value.selectedFolders.find { it == event.directoryUri } != null) {
                         _state.update {
+                            val folders = it.selectedFolders.minus(event.directoryUri)
                             it.copy(
-                                selectedFolders = it.selectedFolders.minus(event.directoryUri),
-                                selectedCount = it.selectedCount - 1
+                                selectedFolders = folders,
+                                selectedCount = it.selectedCount - 1,
+                                allSelected = folders.size + it.selectedWallpapers.size >= it.maxSize
                             )
                         }
-                        updateAllSelected()
                     }
                 }
             }
@@ -125,12 +127,13 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (_state.value.selectedWallpapers.find { it == event.wallpaperUri } != null) {
                         _state.update {
+                            val wallpapers = it.selectedWallpapers.minus(event.wallpaperUri)
                             it.copy(
-                                selectedWallpapers = it.selectedWallpapers.minus(event.wallpaperUri),
-                                selectedCount = it.selectedCount - 1
+                                selectedWallpapers = wallpapers,
+                                selectedCount = it.selectedCount - 1,
+                                allSelected = it.selectedFolders.size + wallpapers.size >= it.maxSize
                             )
                         }
-                        updateAllSelected()
                     }
                 }
             }
@@ -161,22 +164,22 @@ class AlbumViewScreenViewModel @Inject constructor(
 
             is AlbumViewEvent.AddWallpapers -> {
                 viewModelScope.launch {
-                    val newWallpaperUris = event.wallpaperUris.filterNot { it in event.album.wallpapers.map { wallpaper -> wallpaper.wallpaperUri } }
-                    val newWallpapers = newWallpaperUris.map { uri ->
+                    val wallpaperUris = event.wallpaperUris.filterNot { it in event.album.wallpapers.map { wallpaper -> wallpaper.wallpaperUri } }
+                    val wallpapers = wallpaperUris.map { uri ->
                         Wallpaper(
                             initialAlbumName = event.album.album.initialAlbumName,
                             wallpaperUri = uri,
                             key = uri.hashCode() + event.album.album.initialAlbumName.hashCode(),
                         )
                     }
-                    repository.upsertWallpaperList(newWallpapers)
+                    repository.upsertWallpaperList(wallpapers)
                     _state.update {
                         it.copy(
                             selectedFolders = emptyList(),
                             selectedWallpapers = emptyList(),
                             allSelected = false,
                             selectedCount = 0,
-                            maxSize = _state.value.maxSize + newWallpapers.size
+                            maxSize = it.maxSize + wallpapers.size
                         )
                     }
                 }
@@ -203,21 +206,11 @@ class AlbumViewScreenViewModel @Inject constructor(
                                 selectedWallpapers = emptyList(),
                                 allSelected = false,
                                 selectedCount = 0,
-                                maxSize = _state.value.maxSize + 1
+                                maxSize = it.maxSize + 1
                             )
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun updateAllSelected() {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    allSelected = it.selectedFolders.size + it.selectedWallpapers.size >= _state.value.maxSize
-                )
             }
         }
     }
@@ -233,9 +226,8 @@ class AlbumViewScreenViewModel @Inject constructor(
             if (file.isDirectory()) {
                 files.addAll(listFilesRecursive(file, context))
             } else {
-                val extension = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
-                val allowedExtensions = listOf("jpg", "png", "heif", "webp")
-                if (extension in allowedExtensions) {
+                val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
+                if (file.extension in allowedExtensions) {
                     files.add(file.uri.toString())
                 }
             }

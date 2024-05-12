@@ -22,17 +22,17 @@ fun DeleteAlbumAlertDialog(
         icon = {
             Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.delete_confirmation))
         },
-        title = { Text(text = "Delete album?") },
-        text = { Text(text = "Are you sure you want to delete this?") },
+        title = { Text(text = stringResource(R.string.delete_album_question)) },
+        text = { Text(text = stringResource(R.string.are_you_sure_you_want_to_delete_this)) },
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
             TextButton(onClick = { onConfirmation() }) {
-                Text("Confirm")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

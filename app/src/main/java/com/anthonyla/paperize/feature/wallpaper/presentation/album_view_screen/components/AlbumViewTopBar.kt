@@ -56,7 +56,6 @@ fun AlbumViewTopBar(
     onDeleteAlbum: () -> Unit,
     onDeleteSelected: () -> Unit,
     onTitleChange: (String) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val state = albumState.collectAsStateWithLifecycle()
     var showDeleteAlertDialog by rememberSaveable { mutableStateOf(false) }
@@ -109,7 +108,7 @@ fun AlbumViewTopBar(
                             )
                         }
                     }
-                    Text("${state.value.selectedCount} selected")
+                    Text(stringResource(R.string.selected_count, state.value.selectedCount))
                 }
             }
         },

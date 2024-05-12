@@ -30,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.R
 
 /**
  * Three-state selector for dark mode in settings
@@ -40,9 +42,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
     val options = listOf(
-        Triple("Dark Mode", Icons.Outlined.DarkMode, Icons.Filled.DarkMode),
-        Triple("Automatic Device Mode", Icons.Outlined.BrightnessAuto, Icons.Filled.BrightnessAuto),
-        Triple("Light Mode", Icons.Outlined.LightMode, Icons.Filled.LightMode)
+        Triple(stringResource(R.string.dark_mode), Icons.Outlined.DarkMode, Icons.Filled.DarkMode),
+        Triple(stringResource(R.string.automatic_device_mode), Icons.Outlined.BrightnessAuto, Icons.Filled.BrightnessAuto),
+        Triple(stringResource(R.string.light_mode), Icons.Outlined.LightMode, Icons.Filled.LightMode)
     )
     var selectedIndex by remember {
         mutableIntStateOf(
@@ -70,16 +72,17 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                             2 -> false
                             else -> null
                         }
-                    ) },
+                    )
+                },
             headlineContent = {
                 Text(
-                    text = "Dark Mode",
+                    text = stringResource(R.string.dark_mode),
                     style = MaterialTheme.typography.titleMedium
 
                 ) },
             supportingContent = {
                 Text(
-                    text = "Easier on the eyes",
+                    text = stringResource(R.string.easier_on_the_eyes),
                     style = MaterialTheme.typography.bodySmall,
                     overflow = TextOverflow.Ellipsis
                 ) },
@@ -116,7 +119,7 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
             leadingContent = {
                 Icon(
                     Icons.Outlined.Brightness6,
-                    contentDescription = "Dark Mode",
+                    contentDescription = stringResource(R.string.dark_mode),
                     tint = MaterialTheme.colorScheme.primary
                 )
             },

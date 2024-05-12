@@ -36,6 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.airbnb.lottie.compose.LottieAnimation
@@ -125,7 +127,11 @@ fun NotificationScreen(
                 LottieAnimation(
                     composition = composition,
                     progress = { progress },
-                    modifier = Modifier.fillMaxHeight(0.5f)
+                    modifier = Modifier
+                        .fillMaxHeight(0.5f)
+                        .semantics { contentDescription = context.getString(R.string.notification_bell_animation) },
+                    safeMode = true,
+                    enableMergePaths = true
                 )
                 Icon(
                     imageVector = Icons.Outlined.Info,

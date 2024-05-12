@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
+import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.getTabItems
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.tabItems
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
 @Composable
@@ -47,6 +47,7 @@ fun HomeScreen(
     enableChanger: Boolean
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val tabItems = getTabItems()
     val pagerState = rememberPagerState { tabItems.size }
 
     var addAlbumDialog by rememberSaveable { mutableStateOf(false) }
