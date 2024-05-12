@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -41,13 +42,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
-        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            val fadeOut = ObjectAnimator.ofFloat(splashScreenViewProvider.view, View.ALPHA, 1f, 0f)
-            fadeOut.interpolator = AccelerateInterpolator()
-            fadeOut.duration = 300L
-            fadeOut.doOnEnd { splashScreenViewProvider.remove() }
-            fadeOut.start()
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+                val fadeOut = ObjectAnimator.ofFloat(splashScreenViewProvider.view, View.ALPHA, 1f, 0f)
+                fadeOut.interpolator = AccelerateInterpolator()
+                fadeOut.duration = 300L
+                fadeOut.doOnEnd { splashScreenViewProvider.remove() }
+                fadeOut.start()
+            }
         }
+
         setContent {
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
