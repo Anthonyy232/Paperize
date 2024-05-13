@@ -5,7 +5,6 @@
   <p align="center">
 </p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
-    <a title="Crowdin" target="_blank" href="https://crowdin.com/project/paperize"><img src="https://badges.crowdin.net/paperize/localized.svg"></a>
 </div>  
 
 
@@ -33,6 +32,13 @@
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
 
 Playstore and F-Droid will be added soon
+
+## Localization
+I want to allow more people to use the app
+
+Help me out with that [here](https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922)!
+
+[![Crowdin](https://badges.crowdin.net/paperize/localized.svg)](https://crowdin.com/project/paperize)
 
 ## Technologies
 
