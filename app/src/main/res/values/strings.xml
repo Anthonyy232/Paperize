@@ -33,7 +33,7 @@
     <string name="click_to_select_a_different_album">Click to select a different album</string>
     <string name="no_icon">No icon</string>
     <string name="no_album_selected">No album selected</string>
-    <string name="wallpaper">" wallpaper"</string>
+    <string name="wallpaper">wallpaper</string>
     <string name="currently_selected_album">Currently selected album</string>
     <string name="stop_the_album">Stop the album</string>
     <string name="more_options">More options</string>
@@ -94,7 +94,7 @@
     <string name="your_data_is_safe_with_us_it_stays_on_your_device_at_all_times">Your data is safe with us. It stays on your device at all times.</string>
     <string name="we_don_t_collect_personal_data_or_track_your_usage_all_your_data_stays_on_your_device">We don\'t collect personal data or track your usage. All your data stays on your device.</string>
     <string name="we_ask_for_notification_access_to_personalize_your_wallpapers_we_don_t_store_or_share_your_notifications_we_also_access_your_local_files_for_wallpapers_but_don_t_upload_or_transfer_them">We ask for notification access to personalize your wallpapers. We don\'t store or share your notifications. We also access your local files for wallpapers, but don\'t upload or transfer them.</string>
-    <string name="welcome_to">"Welcome to "</string>
+    <string name="welcome_to">Welcome to </string>
     <string name="we_respect_your_privacy_and_protect_your_personal_info_by_using_our_app_you_re_okay_with_our_privacy_policy">We respect your privacy and protect your personal info. By using our app, you\'re okay with our privacy policy.</string>
     <string name="welcome_animation">Welcome animation</string>
     <string name="notification_bell_animation">Notification bell animation</string>

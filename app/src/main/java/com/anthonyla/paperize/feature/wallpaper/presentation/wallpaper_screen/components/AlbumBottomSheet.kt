@@ -90,7 +90,7 @@ fun AlbumBottomSheet(
                     ) },
                 supportingContent = {
                     Text(
-                        text = (it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size).toString() + stringResource(R.string.wallpaper),
+                        text = (it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size).toString() + " " + stringResource(R.string.wallpaper),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis
                     )
