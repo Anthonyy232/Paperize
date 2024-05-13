@@ -12,7 +12,6 @@
     <string name="add_wallpaper">Add wallpaper</string>
     <string name="add_images">Add images</string>
     <string name="add_folder">Add folder</string>
-    <string name="add_image">add_image\n</string>
     <string name="contact_button">Contact</string>
     <string name="image_is_selected">Image is selected</string>
     <string name="image_is_not_selected">Image is not selected</string>
@@ -141,4 +140,6 @@
     <string name="coming_soon">Coming soon</string>
     <string name="new_album">New Album</string>
     <string name="wallpapers">wallpapers</string>
+    <string name="translation">Translation</string>
+    <string name="help_translate_the_app_on_crowdin">Help translate the app on Crowdin!</string>
 </resources>

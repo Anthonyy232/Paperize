@@ -64,6 +64,9 @@ fun SettingsScrollableSettings(
     }
 
     val githubLink = "https://github.com/Anthonyy232/Paperize"
+    val playstoreLink = ""
+    val fdroidLink = ""
+    val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
 
     Scaffold(
         snackbarHost = {
@@ -89,9 +92,7 @@ fun SettingsScrollableSettings(
             ) {
                 Spacer(Modifier.height(largeTopAppBarHeightPx))
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 ListSectionTitle(stringResource(R.string.appearance))
                 Spacer(modifier = Modifier.height(16.dp))
                 DarkModeListItem(
@@ -112,6 +113,14 @@ fun SettingsScrollableSettings(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 ListSectionTitle(stringResource(R.string.about))
+                Spacer(modifier = Modifier.height(16.dp))
+                TranslateListItem(
+                    onClick = {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(translateLink)
+                        context.startActivity(openURL)
+                    }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 PrivacyPolicyListItem (onPrivacyPolicyClick = onPrivacyClick)
                 Spacer(modifier = Modifier.height(16.dp))
