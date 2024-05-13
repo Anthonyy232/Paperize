@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.data.data_source
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 /**
  * Converters for Room database to convert list of strings to json string and vice versa

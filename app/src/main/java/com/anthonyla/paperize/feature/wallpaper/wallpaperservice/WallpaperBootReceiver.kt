@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject

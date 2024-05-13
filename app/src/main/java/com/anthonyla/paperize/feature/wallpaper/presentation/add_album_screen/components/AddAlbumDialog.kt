@@ -60,7 +60,7 @@ fun AddAlbumDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "New Album",
+                    text = stringResource(R.string.new_album),
                     modifier = Modifier.padding(20.dp),
                     fontSize = 25.sp
                 )

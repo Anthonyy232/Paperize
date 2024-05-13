@@ -18,7 +18,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 9
-        versionName = "1.1.1"
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -49,6 +49,10 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
+    }
+
+    androidResources {
+        generateLocaleConfig = true
     }
 }
 

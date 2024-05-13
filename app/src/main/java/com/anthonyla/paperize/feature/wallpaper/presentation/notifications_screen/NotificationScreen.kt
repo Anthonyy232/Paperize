@@ -122,14 +122,17 @@ fun NotificationScreen(
         content = { it
             Column (modifier = Modifier.padding(32.dp)) {
                 Spacer(modifier = Modifier.height(120.dp))
-                Text(text = "Notifications", style = MaterialTheme.typography.headlineLarge)
+                Text(text = stringResource(id = R.string.notifications), style = MaterialTheme.typography.headlineLarge)
                 Spacer(modifier = Modifier.height(16.dp))
                 LottieAnimation(
                     composition = composition,
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxHeight(0.5f)
-                        .semantics { contentDescription = context.getString(R.string.notification_bell_animation) },
+                        .semantics {
+                            contentDescription =
+                                context.getString(R.string.notification_bell_animation)
+                        },
                     safeMode = true,
                     enableMergePaths = true
                 )

@@ -27,9 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import kotlinx.coroutines.flow.StateFlow
@@ -90,7 +92,7 @@ fun SettingsScrollableSettings(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ListSectionTitle("Appearance")
+                ListSectionTitle(stringResource(R.string.appearance))
                 Spacer(modifier = Modifier.height(16.dp))
                 DarkModeListItem(
                     darkMode = state.value.darkMode,
@@ -109,7 +111,7 @@ fun SettingsScrollableSettings(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                ListSectionTitle("About")
+                ListSectionTitle(stringResource(R.string.about))
                 Spacer(modifier = Modifier.height(16.dp))
                 PrivacyPolicyListItem (onPrivacyPolicyClick = onPrivacyClick)
                 Spacer(modifier = Modifier.height(16.dp))
@@ -127,8 +129,8 @@ fun SettingsScrollableSettings(
                         coroutineScope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
                             snackbarHostState.showSnackbar(
-                                message = "Coming soon",
-                                actionLabel = "Dismiss",
+                                message = context.getString(R.string.coming_soon),
+                                actionLabel = context.getString(R.string.dismiss),
                                 duration = SnackbarDuration.Short
                             )
                         }
@@ -137,8 +139,8 @@ fun SettingsScrollableSettings(
                         coroutineScope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
                             snackbarHostState.showSnackbar(
-                                message = "Coming soon",
-                                actionLabel = "Dismiss",
+                                message = context.getString(R.string.coming_soon),
+                                actionLabel = context.getString(R.string.dismiss),
                                 duration = SnackbarDuration.Short
                             )
                         }

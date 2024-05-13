@@ -96,8 +96,11 @@ fun FolderItem(
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (!selectionMode) { onFolderViewClick() }
-                    else { onItemSelection() }
+                    if (!selectionMode) {
+                        onFolderViewClick()
+                    } else {
+                        onItemSelection()
+                    }
                 },
                 onLongClick = {
                     if (!selectionMode) {
@@ -171,7 +174,7 @@ fun FolderItem(
                 )
             }
             Text(
-                text = folder.wallpapers.size.toString().plus(" wallpapers"),
+                text = folder.wallpapers.size.toString().plus(" " + stringResource(R.string.wallpapers)),
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .align(Alignment.Start),

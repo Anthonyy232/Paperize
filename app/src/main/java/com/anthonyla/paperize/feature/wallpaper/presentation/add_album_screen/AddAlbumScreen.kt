@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumAnimatedFab
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumFabMenuOptions
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
@@ -137,7 +136,6 @@ fun AddAlbumScreen(
                     exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
                 ) {
                     AddAlbumAnimatedFab(
-                        menuOptions = AddAlbumFabMenuOptions(),
                         onImageClick = {
                             selectionMode = false
                             imagePickerLauncher.launch(arrayOf("image/*"))
@@ -152,7 +150,6 @@ fun AddAlbumScreen(
             }
             else {
                 AddAlbumAnimatedFab(
-                    menuOptions = AddAlbumFabMenuOptions(),
                     onImageClick = {
                         selectionMode = false
                         imagePickerLauncher.launch(arrayOf("image/*"))

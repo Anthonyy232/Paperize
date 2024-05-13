@@ -2,8 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.data.repository
 
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.SelectedAlbumDao
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository

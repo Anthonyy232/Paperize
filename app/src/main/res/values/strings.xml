@@ -133,4 +133,12 @@
     <string name="dynamic_theming">Dynamic Theming</string>
     <string name="click_here_to_view_the_licenses">Click here to view the licenses</string>
     <string name="click_here_to_view_our_privacy_policy">Click here to view our privacy policy</string>
+    <string name="add_images_btn">Add Images</string>
+    <string name="add_folder_btn">Add Folder</string>
+    <string name="version">Version:</string>
+    <string name="appearance">Appearance</string>
+    <string name="about">About</string>
+    <string name="coming_soon">Coming soon</string>
+    <string name="new_album">New Album</string>
+    <string name="wallpapers">wallpapers</string>
 </resources>

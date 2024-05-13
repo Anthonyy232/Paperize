@@ -54,7 +54,9 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.app_icon_foreground),
                     contentDescription = stringResource(id = R.string.app_name),
-                    modifier = Modifier.size(160.dp).scale(1.5f),
+                    modifier = Modifier
+                        .size(160.dp)
+                        .scale(1.5f),
                     tint = MaterialTheme.colorScheme.primary,
                 )
                 Text(
@@ -63,7 +65,7 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
                 )
                 Text(
-                    text = "Version: 1.1.1",
+                    text = stringResource(R.string.version) + " " + "1.2.0",
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )

@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ElevatedCard
@@ -49,7 +51,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.comp
  */
 @Composable
 fun AddAlbumAnimatedFab(
-    menuOptions: AddAlbumFabMenuOptions,
     animate: Boolean,
     onImageClick: () -> Unit,
     onFolderClick: () -> Unit
@@ -108,8 +109,8 @@ fun AddAlbumAnimatedFab(
                 Surface(tonalElevation = 5.dp) {
                     Column(modifier = Modifier.height(menuHeight)) {
                         MenuRow(
-                            text = menuOptions.imageOption.text,
-                            icon = menuOptions.imageOption.icon,
+                            text = stringResource(R.string.add_images_btn),
+                            icon = Icons.Filled.PhotoLibrary,
                             horizontalExpansion = expandHorizontally,
                             onClick = {
                                 expanded = false
@@ -117,8 +118,8 @@ fun AddAlbumAnimatedFab(
                             }
                         )
                         MenuRow(
-                            text = menuOptions.folderOption.text,
-                            icon = menuOptions.folderOption.icon,
+                            text = stringResource(R.string.add_folder_btn),
+                            icon = Icons.Filled.Folder,
                             horizontalExpansion = expandHorizontally,
                             onClick = {
                                 expanded = false
@@ -174,8 +175,8 @@ fun AddAlbumAnimatedFab(
                 Surface(tonalElevation = 5.dp) {
                     Column(modifier = Modifier.height(if (expanded) menuHeightSize.first else menuHeightSize.second)) {
                         MenuRow(
-                            text = menuOptions.imageOption.text,
-                            icon = menuOptions.imageOption.icon,
+                            text = stringResource(R.string.add_images_btn),
+                            icon = Icons.Filled.PhotoLibrary,
                             horizontalExpansion = if (expanded) expandHorizontalSize.first else expandHorizontalSize.second,
                             onClick = {
                                 expanded = false
@@ -183,8 +184,8 @@ fun AddAlbumAnimatedFab(
                             }
                         )
                         MenuRow(
-                            text = menuOptions.folderOption.text,
-                            icon = menuOptions.folderOption.icon,
+                            text = stringResource(R.string.add_folder_btn),
+                            icon = Icons.Filled.Folder,
                             horizontalExpansion = if (expanded) expandHorizontalSize.first else expandHorizontalSize.second,
                             onClick = {
                                 expanded = false
