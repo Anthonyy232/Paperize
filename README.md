@@ -5,6 +5,7 @@
   <p align="center">
 </p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
+    <a title="Crowdin" target="_blank" href="https://crowdin.com/project/paperize"><img src="https://badges.crowdin.net/paperize/localized.svg"></a>
 </div>  
 
 
