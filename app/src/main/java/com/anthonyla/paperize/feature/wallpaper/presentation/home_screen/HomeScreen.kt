@@ -49,7 +49,6 @@ fun HomeScreen(
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabItems = getTabItems()
     val pagerState = rememberPagerState { tabItems.size }
-
     var addAlbumDialog by rememberSaveable { mutableStateOf(false) }
     if (addAlbumDialog) AddAlbumDialog(
         onDismissRequest = { addAlbumDialog = false },
@@ -65,9 +64,17 @@ fun HomeScreen(
             )
         }
     ) { padding ->
-        LaunchedEffect(tabIndex) { pagerState.animateScrollToPage(tabIndex) }
+        LaunchedEffect(tabIndex) {
+            if (tabIndex in tabItems.indices) {
+                pagerState.animateScrollToPage(tabIndex)
+            }
+        }
         LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect { page -> tabIndex = page }
+            snapshotFlow { pagerState.currentPage }.collect { page ->
+                if (page in tabItems.indices) {
+                    tabIndex = page
+                }
+            }
         }
         Column(modifier = Modifier.padding(padding)) {
             TabRow(
