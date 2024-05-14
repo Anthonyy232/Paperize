@@ -1,12 +1,13 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,16 @@ fun SetLockScreenSwitch(
             .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
             .clip(RoundedCornerShape(16.dp))
     ) {
-        Column (horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        val columnModifier = if (animate) {
+            Modifier.animateContentSize(
+                animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+            )
+        } else { Modifier }
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = columnModifier
+        ) {
             Row (horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.set_as_lock_screen),
@@ -59,7 +69,12 @@ fun SetLockScreenSwitch(
                 AnimatedVisibility(
                     visible = checked && albumUri != null,
                     enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
-                    exit = shrinkVertically(animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing))
+                    exit = fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = LinearOutSlowInEasing
+                        )
+                    )
                 ) {
                     Row(Modifier.fillMaxWidth()) {
                         Column(

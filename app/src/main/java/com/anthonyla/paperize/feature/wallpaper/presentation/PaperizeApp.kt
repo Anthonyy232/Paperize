@@ -85,7 +85,6 @@ fun PaperizeApp(
                 albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpapers))
             }
         }
-
         selectedState.value.selectedAlbum?.let { selectedAlbum ->
             albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }?.let { foundAlbum ->
                 val albumNameHashCode = foundAlbum.album.initialAlbumName.hashCode()
@@ -107,7 +106,7 @@ fun PaperizeApp(
                     ),
                     wallpapers = wallpapers
                 )
-                wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
+                wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum, null))
                 settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(settingsState.value.interval))
                 if (settingsState.value.enableChanger) { // Not ideal but no other option to check if service is running (thanks Android)
                     val intent = Intent(context, WallpaperService::class.java).apply {
@@ -248,6 +247,15 @@ fun PaperizeApp(
                             context.startForegroundService(it)
                         }
                     }
+                },
+                onSelectAlbum = {album ->
+                    settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
+                    wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(null, album))
+                    val intent = Intent(context, WallpaperService::class.java).apply {
+                        action = WallpaperService.Actions.START.toString()
+                        putExtra("timeInMinutes", settingsState.value.interval)
+                    }
+                    context.startForegroundService(intent)
                 }
             )
         }

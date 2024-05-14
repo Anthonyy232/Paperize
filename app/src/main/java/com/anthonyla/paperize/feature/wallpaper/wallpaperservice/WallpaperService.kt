@@ -97,7 +97,7 @@ class WallpaperService: Service() {
                         }
                     }
                 }
-                handler.post(runnableCode)
+                handler.postDelayed(runnableCode, 3000)
             }
             Actions.STOP.toString() -> {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -147,48 +147,18 @@ class WallpaperService: Service() {
         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, time.plusMinutes(timeInMinutes.toLong()).format(formatter))
         val setLockWithHome = settingsDataStoreImpl.getBoolean(SettingsConstants.SET_LOCK_WITH_HOME) ?: false
         val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
-        selectedAlbum?.let { it ->
-            var wallpaper = it.album.wallpapersInQueue.firstOrNull()
-            // Pick the next wallpaper in the queue
-            if (wallpaper != null) {
-                val notification = createNotification(it.album.wallpapersInQueue.size, it.wallpapers.size)
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(1, notification)
-                if (!setWallpaper(context, wallpaper.toUri(), setLockWithHome)) {
-                    selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper }
-                        ?.let { it1 ->
-                            selectedRepository.deleteWallpaper(it1)
-                            selectedRepository.upsertSelectedAlbum(
-                                it.copy(
-                                    album = it.album.copy(
-                                        wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
-                                        currentWallpaper = null
-                                    ),
-                                    wallpapers = it.wallpapers.filter { it == it1 },
-                                )
-                            )
-                            albumRepository.deleteWallpaper(it1)
-                        }
-                }
-                else {
-                    selectedRepository.upsertSelectedAlbum(
-                        it.copy(
-                            album = it.album.copy(
-                                wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
-                                currentWallpaper = wallpaper
-                            )
-                        )
-                    )
-                }
-            }
-            // No more wallpapers in the queue -- reshuffle the wallpapers
-            else {
-                val notification = createNotification(it.wallpapers.size, it.wallpapers.size)
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(1, notification)
-                val newWallpaperInQueue = it.wallpapers.map { it.wallpaperUri }.shuffled()
-                wallpaper = newWallpaperInQueue.firstOrNull()
+        if (selectedAlbum == null) {
+            onDestroy()
+            return
+        }
+        else {
+            selectedAlbum.let { it ->
+                var wallpaper = it.album.wallpapersInQueue.firstOrNull()
+                // Pick the next wallpaper in the queue
                 if (wallpaper != null) {
+                    val notification = createNotification(it.album.wallpapersInQueue.size, it.wallpapers.size)
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.notify(1, notification)
                     if (!setWallpaper(context, wallpaper.toUri(), setLockWithHome)) {
                         selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper }
                             ?.let { it1 ->
@@ -199,23 +169,57 @@ class WallpaperService: Service() {
                                             wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
                                             currentWallpaper = null
                                         ),
-                                        wallpapers = it.wallpapers.filter { it == it1 }
+                                        wallpapers = it.wallpapers.filter { it == it1 },
                                     )
                                 )
                                 albumRepository.deleteWallpaper(it1)
                             }
-                    }
-                    else {
+                    } else {
                         selectedRepository.upsertSelectedAlbum(
                             it.copy(
                                 album = it.album.copy(
-                                    wallpapersInQueue = newWallpaperInQueue.drop(1),
+                                    wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
                                     currentWallpaper = wallpaper
                                 )
                             )
                         )
                     }
-                } else { onDestroy() }
+                }
+                // No more wallpapers in the queue -- reshuffle the wallpapers
+                else {
+                    val notification = createNotification(it.wallpapers.size, it.wallpapers.size)
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.notify(1, notification)
+                    val newWallpaperInQueue = it.wallpapers.map { it.wallpaperUri }.shuffled()
+                    wallpaper = newWallpaperInQueue.firstOrNull()
+                    if (wallpaper != null) {
+                        if (!setWallpaper(context, wallpaper.toUri(), setLockWithHome)) {
+                            selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper }
+                                ?.let { it1 ->
+                                    selectedRepository.deleteWallpaper(it1)
+                                    selectedRepository.upsertSelectedAlbum(
+                                        it.copy(
+                                            album = it.album.copy(
+                                                wallpapersInQueue = it.album.wallpapersInQueue.drop(1),
+                                                currentWallpaper = null
+                                            ),
+                                            wallpapers = it.wallpapers.filter { it == it1 }
+                                        )
+                                    )
+                                    albumRepository.deleteWallpaper(it1)
+                                }
+                        } else {
+                            selectedRepository.upsertSelectedAlbum(
+                                it.copy(
+                                    album = it.album.copy(
+                                        wallpapersInQueue = newWallpaperInQueue.drop(1),
+                                        currentWallpaper = wallpaper
+                                    )
+                                )
+                            )
+                        }
+                    } else { onDestroy() }
+                }
             }
         }
     }

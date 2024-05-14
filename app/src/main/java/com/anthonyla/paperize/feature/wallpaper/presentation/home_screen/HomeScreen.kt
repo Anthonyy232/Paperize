@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
@@ -37,6 +38,7 @@ fun HomeScreen(
     onScheduleWallpaperChanger: (Int) -> Unit,
     onSetLockWithHome: (Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
+    onSelectAlbum: (AlbumWithWallpaperAndFolder) -> Unit,
     onStop: () -> Unit,
     animate : Boolean,
     interval: Int,
@@ -129,7 +131,8 @@ fun HomeScreen(
                         onSetLockWithHome = onSetLockWithHome,
                         selectedAlbum = selectedAlbum,
                         enableChanger = enableChanger,
-                        onToggleChanger = onToggleChanger
+                        onToggleChanger = onToggleChanger,
+                        onSelectAlbum = onSelectAlbum
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

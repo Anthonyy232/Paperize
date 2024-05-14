@@ -92,6 +92,7 @@ fun StartupScreen(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxHeight(0.5f)
+                        .align(Alignment.CenterHorizontally)
                         .semantics { contentDescription = context.getString(R.string.welcome_animation) },
                     safeMode = true,
                     enableMergePaths = true

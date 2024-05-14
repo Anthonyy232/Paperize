@@ -15,6 +15,7 @@ class SelectedAlbumRepositoryImpl(
     }
 
     override suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum) {
+        dao.deleteAll()
         dao.upsertAlbum(selectedAlbum.album)
         dao.upsertWallpaperList(selectedAlbum.wallpapers)
     }

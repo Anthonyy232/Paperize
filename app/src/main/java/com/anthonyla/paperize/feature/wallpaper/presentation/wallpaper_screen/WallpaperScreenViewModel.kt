@@ -3,6 +3,8 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -41,8 +43,39 @@ class WallpaperScreenViewModel @Inject constructor (
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    repository.deleteAll()
-                    repository.upsertSelectedAlbum(event.selectedAlbum)
+                    if (event.selectedAlbum != null) {
+                        _state.update {
+                            it.copy(
+                                selectedAlbum = event.selectedAlbum
+                            )
+                        }
+                        repository.upsertSelectedAlbum(event.selectedAlbum)
+                    }
+                    else if (event.album != null) {
+                        val wallpapers: List<Wallpaper> = event.album.wallpapers + event.album.folders.asSequence().flatMap { folder ->
+                            folder.wallpapers.asSequence().map { wallpaper ->
+                                Wallpaper(
+                                    initialAlbumName = event.album.album.initialAlbumName,
+                                    wallpaperUri = wallpaper,
+                                    key = wallpaper.hashCode() + event.album.album.initialAlbumName.hashCode(),
+                                )
+                            }
+                        }.toList()
+                        val shuffledWallpapers = wallpapers.map { it.wallpaperUri }.shuffled()
+                        val newSelectedAlbum = SelectedAlbum(
+                            album = event.album.album.copy(
+                                wallpapersInQueue = shuffledWallpapers,
+                                currentWallpaper = shuffledWallpapers.firstOrNull()
+                            ),
+                            wallpapers = wallpapers
+                        )
+                        _state.update {
+                            it.copy(
+                                selectedAlbum = newSelectedAlbum
+                            )
+                        }
+                        repository.upsertSelectedAlbum(newSelectedAlbum)
+                    }
                 }
             }
             is WallpaperEvent.Refresh -> {
@@ -50,12 +83,12 @@ class WallpaperScreenViewModel @Inject constructor (
             }
             is WallpaperEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    repository.deleteAll()
                     _state.update {
                         it.copy(
                             selectedAlbum = null
                         )
                     }
+                    repository.deleteAll()
                 }
             }
         }

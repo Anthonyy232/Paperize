@@ -27,11 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
@@ -42,11 +40,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperScreen(
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
-    wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
     onScheduleWallpaperChanger: (Int) -> Unit,
     onSetLockWithHome: (Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
+    onSelectAlbum: (AlbumWithWallpaperAndFolder) -> Unit,
     onStop: () -> Unit,
     animate: Boolean,
     interval: Int,
@@ -199,28 +196,9 @@ fun WallpaperScreen(
                     currentSelectedAlbum = selectedAlbum,
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
-                        val wallpapers: List<Wallpaper> = album.wallpapers + album.folders.asSequence().flatMap { folder ->
-                            folder.wallpapers.asSequence().map { wallpaper ->
-                                Wallpaper(
-                                    initialAlbumName = album.album.initialAlbumName,
-                                    wallpaperUri = wallpaper,
-                                    key = wallpaper.hashCode() + album.album.initialAlbumName.hashCode(),
-                                )
-                            }
-                        }.toList()
-                        val shuffledWallpapers = wallpapers.map { it.wallpaperUri }.shuffled()
-                        val newSelectedAlbum = SelectedAlbum(
-                            album = album.album.copy(
-                                wallpapersInQueue = shuffledWallpapers,
-                                currentWallpaper = shuffledWallpapers.firstOrNull()
-                            ),
-                            wallpapers = wallpapers
-                        )
-                        settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
-                        wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum))
                         openBottomSheet = false
+                        onSelectAlbum(album)
                         onScheduleWallpaperChanger(interval)
-                        onToggleChanger(true)
                     },
                     animate = animate
                 )
