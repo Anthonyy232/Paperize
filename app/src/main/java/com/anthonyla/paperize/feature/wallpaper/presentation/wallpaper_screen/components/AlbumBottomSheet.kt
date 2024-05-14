@@ -89,8 +89,9 @@ fun AlbumBottomSheet(
                         style = MaterialTheme.typography.titleMedium
                     ) },
                 supportingContent = {
+                    val totalWallpapers = it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size
                     Text(
-                        text = (it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size).toString() + " " + stringResource(R.string.wallpaper),
+                        text = LocalContext.current.resources.getQuantityString(R.plurals.wallpaper_count, totalWallpapers, totalWallpapers),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis
                     )

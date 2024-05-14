@@ -93,7 +93,9 @@ fun StartupScreen(
                     modifier = Modifier
                         .fillMaxHeight(0.5f)
                         .align(Alignment.CenterHorizontally)
-                        .semantics { contentDescription = context.getString(R.string.welcome_animation) },
+                        .semantics {
+                            contentDescription = context.getString(R.string.welcome_animation)
+                        },
                     safeMode = true,
                     enableMergePaths = true
                 )
@@ -185,37 +187,14 @@ fun StartupScreen(
 @Composable
 fun PrivacyNoticeText() {
     LazyColumn {
-        item {
-            SectionText(stringResource(R.string.hello), stringResource(R.string.welcome_to) + "Paperize! " + stringResource(
-                R.string.we_respect_your_privacy_and_protect_your_personal_info_by_using_our_app_you_re_okay_with_our_privacy_policy
-            ) )
-        }
-        item {
-            SectionText(stringResource(R.string.what_we_collect),
-                stringResource(R.string.we_ask_for_notification_access_to_personalize_your_wallpapers_we_don_t_store_or_share_your_notifications_we_also_access_your_local_files_for_wallpapers_but_don_t_upload_or_transfer_them))
-        }
-        item {
-            SectionText(stringResource(R.string.how_we_use_info),
-                stringResource(R.string.we_don_t_collect_personal_data_or_track_your_usage_all_your_data_stays_on_your_device))
-        }
-        item {
-            SectionText(stringResource(R.string.security),
-                stringResource(R.string.your_data_is_safe_with_us_it_stays_on_your_device_at_all_times))
-        }
-        item {
-            SectionText(stringResource(R.string.third_party_services),
-                stringResource(R.string.no_third_party_ads_here_we_might_have_external_links_but_we_re_not_responsible_for_their_privacy_practices))
-        }
-        item {
-            SectionText(stringResource(R.string.for_kids), "Paperize " + stringResource(R.string.isn_t_for_kids_under_13_we_don_t_knowingly_collect_their_info))
-        }
-        item {
-            SectionText(stringResource(R.string.policy_updates),
-                stringResource(R.string.we_might_update_this_policy_sometimes_you_ll_see_any_changes_in_the_app_and_on_github))
-        }
-        item {
-            SectionText(stringResource(R.string.contact_us), stringResource(R.string.got_questions_or_concerns_about_our_privacy_policy_email_us_at) + "anthonyyla.dev@gmail.com.")
-        }
+        item { SectionText(stringResource(R.string.privacy_intro_title), stringResource(R.string.privacy_intro_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_data_collection_title), stringResource(R.string.privacy_data_collection_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_information_usage_title), stringResource(R.string.privacy_information_usage_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_data_security_title), stringResource(R.string.privacy_data_security_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_third_party_services_title), stringResource(R.string.privacy_third_party_services_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_children_privacy_title), stringResource(R.string.privacy_children_privacy_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_changes_notice_title), stringResource(R.string.privacy_changes_notice_content, stringResource(R.string.app_name))) }
+        item { SectionText(stringResource(R.string.privacy_contact_us_title), stringResource(R.string.privacy_contact_us_content, "anthonyyla.dev@gmail.com")) }
     }
 }
 

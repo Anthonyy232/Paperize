@@ -88,7 +88,7 @@ fun CurrentSelectedAlbum(
         supportingContent = {
             if (selectedAlbum != null) {
                 Text(
-                    text = "${selectedAlbum.wallpapers.size} ${stringResource(R.string.wallpaper)}",
+                    text = LocalContext.current.resources.getQuantityString(R.plurals.wallpaper_count, selectedAlbum.wallpapers.size, selectedAlbum.wallpapers.size),
                     style = MaterialTheme.typography.bodySmall,
                     overflow = TextOverflow.Ellipsis
                 )
