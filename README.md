@@ -19,11 +19,13 @@
 <div align="center">
     <br/>
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/eebec922-70a6-4d54-97d9-ab02cbfb7a36" width="30%" alt="onboarding" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/60a4d68d-5e19-49f2-8822-e702d02651c6" width="30%" alt="wallpaper" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/e22c1928-81f5-4b9a-822f-2d3c901bab3f" width="30%" alt="wallpaper" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/e106c0dc-23ff-4f4a-adfc-5ebe93219ae0" width="30%" alt="album" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/7093a1ea-91ab-4da8-a82b-43e24d88d376" width="30%" alt="settings" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/66b092e5-4af4-4396-b145-63ee506d9257" width="30%" alt="settings" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/54ebd285-8da4-4446-83f1-ba0e7ee9476d" width="30%" alt="adding" />
     <br/>
+    <br/>
+    <div><video controls src="https://github.com/Anthonyy232/Paperize/assets/60626873/086f27da-1648-456a-8581-79e56f4f4881" muted="false"></video></div>
 </div>
 
 
