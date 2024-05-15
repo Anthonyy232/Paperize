@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Paperize</string>
+  <string name="SettingsIcon">옵션</string>
+  <string name="dropdownmenu_settings">설정</string>
+  <string name="home_screen">홈</string>
+  <string name="wallpaper_screen">배경화면</string>
+  <string name="library_screen">라이브러리</string>
+  <string name="settings_screen">설정</string>
+  <string name="settings_back">뒤로</string>
+  <string name="LibraryFloatingButton">새로운 라이브러리를 추가하세요</string>
+  <string name="set_wallpaper_description">라이브 배경화면을 활성화하세요</string>
+  <string name="add_wallpaper">배경화면 추가</string>
+  <string name="add_images">이미지를 추가하세요</string>
+  <string name="add_folder">폴더 추가</string>
+  <string name="contact_button">연락처</string>
+  <string name="image_is_selected">이미지가 선택되었습니다</string>
+  <string name="image_is_not_selected">이미지가 선택되지 않았습니다</string>
+  <string name="select_all_images_for_deletion">삭제하려는 모든 이미지를 선택하세요</string>
+  <string name="delete_confirmation">삭제 확인</string>
+  <string name="all_images_selected_for_deletion">모든 이미지가 삭제를 위해 선택되었습니다</string>
+  <string name="add_album">앨범 추가</string>
+  <string name="add_wallpaper_screen">배경화면 화면 추가</string>
+  <string name="enter_the_name_of_the_album">앨범 이름을 입력하세요</string>
+  <string name="album_name">앨범 이름</string>
+  <string name="cancel">취소</string>
+  <string name="save">저장</string>
+  <string name="delete_album">삭제</string>
+  <string name="change_name">이름 수정</string>
+  <string name="click_to_select_a_different_album">다른 앨범을 선택하려면 클릭하세요</string>
+  <string name="no_icon">아이콘 없음</string>
+  <string name="no_album_selected">앨범이 선택되지 않았습니다</string>
+  <string name="currently_selected_album">현재 선택된 앨범</string>
+  <string name="stop_the_album">앨범 중지</string>
+  <string name="more_options">더 많은 옵션</string>
+  <string name="startup">시작</string>
+  <string name="agree">동의합니다</string>
+  <string name="welcome">환영합니다</string>
+  <string name="notifications">알림</string>
+  <string name="continue_button">참가</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">이 앱이 제대로 작동하려면 알림 권한이 필요합니다</string>
+  <string name="allow">허용</string>
+  <string name="notification_info_message">이 앱이 제대로 작동하려면 알림을 사용하는 것이 좋습니다. 허용하지 않으면 시스템이 앱을 종료할 수 있습니다. 나중에 설정에서 알림을 음소거할 수 있습니다.</string>
+  <string name="set_as_lock_screen">잠금 화면으로 설정</string>
+  <string name="lock_screen">잠금 화면</string>
+  <string name="home">홈 화면</string>
+  <string name="last_change">최근 변경</string>
+  <string name="next_change">다음 변경</string>
+  <string name="privacy_policy">개인정보 처리방침</string>
+  <string name="privacy_screen">개인정보 보호 화면</string>
+  <string name="licenses">라이센스</string>
+  <string name="licenses_screen">라이센스 화면</string>
+  <string name="contact">연락처</string>
+  <string name="contact_the_author_by_email">이메일로 작성자에게 문의</string>
+  <string name="reset_to_default">기본값으로 재설정</string>
+  <string name="reset_all_data">모든 데이터 재설정</string>
+  <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">모든 설정 및 데이터를 기본값으로 재설정하시겠습니까?</string>
+  <string name="confirm">확인</string>
+  <string name="spotlight_animation">스포트라이트 애니메이션</string>
+  <string name="circle_2_animation">원 2 애니메이션</string>
+  <string name="circle_1_animation">원 1 애니메이션</string>
+  <string name="circle_3_animation">원 3 애니메이션</string>
+  <string name="wallpaper_changer_has_been_enabled">배경 화면 변경기가 활성화되었습니다.</string>
+  <string name="wallpaper_changer_has_been_disabled">화면 변경기는 비활성화되었습니다.</string>
+  <string name="dismiss">무시</string>
+  <string name="has_been_unselected">%1$s가 선택 취소되었습니다.</string>
+  <string name="interval">간격 | %1$s</string>
+  <plurals name="minutes">
+    <item quantity="other">%d 분</item>
+  </plurals>
+  <plurals name="hours">
+    <item quantity="other">%d 시간</item>
+  </plurals>
+  <plurals name="days">
+    <item quantity="other">%d 일</item>
+  </plurals>
+  <string name="selected_count">%1$s 선택됨</string>
+  <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">앱을 사용하려면 다음 개인정보 보호 공지를 읽고 동의하십시오.</string>
+  <string name="privacy_notice">개인정보 보호 공지</string>
+  <string name="please_read_and_agree_to_the_privacy_notice">개인정보 보호 공지를 읽고 동의하십시오.</string>
+  <string name="view">보기</string>
+  <string name="welcome_animation">환영 애니메이션</string>
+  <string name="notification_bell_animation">알림 벨 애니메이션</string>
+  <string name="delete_these">이것들을 삭제하시겠습니까?</string>
+  <string name="are_you_sure_you_want_to_delete_these_wallpapers">이러한 배경 화면을 삭제하시겠습니까?</string>
+  <string name="are_you_sure_you_want_to_delete_this">이것을 삭제하시겠습니까?</string>
+  <string name="delete_album_question">앨범을 삭제하시겠습니까?</string>
+  <string name="animation">애니메이션</string>
+  <string name="increase_visual_appeal">시각적 매력을 높입니다.</string>
+  <string name="dark_mode">다크 모드</string>
+  <string name="automatic_device_mode">자동 장치 모드</string>
+  <string name="light_mode">라이트 모드</string>
+  <string name="easier_on_the_eyes">눈의 부담을 줄입니다.</string>
+  <string name="dynamic_theme">다이내믹 테마</string>
+  <string name="material_you">머티리얼 유</string>
+  <string name="dynamic_theming">다이내믹 테마</string>
+  <string name="click_here_to_view_the_licenses">여기 를 클릭하면 라이센스를 볼 수 있습니다.</string>
+  <string name="click_here_to_view_our_privacy_policy">여기 를 클릭하면 개인 정보 보호 정책을 볼 수 있습니다.</string>
+  <string name="add_images_btn">이미지 추가</string>
+  <string name="add_folder_btn">폴더 추가</string>
+  <string name="version">버전: %1$s</string>
+  <string name="appearance">외관</string>
+  <string name="about">정보</string>
+  <string name="coming_soon">곧 출시</string>
+  <string name="new_album">새 앨범</string>
+  <string name="wallpapers">벽지</string>
+  <string name="translation">번역</string>
+  <string name="help_translate_the_app_on_crowdin">Crowdin에서 앱 번역에 참여하세요!</string>
+  <plurals name="wallpaper_count">
+    <item quantity="other">%d개의 벽지</item>
+  </plurals>
+  <string name="privacy_intro_title">소개</string>
+  <string name="privacy_intro_content">%1$s에 오신 것을 환영합니다! 이 개인 정보 보호 고지에서는 모바일 애플리케이션을 사용할 때 어떻게 개인 정보를 수집, 사용 및 보호하는지 개괄적으로 설명합니다. %1$s을 사용하면 본 고지에서 설명한 약관에 동의하는 것입니다.</string>
+  <string name="privacy_data_collection_title">데이터 수집</string>
+  <string name="privacy_data_collection_content">알림 액세스: %1$s는 알림을 기반으로 맞춤 설정된 벽지 추천 기능을 제공하기 위해 알림 액세스를 요청합니다. 알림 내용이나 개인식별정보(PII)는 기기 외부에 저장하지 않습니다.
+
+로컬 파일: %1$s는 기기에 저장된 파일에 액세스하여 해당 파일을 벽지로 설정할 수 있도록 합니다. 이러한 파일은 외부 서버에 업로드하거나 전송하지 않습니다.</string>
+  <string name="privacy_information_usage_title">정보 사용</string>
+  <string name="privacy_information_usage_content">개인 데이터: 이름, 이메일 주소, 전화번호와 같은 개인 데이터는 수집하거나 저장하지 않습니다.
+
+사용 현황 분석: %1$s은 사용 현황 행동을 추적하거나 분석 데이터를 수집하지 않습니다.</string>
+  <string name="privacy_data_security_title">데이터 보안</string>
+  <string name="privacy_data_security_content">기기 내 저장: %1$s에서 사용하는 모든 데이터는 기기에 저장됩니다. 데이터를 외부로 전송하거나 저장하지 않습니다.</string>
+  <string name="privacy_third_party_services_title">타사 서비스</string>
+  <string name="privacy_third_party_services_content">광고: %1$s은 타사 광고를 표시하지 않습니다.
+
+외부 링크: 앱에는 외부 웹사이트를 참조하는 링크가 포함될 수 있습니다. 해당 사이트의 개인 정보 보호 관행에 대하여서는 책임을 지지 않습니다.</string>
+  <string name="privacy_children_privacy_title">아동 개인 정보 보호</string>
+  <string name="privacy_children_privacy_content">%1$s은 13세 미만의 어린이 대상이 아닙니다. 아동의 정보를 수집하지 않습니다.</string>
+  <string name="privacy_changes_notice_title">본 고지 변경</string>
+  <string name="privacy_changes_notice_content">개인 정보 보호 고지를 수시로 업데이트할 수 있습니다. 모든 변경 사항은 앱과 웹사이트에 반영됩니다.</string>
+  <string name="privacy_contact_us_title">문의</string>
+  <string name="privacy_contact_us_content">개인 정보 보호 고지 사항이 궁금한 사항 있을 경우 %1$s을 통해 문의 바랍니다.</string>
+  <plurals name="notification_content_text">
+    <item quantity="other">회전: %1$d/%2$d 개의 배경 화면\n간격: %3$s</item>
+  </plurals>
+</resources>

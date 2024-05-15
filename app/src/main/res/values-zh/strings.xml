@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Paperize</string>
+  <string name="SettingsIcon">選項</string>
+  <string name="dropdownmenu_settings">設定</string>
+  <string name="home_screen">主頁</string>
+  <string name="wallpaper_screen">壁紙</string>
+  <string name="library_screen">媒體庫</string>
+  <string name="settings_screen">設定</string>
+  <string name="settings_back">返回</string>
+  <string name="LibraryFloatingButton">添加新媒體庫</string>
+  <string name="set_wallpaper_description">啟用動態壁紙</string>
+  <string name="add_wallpaper">添加壁紙</string>
+  <string name="add_images">添加圖片</string>
+  <string name="add_folder">添加資料夾</string>
+  <string name="contact_button">聯繫人</string>
+  <string name="image_is_selected">圖片已選取</string>
+  <string name="image_is_not_selected">圖片未選取</string>
+  <string name="select_all_images_for_deletion">選擇所有照片進行刪除</string>
+  <string name="delete_confirmation">刪除確認</string>
+  <string name="all_images_selected_for_deletion">所有照片選取進行刪除</string>
+  <string name="add_album">添加相簿</string>
+  <string name="add_wallpaper_screen">添加壁紙屏幕</string>
+  <string name="enter_the_name_of_the_album">輸入相簿名稱</string>
+  <string name="album_name">相簿名稱</string>
+  <string name="cancel">取消</string>
+  <string name="save">儲存</string>
+  <string name="delete_album">刪除</string>
+  <string name="change_name">編輯名稱</string>
+  <string name="click_to_select_a_different_album">點擊選擇不同的相簿</string>
+  <string name="no_icon">沒有圖示</string>
+  <string name="no_album_selected">未選取相簿</string>
+  <string name="currently_selected_album">當前選取相簿</string>
+  <string name="stop_the_album">停止音樂</string>
+  <string name="more_options">更多選項</string>
+  <string name="startup">啟動</string>
+  <string name="agree">同意</string>
+  <string name="welcome">歡迎</string>
+  <string name="notifications">通知</string>
+  <string name="continue_button">我進來了</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">此應用程式需要通知權限才能正常運作</string>
+  <string name="allow">允許</string>
+  <string name="notification_info_message">此應用程式需要通知才能正常運作。如果不提供，系統可能會終止該應用程式。稍後您可以在設定中將通知設為靜音。</string>
+  <string name="set_as_lock_screen">設定為鎖定畫面</string>
+  <string name="lock_screen">鎖定畫面</string>
+  <string name="home">主畫面</string>
+  <string name="last_change">最後一次變更</string>
+  <string name="next_change">下一次變更</string>
+  <string name="privacy_policy">隱私權政策</string>
+  <string name="privacy_screen">隱私權畫面</string>
+  <string name="licenses">授權</string>
+  <string name="licenses_screen">授權畫面</string>
+  <string name="contact">聯繫人</string>
+  <string name="contact_the_author_by_email">透過電子郵件聯繫作者</string>
+  <string name="reset_to_default">重置為預設值</string>
+  <string name="reset_all_data">重設所有資料</string>
+  <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">確定要將所有設定和資料重設為預設值嗎？</string>
+  <string name="confirm">確認</string>
+  <string name="spotlight_animation">聚光燈動畫</string>
+  <string name="circle_2_animation">圓圈 2 動畫</string>
+  <string name="circle_1_animation">圓圈 1 動畫</string>
+  <string name="circle_3_animation">圓圈 3 動畫</string>
+  <string name="wallpaper_changer_has_been_enabled">已啟用壁紙更換器。</string>
+  <string name="wallpaper_changer_has_been_disabled">背景圖片已停用。</string>
+  <string name="dismiss">關閉</string>
+  <string name="has_been_unselected">已取消選取 %1$s。</string>
+  <string name="interval">間隔 | %1$s</string>
+  <plurals name="minutes">
+    <item quantity="other">%d 分鐘</item>
+  </plurals>
+  <plurals name="hours">
+    <item quantity="other">%d 小時</item>
+  </plurals>
+  <plurals name="days">
+    <item quantity="other">%d 天</item>
+  </plurals>
+  <string name="selected_count">%1$s 個項目已選取</string>
+  <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">請閱讀並同意以下隱私權聲明才能使用應用程式。</string>
+  <string name="privacy_notice">隱私權聲明</string>
+  <string name="please_read_and_agree_to_the_privacy_notice">請閱讀並同意隱私權聲明。</string>
+  <string name="view">檢視</string>
+  <string name="welcome_animation">歡迎動畫</string>
+  <string name="notification_bell_animation">通知鈴動畫</string>
+  <string name="delete_these">刪除這些？</string>
+  <string name="are_you_sure_you_want_to_delete_these_wallpapers">您確定要刪除這些背景圖片嗎？</string>
+  <string name="are_you_sure_you_want_to_delete_this">您確定要刪除這個嗎？</string>
+  <string name="delete_album_question">刪除相簿？</string>
+  <string name="animation">動畫</string>
+  <string name="increase_visual_appeal">增加視覺吸引力</string>
+  <string name="dark_mode">深色模式</string>
+  <string name="automatic_device_mode">裝置自動模式</string>
+  <string name="light_mode">淺色模式</string>
+  <string name="easier_on_the_eyes">保護眼睛</string>
+  <string name="dynamic_theme">動態主題</string>
+  <string name="material_you">Material You</string>
+  <string name="dynamic_theming">動態主題設定</string>
+  <string name="click_here_to_view_the_licenses">點擊此处查看许可证</string>
+  <string name="click_here_to_view_our_privacy_policy">點擊此处查看我們的隱私政策</string>
+  <string name="add_images_btn">添加圖片</string>
+  <string name="add_folder_btn">添加資料夾</string>
+  <string name="version">版本：%1$s</string>
+  <string name="appearance">外觀</string>
+  <string name="about">關於</string>
+  <string name="coming_soon">即將推出</string>
+  <string name="new_album">新相簿</string>
+  <string name="wallpapers">壁紙</string>
+  <string name="translation">翻譯</string>
+  <string name="help_translate_the_app_on_crowdin">幫助我們在 Crowdin 上翻譯應用程式！</string>
+  <plurals name="wallpaper_count">
+    <item quantity="other">%d 張壁紙</item>
+  </plurals>
+  <string name="privacy_intro_title">介紹</string>
+  <string name="privacy_intro_content">歡迎使用 %1$s！本隱私權聲明概述了我們在您使用行動應用程式時如何收集、使用和保護您的個人資訊。使用 %1$s 即表示您同意本聲明中所述的條款。</string>
+  <string name="privacy_data_collection_title">數據收集</string>
+  <string name="privacy_data_collection_content">通知權限：%1$s 要求通知權限，以便根據您的通知提供個人化壁紙推薦。我們不會在您的裝置外部儲存任何通知內容或個人身分資訊 (PII)。
+
+本地檔案：%1$s 訪問裝置中儲存的檔案，允許您將這些檔案設定為壁紙。我們不會上傳或傳送這些檔案至任何外部伺服器。</string>
+  <string name="privacy_information_usage_title">資訊使用</string>
+  <string name="privacy_information_usage_content">個人資料：我們不會收集或儲存任何個人資料，例如姓名、電子郵件地址或電話號碼。
+
+使用分析：%1$s 不會追蹤您的使用行為或收集分析資料。</string>
+  <string name="privacy_data_security_title">數據安全</string>
+  <string name="privacy_data_security_content">裝置上儲存：%1$s 使用的所有資料均保存在您的裝置上。我們不會在外部傳輸或儲存任何資料。</string>
+  <string name="privacy_third_party_services_title">第三方服務</string>
+  <string name="privacy_third_party_services_content">廣告：%1$s 不會顯示第三方廣告。
+
+外部連結：我們的應用程式可能包含指向外部網站的連結。請注意，我們不對這些網站的隱私實務負責。</string>
+  <string name="privacy_children_privacy_title">兒童隱私</string>
+  <string name="privacy_children_privacy_content">%1$s 不適用於 13 歲以下的兒童。我們不會故意收集任何兒童的資訊。</string>
+  <string name="privacy_changes_notice_title">本聲明異動</string>
+  <string name="privacy_changes_notice_content">我們可能會不時更新本隱私權聲明。任何變更都將反映在應用程式和我們的網站上。</string>
+  <string name="privacy_contact_us_title">聯絡我們</string>
+  <string name="privacy_contact_us_content">如果您對本隱私權聲明有任何疑問或疑慮，請透過 %1$s 與我聯繫。</string>
+  <plurals name="notification_content_text">
+    <item quantity="other">旋轉：%1$d/%2$d 張壁紙\n間隔：%3$s</item>
+  </plurals>
+</resources>

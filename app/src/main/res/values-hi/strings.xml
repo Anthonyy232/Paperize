@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Paperize</string>
+  <string name="SettingsIcon">विकल्प</string>
+  <string name="dropdownmenu_settings">सेटिंग्स</string>
+  <string name="home_screen">गृह</string>
+  <string name="wallpaper_screen">वॉलपेपर</string>
+  <string name="library_screen">पुस्तकालय</string>
+  <string name="settings_screen">सेटिंग्स</string>
+  <string name="settings_back">वापस</string>
+  <string name="LibraryFloatingButton">एक नया पुस्तकालय जोड़ें</string>
+  <string name="set_wallpaper_description">लाइव वॉलपेपर सक्षम करें</string>
+  <string name="add_wallpaper">वॉलपेपर जोड़ें</string>
+  <string name="add_images">छवियां जोड़ें</string>
+  <string name="add_folder">फ़ोल्डर जोड़ें</string>
+  <string name="contact_button">संपर्क करें</string>
+  <string name="image_is_selected">छवि चयनित है</string>
+  <string name="image_is_not_selected">छवि चयनित नहीं है</string>
+  <string name="select_all_images_for_deletion">हटाने के लिए सभी छवियों का चयन करें</string>
+  <string name="delete_confirmation">हटाने की पुष्टि</string>
+  <string name="all_images_selected_for_deletion">हटाने के लिए सभी चयनित छवियां</string>
+  <string name="add_album">एल्बम जोड़ें</string>
+  <string name="add_wallpaper_screen">वॉलपेपर स्क्रीन जोड़ें</string>
+  <string name="enter_the_name_of_the_album">एल्बम का नाम दर्ज करें</string>
+  <string name="album_name">एल्बम का नाम</string>
+  <string name="cancel">रद्द करें</string>
+  <string name="save">सहेजें</string>
+  <string name="delete_album">हटाना</string>
+  <string name="change_name">नाम संपादित करें</string>
+  <string name="click_to_select_a_different_album">किसी भिन्न एल्बम का चयन करने के लिए क्लिक करें</string>
+  <string name="no_icon">कोई आइकन नहीं</string>
+  <string name="no_album_selected">कोई एल्बम नहीं चुना गया</string>
+  <string name="currently_selected_album">वर्तमान में चयनित एल्बम</string>
+  <string name="stop_the_album">एल्बम बंद करें</string>
+  <string name="more_options">अधिक विकल्प</string>
+  <string name="startup">प्रारंभ</string>
+  <string name="agree">सहमत</string>
+  <string name="welcome">स्वागत है</string>
+  <string name="notifications">सूचनाएं</string>
+  <string name="continue_button">मैं अंदर हूँ</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">इस ऐप के ठीक से काम करने के लिए अधिसूचना अनुमति आवश्यक है</string>
+  <string name="allow">अनुमति दें</string>
+  <string name="notification_info_message">इस ऐप के ठीक से काम करने के लिए सूचनाएं अनुशंसित हैं। यदि नहीं दिया गया है, तो सिस्टम ऐप को समाप्त कर सकता है। आप बाद में सेटिंग में सूचनाएं म्यूट कर सकते हैं।</string>
+  <string name="set_as_lock_screen">लॉक स्क्रीन के रूप में सेट करें</string>
+  <string name="lock_screen">लॉक स्क्रीन</string>
+  <string name="home">होम स्क्रीन</string>
+  <string name="last_change">अंतिम परिवर्तन</string>
+  <string name="next_change">अगला परिवर्तन</string>
+  <string name="privacy_policy">गोपनीयता नीति</string>
+  <string name="privacy_screen">गोपनीयता स्क्रीन</string>
+  <string name="licenses">लाइसेंस</string>
+  <string name="licenses_screen">लाइसेंस स्क्रीन</string>
+  <string name="contact">संपर्क करें</string>
+  <string name="contact_the_author_by_email">ईमेल द्वारा लेखक से संपर्क करें</string>
+  <string name="reset_to_default">डिफ़ॉल्ट पर रीसेट करें</string>
+  <string name="reset_all_data">सभी डेटा रीसेट करें</string>
+  <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">क्या आप वाकई सभी सेटिंग्स और डेटा को डिफ़ॉल्ट पर रीसेट करना चाहते हैं?</string>
+  <string name="confirm">पुष्टि करें</string>
+  <string name="spotlight_animation">स्पॉटलाइट एनिमेशन</string>
+  <string name="circle_2_animation">सर्कल 2 एनिमेशन</string>
+  <string name="circle_1_animation">सर्कल 1 एनिमेशन</string>
+  <string name="circle_3_animation">सर्कल 3 एनिमेशन</string>
+  <string name="wallpaper_changer_has_been_enabled">वॉलपेपर परिवर्तक सक्षम हो गया है।</string>
+  <string name="wallpaper_changer_has_been_disabled">वॉलपेपर परिवर्तक अक्षम कर दिया गया है।</string>
+  <string name="dismiss">बर्खास्त</string>
+  <string name="has_been_unselected">%1$s का अचयन किया गया है।</string>
+  <string name="interval">अंतराल | %1$s</string>
+  <plurals name="minutes">
+    <item quantity="one">%d मिनट</item>
+    <item quantity="other">%d मिनट</item>
+  </plurals>
+  <plurals name="hours">
+    <item quantity="one">%d घंटा</item>
+    <item quantity="other">%d घंटे</item>
+  </plurals>
+  <plurals name="days">
+    <item quantity="one">%d दिन</item>
+    <item quantity="other">%d दिन</item>
+  </plurals>
+  <string name="selected_count">%1$s चुना गया</string>
+  <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">ऐप का उपयोग करने के लिए कृपया निम्नलिखित गोपनीयता सूचना को पढ़ें और सहमत हों।</string>
+  <string name="privacy_notice">गोपनीयता सूचना</string>
+  <string name="please_read_and_agree_to_the_privacy_notice">कृपया गोपनीयता सूचना को पढ़ें और सहमत हों।</string>
+  <string name="view">दृश्य</string>
+  <string name="welcome_animation">स्वागत एनीमेशन</string>
+  <string name="notification_bell_animation">सूचना घंटी एनीमेशन</string>
+  <string name="delete_these">इन्हें हटाएँ?</string>
+  <string name="are_you_sure_you_want_to_delete_these_wallpapers">क्या आप वाकई इन वॉलपेपर को हटाना चाहते हैं?</string>
+  <string name="are_you_sure_you_want_to_delete_this">क्या आप वाकई इसे हटाना चाहते हैं?</string>
+  <string name="delete_album_question">एल्बम हटाएँ?</string>
+  <string name="animation">एनीमेशन</string>
+  <string name="increase_visual_appeal">दृश्य अपील बढ़ाएँ</string>
+  <string name="dark_mode">डार्क मोड</string>
+  <string name="automatic_device_mode">स्वचालित डिवाइस मोड</string>
+  <string name="light_mode">लाइट मोड</string>
+  <string name="easier_on_the_eyes">आँखों पर आसान</string>
+  <string name="dynamic_theme">गतिशील विषयवस्तु</string>
+  <string name="material_you">मटेरियल यू</string>
+  <string name="dynamic_theming">गतिशील थीमिंग</string>
+  <string name="click_here_to_view_the_licenses">लाइसेंस देखने के लिए यहां क्लिक करें</string>
+  <string name="click_here_to_view_our_privacy_policy">हमारी गोपनीयता नीति देखने के लिए यहां क्लिक करें</string>
+  <string name="add_images_btn">चित्र जोड़ें</string>
+  <string name="add_folder_btn">फ़ोल्डर जोड़ें</string>
+  <string name="version">संस्करण: %1$s</string>
+  <string name="appearance">प्रकटन</string>
+  <string name="about">के बारे में</string>
+  <string name="coming_soon">जल्द आ रहा है</string>
+  <string name="new_album">नया एल्बम</string>
+  <string name="wallpapers">वॉलपेपर</string>
+  <string name="translation">अनुवाद</string>
+  <string name="help_translate_the_app_on_crowdin">क्राउडिन पर ऐप का अनुवाद करने में मदद करें!</string>
+  <plurals name="wallpaper_count">
+    <item quantity="one">%d वॉलपेपर</item>
+    <item quantity="other">%d वॉलपेपर</item>
+  </plurals>
+  <string name="privacy_intro_title">परिचय</string>
+  <string name="privacy_intro_content">%1$s में आपका स्वागत है! यह गोपनीयता सूचना बताती है कि जब आप हमारे मोबाइल एप्लिकेशन का उपयोग करते हैं तो हम आपकी व्यक्तिगत जानकारी कैसे एकत्र करते हैं, उसका उपयोग कैसे करते हैं और उसकी सुरक्षा कैसे करते हैं। %1$s का उपयोग करके, आप इस सूचना में वर्णित शर्तों से सहमत होते हैं।</string>
+  <string name="privacy_data_collection_title">डेटा संग्रह</string>
+  <string name="privacy_data_collection_content">सूचना एक्सेस: %1$s आपको आपकी सूचनाओं के आधार पर वैयक्तिकृत वॉलपेपर अनुशंसाएँ प्रदान करने के लिए सूचना एक्सेस का अनुरोध करता है। हम आपके डिवाइस के बाहर किसी भी सूचना सामग्री या व्यक्तिगत रूप से पहचान योग्य जानकारी (पीआईआई) को संग्रहीत नहीं करते हैं।
+
+स्थानीय फ़ाइलें: %1$s आपको उन्हें वॉलपेपर के रूप में सेट करने की अनुमति देने के लिए आपके डिवाइस पर संग्रहीत फ़ाइलों तक पहुँचता है। हम इन फ़ाइलों को किसी भी बाहरी सर्वर पर अपलोड या स्थानांतरित नहीं करते हैं।</string>
+  <string name="privacy_information_usage_title">सूचना उपयोग</string>
+  <string name="privacy_information_usage_content">व्यक्तिगत डेटा: हम नाम, ईमेल पते या फ़ोन नंबर जैसे किसी भी व्यक्तिगत डेटा को एकत्र या संग्रहीत नहीं करते हैं।
+
+उपयोग विश्लेषण: %1$s आपके उपयोग व्यवहार को ट्रैक नहीं करता है या विश्लेषण डेटा एकत्र नहीं करता है।</string>
+  <string name="privacy_data_security_title">डेटा सुरक्षा</string>
+  <string name="privacy_data_security_content">डिवाइस पर संग्रहण: %1$s द्वारा उपयोग किया गया सभी डेटा आपके डिवाइस पर रहता है। हम किसी भी डेटा को बाहरी रूप से संचारित या संग्रहीत नहीं करते हैं।</string>
+  <string name="privacy_third_party_services_title">तृतीय-पक्ष सेवाएँ</string>
+  <string name="privacy_third_party_services_content">विज्ञापन: %1$s तृतीय-पक्ष विज्ञापन प्रदर्शित नहीं करता है।
+
+बाहरी लिंक: हमारे ऐप में बाहरी वेबसाइटों के लिंक हो सकते हैं। कृपया ध्यान दें कि हम इन साइटों की गोपनीयता प्रथाओं के लिए ज़िम्मेदार नहीं हैं।</string>
+  <string name="privacy_children_privacy_title">बच्चों की गोपनीयता</string>
+  <string name="privacy_children_privacy_content">%1$s 13 साल से कम उम्र के बच्चों के लिए नहीं है। हम जानबूझकर बच्चों से कोई जानकारी एकत्र नहीं करते हैं।</string>
+  <string name="privacy_changes_notice_title">इस सूचना में परिवर्तन</string>
+  <string name="privacy_changes_notice_content">हम समय-समय पर इस गोपनीयता सूचना को अपडेट कर सकते हैं। कोई भी परिवर्तन ऐप और हमारी वेबसाइट पर दिखाई देगा।</string>
+  <string name="privacy_contact_us_title">हमसे संपर्क करें</string>
+  <string name="privacy_contact_us_content">यदि आपके पास इस गोपनीयता सूचना के बारे में कोई प्रश्न या चिंता है, तो कृपया मुझसे %1$s पर संपर्क करें।</string>
+  <plurals name="notification_content_text">
+    <item quantity="one">रोटेशन: %1$d/%2$d वॉलपेपर
+अंतराल: %3$s</item>
+    <item quantity="other">रोटेशन: %1$d/%2$d वॉलपेपर
+अंतराल: %3$s</item>
+  </plurals>
+</resources>
