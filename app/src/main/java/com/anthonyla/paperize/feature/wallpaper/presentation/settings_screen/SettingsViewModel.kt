@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @HiltViewModel
@@ -158,7 +159,7 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetWallpaperInterval -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yy hh:mm\na")
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val time = LocalDateTime.now()
                     val formattedLastSetTime = time.format(formatter)
                     val formattedNextSetTime = time.plusMinutes(event.interval.toLong()).format(formatter)

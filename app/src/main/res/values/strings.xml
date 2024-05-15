@@ -64,12 +64,18 @@
     <string name="dismiss">Dismiss</string>
     <string name="has_been_unselected">%1$s has been unselected.</string>
     <string name="interval">Interval | %1$s</string>
-    <string name="minutes">%1$s minutes</string>
-    <string name="minute">%1$s minute</string>
-    <string name="hour">%1$s hour</string>
-    <string name="hours">%1$s hours</string>
-    <string name="day">%1$s day</string>
-    <string name="days">%1$s days</string>
+    <plurals name="minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="selected_count">%1$s selected</string>
     <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Please read and agree to the following privacy notice to use the app.</string>
     <string name="privacy_notice">Privacy Notice</string>
@@ -94,7 +100,7 @@
     <string name="click_here_to_view_our_privacy_policy">Click here to view our privacy policy</string>
     <string name="add_images_btn">Add Images</string>
     <string name="add_folder_btn">Add Folder</string>
-    <string name="version">Version:</string>
+    <string name="version">Version: %1$s</string>
     <string name="appearance">Appearance</string>
     <string name="about">About</string>
     <string name="coming_soon">Coming soon</string>
@@ -122,4 +128,8 @@
     <string name="privacy_changes_notice_content">We may update this privacy notice from time to time. Any changes will be reflected in the app and on our website.</string>
     <string name="privacy_contact_us_title">Contact Us</string>
     <string name="privacy_contact_us_content">If you have any questions or concerns about this privacy notice, please contact me at %1$s.</string>
+    <plurals name="notification_content_text">
+        <item quantity="one">Rotation: %1$d/%2$d wallpaper\nInterval: %3$s</item>
+        <item quantity="other">Rotation: %1$d/%2$d wallpapers\nInterval: %3$s</item>
+    </plurals>
 </resources>

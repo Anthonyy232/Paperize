@@ -132,8 +132,7 @@ fun NotificationScreen(
                         .fillMaxHeight(0.5f)
                         .align(Alignment.CenterHorizontally)
                         .semantics {
-                            contentDescription =
-                                context.getString(R.string.notification_bell_animation)
+                            contentDescription = context.getString(R.string.notification_bell_animation)
                         },
                     safeMode = true,
                     enableMergePaths = true

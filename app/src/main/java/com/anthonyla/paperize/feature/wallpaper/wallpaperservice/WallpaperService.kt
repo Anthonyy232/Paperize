@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 
@@ -129,8 +130,8 @@ class WallpaperService: Service() {
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
-            .setContentTitle("Paperize")
-            .setContentText("Rotation: $current/$total wallpapers\nInterval: ${formatTime(timeInMinutes)}")
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(resources.getQuantityString(R.plurals.notification_content_text, total, current, total, formatTime(timeInMinutes)))
             .setSmallIcon(R.drawable.notification_icon)
             .setContentIntent(pendingIntent)
             .build()
@@ -141,7 +142,7 @@ class WallpaperService: Service() {
      * If none left, reshuffle the wallpapers and pick the first one
      */
     private suspend fun changeWallpaper(context: Context) {
-        val formatter = DateTimeFormatter.ofPattern("MM/dd/yy hh:mm\na")
+        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
         val time = LocalDateTime.now()
         settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, time.format(formatter))
         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, time.plusMinutes(timeInMinutes.toLong()).format(formatter))
@@ -261,21 +262,9 @@ class WallpaperService: Service() {
         val hours = (timeInMinutes % (24 * 60)) / 60
         val minutes = timeInMinutes % 60
 
-        val formattedDays = when {
-            days > 1 -> "$days days"
-            days == 1 -> "$days day"
-            else -> ""
-        }
-        val formattedHours = when {
-            hours > 1 -> "$hours hours"
-            hours == 1 -> "$hours hour"
-            else -> ""
-        }
-        val formattedMinutes = when {
-            minutes > 1 -> "$minutes minutes"
-            minutes == 1 -> "$minutes minute"
-            else -> ""
-        }
+        val formattedDays = if (days > 0) resources.getQuantityString(R.plurals.days, days, days) else ""
+        val formattedHours = if (hours > 0) resources.getQuantityString(R.plurals.hours, hours, hours) else ""
+        val formattedMinutes = if (minutes > 0) resources.getQuantityString(R.plurals.minutes, minutes, minutes) else ""
 
         return listOf(formattedDays, formattedHours, formattedMinutes).filter { it.isNotEmpty() }.joinToString(", ")
     }

@@ -79,7 +79,7 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
                 )
                 Text(
-                    text = stringResource(R.string.version) + " " + version,
+                    text = stringResource(R.string.version, version),
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )

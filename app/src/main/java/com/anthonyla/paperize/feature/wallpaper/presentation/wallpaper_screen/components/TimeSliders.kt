@@ -37,6 +37,7 @@ fun TimeSliders(
     var hours by rememberSaveable { mutableFloatStateOf(((timeInMinutes % (24 * 60)) / 60).toFloat()) }
     var minutes by rememberSaveable { mutableFloatStateOf((timeInMinutes % 60).toFloat()) }
     val scope = rememberCoroutineScope()
+    val context = LocalView.current
     var job by remember { mutableStateOf<Job?>(null) }
 
     Surface(
@@ -51,25 +52,21 @@ fun TimeSliders(
             val displayDays = totalMinutes / (24 * 60)
             val displayHours = (totalMinutes % (24 * 60)) / 60
             val displayMinutes = totalMinutes % 60
-            val formattedDays = when {
-                displayDays > 1 -> stringResource(R.string.days, displayDays)
-                displayDays == 1 -> stringResource(R.string.day, displayDays)
-                else -> ""
-            }
-            val formattedHours = when {
-                displayHours > 1 -> stringResource(R.string.hours, displayHours)
-                displayHours == 1 -> stringResource(R.string.hour, displayHours)
-                else -> ""
-            }
-            val formattedMinutes = when {
-                displayMinutes > 1 -> stringResource(R.string.minutes, displayMinutes)
-                displayMinutes == 1 -> stringResource(R.string.minute, displayMinutes)
-                else -> ""
-            }
+            val formattedDays = if (displayDays > 0) {
+                context.resources.getQuantityString(R.plurals.days, displayDays, displayDays)
+            } else {""}
+
+            val formattedHours = if (displayHours > 0) {
+                context.resources.getQuantityString(R.plurals.hours, displayHours, displayHours)
+            } else {""}
+
+            val formattedMinutes = if (displayMinutes > 0) {
+                context.resources.getQuantityString(R.plurals.minutes, displayMinutes, displayMinutes)
+            } else {""}
+
             val formattedTime = stringResource(
                 R.string.interval,
-                listOf(formattedDays, formattedHours, formattedMinutes).filter { it.isNotEmpty() }
-                    .joinToString(", ")
+                listOf(formattedDays, formattedHours, formattedMinutes).filter { it.isNotEmpty() }.joinToString(", ")
             )
 
             Text(
