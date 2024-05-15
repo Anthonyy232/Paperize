@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components
 
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,16 +25,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+
 
 /**
  * List item for app version and link to GitHub and PlayStore
  */
 @Composable
 fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, onFdroidClick: () -> Unit) {
+    val context = LocalContext.current
+    var version = ""
+    try {
+        val pInfo: PackageInfo =
+            context.packageManager.getPackageInfo(context.packageName, 0)
+        version = pInfo.versionName
+    } catch (e: PackageManager.NameNotFoundException) {
+        e.printStackTrace()
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,7 +79,7 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
                 )
                 Text(
-                    text = stringResource(R.string.version) + " " + "1.2.0",
+                    text = stringResource(R.string.version) + " " + version,
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
