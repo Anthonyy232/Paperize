@@ -83,4 +83,4 @@ All contributions to the app is welcome. Feel free to report any issues and crea
 ## License
 Contact on my GitHub profile
 
-Paperize © GNU GPL v3.0
+Anthony La © GNU GPL v3.0
