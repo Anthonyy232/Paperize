@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.feature.wallpaper.wallpaperservice
+package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent

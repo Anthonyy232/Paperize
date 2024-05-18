@@ -53,7 +53,8 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                 false -> 2
                 else -> 1
             }
-        ) }
+        )
+    }
     Row(
         modifier = Modifier.fillMaxSize()
     ) {

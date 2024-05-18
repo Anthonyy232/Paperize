@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,6 +30,7 @@ class SettingsViewModel @Inject constructor (
     )
 
     private var currentGetJob: Job? = null
+    var setKeepOnScreenCondition: Boolean = true
 
     init {
         currentGetJob = viewModelScope.launch(Dispatchers.IO) {
@@ -41,6 +43,9 @@ class SettingsViewModel @Inject constructor (
             val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
             val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
             val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
+            val darkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100 }
+            val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
+            val wallpaperScaling = async { ScalingConstants.valueOf(settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING) ?: ScalingConstants.FILL.name) }
 
             _state.update {
                 it.copy(
@@ -53,9 +58,12 @@ class SettingsViewModel @Inject constructor (
                     nextSetTime = nextSetTime.await(),
                     animate = animate.await(),
                     enableChanger = enableChanger.await(),
-                    isDataLoaded = true
+                    darkenPercentage = darkenPercentage.await(),
+                    darken = darken.await(),
+                    wallpaperScaling = wallpaperScaling.await(),
                 )
             }
+            setKeepOnScreenCondition = false
         }
     }
 
@@ -97,6 +105,8 @@ class SettingsViewModel @Inject constructor (
                     val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
                     val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
                     val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
+                    val darkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 0 }
+                    val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
 
                     _state.update {
                         it.copy(
@@ -108,7 +118,9 @@ class SettingsViewModel @Inject constructor (
                             lastSetTime = lastSetTime.await(),
                             nextSetTime = nextSetTime.await(),
                             animate = animate.await(),
-                            enableChanger = enableChanger.await()
+                            enableChanger = enableChanger.await(),
+                            darkenPercentage = darkenPercentage.await(),
+                            darken = darken.await()
                         )
                     }
                 }
@@ -176,6 +188,31 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetDarkenPercentage -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putInt(SettingsConstants.DARKEN_PERCENTAGE, event.darkenPercentage)
+                    _state.update {
+                        it.copy(
+                            darkenPercentage = event.darkenPercentage
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetDarken -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    when (event.darken) {
+                        true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARKEN, true) }
+                        false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARKEN, false) }
+                    }
+                    _state.update {
+                        it.copy(
+                            darken = event.darken
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.SetLockWithHome -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     when (event.lockWithHome) {
@@ -185,6 +222,17 @@ class SettingsViewModel @Inject constructor (
                     _state.update {
                         it.copy(
                             setLockWithHome = event.lockWithHome
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetWallpaperScaling -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putString(SettingsConstants.WALLPAPER_SCALING, event.scaling.name)
+                    _state.update {
+                        it.copy(
+                            wallpaperScaling = event.scaling
                         )
                     }
                 }
@@ -201,6 +249,10 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ANIMATE_TYPE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.WALLPAPER_CHANGE_INTERVAL)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_CHANGER)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.DARKEN_PERCENTAGE)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARKEN)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.WALLPAPER_SCALING)
+
                     _state.update {
                         it.copy(
                             darkMode = null,
@@ -211,7 +263,10 @@ class SettingsViewModel @Inject constructor (
                             lastSetTime = null,
                             nextSetTime = null,
                             animate = true,
-                            enableChanger = false
+                            enableChanger = false,
+                            darkenPercentage = 100,
+                            darken = false,
+                            wallpaperScaling = ScalingConstants.FILL
                         )
                     }
                 }

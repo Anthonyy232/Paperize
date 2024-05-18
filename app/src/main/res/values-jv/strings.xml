@@ -45,7 +45,7 @@
   <string name="lock_screen">Layar kunci</string>
   <string name="home">Layar ngarep</string>
   <string name="last_change">owah-owahan pungkasan</string>
-  <string name="next_change">owah-owahan sabanjure</string>
+  <string name="next_change">owah-owahan sabanjuré</string>
   <string name="privacy_policy">Kebijakan Privasi</string>
   <string name="privacy_screen">Layar Privasi</string>
   <string name="licenses">Lisensi</string>
@@ -120,11 +120,22 @@
   <string name="privacy_third_party_services_title">Layanan Pihak Katelu</string>
   <string name="privacy_third_party_services_content">Iklan: %1$s ora nampilake iklan pihak katelu.\n\nLink Eksternal: Aplikasi kita bisa uga ngemot pranala menyang situs web eksternal. Elinga yen kita ora tanggung jawab kanggo praktik privasi situs kasebut.</string>
   <string name="privacy_children_privacy_title">Privasi Anak</string>
-  <string name="privacy_children_privacy_content">%1$s ora kanggo bocah-bocah ing sangisore 13 taun. Kita ora sengaja ngumpulake informasi saka bocah-bocah.</string>
+  <string name="privacy_children_privacy_content">%1$s ora dimaksudaké kanggo bocah-bocah ing umur 13 taun. Kita ora sengaja ngumpulake informasi saka bocah-bocah.</string>
   <string name="privacy_changes_notice_title">Owah-owahan ing kabar iki</string>
   <string name="privacy_changes_notice_content">Kita bisa nganyari kabar privasi iki saka wektu kanggo wektu. Sembarang owah-owahan bakal dibayangke ing app lan ing situs web kita.</string>
   <string name="privacy_contact_us_title">Hubungi Kita</string>
   <string name="privacy_contact_us_content">Yen sampeyan duwe pitakon utawa kuwatir babagan kabar privasi iki, hubungi kula ing %1$s.</string>
+  <string name="no_albums_found">Ora ana album sing ditemokake</string>
+  <string name="disable_live_wallpaper">Pateni wallpaper urip</string>
+  <string name="live_wallpaper_detected">Wallpaper Live Dideteksi</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Mangga mateni wallpaper urip kanggo nggunakake pangisi wallpaper.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Isi</string>
+  <string name="fit">Pas</string>
+  <string name="stretch">Stretch</string>
+  <string name="wallpaper_scaling">Skala Wallpaper</string>
+  <string name="adjust_brightness">Nyetel Padhang</string>
   <plurals name="notification_content_text">
     <item quantity="other">Rotasi: %1$d/%2$d wallpaper\nInterval: %3$s</item>
   </plurals>

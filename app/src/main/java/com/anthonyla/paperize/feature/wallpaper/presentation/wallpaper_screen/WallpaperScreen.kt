@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
+import android.app.WallpaperManager
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -27,14 +29,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SetLockScreenSwitch
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowLiveWallpaperEnabledDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperScalingRow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -51,13 +57,27 @@ fun WallpaperScreen(
     lastSetTime: String?,
     nextSetTime: String?,
     selectedAlbum: SelectedAlbum?,
-    enableChanger: Boolean
+    enableChanger: Boolean,
+    darkenPercentage: Int,
+    onDarkenPercentage: (Int) -> Unit,
+    darken: Boolean,
+    onDarkCheck: (Boolean) -> Unit,
+    scaling: ScalingConstants,
+    onScalingChange: (ScalingConstants) -> Unit
 ) {
+    val context = LocalContext.current
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val openDialog = rememberSaveable { mutableStateOf(false) }
+    val showInterval = rememberSaveable { mutableStateOf(false) }
+
+    if (openDialog.value) {
+        ShowLiveWallpaperEnabledDialog(
+            onDismissRequest = { openDialog.value = false }
+        )
+    }
 
     Scaffold(
         snackbarHost = {
@@ -83,7 +103,22 @@ fun WallpaperScreen(
                     CurrentSelectedAlbum(
                         selectedAlbum = selectedAlbum,
                         onOpenBottomSheet = {
-                            if (albumState.value.albumsWithWallpapers.firstOrNull() != null) openBottomSheet = true
+                            if (albumState.value.albumsWithWallpapers.firstOrNull() != null) {
+                                if (isLiveWallpaperSet(context)) {
+                                    openDialog.value = true
+                                }
+                                else { openBottomSheet = true }
+                            }
+                            else {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.no_albums_found),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
                         },
                         onStop = {
                             if (selectedAlbum != null) {
@@ -145,7 +180,10 @@ fun WallpaperScreen(
                                     albumUri = selectedAlbum.album.currentWallpaper,
                                     checked = setLockWithHome,
                                     onCheckedChange = { onSetLockWithHome(it) },
-                                    animate = true
+                                    animate = true,
+                                    darken = darken,
+                                    darkenPercentage = darkenPercentage,
+                                    scaling = scaling
                                 )
                             }
                         }
@@ -156,7 +194,32 @@ fun WallpaperScreen(
                                 albumUri = selectedAlbum.album.currentWallpaper,
                                 checked = setLockWithHome,
                                 onCheckedChange = { onSetLockWithHome(it) },
-                                animate = false
+                                animate = false,
+                                darken = darken,
+                                darkenPercentage = darkenPercentage,
+                                scaling = scaling
+                            )
+                        }
+                    }
+                }
+                item {
+                    if (animate) {
+                        AnimatedVisibility(
+                            visible = selectedAlbum != null,
+                            enter = slideInVertically(initialOffsetY = { -it }),
+                            exit = fadeOut()
+                        ) {
+                            WallpaperScalingRow(
+                                scaling = scaling,
+                                onScalingChange = onScalingChange
+                            )
+                        }
+                    }
+                    else {
+                        if (selectedAlbum != null) {
+                            WallpaperScalingRow(
+                                scaling = scaling,
+                                onScalingChange = onScalingChange
                             )
                         }
                     }
@@ -173,7 +236,10 @@ fun WallpaperScreen(
                                 onTimeChange = { days, hours, minutes ->
                                     val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                     onScheduleWallpaperChanger(totalMinutes)
-                                }
+                                },
+                                showInterval = showInterval.value,
+                                animate = true,
+                                onShowIntervalChange = { showInterval.value = it }
                             )
                         }
                     }
@@ -184,7 +250,38 @@ fun WallpaperScreen(
                                 onTimeChange = { days, hours, minutes ->
                                     val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                     onScheduleWallpaperChanger(totalMinutes)
-                                }
+                                },
+                                showInterval = showInterval.value,
+                                animate = false,
+                                onShowIntervalChange = { showInterval.value = it }
+                            )
+                        }
+                    }
+                }
+                item {
+                    if (animate) {
+                        AnimatedVisibility(
+                            visible = selectedAlbum != null,
+                            enter = slideInVertically(initialOffsetY = { -it }),
+                            exit = fadeOut()
+                        ) {
+                            DarkenSwitchAndSlider(
+                                onDarkCheck = onDarkCheck,
+                                darken = darken,
+                                onDarkenChange = onDarkenPercentage,
+                                darkenPercentage = darkenPercentage,
+                                animate = true
+                            )
+                        }
+                    }
+                    else {
+                        if (selectedAlbum != null) {
+                            DarkenSwitchAndSlider(
+                                onDarkCheck = onDarkCheck,
+                                darken = darken,
+                                onDarkenChange = onDarkenPercentage,
+                                darkenPercentage = darkenPercentage,
+                                animate = false
                             )
                         }
                     }
@@ -205,4 +302,9 @@ fun WallpaperScreen(
             }
         },
     )
+}
+
+fun isLiveWallpaperSet(context: Context): Boolean {
+    val wallpaperManager = WallpaperManager.getInstance(context)
+    return wallpaperManager.wallpaperInfo != null
 }

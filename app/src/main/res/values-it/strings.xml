@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Potremmo aggiornare questa informativa sulla privacy di volta in volta. Eventuali modifiche saranno riportate nell\'app e sul nostro sito web.</string>
   <string name="privacy_contact_us_title">Contattaci</string>
   <string name="privacy_contact_us_content">In caso di domande o dubbi sulla presente informativa sulla privacy, contattaci all\'indirizzo %1$s.</string>
+  <string name="no_albums_found">Nessun album trovato</string>
+  <string name="disable_live_wallpaper">Disabilita lo sfondo animato</string>
+  <string name="live_wallpaper_detected">Sfondo animato rilevato</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Si prega di disabilitare lo sfondo animato per utilizzare il cambia-sfondi.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Riempi</string>
+  <string name="fit">Adatta</string>
+  <string name="stretch">Allunga</string>
+  <string name="wallpaper_scaling">Scalatura dello sfondo</string>
+  <string name="adjust_brightness">Regola Luminosità</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotazione: %1$d/%2$d sfondo\nIntervallo: %3$s</item>
     <item quantity="other">Rotazione: %1$d/%2$d sfondi\nIntervallo: %3$s</item>

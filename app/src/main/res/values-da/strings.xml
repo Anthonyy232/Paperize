@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Vi kan opdatere denne privatlivsmeddelelse fra tid til anden. Alle ændringer vil blive afspejlet i appen og på vores website.</string>
   <string name="privacy_contact_us_title">Kontakt os</string>
   <string name="privacy_contact_us_content">Hvis du har spørgsmål eller bekymringer om denne privatlivsmeddelelse, bedes du kontakte mig på %1$s.</string>
+  <string name="no_albums_found">Ingen album fundet</string>
+  <string name="disable_live_wallpaper">Deaktiver levende tapet</string>
+  <string name="live_wallpaper_detected">Levende tapet registreret</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Deaktiver venligst dit levende tapet for at bruge tapet-skifteren.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Fyld</string>
+  <string name="fit">Tilpas</string>
+  <string name="stretch">Stræk</string>
+  <string name="wallpaper_scaling">Baggrundsskalering</string>
+  <string name="adjust_brightness">Juster lysstyrke</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotation: %1$d/%2$d tapet\nInterval: %3$s</item>
     <item quantity="other">Rotation: %1$d/%2$d wallpapers\nInterval: %3$s</item>

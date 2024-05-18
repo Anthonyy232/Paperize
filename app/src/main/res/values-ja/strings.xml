@@ -125,6 +125,17 @@
   <string name="privacy_changes_notice_content">このプライバシー通知は、適宜更新される場合があります。変更は、アプリと当社のウェブサイトに反映されます。</string>
   <string name="privacy_contact_us_title">お問い合わせ</string>
   <string name="privacy_contact_us_content">このプライバシー通知に関するご質問や懸念がございましたら、%1$sまでご連絡ください。</string>
+  <string name="no_albums_found">アルバムが見つかりません</string>
+  <string name="disable_live_wallpaper">ライブ壁紙を無効にする</string>
+  <string name="live_wallpaper_detected">ライブ壁紙が検出されました</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">ライブ壁紙チェンジャーを使用するには、ライブ壁紙を無効にしてください。</string>
+  <string name="ok">了解</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">いっぱいにする</string>
+  <string name="fit">合わせる</string>
+  <string name="stretch">伸ばす</string>
+  <string name="wallpaper_scaling">壁紙の拡大縮小</string>
+  <string name="adjust_brightness">明るさを調整</string>
   <plurals name="notification_content_text">
     <item quantity="other">旋转：%1$d/%2$d 壁纸
 间隔：%3$s</item>

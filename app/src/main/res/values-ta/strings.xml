@@ -9,7 +9,7 @@
   <string name="settings_screen">அமைப்புகள்</string>
   <string name="settings_back">மீண்டும்</string>
   <string name="LibraryFloatingButton">புதிய நூலகத்தைச் சேர்க்கவும்</string>
-  <string name="set_wallpaper_description">நேரடி வால்பேப்பரை இயக்கு</string>
+  <string name="set_wallpaper_description">நேரடி வால்பேப்பரை இயக்கவும்</string>
   <string name="add_wallpaper">வால்பேப்பரைச் சேர்க்கவும்</string>
   <string name="add_images">படங்களைச் சேர்க்கவும்</string>
   <string name="add_folder">கோப்புறையைச் சேர்க்கவும்</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">இந்த தனியுரிமை அறிவிப்பை நாங்கள் அவ்வப்போது புதுப்பிக்கலாம். எந்த மாற்றமும் ஆப்ஸ் மற்றும் எங்கள் இணையதளத்தில் பிரதிபலிக்கும்.</string>
   <string name="privacy_contact_us_title">எங்களை தொடர்பு கொள்ள</string>
   <string name="privacy_contact_us_content">இந்த தனியுரிமை அறிவிப்பைப் பற்றி உங்களுக்கு ஏதேனும் கேள்விகள் அல்லது கவலைகள் இருந்தால், தயவுசெய்து என்னை %1$sஇல் தொடர்பு கொள்ளவும்.</string>
+  <string name="no_albums_found">ஆல்பங்கள் எதுவும் இல்லை</string>
+  <string name="disable_live_wallpaper">நேரடி வால்பேப்பரை முடக்கு</string>
+  <string name="live_wallpaper_detected">நேரடி வால்பேப்பர் கண்டறியப்பட்டது</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">வால்பேப்பர் மாற்றியைப் பயன்படுத்த, உங்கள் நேரடி வால்பேப்பரை முடக்கவும்.</string>
+  <string name="ok">சரி</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">நிரப்பவும்</string>
+  <string name="fit">பொருத்தம்</string>
+  <string name="stretch">நீட்டவும்</string>
+  <string name="wallpaper_scaling">வால்பேப்பர் அளவிடுதல்</string>
+  <string name="adjust_brightness">பிரகாசத்தை சரிசெய்யவும்</string>
   <plurals name="notification_content_text">
     <item quantity="one">சுழற்சி: %1$d/%2$d வால்பேப்பர்\nஇடைவெளி: %3$s</item>
     <item quantity="other">சுழற்சி: %1$d/%2$d வால்பேப்பர்கள்\nஇடைவெளி: %3$s</item>

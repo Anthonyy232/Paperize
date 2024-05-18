@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -72,12 +70,6 @@ fun AlbumItem(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center
                         ),
-                        requestBuilder = {
-                            Glide
-                                .with(LocalContext.current)
-                                .asBitmap()
-                                .transition(BitmapTransitionOptions.withCrossFade())
-                        },
                         loading = {
                             if (animate) {
                                 Box(modifier = Modifier.matchParentSize()) {

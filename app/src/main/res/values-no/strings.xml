@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Vi kan oppdatere denne personvernerklæringen fra tid til annen. Endringer vil bli gjenspeilet i appen og på nettstedet vårt.</string>
   <string name="privacy_contact_us_title">Kontakt oss</string>
   <string name="privacy_contact_us_content">Hvis du har spørsmål eller bekymringer angående denne personvernerklæringen, kan du kontakte meg på %1$s.</string>
+  <string name="no_albums_found">Ingen album funnet</string>
+  <string name="disable_live_wallpaper">Deaktiver levende bakgrunn</string>
+  <string name="live_wallpaper_detected">Levende Bakgrunnsbilde Registrert</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Vennligst deaktiver live-bakgrunnen din for å bruke bakgrunnsskifteren.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Fyll</string>
+  <string name="fit">Tilpass</string>
+  <string name="stretch">Strekk</string>
+  <string name="wallpaper_scaling">Bakgrunn Skalering</string>
+  <string name="adjust_brightness">Juster Lysstyrke</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotasjon: %1$d/%2$d bakgrunnsbilder\nIntervall: %3$s</item>
     <item quantity="other">Rotasjon: %1$d/%2$d bakgrunnsbilder\nIntervall: %3$s</item>

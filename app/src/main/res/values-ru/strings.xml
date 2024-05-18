@@ -143,6 +143,17 @@
   <string name="privacy_changes_notice_content">Мы можем время от времени обновлять это уведомление о конфиденциальности. Любые изменения будут отражены в приложении и на нашем веб-сайте.</string>
   <string name="privacy_contact_us_title">Обратная связь</string>
   <string name="privacy_contact_us_content">Если у вас есть какие-либо вопросы или замечания по поводу данного уведомления о конфиденциальности, пожалуйста, свяжитесь со мной по адресу %1$s.</string>
+  <string name="no_albums_found">Альбомы не найдены</string>
+  <string name="disable_live_wallpaper">Отключить живые обои</string>
+  <string name="live_wallpaper_detected">Обнаружены живые обои</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Пожалуйста, отключите живые обои, чтобы использовать смену обоев.</string>
+  <string name="ok">ОК</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Заполнить</string>
+  <string name="fit">Вписать</string>
+  <string name="stretch">Растянуть</string>
+  <string name="wallpaper_scaling">Масштабирование обоев</string>
+  <string name="adjust_brightness">Настроить яркость</string>
   <plurals name="notification_content_text">
     <item quantity="one">Ротация: %1$d/%2$d обои\nИнтервал: %3$s</item>
     <item quantity="few">Ротация: %1$d/%2$d обоев\nИнтервал: %3$s</item>

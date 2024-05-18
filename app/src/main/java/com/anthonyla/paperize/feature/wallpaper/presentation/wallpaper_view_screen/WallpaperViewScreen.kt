@@ -29,8 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -76,6 +74,7 @@ fun WallpaperViewScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.home_screen),
+                            tint = Color.White
                         )
                     }
                 },
@@ -103,15 +102,9 @@ fun WallpaperViewScreen(
                         GlideImage(
                             imageModel = { wallpaperUri.toUri() },
                             imageOptions = ImageOptions(
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Fit,
                                 alignment = Alignment.Center
                             ),
-                            requestBuilder = {
-                                Glide
-                                    .with(LocalContext.current)
-                                    .asBitmap()
-                                    .transition(BitmapTransitionOptions.withCrossFade())
-                            },
                             loading = {
                                 if (animate) {
                                     Box(modifier = Modifier.matchParentSize()) {

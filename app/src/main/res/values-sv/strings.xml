@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Vi kan komma att uppdatera detta sekretessmeddelande från tid till annan. Eventuella ändringar kommer att återspeglas i appen och på vår webbplats.</string>
   <string name="privacy_contact_us_title">Kontakta oss</string>
   <string name="privacy_contact_us_content">Om du har några frågor eller funderingar kring detta sekretessmeddelande, vänligen kontakta mig på %1$s.</string>
+  <string name="no_albums_found">Inga album hittades</string>
+  <string name="disable_live_wallpaper">Inaktivera levande bakgrundsbild</string>
+  <string name="live_wallpaper_detected">Levande bakgrundsbild upptäckt</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Inaktivera din levande bakgrundsbild för att använda bakgrundsbildsväxlaren.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Fyll</string>
+  <string name="fit">Anpassa</string>
+  <string name="stretch">Sträck ut</string>
+  <string name="wallpaper_scaling">Bakgrundsbildskalning</string>
+  <string name="adjust_brightness">Justera ljusstyrka</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotation: %1$d/%2$d tapet\nIntervall: %3$s</item>
     <item quantity="other">Rotation: %1$d/%2$d tapeter\nIntervall: %3$s</item>

@@ -125,6 +125,17 @@
   <string name="privacy_changes_notice_content">Chúng tôi có thể cập nhật thông báo về quyền riêng tư này theo thời gian. Mọi thay đổi sẽ được phản ánh trong ứng dụng và trên trang web của chúng tôi.</string>
   <string name="privacy_contact_us_title">Liên hệ với chúng tôi</string>
   <string name="privacy_contact_us_content">Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào về thông báo bảo mật này, vui lòng liên hệ với tôi tại %1$s.</string>
+  <string name="no_albums_found">Không tìm thấy album nào</string>
+  <string name="disable_live_wallpaper">Tắt hình nền động</string>
+  <string name="live_wallpaper_detected">Phát hiện hình nền động</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Vui lòng tắt hình nền động của bạn để sử dụng công cụ thay đổi hình nền.</string>
+  <string name="ok">Đồng ý</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Điền</string>
+  <string name="fit">Vừa với</string>
+  <string name="stretch">Co giãn</string>
+  <string name="wallpaper_scaling">Thay đổi kích thước hình nền</string>
+  <string name="adjust_brightness">Điều chỉnh độ sáng</string>
   <plurals name="notification_content_text">
     <item quantity="other">Xoay vòng: %1$d/%2$d ảnh nền
 Khoảng thời gian: %3$s</item>

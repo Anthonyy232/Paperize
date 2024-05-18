@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
@@ -46,7 +47,13 @@ fun HomeScreen(
     lastSetTime: String?,
     nextSetTime: String?,
     selectedAlbum: SelectedAlbum?,
-    enableChanger: Boolean
+    enableChanger: Boolean,
+    darkenPercentage: Int,
+    onDarkenPercentage: (Int) -> Unit,
+    darken: Boolean,
+    onDarkCheck: (Boolean) -> Unit,
+    scaling: ScalingConstants,
+    onScalingChange: (ScalingConstants) -> Unit
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabItems = getTabItems()
@@ -132,7 +139,13 @@ fun HomeScreen(
                         selectedAlbum = selectedAlbum,
                         enableChanger = enableChanger,
                         onToggleChanger = onToggleChanger,
-                        onSelectAlbum = onSelectAlbum
+                        onSelectAlbum = onSelectAlbum,
+                        darkenPercentage = darkenPercentage,
+                        onDarkenPercentage = onDarkenPercentage,
+                        darken = darken,
+                        onDarkCheck = onDarkCheck,
+                        scaling = scaling,
+                        onScalingChange = onScalingChange
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

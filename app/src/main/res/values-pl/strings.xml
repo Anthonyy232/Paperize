@@ -137,6 +137,17 @@
   <string name="privacy_changes_notice_content">Możemy od czasu do czasu aktualizować niniejszą informację o ochronie prywatności. Wszelkie zmiany zostaną odzwierciedlone w aplikacji i na naszej stronie internetowej.</string>
   <string name="privacy_contact_us_title">Skontaktuj się z nami</string>
   <string name="privacy_contact_us_content">Jeśli masz jakiekolwiek pytania lub wątpliwości dotyczące niniejszego oświadczenia o ochronie prywatności, skontaktuj się ze mną pod adresem %1$s.</string>
+  <string name="no_albums_found">Brak albumów</string>
+  <string name="disable_live_wallpaper">Wyłącz animowaną tapetę</string>
+  <string name="live_wallpaper_detected">Wykryto animowaną tapetę</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Wyłącz animowaną tapetę, aby móc używać zmieniacza tapet.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Wypełnij</string>
+  <string name="fit">Dopasuj</string>
+  <string name="stretch">Rozciągnij</string>
+  <string name="wallpaper_scaling">Skalowanie tapety</string>
+  <string name="adjust_brightness">Dostosuj jasność</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotacja: %1$d/%2$d tapety\nInterwał: %3$s</item>
     <item quantity="few">Rotacja: %1$d/%2$d tapet\nInterwał: %3$s</item>

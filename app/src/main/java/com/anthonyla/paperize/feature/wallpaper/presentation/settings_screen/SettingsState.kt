@@ -1,8 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
+import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 
-data class SettingsState (
-    val isDataLoaded: Boolean = false,
+data class SettingsState(
     val firstLaunch: Boolean = true,
     val darkMode: Boolean? = null,
     val dynamicTheming: Boolean = false,
@@ -11,5 +11,8 @@ data class SettingsState (
     val setLockWithHome: Boolean = false,
     val lastSetTime: String? = null,
     val nextSetTime: String? = null,
-    val enableChanger: Boolean = false
+    val enableChanger: Boolean = false,
+    val darkenPercentage: Int = 100,
+    val darken: Boolean = false,
+    val wallpaperScaling: ScalingConstants = ScalingConstants.FILL
 )

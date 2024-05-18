@@ -74,14 +74,14 @@
   <plurals name="hours">
     <item quantity="one">%d hodina</item>
     <item quantity="few">%d hodiny</item>
-    <item quantity="many">%d hodin</item>
-    <item quantity="other">%d hodin</item>
+    <item quantity="many">%d hodiny</item>
+    <item quantity="other">%d hodiny</item>
   </plurals>
   <plurals name="days">
     <item quantity="one">%d den</item>
     <item quantity="few">%d dny</item>
-    <item quantity="many">%d dnů</item>
-    <item quantity="other">%d dnů</item>
+    <item quantity="many">%d dny</item>
+    <item quantity="other">%d dny</item>
   </plurals>
   <string name="selected_count">%1$s vybráno</string>
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Pro používání aplikace si prosím přečtěte a souhlaste s následujícím oznámením o ochraně osobních údajů.</string>
@@ -137,6 +137,17 @@
   <string name="privacy_changes_notice_content">Toto oznámení o ochraně osobních údajů můžeme čas od času aktualizovat. Veškeré změny se projeví v aplikaci a na našich webových stránkách.</string>
   <string name="privacy_contact_us_title">Kontaktujte nás</string>
   <string name="privacy_contact_us_content">Máte-li dotazy nebo připomínky k tomuto oznámení o ochraně osobních údajů, kontaktujte mě prosím na adrese %1$s.</string>
+  <string name="no_albums_found">Žádná alba nenalezena</string>
+  <string name="disable_live_wallpaper">Deaktivovat živou tapetu</string>
+  <string name="live_wallpaper_detected">Živá tapeta detekována</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Prosím deaktivujte živou tapetu pro použití funkce změny tapety.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Vyplnit</string>
+  <string name="fit">Přizpůsobit</string>
+  <string name="stretch">Roztahovat</string>
+  <string name="wallpaper_scaling">Škálování tapety</string>
+  <string name="adjust_brightness">Upravit jas</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotace: %1$d/%2$d tapety\nInterval: %3$s</item>
     <item quantity="few">Rotace: %1$d/%2$d tapety\nInterval: %3$s</item>

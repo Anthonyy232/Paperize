@@ -6,6 +6,11 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -50,9 +55,12 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.Startup
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.WallpaperView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionIn
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
-import com.anthonyla.paperize.feature.wallpaper.wallpaperservice.WallpaperService
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URLEncoder
@@ -71,6 +79,8 @@ fun PaperizeApp(
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
     val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var job by remember { mutableStateOf<Job?>(null) }
+    val scope = rememberCoroutineScope()
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
@@ -108,13 +118,6 @@ fun PaperizeApp(
                 )
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(newSelectedAlbum, null))
                 settingsViewModel.onEvent(SettingsEvent.SetWallpaperInterval(settingsState.value.interval))
-                if (settingsState.value.enableChanger) { // Not ideal but no other option to check if service is running (thanks Android)
-                    val intent = Intent(context, WallpaperService::class.java).apply {
-                        action = WallpaperService.Actions.START.toString()
-                        putExtra("timeInMinutes", settingsState.value.interval)
-                    }
-                    context.startForegroundService(intent)
-                }
             } ?: run {
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                 Intent(context, WallpaperService::class.java).also {
@@ -229,9 +232,21 @@ fun PaperizeApp(
                 nextSetTime = settingsState.value.nextSetTime,
                 onSetLockWithHome = {
                     settingsViewModel.onEvent(SettingsEvent.SetLockWithHome(it))
+                    job?.cancel()
+                    job = scope.launch {
+                        delay(2000)
+                        if (settingsState.value.enableChanger) {
+                            val intent = Intent(context, WallpaperService::class.java).apply {
+                                action = WallpaperService.Actions.UPDATE.toString()
+                            }
+                            context.startForegroundService(intent)
+                        }
+                    }
                 },
                 selectedAlbum = selectedState.value.selectedAlbum,
                 enableChanger = settingsState.value.enableChanger,
+                darkenPercentage = settingsState.value.darkenPercentage,
+                darken = settingsState.value.darken,
                 onToggleChanger = { enableWallpaperChanger ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
                     if (enableWallpaperChanger) {
@@ -256,6 +271,48 @@ fun PaperizeApp(
                         putExtra("timeInMinutes", settingsState.value.interval)
                     }
                     context.startForegroundService(intent)
+                },
+                onDarkenPercentage = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDarkenPercentage(it))
+                    job?.cancel()
+                    job = scope.launch {
+                        delay(2000)
+                        if (settingsState.value.enableChanger) {
+                            val intent = Intent(context, WallpaperService::class.java).apply {
+                                action = WallpaperService.Actions.UPDATE.toString()
+                            }
+                            context.startForegroundService(intent)
+                        }
+                    }
+                },
+                onDarkCheck = {
+                    settingsViewModel.onEvent(SettingsEvent.SetDarken(it))
+                    job?.cancel()
+                    job = scope.launch {
+                        delay(2000)
+                        if (settingsState.value.enableChanger) {
+                            val intent = Intent(context, WallpaperService::class.java).apply {
+                                action = WallpaperService.Actions.UPDATE.toString()
+                            }
+                            context.startForegroundService(intent)
+                        }
+                    }
+                },
+                scaling = settingsState.value.wallpaperScaling,
+                onScalingChange = {
+                    if (settingsState.value.wallpaperScaling != it) {
+                        settingsViewModel.onEvent(SettingsEvent.SetWallpaperScaling(it))
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(2000)
+                            if (settingsState.value.enableChanger) {
+                                val intent = Intent(context, WallpaperService::class.java).apply {
+                                    action = WallpaperService.Actions.UPDATE.toString()
+                                }
+                                context.startForegroundService(intent)
+                            }
+                        }
+                    }
                 }
             )
         }
@@ -284,7 +341,7 @@ fun PaperizeApp(
                 },
                 onShowFolderView = { folderName, wallpapers ->
                     /*navController.navigate(
-                        com.anthonyla.paperize.feature.wallpaper.util.navigation.FolderView(
+                        FolderView(
                             folderName,
                             wallpapers
                         )

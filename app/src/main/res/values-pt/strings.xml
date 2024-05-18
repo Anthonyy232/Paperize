@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Podemos atualizar este aviso de privacidade de tempos em tempos. Quaisquer alterações serão refletidas no aplicativo e em nosso site.</string>
   <string name="privacy_contact_us_title">Fale Conosco</string>
   <string name="privacy_contact_us_content">Se você tiver alguma dúvida ou preocupação sobre este aviso de privacidade, entre em contato comigo em %1$s.</string>
+  <string name="no_albums_found">Nenhum álbum encontrado</string>
+  <string name="disable_live_wallpaper">Desabilitar papel de parede animado</string>
+  <string name="live_wallpaper_detected">Papel de parede animado detectado</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Por favor, desabilite seu papel de parede animado para usar o trocador de papel de parede.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Preencher</string>
+  <string name="fit">Ajustar</string>
+  <string name="stretch">Esticar</string>
+  <string name="wallpaper_scaling">Escala do papel de parede</string>
+  <string name="adjust_brightness">Ajustar brilho</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotação: %1$d/%2$d papel de parede\nIntervalo: %3$s</item>
     <item quantity="other">Rotação: %1$d/%2$d papéis de parede\nIntervalo: %3$s</item>

@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Wir können diesen Datenschutzhinweis von Zeit zu Zeit aktualisieren. Alle Änderungen werden in der App und auf unserer Website veröffentlicht.</string>
   <string name="privacy_contact_us_title">Kontakt</string>
   <string name="privacy_contact_us_content">Wenn Sie Fragen oder Bedenken zu diesem Datenschutzhinweis haben, wenden Sie sich bitte unter %1$s an mich.</string>
+  <string name="no_albums_found">Keine Alben gefunden</string>
+  <string name="disable_live_wallpaper">Live-Hintergrund deaktivieren</string>
+  <string name="live_wallpaper_detected">Live-Hintergrund erkannt</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Bitte deaktiviere deinen Live-Hintergrund, um den Hintergrundwechsler verwenden zu können.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Füllen</string>
+  <string name="fit">Anpassen</string>
+  <string name="stretch">Strecken</string>
+  <string name="wallpaper_scaling">Hintergrundskalierung</string>
+  <string name="adjust_brightness">Helligkeit anpassen</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotation: %1$d/%2$d Hintergrundbilder
 Intervall: %3$s</item>

@@ -40,7 +40,7 @@
   <string name="continue_button">Ina Ciki</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">Ana buƙatar izinin sanarwa don wannan app ɗin yayi aiki da kyau</string>
   <string name="allow">Izinin</string>
-  <string name="notification_info_message">Ana ba da shawarar sanarwar don wannan app ɗin yayi aiki da kyau. Idan ba a ba ba, tsarin na iya ƙare app ɗin. Kuna iya kashe sanarwar a cikin saitunan daga baya.</string>
+  <string name="notification_info_message">Ana ba da shawarar sanarwar don wannan app ɗin yayi aiki da kyau. Idan ba a ba ba, tsarin na iya dakatar da ƙa\'idar. Kuna iya kashe sanarwar a cikin saitunan daga baya.</string>
   <string name="set_as_lock_screen">Saita azaman allon kulle</string>
   <string name="lock_screen">Kulle allo</string>
   <string name="home">Fuskar allo</string>
@@ -63,7 +63,7 @@
   <string name="wallpaper_changer_has_been_enabled">An kunna mai sauya fuskar bangon waya.</string>
   <string name="wallpaper_changer_has_been_disabled">An kashe mai sauya fuskar bangon waya.</string>
   <string name="dismiss">Korar</string>
-  <string name="has_been_unselected">%1$s ba\'a zaba ba.</string>
+  <string name="has_been_unselected">%1$s ba a zaba ba.</string>
   <string name="interval">Interval | %1$s</string>
   <plurals name="minutes">
     <item quantity="one">%d minute</item>
@@ -114,7 +114,7 @@
     <item quantity="other">%d fuskar bangon waya</item>
   </plurals>
   <string name="privacy_intro_title">Gabatarwa</string>
-  <string name="privacy_intro_content">Barka da zuwa %1$s! Wannan bayanin sirri yana fayyace yadda muke tattarawa, amfani, da kare keɓaɓɓen bayanin ku lokacin da kuke amfani da aikace-aikacen wayar hannu. Ta amfani da %1$s, kun yarda da sharuɗɗan da aka bayyana a cikin wannan sanarwar.</string>
+  <string name="privacy_intro_content">Barka da zuwa %1$s! Wannan bayanin sirri yana bayyana yadda muke tattarawa, amfani, da kare keɓaɓɓen keɓaɓɓen bayanin ku lokacin da kuke amfani da aikace-aikacen hannu. Ta amfani da %1$s, kun yarda da sharuɗɗan da aka bayyana a cikin wannan sanarwar.</string>
   <string name="privacy_data_collection_title">Tarin Bayanai</string>
   <string name="privacy_data_collection_content">Samun Faɗakarwa: %1$s yana buƙatar samun damar sanarwa don samar muku da keɓaɓɓen shawarwarin fuskar bangon waya dangane da sanarwarku. Ba mu adana duk wani abun ciki na sanarwa ko bayanan sirri (PII) a wajen na\'urarka.\n\nFayilolin gida: %1$s yana shiga fayilolin da aka adana akan na\'urarka don baka damar saita su azaman fuskar bangon waya. Ba mu loda ko canja wurin waɗannan fayiloli zuwa kowane sabar na waje.</string>
   <string name="privacy_information_usage_title">Amfanin Bayani</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Za mu iya sabunta wannan bayanin sirri lokaci zuwa lokaci. Duk wani canje-canje za a bayyana a cikin app da kuma a kan gidan yanar gizon mu.</string>
   <string name="privacy_contact_us_title">Tuntube Mu</string>
   <string name="privacy_contact_us_content">Idan kuna da wasu tambayoyi ko damuwa game da wannan sanarwar sirri, da fatan za a tuntuɓe ni a %1$s.</string>
+  <string name="no_albums_found">Ba a sami kundi ba</string>
+  <string name="disable_live_wallpaper">Kashe fuskar bangon waya kai tsaye</string>
+  <string name="live_wallpaper_detected">An Gano Wallpaper Live</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Da fatan za a kashe fuskar bangon waya mai rai don amfani da mai canza fuskar bangon waya.</string>
+  <string name="ok">KO</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Cika</string>
+  <string name="fit">Fit</string>
+  <string name="stretch">Mikewa</string>
+  <string name="wallpaper_scaling">Ƙimar fuskar bangon waya</string>
+  <string name="adjust_brightness">Daidaita Haske</string>
   <plurals name="notification_content_text">
     <item quantity="one">Juyawa: %1$d/%2$d fuskar bangon waya\nTazarar: %3$s</item>
     <item quantity="other">Juyawa: %1$d/%2$d bangon bango\nTazarar: %3$s</item>

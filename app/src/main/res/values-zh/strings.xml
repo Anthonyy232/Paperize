@@ -131,6 +131,17 @@
   <string name="privacy_changes_notice_content">我們可能會不時更新本隱私權聲明。任何變更都將反映在應用程式和我們的網站上。</string>
   <string name="privacy_contact_us_title">聯絡我們</string>
   <string name="privacy_contact_us_content">如果您對本隱私權聲明有任何疑問或疑慮，請透過 %1$s 與我聯繫。</string>
+  <string name="no_albums_found">找不到專輯</string>
+  <string name="disable_live_wallpaper">禁用動態桌布</string>
+  <string name="live_wallpaper_detected">偵測到動態桌布</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">請禁用您的動態桌布以使用桌布更換器。</string>
+  <string name="ok">確定</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">填滿</string>
+  <string name="fit">調整</string>
+  <string name="stretch">拉伸</string>
+  <string name="wallpaper_scaling">桌布縮放</string>
+  <string name="adjust_brightness">調整亮度</string>
   <plurals name="notification_content_text">
     <item quantity="other">旋轉：%1$d/%2$d 張壁紙\n間隔：%3$s</item>
   </plurals>

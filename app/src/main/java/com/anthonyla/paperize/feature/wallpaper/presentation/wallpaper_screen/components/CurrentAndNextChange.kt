@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
+/**
+ * Contains the current and next change components that shows the last and next set time
+ */
 @Composable
 fun CurrentAndNextChange(
     lastSetTime: String?,
@@ -37,10 +40,10 @@ fun CurrentAndNextChange(
     ) {
         Surface(
             tonalElevation = 10.dp,
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .weight(1f)
                 .padding(PaddingValues(16.dp, 8.dp, 8.dp, 8.dp))
-                .clip(RoundedCornerShape(16.dp))
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

@@ -68,20 +68,20 @@
   <plurals name="minutes">
     <item quantity="one">%d хвилина</item>
     <item quantity="few">%d хвилини</item>
-    <item quantity="many">%d хвилин</item>
-    <item quantity="other">%d хвилин</item>
+    <item quantity="many">%d хвилини</item>
+    <item quantity="other">%d хвилини</item>
   </plurals>
   <plurals name="hours">
     <item quantity="one">%d година</item>
     <item quantity="few">%d години</item>
-    <item quantity="many">%d годин</item>
-    <item quantity="other">%d годин</item>
+    <item quantity="many">%d години</item>
+    <item quantity="other">%d години</item>
   </plurals>
   <plurals name="days">
     <item quantity="one">%d день</item>
     <item quantity="few">%d дні</item>
-    <item quantity="many">%d днів</item>
-    <item quantity="other">%d днів</item>
+    <item quantity="many">%d дні</item>
+    <item quantity="other">%d дні</item>
   </plurals>
   <string name="selected_count">%1$s обрано</string>
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Будь ласка, прочитайте та погоджуйтеся з наступною політикою конфіденційності, щоб використовувати додаток.</string>
@@ -137,6 +137,17 @@
   <string name="privacy_changes_notice_content">Ми можемо час від часу оновлювати це положення про конфіденційність. Будь-які зміни будуть відображені в додатку та на нашому веб-сайті.</string>
   <string name="privacy_contact_us_title">Зв\'яжіться з нами</string>
   <string name="privacy_contact_us_content">Якщо у вас є запитання або занепокоєння щодо цього повідомлення про конфіденційність, зв\'яжіться зі мною за адресою %1$s.</string>
+  <string name="no_albums_found">Не знайдено альбомів</string>
+  <string name="disable_live_wallpaper">Вимкнути живі шпалери</string>
+  <string name="live_wallpaper_detected">Виявлено живі шпалери</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Щоб використовувати змінювач шпалер, вимкніть живі шпалери.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Заповнити</string>
+  <string name="fit">Вписати</string>
+  <string name="stretch">Розтягнути</string>
+  <string name="wallpaper_scaling">Масштабування шпалер</string>
+  <string name="adjust_brightness">Налаштувати яскравість</string>
   <plurals name="notification_content_text">
     <item quantity="one">Зміна: %1$d/%2$d шпалер\nІнтервал: %3$s</item>
     <item quantity="few">Зміна: %1$d/%2$d шпалер\nІнтервал: %3$s</item>

@@ -18,7 +18,7 @@
   <string name="image_is_not_selected">Слика није изабрана</string>
   <string name="select_all_images_for_deletion">Изаберите све слике за брисање</string>
   <string name="delete_confirmation">Обриши потврду</string>
-  <string name="all_images_selected_for_deletion">Све слике изабране за брисање</string>
+  <string name="all_images_selected_for_deletion">Све слике су изабране за брисање</string>
   <string name="add_album">Додај албум</string>
   <string name="add_wallpaper_screen">Додај екран за позадину</string>
   <string name="enter_the_name_of_the_album">Унесите назив албума</string>
@@ -111,7 +111,7 @@
   <string name="new_album">Нови албум</string>
   <string name="wallpapers">валлпаперс</string>
   <string name="translation">Превод</string>
-  <string name="help_translate_the_app_on_crowdin">Помозите у превођењу апликације на Цровдин-у!</string>
+  <string name="help_translate_the_app_on_crowdin">Помозите да преведете апликацију на Цровдин-у!</string>
   <plurals name="wallpaper_count">
     <item quantity="one">%d позадина</item>
     <item quantity="few">%d позадине</item>
@@ -133,6 +133,17 @@
   <string name="privacy_changes_notice_content">Можемо с времена на време ажурирати ово обавештење о приватности. Све промене ће се одразити у апликацији и на нашој веб страници.</string>
   <string name="privacy_contact_us_title">Контактирајте нас</string>
   <string name="privacy_contact_us_content">Ако имате било каквих питања или недоумица у вези са овим обавештењем о приватности, контактирајте ме на %1$s.</string>
+  <string name="no_albums_found">Није пронађен ниједан албум</string>
+  <string name="disable_live_wallpaper">Онемогућите живу позадину</string>
+  <string name="live_wallpaper_detected">Откривена је жива позадина</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Онемогућите живу позадину да бисте користили мењач позадине.</string>
+  <string name="ok">У реду</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Филл</string>
+  <string name="fit">Фит</string>
+  <string name="stretch">Стретцх</string>
+  <string name="wallpaper_scaling">Скалирање тапета</string>
+  <string name="adjust_brightness">Подесите осветљеност</string>
   <plurals name="notification_content_text">
     <item quantity="one">Ротација: %1$d/%2$d позадина\nИнтервал: %3$s</item>
     <item quantity="few">Ротација: %1$d/%2$d позадине\nИнтервал: %3$s</item>

@@ -133,6 +133,17 @@
   <string name="privacy_changes_notice_content">Este posibil să actualizăm această politică de confidențialitate din când în când. Orice modificări vor fi reflectate în aplicație și pe site-ul nostru web.</string>
   <string name="privacy_contact_us_title">Contactați-ne</string>
   <string name="privacy_contact_us_content">Daca aveti  intrebari sau nelamuriri cu privire la aceasta notificare de confidentialitate, va rugam sa ma contactati la %1$s.</string>
+  <string name="no_albums_found">Nu s-au găsit albume</string>
+  <string name="disable_live_wallpaper">Dezactivați imaginea de fundal animată</string>
+  <string name="live_wallpaper_detected">Imagine de fundal animată detectată</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Vă rugăm să dezactivați imaginea de fundal animată pentru a utiliza schimbătorul de imagini de fundal.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Umplere</string>
+  <string name="fit">Potrivire</string>
+  <string name="stretch">Întindere</string>
+  <string name="wallpaper_scaling">Scalarea imaginii de fundal</string>
+  <string name="adjust_brightness">Reglați luminozitatea</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotire: %1$d/%2$d imagini de fundal
 Interval: %3$s</item>

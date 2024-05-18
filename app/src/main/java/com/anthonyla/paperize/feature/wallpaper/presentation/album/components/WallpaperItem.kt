@@ -1,9 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -27,7 +24,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -35,10 +34,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.ScalingConstants
+import com.anthonyla.paperize.core.getImageDimensions
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
+import com.bumptech.glide.load.DecodeFormat
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -55,10 +55,12 @@ fun WallpaperItem(
     onItemSelection: () -> Unit,
     onWallpaperViewClick: () -> Unit,
     modifier: Modifier = Modifier,
-    wallpaperDrawable : Bitmap? = null,
     aspectRatio: Float? = null,
     clickable: Boolean = true,
-    animate: Boolean = true
+    animate: Boolean = true,
+    darken: Boolean = false,
+    darkenPercentage: Int? = null,
+    scaling: ScalingConstants? = null
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -89,8 +91,11 @@ fun WallpaperItem(
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
-                    if (!selectionMode) { onWallpaperViewClick() }
-                    else { onItemSelection() }
+                    if (!selectionMode) {
+                        onWallpaperViewClick()
+                    } else {
+                        onItemSelection()
+                    }
                 },
                 onLongClick = {
                     if (!selectionMode) {
@@ -107,20 +112,26 @@ fun WallpaperItem(
     }
     Box(modifier = boxModifier) {
         if (showUri) {
-            val dimension = wallpaperDrawable?.let { Pair(it.width, it.height) } ?: wallpaperUri.toUri().getImageDimensions(context)
-            val imageAspectRatio = aspectRatio ?: (dimension.first.toFloat() / dimension.second.toFloat())
+            val dimension = wallpaperUri.toUri().getImageDimensions(context)
+            val imageAspectRatio = aspectRatio ?: (dimension.width.toFloat() / dimension.height.toFloat())
             GlideImage(
-                imageModel = { wallpaperDrawable ?: wallpaperUri.toUri() },
+                imageModel = { wallpaperUri },
                 imageOptions = ImageOptions(
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
+                    contentScale = if (scaling != null) {
+                        when (scaling) {
+                            ScalingConstants.FILL -> ContentScale.FillHeight
+                            ScalingConstants.FIT -> ContentScale.FillWidth
+                            ScalingConstants.STRETCH -> ContentScale.FillBounds
+                        }
+                    } else { ContentScale.Crop },
+                    alignment = Alignment.Center,
+                    colorFilter = if (darken && darkenPercentage != null && darkenPercentage < 100) {
+                        ColorFilter.tint(
+                            Color.Black.copy(alpha = (100 - darkenPercentage).toFloat().div(100f)),
+                            BlendMode.Darken
+                        )
+                    } else { null }
                 ),
-                requestBuilder = {
-                    Glide
-                        .with(LocalContext.current)
-                        .asBitmap()
-                        .transition(BitmapTransitionOptions.withCrossFade())
-                },
                 loading = {
                     if (animate) {
                         Box(modifier = Modifier.matchParentSize()) {
@@ -128,7 +139,13 @@ fun WallpaperItem(
                         }
                     }
                 },
-                modifier = Modifier.aspectRatio(imageAspectRatio)
+                requestBuilder =  {
+                    Glide
+                        .with(LocalContext.current)
+                        .asBitmap()
+                        .format(DecodeFormat.PREFER_RGB_565)
+                },
+                modifier = Modifier.aspectRatio(imageAspectRatio).background(if (scaling != null) Color.Black else Color.Transparent),
             )
         }
         if (selectionMode) {
@@ -153,23 +170,4 @@ fun WallpaperItem(
             }
         }
     }
-}
-
-fun Uri.getImageDimensions(context: Context): Pair<Int, Int> {
-    val inputStream = context.contentResolver.openInputStream(this)!!
-    val exif = ExifInterface(inputStream)
-
-    var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-    var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
-
-    if (width == 0 || height == 0) {
-        val options = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-        BitmapFactory.decodeStream(context.contentResolver.openInputStream(this), null, options)
-        width = options.outWidth
-        height = options.outHeight
-    }
-
-    return Pair(width, height)
 }

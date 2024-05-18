@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Voimme päivittää tätä tietosuojakäytäntöä ajoittain. Kaikki muutokset näkyvät sovelluksessa ja verkkosivustollamme.</string>
   <string name="privacy_contact_us_title">Ota yhteyttä</string>
   <string name="privacy_contact_us_content">Jos sinulla on kysyttävää tai huolenaiheita tästä tietosuojakäytännöstä, ota yhteyttä minuun osoitteessa %1$s.</string>
+  <string name="no_albums_found">Ei löytynyt albumeja</string>
+  <string name="disable_live_wallpaper">Poista live-taustakuva käytöstä</string>
+  <string name="live_wallpaper_detected">Live-taustakuva havaittu</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Poista live-taustakuva käytöstä käyttääksesi taustakuvanvaihtajaa.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Täytä</string>
+  <string name="fit">Sovita</string>
+  <string name="stretch">Venytä</string>
+  <string name="wallpaper_scaling">Taustakuvan skaalaus</string>
+  <string name="adjust_brightness">Säädä kirkkautta</string>
   <plurals name="notification_content_text">
     <item quantity="one">Kierto: %1$d/%2$d taustakuvaa\nAikaväli: %3$s</item>
     <item quantity="other">Kierto: %1$d/%2$d taustakuvaa\nAikaväli: %3$s</item>

@@ -62,6 +62,7 @@ data class WallpaperView(val wallpaper: String)
 @Serializable
 data class FolderView(val folderName: String?, val wallpapers: List<String>)
  */
+
 sealed class NavScreens(val route: String) {
     data object FolderView : NavScreens("folder_view_screen")
 }

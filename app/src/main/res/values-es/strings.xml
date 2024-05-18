@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Podemos actualizar este aviso de privacidad de vez en cuando. Cualquier cambio se reflejará en la aplicación y en nuestro sitio web.</string>
   <string name="privacy_contact_us_title">Contáctenos</string>
   <string name="privacy_contact_us_content">Si tiene alguna pregunta o inquietud sobre este aviso de privacidad, comuníquese conmigo en %1$s.</string>
+  <string name="no_albums_found">No se encontraron álbumes</string>
+  <string name="disable_live_wallpaper">Desactivar el fondo de pantalla animado</string>
+  <string name="live_wallpaper_detected">Fondo de pantalla animado detectado</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Por favor, desactiva el fondo de pantalla animado para usar el cambiador de fondos de pantalla.</string>
+  <string name="ok">Aceptar</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Rellenar</string>
+  <string name="fit">Ajustar</string>
+  <string name="stretch">Estirar</string>
+  <string name="wallpaper_scaling">Escalado de fondo de pantalla</string>
+  <string name="adjust_brightness">Ajustar el brillo</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotación: %1$d/%2$d fondo de pantalla
 Intervalo: %3$s</item>

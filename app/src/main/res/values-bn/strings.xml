@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">We may update this privacy notice from time to time. Any changes will be reflected in the app and on our website.</string>
   <string name="privacy_contact_us_title">Contact Us</string>
   <string name="privacy_contact_us_content">If you have any questions or concerns about this privacy notice, please contact me at %1$s.</string>
+  <string name="no_albums_found">কোনও অ্যালবাম পাওয়া যায়নি</string>
+  <string name="disable_live_wallpaper">লাইভ ওয়ালপেপার অক্ষম করুন</string>
+  <string name="live_wallpaper_detected">লাইভ ওয়ালপেপার সনাক্ত</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">ওয়ালপেপার চেঞ্জার ব্যবহার করতে দয়া করে আপনার লাইভ ওয়ালপেপারটি অক্ষম করুন।</string>
+  <string name="ok">ঠিক আছে</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">ভরাট করুন</string>
+  <string name="fit">ফিট করুন</string>
+  <string name="stretch">স্ট্রেচ করুন</string>
+  <string name="wallpaper_scaling">ওয়ালপেপার স্কেলিং</string>
+  <string name="adjust_brightness">উজ্জ্বলতা সামঞ্জস্য করুন</string>
   <plurals name="notification_content_text">
     <item quantity="one">ঘূর্ণন: %1$d/%2$d ওয়ালপেপার\nসময়: %3$s</item>
     <item quantity="other">ঘূর্ণন: %1$d/%2$d ওয়ালপেপারসময়: %3$s</item>

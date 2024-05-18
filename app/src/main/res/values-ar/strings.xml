@@ -145,6 +145,17 @@
   <string name="privacy_changes_notice_content">يجوز لنا تحديث إشعار الخصوصية هذا من وقت لآخر. ستنعكس أي تغييرات في التطبيق وعلى موقعنا الإلكتروني.</string>
   <string name="privacy_contact_us_title">اتصل بنا</string>
   <string name="privacy_contact_us_content">إذا كانت لديك أي أسئلة أو مخاوف بخصوص إشعار الخصوصية هذا، فيرجى الاتصال بي على البريد الإلكتروني %1$s.</string>
+  <string name="no_albums_found">لم يتم العثور على ألبومات</string>
+  <string name="disable_live_wallpaper">تعطيل خلفية حية</string>
+  <string name="live_wallpaper_detected">تم الكشف عن خلفية حية</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">يرجى تعطيل خلفية الشاشة الحية لاستخدام مبدل الخلفية.</string>
+  <string name="ok">موافق</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">ملء</string>
+  <string name="fit">تناسب</string>
+  <string name="stretch">تمديد</string>
+  <string name="wallpaper_scaling">تغيير حجم الخلفية</string>
+  <string name="adjust_brightness">ضبط السطوع</string>
   <plurals name="notification_content_text">
     <item quantity="zero">التدوير: %1$d/%2$d خلفيات\nالفترة الزمنية: %3$s</item>
     <item quantity="one">التدوير: %1$d/%2$d خلفية\nالفترة الزمنية: %3$s</item>

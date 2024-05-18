@@ -135,6 +135,17 @@
   <string name="privacy_changes_notice_content">हम समय-समय पर इस गोपनीयता सूचना को अपडेट कर सकते हैं। कोई भी परिवर्तन ऐप और हमारी वेबसाइट पर दिखाई देगा।</string>
   <string name="privacy_contact_us_title">हमसे संपर्क करें</string>
   <string name="privacy_contact_us_content">यदि आपके पास इस गोपनीयता सूचना के बारे में कोई प्रश्न या चिंता है, तो कृपया मुझसे %1$s पर संपर्क करें।</string>
+  <string name="no_albums_found">कोई एल्बम नहीं मिला</string>
+  <string name="disable_live_wallpaper">लाइव वॉलपेपर को अक्षम करें</string>
+  <string name="live_wallpaper_detected">लाइव वॉलपेपर का पता चला</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">वॉलपेपर बदलने का उपयोग करने के लिए कृपया अपने लाइव वॉलपेपर को अक्षम करें।</string>
+  <string name="ok">ठीक है</string>
+  <string name="brightness_percentage">%1$स%</string>
+  <string name="fill">भरें</string>
+  <string name="fit">फिट</string>
+  <string name="stretch">खिंचाव</string>
+  <string name="wallpaper_scaling">वॉलपेपर स्केलिंग</string>
+  <string name="adjust_brightness">चमक समायोजित करें</string>
   <plurals name="notification_content_text">
     <item quantity="one">रोटेशन: %1$d/%2$d वॉलपेपर
 अंतराल: %3$s</item>

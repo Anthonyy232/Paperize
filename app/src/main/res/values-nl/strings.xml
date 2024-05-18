@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">We kunnen deze privacyverklaring van tijd tot tijd bijwerken. Alle wijzigingen worden doorgevoerd in de app en op onze website.</string>
   <string name="privacy_contact_us_title">Contact opnemen</string>
   <string name="privacy_contact_us_content">Als u vragen of opmerkingen heeft over deze privacyverklaring, neem dan contact op met %1$s.</string>
+  <string name="no_albums_found">Geen albums gevonden</string>
+  <string name="disable_live_wallpaper">Live achtergrond uitschakelen</string>
+  <string name="live_wallpaper_detected">Live achtergrond gedetecteerd</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Schakel alstublieft je live achtergrond uit om de achtergrond verwisselaar te kunnen gebruiken.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Vullen</string>
+  <string name="fit">Passen</string>
+  <string name="stretch">Uitrekken</string>
+  <string name="wallpaper_scaling">Achtergrond schalen</string>
+  <string name="adjust_brightness">Helderheid aanpassen</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotatie: %1$d/%2$d wallpaper\nInterval: %3$s</item>
     <item quantity="other">Rotatie: %1$d/%2$d wallpapers\nInterval: %3$s</item>

@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Ενδέχεται να ενημερώνουμε την παρούσα ειδοποίηση απορρήτου κατά καιρούς. Οποιεσδήποτε αλλαγές θα αντικατοπτρίζονται στην εφαρμογή και στον ιστότοπό μας.</string>
   <string name="privacy_contact_us_title">Επικοινωνήστε μαζί μας</string>
   <string name="privacy_contact_us_content">Εάν έχετε οποιεσδήποτε ερωτήσεις ή ανησυχίες σχετικά με την παρούσα ειδοποίηση απορρήτου, επικοινωνήστε μαζί μου στη διεύθυνση %1$s.</string>
+  <string name="no_albums_found">Δεν βρέθηκαν άλμπουμ</string>
+  <string name="disable_live_wallpaper">Απενεργοποίηση ζωντανής ταπετσαρίας</string>
+  <string name="live_wallpaper_detected">Εντοπίστηκε ζωντανή ταπετσαρία</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Απενεργοποιήστε τη ζωντανή ταπετσαρία για να χρησιμοποιήσετε την αλλαγή ταπετσαρίας.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Γέμισμα</string>
+  <string name="fit">Προσαρμογή</string>
+  <string name="stretch">Τέντωμα</string>
+  <string name="wallpaper_scaling">Κλιμάκωση ταπετσαρίας</string>
+  <string name="adjust_brightness">Ρύθμιση φωτεινότητας</string>
   <plurals name="notification_content_text">
     <item quantity="one">Περιστροφή: %1$d/%2$d ταπετσαρία\nΔιάστημα: %3$s</item>
     <item quantity="other">Περιστροφή: %1$d/%2$d ταπετσαρίες\nΔιάστημα: %3$s</item>

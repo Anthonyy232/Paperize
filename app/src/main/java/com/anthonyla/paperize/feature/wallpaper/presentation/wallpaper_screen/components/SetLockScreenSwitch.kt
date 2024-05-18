@@ -13,42 +13,54 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 
+/**
+ * SetLockScreenSwitch is a composable that displays a switch to set the wallpaper as the lock screen wallpaper
+ * Also shows a preview of lock and home screen when enabled along with brightness added
+ */
 @Composable
 fun SetLockScreenSwitch(
     albumUri : String?,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    animate: Boolean
+    animate: Boolean,
+    darken: Boolean,
+    darkenPercentage: Int,
+    scaling: ScalingConstants?
 ) {
     Surface(
         tonalElevation = 10.dp,
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
-            .clip(RoundedCornerShape(16.dp))
     ) {
-        val columnModifier = if (animate) {
-            Modifier.animateContentSize(
-                animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
-            )
-        } else { Modifier }
+        val columnModifier = remember {
+            if (animate) {
+                Modifier.animateContentSize(
+                    animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                )
+            } else { Modifier }
+        }
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -94,11 +106,19 @@ fun SetLockScreenSwitch(
                                     onWallpaperViewClick = {},
                                     modifier = Modifier
                                         .padding(4.dp)
-                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                        .border(
+                                            3.dp,
+                                            color = Color.Black,
+                                            shape = RoundedCornerShape(16.dp)
+                                        ),
                                     aspectRatio = 9f / 19.5f,
                                     clickable = false,
-                                    animate = true
+                                    animate = true,
+                                    darken = darken,
+                                    darkenPercentage = darkenPercentage,
+                                    scaling = scaling
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                         Column(
@@ -118,11 +138,19 @@ fun SetLockScreenSwitch(
                                     onWallpaperViewClick = {},
                                     modifier = Modifier
                                         .padding(4.dp)
-                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                        .border(
+                                            3.dp,
+                                            color = Color.Black,
+                                            shape = RoundedCornerShape(16.dp)
+                                        ),
                                     aspectRatio = 9f / 19.5f,
                                     clickable = false,
-                                    animate = true
+                                    animate = true,
+                                    darken = darken,
+                                    darkenPercentage = darkenPercentage,
+                                    scaling = scaling
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
@@ -148,11 +176,19 @@ fun SetLockScreenSwitch(
                                     onWallpaperViewClick = {},
                                     modifier = Modifier
                                         .padding(4.dp)
-                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                        .border(
+                                            3.dp,
+                                            color = Color.Black,
+                                            shape = RoundedCornerShape(16.dp)
+                                        ),
                                     aspectRatio = 9f / 19.5f,
                                     clickable = false,
-                                    animate = false
+                                    animate = false,
+                                    darken = darken,
+                                    darkenPercentage = darkenPercentage,
+                                    scaling = scaling
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                         Column(
@@ -172,11 +208,19 @@ fun SetLockScreenSwitch(
                                     onWallpaperViewClick = {},
                                     modifier = Modifier
                                         .padding(4.dp)
-                                        .border(3.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
+                                        .border(
+                                            3.dp,
+                                            color = Color.Black,
+                                            shape = RoundedCornerShape(16.dp)
+                                        ),
                                     aspectRatio = 9f / 19.5f,
                                     clickable = false,
-                                    animate = false
+                                    animate = false,
+                                    darken = darken,
+                                    darkenPercentage = darkenPercentage,
+                                    scaling = scaling
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }

@@ -128,6 +128,17 @@
     <string name="privacy_changes_notice_content">We may update this privacy notice from time to time. Any changes will be reflected in the app and on our website.</string>
     <string name="privacy_contact_us_title">Contact Us</string>
     <string name="privacy_contact_us_content">If you have any questions or concerns about this privacy notice, please contact me at %1$s.</string>
+    <string name="no_albums_found">No albums found</string>
+    <string name="disable_live_wallpaper">Disable live wallpaper</string>
+    <string name="live_wallpaper_detected">Live Wallpaper Detected</string>
+    <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Please disable your live wallpaper to use the wallpaper changer.</string>
+    <string name="ok">OK</string>
+    <string name="brightness_percentage">%1$s%%</string>
+    <string name="fill">Fill</string>
+    <string name="fit">Fit</string>
+    <string name="stretch">Stretch</string>
+    <string name="wallpaper_scaling">Wallpaper Scaling</string>
+    <string name="adjust_brightness">Adjust Brightness</string>
     <plurals name="notification_content_text">
         <item quantity="one">Rotation: %1$d/%2$d wallpaper\nInterval: %3$s</item>
         <item quantity="other">Rotation: %1$d/%2$d wallpapers\nInterval: %3$s</item>

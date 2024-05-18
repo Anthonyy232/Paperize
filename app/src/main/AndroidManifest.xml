@@ -7,6 +7,12 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <queries>
+        <intent>
+            <action android:name="android.service.wallpaper.WallpaperService" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:name=".App"
@@ -26,8 +32,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".feature.wallpaper.wallpaperservice.WallpaperService" android:foregroundServiceType="mediaPlayback"/>
-        <receiver android:name=".feature.wallpaper.wallpaperservice.WallpaperBootReceiver"
+        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService" android:foregroundServiceType="mediaPlayback"/>
+        <receiver android:name=".feature.wallpaper.wallpaper_service.WallpaperBootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

@@ -116,7 +116,7 @@
   <string name="privacy_intro_title">ਜਾਣ-ਪਛਾਣ</string>
   <string name="privacy_intro_content">%1$sਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ! ਇਹ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਇਹ ਦੱਸਦਾ ਹੈ ਕਿ ਜਦੋਂ ਤੁਸੀਂ ਸਾਡੀ ਮੋਬਾਈਲ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ ਤਾਂ ਅਸੀਂ ਤੁਹਾਡੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਨੂੰ ਕਿਵੇਂ ਇਕੱਤਰ ਕਰਦੇ ਹਾਂ, ਵਰਤਦੇ ਹਾਂ ਅਤੇ ਸੁਰੱਖਿਅਤ ਕਰਦੇ ਹਾਂ। %1$sਦੀ ਵਰਤੋਂ ਕਰਕੇ, ਤੁਸੀਂ ਇਸ ਨੋਟਿਸ ਵਿੱਚ ਵਰਣਨ ਕੀਤੀਆਂ ਸ਼ਰਤਾਂ ਨਾਲ ਸਹਿਮਤ ਹੁੰਦੇ ਹੋ।</string>
   <string name="privacy_data_collection_title">ਡਾਟਾ ਇਕੱਠਾ ਕਰਨ</string>
-  <string name="privacy_data_collection_content">ਸੂਚਨਾ ਪਹੁੰਚ: %1$s ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਤੁਹਾਨੂੰ ਵਿਅਕਤੀਗਤ ਵਾਲਪੇਪਰ ਸਿਫ਼ਾਰਸ਼ਾਂ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਸੂਚਨਾ ਪਹੁੰਚ ਦੀ ਬੇਨਤੀ ਕਰਦਾ ਹੈ। ਅਸੀਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੇ ਬਾਹਰ ਕੋਈ ਵੀ ਸੂਚਨਾ ਸਮੱਗਰੀ ਜਾਂ ਨਿੱਜੀ ਤੌਰ \'ਤੇ ਪਛਾਣ ਯੋਗ ਜਾਣਕਾਰੀ (PII) ਸਟੋਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।\n\nਸਥਾਨਕ ਫ਼ਾਈਲਾਂ: %1$s ਤੁਹਾਡੀ ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੀਆਂ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਵਾਲਪੇਪਰਾਂ ਵਜੋਂ ਸੈੱਟ ਕਰ ਸਕੋ। ਅਸੀਂ ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਕਿਸੇ ਬਾਹਰੀ ਸਰਵਰ \'ਤੇ ਅੱਪਲੋਡ ਜਾਂ ਟ੍ਰਾਂਸਫ਼ਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।</string>
+  <string name="privacy_data_collection_content">ਸੂਚਨਾ ਪਹੁੰਚ: %1$s ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਤੁਹਾਨੂੰ ਵਿਅਕਤੀਗਤ ਵਾਲਪੇਪਰ ਸਿਫ਼ਾਰਸ਼ਾਂ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਸੂਚਨਾ ਪਹੁੰਚ ਦੀ ਬੇਨਤੀ ਕਰਦਾ ਹੈ। ਅਸੀਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੇ ਬਾਹਰ ਕੋਈ ਵੀ ਸੂਚਨਾ ਸਮੱਗਰੀ ਜਾਂ ਨਿੱਜੀ ਤੌਰ \'ਤੇ ਪਛਾਣਨ ਯੋਗ ਜਾਣਕਾਰੀ (PII) ਸਟੋਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।\n\nਸਥਾਨਕ ਫ਼ਾਈਲਾਂ: %1$s ਤੁਹਾਡੀ ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੀਆਂ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਵਾਲਪੇਪਰਾਂ ਵਜੋਂ ਸੈੱਟ ਕਰ ਸਕੋ। ਅਸੀਂ ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਕਿਸੇ ਬਾਹਰੀ ਸਰਵਰ \'ਤੇ ਅੱਪਲੋਡ ਜਾਂ ਟ੍ਰਾਂਸਫ਼ਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।</string>
   <string name="privacy_information_usage_title">ਜਾਣਕਾਰੀ ਦੀ ਵਰਤੋਂ</string>
   <string name="privacy_information_usage_content">ਨਿੱਜੀ ਡੇਟਾ: ਅਸੀਂ ਕੋਈ ਵੀ ਨਿੱਜੀ ਡੇਟਾ ਜਿਵੇਂ ਕਿ ਨਾਮ, ਈਮੇਲ ਪਤੇ, ਜਾਂ ਫ਼ੋਨ ਨੰਬਰ ਇਕੱਤਰ ਜਾਂ ਸਟੋਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।\n\nਉਪਯੋਗਤਾ ਵਿਸ਼ਲੇਸ਼ਣ: %1$s ਤੁਹਾਡੇ ਵਰਤੋਂ ਵਿਵਹਾਰ ਨੂੰ ਟਰੈਕ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਵਿਸ਼ਲੇਸ਼ਣ ਡੇਟਾ ਇਕੱਠਾ ਨਹੀਂ ਕਰਦਾ।</string>
   <string name="privacy_data_security_title">ਡਾਟਾ ਸੁਰੱਖਿਆ</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">ਅਸੀਂ ਸਮੇਂ-ਸਮੇਂ \'ਤੇ ਇਸ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦੇ ਹਾਂ। ਕੋਈ ਵੀ ਬਦਲਾਅ ਐਪ ਅਤੇ ਸਾਡੀ ਵੈੱਬਸਾਈਟ \'ਤੇ ਪ੍ਰਤੀਬਿੰਬਿਤ ਹੋਣਗੇ।</string>
   <string name="privacy_contact_us_title">ਸਾਡੇ ਨਾਲ ਸੰਪਰਕ ਕਰੋ</string>
   <string name="privacy_contact_us_content">ਜੇਕਰ ਇਸ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਬਾਰੇ ਤੁਹਾਡੇ ਕੋਈ ਸਵਾਲ ਜਾਂ ਚਿੰਤਾਵਾਂ ਹਨ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਮੇਰੇ ਨਾਲ %1$s\'ਤੇ ਸੰਪਰਕ ਕਰੋ।</string>
+  <string name="no_albums_found">ਕੋਈ ਐਲਬਮ ਨਹੀਂ ਮਿਲੀ</string>
+  <string name="disable_live_wallpaper">ਲਾਈਵ ਵਾਲਪੇਪਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ</string>
+  <string name="live_wallpaper_detected">ਲਾਈਵ ਵਾਲਪੇਪਰ ਖੋਜਿਆ ਗਿਆ</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">ਕਿਰਪਾ ਕਰਕੇ ਵਾਲਪੇਪਰ ਚੇਂਜਰ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਆਪਣੇ ਲਾਈਵ ਵਾਲਪੇਪਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ।</string>
+  <string name="ok">ਠੀਕ ਹੈ</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">ਭਰੋ</string>
+  <string name="fit">ਫਿੱਟ</string>
+  <string name="stretch">ਖਿੱਚੋ</string>
+  <string name="wallpaper_scaling">ਵਾਲਪੇਪਰ ਸਕੇਲਿੰਗ</string>
+  <string name="adjust_brightness">ਚਮਕ ਵਿਵਸਥਿਤ ਕਰੋ</string>
   <plurals name="notification_content_text">
     <item quantity="one">ਰੋਟੇਸ਼ਨ: %1$d/%2$d ਵਾਲਪੇਪਰ\nਅੰਤਰਾਲ: %3$s</item>
     <item quantity="other">ਰੋਟੇਸ਼ਨ: %1$d/%2$d ਵਾਲਪੇਪਰ\nਅੰਤਰਾਲ: %3$s</item>

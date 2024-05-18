@@ -18,7 +18,7 @@
   <string name="image_is_not_selected">प्रतिमा निवडलेली नाही</string>
   <string name="select_all_images_for_deletion">हटवण्यासाठी सर्व प्रतिमा निवडा</string>
   <string name="delete_confirmation">पुष्टीकरण हटवा</string>
-  <string name="all_images_selected_for_deletion">हटवण्यासाठी निवडलेल्या सर्व प्रतिमा</string>
+  <string name="all_images_selected_for_deletion">सर्व प्रतिमा हटवण्यासाठी निवडल्या</string>
   <string name="add_album">अल्बम जोडा</string>
   <string name="add_wallpaper_screen">वॉलपेपर स्क्रीन जोडा</string>
   <string name="enter_the_name_of_the_album">अल्बमचे नाव प्रविष्ट करा</string>
@@ -60,7 +60,7 @@
   <string name="circle_2_animation">मंडळ 2 ॲनिमेशन</string>
   <string name="circle_1_animation">मंडळ 1 ॲनिमेशन</string>
   <string name="circle_3_animation">मंडळ 3 ॲनिमेशन</string>
-  <string name="wallpaper_changer_has_been_enabled">वॉलपेपर चेंजर सक्षम केले आहे.</string>
+  <string name="wallpaper_changer_has_been_enabled">वॉलपेपर चेंजर सक्षम केले गेले आहे.</string>
   <string name="wallpaper_changer_has_been_disabled">वॉलपेपर चेंजर अक्षम केले गेले आहे.</string>
   <string name="dismiss">काढून टाकणे</string>
   <string name="has_been_unselected">%1$s ची निवड रद्द केली गेली आहे.</string>
@@ -120,7 +120,7 @@
   <string name="privacy_information_usage_title">माहितीचा वापर</string>
   <string name="privacy_information_usage_content">वैयक्तिक डेटा: आम्ही कोणताही वैयक्तिक डेटा जसे की नावे, ईमेल पत्ते किंवा फोन नंबर संकलित किंवा संग्रहित करत नाही.\n\nवापर विश्लेषण: %1$s तुमच्या वापराच्या वर्तनाचा मागोवा घेत नाही किंवा विश्लेषण डेटा संकलित करत नाही.</string>
   <string name="privacy_data_security_title">डेटा सुरक्षा</string>
-  <string name="privacy_data_security_content">डिव्हाइसवरील स्टोरेज: %1$s द्वारे वापरलेला सर्व डेटा तुमच्या डिव्हाइसवरच राहतो. आम्ही कोणताही डेटा बाह्यरित्या प्रसारित किंवा संचयित करत नाही.</string>
+  <string name="privacy_data_security_content">डिव्हाइसवरील स्टोरेज: %1$s द्वारे वापरलेला सर्व डेटा तुमच्या डिव्हाइसवरच राहतो. आम्ही बाह्यरित्या कोणताही डेटा प्रसारित किंवा संचयित करत नाही.</string>
   <string name="privacy_third_party_services_title">तृतीय-पक्ष सेवा</string>
   <string name="privacy_third_party_services_content">जाहिराती: %1$s तृतीय-पक्षाच्या जाहिराती प्रदर्शित करत नाहीत.\n\nबाह्य दुवे: आमच्या ॲपमध्ये बाह्य वेबसाइटचे दुवे असू शकतात. कृपया लक्षात घ्या की आम्ही या साइट्सच्या गोपनीयता पद्धतींसाठी जबाबदार नाही.</string>
   <string name="privacy_children_privacy_title">मुलांची गोपनीयता</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">आम्ही ही गोपनीयता सूचना वेळोवेळी अद्यतनित करू शकतो. कोणतेही बदल ॲपमध्ये आणि आमच्या वेबसाइटवर दिसून येतील.</string>
   <string name="privacy_contact_us_title">आमच्याशी संपर्क साधा</string>
   <string name="privacy_contact_us_content">तुम्हाला या गोपनीयतेच्या सूचनेबद्दल काही प्रश्न किंवा समस्या असल्यास, कृपया माझ्याशी %1$sवर संपर्क साधा.</string>
+  <string name="no_albums_found">कोणतेही अल्बम आढळले नाहीत</string>
+  <string name="disable_live_wallpaper">थेट वॉलपेपर अक्षम करा</string>
+  <string name="live_wallpaper_detected">लाइव्ह वॉलपेपर आढळला</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">वॉलपेपर चेंजर वापरण्यासाठी कृपया तुमचा लाइव्ह वॉलपेपर अक्षम करा.</string>
+  <string name="ok">ठीक आहे</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">भरा</string>
+  <string name="fit">फिट</string>
+  <string name="stretch">ताणून लांब करणे</string>
+  <string name="wallpaper_scaling">वॉलपेपर स्केलिंग</string>
+  <string name="adjust_brightness">ब्राइटनेस समायोजित करा</string>
   <plurals name="notification_content_text">
     <item quantity="one">रोटेशन: %1$d/%2$d वॉलपेपर\nमध्यांतर: %3$s</item>
     <item quantity="other">रोटेशन: %1$d/%2$d वॉलपेपर\nमध्यांतर: %3$s</item>

@@ -114,7 +114,7 @@
     <item quantity="other">%d వాల్‌పేపర్‌లు</item>
   </plurals>
   <string name="privacy_intro_title">పరిచయం</string>
-  <string name="privacy_intro_content">%1$sకి స్వాగతం! మీరు మా మొబైల్ అప్లికేషన్‌ను ఉపయోగించినప్పుడు మేము మీ వ్యక్తిగత సమాచారాన్ని ఎలా సేకరిస్తాము, ఉపయోగిస్తాము మరియు సంరక్షిస్తామో ఈ గోప్యతా నోటీసు వివరిస్తుంది. %1$sని ఉపయోగించడం ద్వారా, మీరు ఈ నోటీసులో వివరించిన నిబంధనలకు అంగీకరిస్తున్నారు.</string>
+  <string name="privacy_intro_content">%1$sకి స్వాగతం! మీరు మా మొబైల్ అప్లికేషన్‌ను ఉపయోగించినప్పుడు మేము మీ వ్యక్తిగత సమాచారాన్ని ఎలా సేకరిస్తాము, ఉపయోగిస్తాము మరియు రక్షించుకుంటాము అని ఈ గోప్యతా నోటీసు వివరిస్తుంది. %1$sని ఉపయోగించడం ద్వారా, మీరు ఈ నోటీసులో వివరించిన నిబంధనలకు అంగీకరిస్తున్నారు.</string>
   <string name="privacy_data_collection_title">వివరాల సేకరణ</string>
   <string name="privacy_data_collection_content">నోటిఫికేషన్ యాక్సెస్: %1$s మీ నోటిఫికేషన్‌ల ఆధారంగా వ్యక్తిగతీకరించిన వాల్‌పేపర్ సిఫార్సులను మీకు అందించడానికి నోటిఫికేషన్ యాక్సెస్‌ను అభ్యర్థిస్తుంది. మేము మీ పరికరం వెలుపల ఎటువంటి నోటిఫికేషన్ కంటెంట్‌ను లేదా వ్యక్తిగతంగా గుర్తించదగిన సమాచారాన్ని (PII) నిల్వ చేయము.\n\nస్థానిక ఫైల్‌లు: %1$s మీ పరికరంలో నిల్వ చేయబడిన ఫైల్‌లను వాల్‌పేపర్‌లుగా సెట్ చేయడానికి మిమ్మల్ని అనుమతిస్తుంది. మేము ఈ ఫైల్‌లను ఏ బాహ్య సర్వర్‌లకు అప్‌లోడ్ చేయము లేదా బదిలీ చేయము.</string>
   <string name="privacy_information_usage_title">సమాచార వినియోగం</string>
@@ -124,11 +124,22 @@
   <string name="privacy_third_party_services_title">మూడవ పక్ష సేవలు</string>
   <string name="privacy_third_party_services_content">ప్రకటనలు: %1$s మూడవ పక్ష ప్రకటనలను ప్రదర్శించదు.\n\nబాహ్య లింక్‌లు: మా యాప్ బాహ్య వెబ్‌సైట్‌లకు లింక్‌లను కలిగి ఉండవచ్చు. ఈ సైట్‌ల గోప్యతా పద్ధతులకు మేము బాధ్యత వహించబోమని దయచేసి గమనించండి.</string>
   <string name="privacy_children_privacy_title">పిల్లల గోప్యత</string>
-  <string name="privacy_children_privacy_content">%1$s 13 సంవత్సరాల కంటే తక్కువ వయస్సు ఉన్న పిల్లల కోసం ఉద్దేశించబడలేదు. మేము పిల్లల నుండి ఏదైనా సమాచారాన్ని ఉద్దేశపూర్వకంగా సేకరించము.</string>
+  <string name="privacy_children_privacy_content">%1$s 13 సంవత్సరాల కంటే తక్కువ వయస్సు ఉన్న పిల్లల కోసం ఉద్దేశించబడలేదు. మేము పిల్లల నుండి ఎటువంటి సమాచారాన్ని ఉద్దేశపూర్వకంగా సేకరించము.</string>
   <string name="privacy_changes_notice_title">ఈ నోటీసుకు మార్పులు</string>
   <string name="privacy_changes_notice_content">మేము ఈ గోప్యతా నోటీసును ఎప్పటికప్పుడు అప్‌డేట్ చేయవచ్చు. ఏవైనా మార్పులు యాప్‌లో మరియు మా వెబ్‌సైట్‌లో ప్రతిబింబిస్తాయి.</string>
   <string name="privacy_contact_us_title">మమ్మల్ని సంప్రదించండి</string>
   <string name="privacy_contact_us_content">ఈ గోప్యతా నోటీసు గురించి మీకు ఏవైనా ప్రశ్నలు లేదా ఆందోళనలు ఉంటే, దయచేసి నన్ను %1$sవద్ద సంప్రదించండి.</string>
+  <string name="no_albums_found">ఆల్బమ్‌లు ఏవీ కనుగొనబడలేదు</string>
+  <string name="disable_live_wallpaper">ప్రత్యక్ష వాల్‌పేపర్‌ని నిలిపివేయండి</string>
+  <string name="live_wallpaper_detected">ప్రత్యక్ష వాల్‌పేపర్ కనుగొనబడింది</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">వాల్‌పేపర్ ఛేంజర్‌ని ఉపయోగించడానికి దయచేసి మీ లైవ్ వాల్‌పేపర్‌ను నిలిపివేయండి.</string>
+  <string name="ok">అలాగే</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">పూరించండి</string>
+  <string name="fit">ఫిట్</string>
+  <string name="stretch">సాగదీయండి</string>
+  <string name="wallpaper_scaling">వాల్‌పేపర్ స్కేలింగ్</string>
+  <string name="adjust_brightness">ప్రకాశాన్ని సర్దుబాటు చేయండి</string>
   <plurals name="notification_content_text">
     <item quantity="one">భ్రమణం: %1$d/%2$d వాల్‌పేపర్\nవిరామం: %3$s</item>
     <item quantity="other">భ్రమణం: %1$d/%2$d వాల్‌పేపర్‌లు\nవిరామం: %3$s</item>

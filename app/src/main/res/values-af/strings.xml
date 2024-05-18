@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Ons kan hierdie privaatheidskennisgewing van tyd tot tyd opdateer. Enige veranderinge sal in die toepassing en op ons webwerf weerspieël word.</string>
   <string name="privacy_contact_us_title">Kontak Ons</string>
   <string name="privacy_contact_us_content">As jy enige vrae of bekommernisse oor hierdie privaatheidskennisgewing het, kontak my asseblief by %1$s.</string>
+  <string name="no_albums_found">Geen albums gevind nie</string>
+  <string name="disable_live_wallpaper">Deaktiveer lewendige plakpapier</string>
+  <string name="live_wallpaper_detected">Lewendige plakpapier bespeur</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Deaktiveer asseblief u lewendige muurpapier om die muurpapierwisselaar te gebruik.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Vul</string>
+  <string name="fit">Gepas</string>
+  <string name="stretch">Strek</string>
+  <string name="wallpaper_scaling">Wallpaper Skaal</string>
+  <string name="adjust_brightness">Pas Helderheid aan</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotasie: %1$d/%2$d plakpapier\nInterval: %3$s</item>
     <item quantity="other">Rotasie: %1$d/%2$d agtergronde\nInterval: %3$s</item>

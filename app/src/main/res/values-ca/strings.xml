@@ -3,7 +3,7 @@
   <string name="app_name">Paperize</string>
   <string name="SettingsIcon">Opcions</string>
   <string name="dropdownmenu_settings">Configuració</string>
-  <string name="home_screen">Casa</string>
+  <string name="home_screen">a casa</string>
   <string name="wallpaper_screen">Fons de pantalla</string>
   <string name="library_screen">Biblioteca</string>
   <string name="settings_screen">Configuració</string>
@@ -60,7 +60,7 @@
   <string name="circle_2_animation">Animació del cercle 2</string>
   <string name="circle_1_animation">Animació del cercle 1</string>
   <string name="circle_3_animation">Animació del cercle 3</string>
-  <string name="wallpaper_changer_has_been_enabled">S\'ha activat el canvi de fons de pantalla.</string>
+  <string name="wallpaper_changer_has_been_enabled">S\'ha habilitat el canvi de fons de pantalla.</string>
   <string name="wallpaper_changer_has_been_disabled">S\'ha desactivat el canvi de fons de pantalla.</string>
   <string name="dismiss">Descartar</string>
   <string name="has_been_unselected">%1$s s\'ha anul·lat la selecció.</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">És possible que actualitzem aquest avís de privadesa de tant en tant. Qualsevol canvi es reflectirà a l\'aplicació i al nostre lloc web.</string>
   <string name="privacy_contact_us_title">Contacta amb nosaltres</string>
   <string name="privacy_contact_us_content">Si teniu cap pregunta o dubte sobre aquest avís de privadesa, poseu-vos en contacte amb mi a %1$s.</string>
+  <string name="no_albums_found">No s\'han trobat àlbums</string>
+  <string name="disable_live_wallpaper">Desactiva el fons de pantalla en viu</string>
+  <string name="live_wallpaper_detected">S\'ha detectat fons de pantalla en viu</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Si us plau, desactiveu el vostre fons de pantalla en viu per utilitzar el canviador de fons de pantalla.</string>
+  <string name="ok">D\'acord</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Omplir</string>
+  <string name="fit">Fit</string>
+  <string name="stretch">Estirar</string>
+  <string name="wallpaper_scaling">Escala de fons de pantalla</string>
+  <string name="adjust_brightness">Ajusta la brillantor</string>
   <plurals name="notification_content_text">
     <item quantity="one">Rotació: %1$d/%2$d fons de pantalla\nInterval: %3$s</item>
     <item quantity="other">Rotació: %1$d/%2$d fons de pantalla\nInterval: %3$s</item>

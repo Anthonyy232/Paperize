@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Előfordulhat, hogy időnként frissítjük ezt az adatvédelmi tájékoztatót. Minden változtatást az alkalmazásban és weboldalunkon is közzéteszünk.</string>
   <string name="privacy_contact_us_title">Lépjen kapcsolatba velünk</string>
   <string name="privacy_contact_us_content">Ha bármilyen kérdése vagy észrevétele van ezzel az adatvédelmi tájékoztatóval kapcsolatban, forduljon hozzám %1$s címen.</string>
+  <string name="no_albums_found">Nincsenek albumok</string>
+  <string name="disable_live_wallpaper">Élő háttérkép letiltása</string>
+  <string name="live_wallpaper_detected">Élő háttérkép észlelve</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Az élő háttérképet ki kell kapcsolni a háttérképváltó használatához.</string>
+  <string name="ok">OK</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Kitöltés</string>
+  <string name="fit">Igazítás</string>
+  <string name="stretch">Nyújtás</string>
+  <string name="wallpaper_scaling">Háttérkép méretezése</string>
+  <string name="adjust_brightness">Fényerő beállítása</string>
   <plurals name="notification_content_text">
     <item quantity="one">Forgatás: %1$d/%2$d háttérkép\nIntervallum: %3$s</item>
     <item quantity="other">Forgatás: %1$d/%2$d háttérképek\nIntervallum: %3$s</item>

@@ -137,6 +137,17 @@
   <string name="privacy_changes_notice_content">ייתכן שנעדכן הודעת פרטיות זו מעת לעת. כל שינוי ישתקף באפליקציה ובאתר האינטרנט שלנו.</string>
   <string name="privacy_contact_us_title">צור קשר</string>
   <string name="privacy_contact_us_content">אם יש לך שאלות או חששות לגבי הודעת פרטיות זו, אנא צור איתי קשר בכתובת %1$s.</string>
+  <string name="no_albums_found">לא נמצאו אלבומים</string>
+  <string name="disable_live_wallpaper">השבת טפט חי</string>
+  <string name="live_wallpaper_detected">טפט חי זוהה</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">אנא השבת את טפט החי שלך כדי להשתמש במחליף הטפטים.</string>
+  <string name="ok">אישור</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">מלא</string>
+  <string name="fit">התאמה</string>
+  <string name="stretch">מתיחה</string>
+  <string name="wallpaper_scaling">קנה מידה של טפט</string>
+  <string name="adjust_brightness">התאם בהירות</string>
   <plurals name="notification_content_text">
     <item quantity="one">סיבוב: %1$d/%2$d טפטים\nמרווח: %3$s</item>
     <item quantity="two">סיבוב: %1$d/%2$d טפטים\nמרווח: %3$s</item>

@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">Bu gizlilik bildirimini zaman zaman güncelleyebiliriz. Herhangi bir değişiklik uygulamaya ve web sitemize yansıtılacaktır.</string>
   <string name="privacy_contact_us_title">Bize Ulaşın</string>
   <string name="privacy_contact_us_content">Bu gizlilik bildirimiyle ilgili herhangi bir sorunuz veya endişeniz varsa lütfen %1$sadresinden benimle iletişime geçin.</string>
+  <string name="no_albums_found">Hiçbir albüm bulunamadı</string>
+  <string name="disable_live_wallpaper">Canlı duvar kağıdını devre dışı bırak</string>
+  <string name="live_wallpaper_detected">Canlı Duvar Kağıdı Algılandı</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Duvar kağıdı değiştiriciyi kullanmak için lütfen canlı duvar kağıdınızı devre dışı bırakın.</string>
+  <string name="ok">TAMAM</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">Doldurmak</string>
+  <string name="fit">Yerleştirmek</string>
+  <string name="stretch">Uzatmak</string>
+  <string name="wallpaper_scaling">Duvar Kağıdı Ölçeklendirme</string>
+  <string name="adjust_brightness">Parlaklığı ayarla</string>
   <plurals name="notification_content_text">
     <item quantity="one">Döndürme: %1$d/%2$d duvar kağıdı\nAralık: %3$s</item>
     <item quantity="other">Döndürme: %1$d/%2$d duvar kağıtları\nAralık: %3$s</item>

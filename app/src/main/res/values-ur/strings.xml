@@ -114,9 +114,9 @@
     <item quantity="other">%d وال پیپرز</item>
   </plurals>
   <string name="privacy_intro_title">تعارف</string>
-  <string name="privacy_intro_content">%1$sمیں خوش آمدید! یہ رازداری نوٹس اس بات کا خاکہ پیش کرتا ہے کہ جب آپ ہماری موبائل ایپلیکیشن استعمال کرتے ہیں تو ہم آپ کی ذاتی معلومات کو کیسے اکٹھا، استعمال اور محفوظ رکھتے ہیں۔ %1$sاستعمال کرکے، آپ اس نوٹس میں بیان کردہ شرائط سے اتفاق کرتے ہیں۔</string>
+  <string name="privacy_intro_content">%1$sمیں خوش آمدید! یہ رازداری نوٹس اس بات کا خاکہ پیش کرتا ہے کہ جب آپ ہماری موبائل ایپلیکیشن استعمال کرتے ہیں تو ہم آپ کی ذاتی معلومات کو کیسے اکٹھا کرتے ہیں، استعمال کرتے ہیں اور اس کی حفاظت کرتے ہیں۔ %1$sاستعمال کرکے، آپ اس نوٹس میں بیان کردہ شرائط سے اتفاق کرتے ہیں۔</string>
   <string name="privacy_data_collection_title">ڈیٹا اکٹھا کرنا</string>
-  <string name="privacy_data_collection_content">اطلاع تک رسائی: %1$s آپ کی اطلاعات کی بنیاد پر آپ کو ذاتی نوعیت کی وال پیپر کی سفارشات فراہم کرنے کے لیے اطلاع تک رسائی کی درخواست کرتا ہے۔ ہم آپ کے آلے کے باہر کوئی اطلاعی مواد یا ذاتی طور پر قابل شناخت معلومات (PII) کو اسٹور نہیں کرتے ہیں۔\n\nمقامی فائلیں: %1$s آپ کے آلے پر محفوظ فائلوں تک رسائی حاصل کرتا ہے تاکہ آپ انہیں وال پیپر کے طور پر سیٹ کر سکیں۔ ہم ان فائلوں کو کسی بیرونی سرور پر اپ لوڈ یا منتقل نہیں کرتے ہیں۔</string>
+  <string name="privacy_data_collection_content">اطلاع تک رسائی: %1$s آپ کی اطلاعات کی بنیاد پر آپ کو ذاتی نوعیت کی وال پیپر کی سفارشات فراہم کرنے کے لیے اطلاع تک رسائی کی درخواست کرتا ہے۔ ہم کوئی اطلاعی مواد یا ذاتی طور پر قابل شناخت معلومات (PII) کو آپ کے آلے سے باہر اسٹور نہیں کرتے ہیں۔\n\nمقامی فائلیں: %1$s آپ کے آلے پر محفوظ فائلوں تک رسائی حاصل کرتا ہے تاکہ آپ انہیں وال پیپر کے طور پر سیٹ کر سکیں۔ ہم ان فائلوں کو کسی بیرونی سرور پر اپ لوڈ یا منتقل نہیں کرتے ہیں۔</string>
   <string name="privacy_information_usage_title">معلومات کا استعمال</string>
   <string name="privacy_information_usage_content">ذاتی ڈیٹا: ہم کسی بھی ذاتی ڈیٹا کو جمع یا ذخیرہ نہیں کرتے ہیں جیسے نام، ای میل پتے، یا فون نمبر۔\n\nاستعمال کے تجزیات: %1$s آپ کے استعمال کے رویے کو ٹریک نہیں کرتا ہے یا تجزیاتی ڈیٹا اکٹھا نہیں کرتا ہے۔</string>
   <string name="privacy_data_security_title">ڈیٹا سیکیورٹی</string>
@@ -129,6 +129,17 @@
   <string name="privacy_changes_notice_content">ہم اس رازداری کے نوٹس کو وقتاً فوقتاً اپ ڈیٹ کر سکتے ہیں۔ کوئی بھی تبدیلی ایپ اور ہماری ویب سائٹ پر ظاہر ہوگی۔</string>
   <string name="privacy_contact_us_title">ہم سے رابطہ کریں۔</string>
   <string name="privacy_contact_us_content">اگر آپ کے پاس اس رازداری کے نوٹس کے بارے میں کوئی سوالات یا خدشات ہیں، تو براہ کرم مجھ سے %1$sپر رابطہ کریں۔</string>
+  <string name="no_albums_found">کوئی البمز نہیں ملے</string>
+  <string name="disable_live_wallpaper">لائیو وال پیپر کو غیر فعال کریں۔</string>
+  <string name="live_wallpaper_detected">لائیو وال پیپر کا پتہ چلا</string>
+  <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">وال پیپر چینجر استعمال کرنے کے لیے براہ کرم اپنے لائیو وال پیپر کو غیر فعال کریں۔</string>
+  <string name="ok">ٹھیک ہے</string>
+  <string name="brightness_percentage">%1$s%%</string>
+  <string name="fill">بھرنا</string>
+  <string name="fit">فٹ</string>
+  <string name="stretch">کھینچنا</string>
+  <string name="wallpaper_scaling">وال پیپر اسکیلنگ</string>
+  <string name="adjust_brightness">چمک کو ایڈجسٹ کریں۔</string>
   <plurals name="notification_content_text">
     <item quantity="one">گردش: %1$d/%2$d وال پیپر\nوقفہ: %3$s</item>
     <item quantity="other">گردش: %1$d/%2$d وال پیپرز\nوقفہ: %3$s</item>
