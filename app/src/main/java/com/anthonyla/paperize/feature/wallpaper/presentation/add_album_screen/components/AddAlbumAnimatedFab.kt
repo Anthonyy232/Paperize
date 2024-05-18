@@ -60,7 +60,7 @@ fun AddAlbumAnimatedFab(
 
     BackHandler(expanded) { expanded = false }
 
-    val expandHorizontalSize = Pair(155.dp, 90.dp)
+    val expandHorizontalSize = Pair(165.dp, 90.dp)
     val expandHorizontally by fabTransition.animateDp(
         transitionSpec = { spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow) }, label = "",
         targetValueByState = { isExpanded ->

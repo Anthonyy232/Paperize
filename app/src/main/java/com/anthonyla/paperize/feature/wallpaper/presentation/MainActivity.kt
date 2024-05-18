@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
                         if (!isAlreadyRunning) {
                             val intent = Intent(context, WallpaperService::class.java).apply {
                                 action = WallpaperService.Actions.START.toString()
+                                putExtra("timeInMinutes", settingsState.value.interval)
                             }
                             context.startForegroundService(intent)
                         }
