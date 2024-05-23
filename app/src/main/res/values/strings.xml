@@ -39,7 +39,7 @@
     <string name="continue_button">I\'m In</string>
     <string name="notification_permission_is_required_for_this_app_to_work_properly">Notification permission is required for this app to work properly</string>
     <string name="allow">Allow</string>
-    <string name="notification_info_message">Notifications are recommended for this app to work properly. If not given, the system may terminate the app. You can mute notifications in the settings later.</string>
+    <string name="notification_info_message">Notifications can be enabled to show when the app is running in the background.</string>
     <string name="set_as_lock_screen">Set as lock screen</string>
     <string name="lock_screen">Lock screen</string>
     <string name="home">Home screen</string>

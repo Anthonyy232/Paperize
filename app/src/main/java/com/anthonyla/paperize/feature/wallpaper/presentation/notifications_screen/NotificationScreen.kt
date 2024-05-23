@@ -54,39 +54,15 @@ fun NotificationScreen(
     onAgree: () -> Unit
 ) {
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.notification_animation))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
     )
     val askPermission = rememberSaveable { mutableStateOf(false) }
-    val askCount = rememberSaveable { mutableIntStateOf(0) }
-
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            onAgree()
-        } else {
-            if (++askCount.intValue >= 2) {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                onAgree()
-            }
-            scope.launch {
-                val result = snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.notification_permission_is_required_for_this_app_to_work_properly),
-                    actionLabel = context.getString(R.string.allow),
-                    duration = SnackbarDuration.Short,
-                )
-                when (result) {
-                    SnackbarResult.Dismissed -> {}
-                    SnackbarResult.ActionPerformed -> { askPermission.value = true }
-                }
-            }
-        }
-    }
+    ) { onAgree() }
 
     fun handleFabClick() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -104,22 +80,10 @@ fun NotificationScreen(
     LaunchedEffect (askPermission.value) {
         if (askPermission.value) {
             handleFabClick()
-            askPermission.value = false
         }
     }
 
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 8.dp, vertical = 8.dp)),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-            ) },
         content = { it
             Column (modifier = Modifier.padding(32.dp)) {
                 Spacer(modifier = Modifier.height(120.dp))
@@ -131,9 +95,7 @@ fun NotificationScreen(
                     modifier = Modifier
                         .fillMaxHeight(0.5f)
                         .align(Alignment.CenterHorizontally)
-                        .semantics {
-                            contentDescription = context.getString(R.string.notification_bell_animation)
-                        },
+                        .semantics { contentDescription = context.getString(R.string.notification_bell_animation) },
                     safeMode = true,
                     enableMergePaths = true
                 )
