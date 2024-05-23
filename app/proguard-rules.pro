@@ -26,7 +26,7 @@
 -keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Album {
  !transient <fields>;
 }
--keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaper {
+-keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder {
  !transient <fields>;
 }
 -keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper {

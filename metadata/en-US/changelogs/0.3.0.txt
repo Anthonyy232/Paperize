@@ -1,6 +1,0 @@
-v0.3.0
-Added app icon and GitHub redirect in settings page
-
-Planning
-Look into whether live wallpaper using WallpaperManager (WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER) would work well/be realistic
-It would drain too much battery. Video/GIF wallpaper is also not possible with current WallpaperManager APIs without using live wallpaper

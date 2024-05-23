@@ -55,16 +55,13 @@ fun AddAlbumScreen(
     }
     var showSpotlight by rememberSaveable { mutableStateOf(false) }
 
-    BackHandler {
-        if (selectionMode) {
-            selectionMode = false
+    BackHandler(
+        enabled = selectionMode,
+        onBack = {
             addAlbumViewModel.onEvent(AddAlbumEvent.DeselectAll)
-        } else {
-            onBackClick()
-            addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
-            showSpotlight = false
+            selectionMode = false
         }
-    }
+    )
 
     /** Image picker **/
     val imagePickerLauncher = rememberLauncherForActivityResult(

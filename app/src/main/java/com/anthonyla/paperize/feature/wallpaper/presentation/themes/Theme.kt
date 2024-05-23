@@ -12,11 +12,9 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 
 
 private val LightColors = lightColorScheme(
@@ -90,13 +88,14 @@ private val DarkColors = darkColorScheme(
  */
 @Composable
 fun PaperizeTheme(
-    settingsState: State<SettingsState>,
+    darkMode: Boolean?,
+    dynamicTheming: Boolean,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
 
-    val isDarkMode = isDarkMode(darkMode = settingsState.value.darkMode)
-    val isDynamicTheming = isDynamicTheming(dynamicTheming = settingsState.value.dynamicTheming)
+    val isDarkMode = isDarkMode(darkMode = darkMode)
+    val isDynamicTheming = isDynamicTheming(dynamicTheming = dynamicTheming)
     val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val colors = when {
         isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)

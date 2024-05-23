@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -120,7 +121,8 @@ fun FolderItem(
                         imageModel = { folder.coverUri?.toUri() },
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
+                            alignment = Alignment.Center,
+                            requestSize = IntSize(300, 300),
                         ),
                         loading = {
                             if (animate) {
@@ -130,7 +132,7 @@ fun FolderItem(
                             }
                         },
                         modifier = Modifier
-                            .height(configuration.screenHeightDp.dp / 4.0f)
+                            .aspectRatio(0.8f)
                             .clip(RoundedCornerShape(roundedCornerShapeTransition))
                     )
                 }
@@ -162,7 +164,8 @@ fun FolderItem(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
                         .align(Alignment.Start),
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
             Text(
@@ -171,7 +174,8 @@ fun FolderItem(
                     .padding(horizontal = 24.dp)
                     .align(Alignment.Start),
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.titleSmall
             )
             Spacer(modifier = Modifier.padding(8.dp))
         }

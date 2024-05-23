@@ -11,24 +11,27 @@ import android.util.Log
 import android.util.Size
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.exifinterface.media.ExifInterface
+import com.google.android.renderscript.Toolkit
 
 /**
  * Get the dimensions of the image from the uri
  */
-fun Uri.getImageDimensions(context: Context): Size {
-    val inputStream = context.contentResolver.openInputStream(this)!!
-    val exif = ExifInterface(inputStream)
-    var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-    var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
-    if (width == 0 || height == 0) {
-        val options = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
+fun Uri.getImageDimensions(context: Context): Size? {
+    context.contentResolver.openInputStream(this)?.use { inputStream ->
+        val exif = ExifInterface(inputStream)
+        var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+        var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+        if (width == 0 || height == 0) {
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeStream(context.contentResolver.openInputStream(this), null, options)
+            width = options.outWidth
+            height = options.outHeight
         }
-        BitmapFactory.decodeStream(context.contentResolver.openInputStream(this), null, options)
-        width = options.outWidth
-        height = options.outHeight
+        return Size(width, height)
     }
-    return Size(width, height)
+    return null
 }
 
 /**
@@ -48,9 +51,10 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
     val newHeight = (width * aspectRatio).toInt()
     val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(newBitmap)
-    val bitmap = Bitmap.createScaledBitmap(source, width, newHeight, true)
+    val scaledBitmap = Bitmap.createScaledBitmap(source, width, newHeight, true)
     val top = (height - newHeight) / 2f
-    canvas.drawBitmap(bitmap, 0f, top, null)
+    canvas.drawBitmap(scaledBitmap, 0f, top, null)
+    scaledBitmap.recycle()
     return newBitmap
 }
 
@@ -72,6 +76,7 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawBitmap(scaledBitmap, x, y, null)
+        scaledBitmap.recycle()
         return bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error filling bitmap: $e")
@@ -88,6 +93,7 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         val canvas = Canvas(newBitmap)
         val bitmap = Bitmap.createScaledBitmap(source, width, height, true)
         canvas.drawBitmap(bitmap, 0f, 0f, null)
+        bitmap.recycle()
         return newBitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error stretching bitmap: $e")
@@ -98,21 +104,31 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
 /**
  * Darken the bitmap by a certain percentage - 0 is darkest, 100 is original
  */
-fun darkenBitmap(source: Bitmap, percent: Int, width: Int, height: Int): Bitmap {
+fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
     try {
         val safePercentage = (100 - percent).coerceIn(0, 100)
         val factor = 1 - safePercentage / 100f
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
+        val canvas = Canvas(source)
         val paint = Paint().apply {
             colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
                 setScale(factor, factor, factor, 1f)
             })
         }
         canvas.drawBitmap(source, 0f, 0f, paint)
-        return bitmap
+        return source
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error darkening bitmap: $e")
         return source
     }
 }
+
+fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
+    try {
+        val factor = percent.toFloat().div(100f) * 10
+        return Toolkit.blur(source, factor.toInt())
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error darkening bitmap: $e")
+        return source
+    }
+}
+

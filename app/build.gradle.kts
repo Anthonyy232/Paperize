@@ -18,8 +18,8 @@ android {
         applicationId = "com.anthonyla.paperize"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "1.3.0"
+        versionCode = 13
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -84,7 +84,7 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.7.0-beta01")
     implementation("androidx.core:core-splashscreen:1.2.0-alpha01")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:1.7.0-beta02")
     implementation("com.github.skydoves:landscapist-glide:2.3.3")
@@ -92,12 +92,12 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.4.0")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
-    implementation("com.mikepenz:aboutlibraries-core:11.1.4")
-    implementation("com.mikepenz:aboutlibraries-compose-m3:11.1.4")
+    implementation("com.mikepenz:aboutlibraries-core:11.2.0")
+    implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.0")
     implementation("androidx.compose.foundation:foundation:1.7.0-beta01")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.0-alpha04")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.0-beta01")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.0-beta01")
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-beta01")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.0-beta01")
@@ -108,6 +108,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.lazygeniouz:dfc:1.0.8")
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:b6363490c3")
 }
 
 private fun strongSkippingConfiguration() = listOf(

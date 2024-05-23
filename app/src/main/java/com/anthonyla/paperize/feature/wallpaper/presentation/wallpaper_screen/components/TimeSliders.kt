@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,10 +22,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,16 +55,25 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun TimeSliders(
-    onTimeChange: (Int, Int, Int) -> Unit,
-    timeInMinutes: Int,
+    timeInMinutes1: Int,
+    timeInMinutes2: Int,
     showInterval: Boolean,
     animate: Boolean,
-    onShowIntervalChange: (Boolean) -> Unit
+    onShowIntervalChange: (Boolean) -> Unit,
+    scheduleSeparately: Boolean,
+    onScheduleSeparatelyChange: (Boolean) -> Unit,
+    onTimeChange1: (Int, Int, Int) -> Unit,
+    onTimeChange2: (Int, Int, Int) -> Unit,
+    lockEnabled: Boolean,
+    homeEnabled: Boolean,
 ) {
     val view = LocalView.current
-    var days by rememberSaveable { mutableFloatStateOf((timeInMinutes / (24 * 60)).toFloat()) }
-    var hours by rememberSaveable { mutableFloatStateOf(((timeInMinutes % (24 * 60)) / 60).toFloat()) }
-    var minutes by rememberSaveable { mutableFloatStateOf((timeInMinutes % 60).toFloat()) }
+    var days1 by rememberSaveable { mutableFloatStateOf((timeInMinutes1 / (24 * 60)).toFloat()) }
+    var hours1 by rememberSaveable { mutableFloatStateOf(((timeInMinutes1 % (24 * 60)) / 60).toFloat()) }
+    var minutes1 by rememberSaveable { mutableFloatStateOf((timeInMinutes1 % 60).toFloat()) }
+    var days2 by rememberSaveable { mutableFloatStateOf((timeInMinutes2 / (24 * 60)).toFloat()) }
+    var hours2 by rememberSaveable { mutableFloatStateOf(((timeInMinutes2 % (24 * 60)) / 60).toFloat()) }
+    var minutes2 by rememberSaveable { mutableFloatStateOf((timeInMinutes2 % 60).toFloat()) }
     val scope = rememberCoroutineScope()
     val context = LocalView.current
     var job by remember { mutableStateOf<Job?>(null) }
@@ -82,25 +96,54 @@ fun TimeSliders(
         Column (
             modifier = columnModifier
         ) {
-            val totalMinutes = (days.toInt() * 24 * 60) + (hours.toInt() * 60) + minutes.toInt()
-            val displayDays = totalMinutes / (24 * 60)
-            val displayHours = (totalMinutes % (24 * 60)) / 60
-            val displayMinutes = totalMinutes % 60
-            val formattedDays = if (displayDays > 0) {
-                context.resources.getQuantityString(R.plurals.days, displayDays, displayDays)
+            val totalMinutes1 = (days1.toInt() * 24 * 60) + (hours1.toInt() * 60) + minutes1.toInt()
+            val displayDays1 = totalMinutes1 / (24 * 60)
+            val displayHours1 = (totalMinutes1 % (24 * 60)) / 60
+            val displayMinutes1 = totalMinutes1 % 60
+
+            val formattedDays1 = if (displayDays1 > 0) {
+                context.resources.getQuantityString(R.plurals.days, displayDays1, displayDays1)
             } else {""}
 
-            val formattedHours = if (displayHours > 0) {
-                context.resources.getQuantityString(R.plurals.hours, displayHours, displayHours)
+            val formattedHours1 = if (displayHours1 > 0) {
+                context.resources.getQuantityString(R.plurals.hours, displayHours1, displayHours1)
             } else {""}
 
-            val formattedMinutes = if (displayMinutes > 0) {
-                context.resources.getQuantityString(R.plurals.minutes, displayMinutes, displayMinutes)
+            val formattedMinutes1 = if (displayMinutes1 > 0) {
+                context.resources.getQuantityString(R.plurals.minutes, displayMinutes1, displayMinutes1)
             } else {""}
 
-            val formattedTime = stringResource(
-                R.string.interval,
-                listOf(formattedDays, formattedHours, formattedMinutes).filter { it.isNotEmpty() }.joinToString(", ")
+            val formattedTime1 = stringResource(
+                if (scheduleSeparately)
+                    R.string.interval_home
+                else
+                    R.string.interval,
+                listOf(formattedDays1, formattedHours1, formattedMinutes1).filter { it.isNotEmpty() }.joinToString(", ")
+            )
+
+            val totalMinutes2 = (days2.toInt() * 24 * 60) + (hours2.toInt() * 60) + minutes2.toInt()
+            val displayDays2 = totalMinutes2 / (24 * 60)
+            val displayHours2 = (totalMinutes2 % (24 * 60)) / 60
+            val displayMinutes2 = totalMinutes2 % 60
+
+            val formattedDays2 = if (displayDays2 > 0) {
+                context.resources.getQuantityString(R.plurals.days, displayDays2, displayDays2)
+            } else {""}
+
+            val formattedHours2 = if (displayHours2 > 0) {
+                context.resources.getQuantityString(R.plurals.hours, displayHours2, displayHours2)
+            } else {""}
+
+            val formattedMinutes2 = if (displayMinutes2 > 0) {
+                context.resources.getQuantityString(R.plurals.minutes, displayMinutes2, displayMinutes2)
+            } else {""}
+
+            val formattedTime2 = stringResource(
+                if (scheduleSeparately)
+                    R.string.interval_lock
+                else
+                    R.string.interval,
+                listOf(formattedDays2, formattedHours2, formattedMinutes2).filter { it.isNotEmpty() }.joinToString(", ")
             )
 
             Row (
@@ -110,20 +153,33 @@ fun TimeSliders(
             ) {
                 Spacer(modifier = Modifier.width(32.dp))
                 Text(
-                    text = formattedTime,
+                    text = if (showInterval) {
+                        formattedTime1
+                    } else {
+                        if (scheduleSeparately) {
+                            stringResource(R.string.interval_text)
+                        } else {
+                            formattedTime1
+                        }
+                    },
                     fontWeight = FontWeight.W500,
                 )
                 IconButton(
                     onClick = { onShowIntervalChange(!showInterval) },
                 ) {
-                    Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "Show interval sliders")
+                    Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = stringResource(R.string.show_interval_sliders))
                 }
             }
 
             if (animate) {
                 AnimatedVisibility(
                     visible = showInterval,
-                    enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
+                    enter = expandVertically(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    ),
                     exit = fadeOut(
                         animationSpec = tween(
                             durationMillis = 300,
@@ -133,18 +189,19 @@ fun TimeSliders(
                 ) {
                     Column {
                         Slider(
-                            value = days,
+                            value = days1,
                             onValueChange = { newDays ->
                                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                days = newDays
-                                val totalMinute = (newDays.toInt() * 24 * 60) + (hours.toInt() * 60) + minutes.toInt()
-                                if (totalMinute < 15) {
-                                    minutes = 15f - (hours.toInt() * 60)
+                                days1 = newDays
+                                val totalMinute =
+                                    (newDays.toInt() * 24 * 60) + (hours1.toInt() * 60) + minutes1.toInt()
+                                if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                    minutes1 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (hours1.toInt() * 60)
                                 }
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onTimeChange(newDays.toInt(), hours.toInt(), minutes.toInt())
+                                    onTimeChange1(newDays.toInt(), hours1.toInt(), minutes1.toInt())
                                 }
                             },
                             valueRange = 0f..30f,
@@ -153,18 +210,19 @@ fun TimeSliders(
                         )
 
                         Slider(
-                            value = hours,
+                            value = hours1,
                             onValueChange = { newHours ->
                                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                hours = newHours
-                                val totalMinute = (days.toInt() * 24 * 60) + (newHours.toInt() * 60) + minutes.toInt()
-                                if (totalMinute < 15) {
-                                    minutes = 15f - (newHours.toInt() * 60)
+                                hours1 = newHours
+                                val totalMinute =
+                                    (days1.toInt() * 24 * 60) + (newHours.toInt() * 60) + minutes1.toInt()
+                                if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                    minutes1 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (newHours.toInt() * 60)
                                 }
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onTimeChange(days.toInt(), newHours.toInt(), minutes.toInt())
+                                    onTimeChange1(days1.toInt(), newHours.toInt(), minutes1.toInt())
                                 }
                             },
                             valueRange = 0f..24f,
@@ -173,24 +231,142 @@ fun TimeSliders(
                         )
 
                         Slider(
-                            value = minutes,
+                            value = minutes1,
                             onValueChange = { newMinutes ->
                                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                minutes = if (days.toInt() == 0 && hours.toInt() == 0 && newMinutes < 15) {
-                                    15f
-                                } else {
-                                    newMinutes
-                                }
+                                minutes1 =
+                                    if (days1.toInt() == 0 && hours1.toInt() == 0 && newMinutes < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                        WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat()
+                                    } else {
+                                        newMinutes
+                                    }
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onTimeChange(days.toInt(), hours.toInt(), minutes.toInt())
+                                    onTimeChange1(days1.toInt(), hours1.toInt(), minutes1.toInt())
                                 }
                             },
                             valueRange = 0f..60f,
                             steps = 60,
                             modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
                         )
+                        if (homeEnabled && lockEnabled) {
+                            AnimatedVisibility(
+                                visible = scheduleSeparately,
+                                enter = expandVertically(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    )
+                                ),
+                                exit = shrinkVertically(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    )
+                                )
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = formattedTime2,
+                                        fontWeight = FontWeight.W500,
+                                    )
+                                    Slider(
+                                        value = days2,
+                                        onValueChange = { newDays ->
+                                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                            days2 = newDays
+                                            val totalMinute =
+                                                (newDays.toInt() * 24 * 60) + (hours2.toInt() * 60) + minutes2.toInt()
+                                            if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                                minutes2 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (hours2.toInt() * 60)
+                                            }
+                                            job?.cancel()
+                                            job = scope.launch {
+                                                delay(500)
+                                                onTimeChange2(
+                                                    newDays.toInt(),
+                                                    hours2.toInt(),
+                                                    minutes2.toInt()
+                                                )
+                                            }
+                                        },
+                                        valueRange = 0f..30f,
+                                        steps = 30,
+                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                    )
+
+                                    Slider(
+                                        value = hours2,
+                                        onValueChange = { newHours ->
+                                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                            hours2 = newHours
+                                            val totalMinute =
+                                                (days2.toInt() * 24 * 60) + (newHours.toInt() * 60) + minutes2.toInt()
+                                            if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                                minutes2 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (newHours.toInt() * 60)
+                                            }
+                                            job?.cancel()
+                                            job = scope.launch {
+                                                delay(500)
+                                                onTimeChange2(
+                                                    days2.toInt(),
+                                                    newHours.toInt(),
+                                                    minutes2.toInt()
+                                                )
+                                            }
+                                        },
+                                        valueRange = 0f..24f,
+                                        steps = 24,
+                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                    )
+
+                                    Slider(
+                                        value = minutes2,
+                                        onValueChange = { newMinutes ->
+                                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                            minutes2 =
+                                                if (days2.toInt() == 0 && hours2.toInt() == 0 && newMinutes < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                                    WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat()
+                                                } else {
+                                                    newMinutes
+                                                }
+                                            job?.cancel()
+                                            job = scope.launch {
+                                                delay(500)
+                                                onTimeChange2(
+                                                    days2.toInt(),
+                                                    hours2.toInt(),
+                                                    minutes2.toInt()
+                                                )
+                                            }
+                                        },
+                                        valueRange = 0f..60f,
+                                        steps = 60,
+                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(text = stringResource(R.string.individual_scheduling), fontWeight = FontWeight.W500)
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Switch(
+                                    checked = scheduleSeparately,
+                                    onCheckedChange = onScheduleSeparatelyChange
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -198,18 +374,18 @@ fun TimeSliders(
             else {
                 if (showInterval) {
                     Slider(
-                        value = days,
+                        value = days1,
                         onValueChange = { newDays ->
                             view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                            days = newDays
-                            val totalMinute = (newDays.toInt() * 24 * 60) + (hours.toInt() * 60) + minutes.toInt()
-                            if (totalMinute < 15) {
-                                minutes = 15f - (hours.toInt() * 60)
+                            days1 = newDays
+                            val totalMinute = (newDays.toInt() * 24 * 60) + (hours1.toInt() * 60) + minutes1.toInt()
+                            if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                minutes1 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (hours1.toInt() * 60)
                             }
                             job?.cancel()
                             job = scope.launch {
                                 delay(500)
-                                onTimeChange(newDays.toInt(), hours.toInt(), minutes.toInt())
+                                onTimeChange1(newDays.toInt(), hours1.toInt(), minutes1.toInt())
                             }
                         },
                         valueRange = 0f..30f,
@@ -218,18 +394,18 @@ fun TimeSliders(
                     )
 
                     Slider(
-                        value = hours,
+                        value = hours1,
                         onValueChange = { newHours ->
                             view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                            hours = newHours
-                            val totalMinute = (days.toInt() * 24 * 60) + (newHours.toInt() * 60) + minutes.toInt()
-                            if (totalMinute < 15) {
-                                minutes = 15f - (newHours.toInt() * 60)
+                            hours1 = newHours
+                            val totalMinute = (days1.toInt() * 24 * 60) + (newHours.toInt() * 60) + minutes1.toInt()
+                            if (totalMinute < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                minutes1 = WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat() - (newHours.toInt() * 60)
                             }
                             job?.cancel()
                             job = scope.launch {
                                 delay(500)
-                                onTimeChange(days.toInt(), newHours.toInt(), minutes.toInt())
+                                onTimeChange1(days1.toInt(), newHours.toInt(), minutes1.toInt())
                             }
                         },
                         valueRange = 0f..24f,
@@ -238,18 +414,18 @@ fun TimeSliders(
                     )
 
                     Slider(
-                        value = minutes,
+                        value = minutes1,
                         onValueChange = { newMinutes ->
                             view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                            minutes = if (days.toInt() == 0 && hours.toInt() == 0 && newMinutes < 15) {
-                                15f
+                            minutes1 = if (days1.toInt() == 0 && hours1.toInt() == 0 && newMinutes < WALLPAPER_CHANGE_INTERVAL_DEFAULT) {
+                                WALLPAPER_CHANGE_INTERVAL_DEFAULT.toFloat()
                             } else {
                                 newMinutes
                             }
                             job?.cancel()
                             job = scope.launch {
                                 delay(500)
-                                onTimeChange(days.toInt(), hours.toInt(), minutes.toInt())
+                                onTimeChange1(days1.toInt(), hours1.toInt(), minutes1.toInt())
                             }
                         },
                         valueRange = 0f..60f,

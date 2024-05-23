@@ -43,20 +43,20 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
- * Composable that displays a switch and slider to adjust the brightness of the wallpaper
+ * Composable that displays a switch and slider for the user to adjust the blur effect of the wallpaper
  */
 @Composable
-fun DarkenSwitchAndSlider(
-    onDarkCheck: (Boolean) -> Unit,
-    onDarkenChange: (Int) -> Unit,
-    darken: Boolean,
-    darkenPercentage: Int,
+fun BlurSwitchAndSlider(
+    onBlurPercentageChange: (Int) -> Unit,
+    onBlurChange: (Boolean) -> Unit,
+    blur: Boolean,
+    blurPercentage: Int,
     animate: Boolean
 ) {
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     var job by remember { mutableStateOf<Job?>(null) }
-    var percentage by rememberSaveable { mutableFloatStateOf(darkenPercentage.toFloat()) }
+    var percentage by rememberSaveable { mutableFloatStateOf(blurPercentage.toFloat()) }
 
     Surface(
         tonalElevation = 10.dp,
@@ -75,18 +75,18 @@ fun DarkenSwitchAndSlider(
         ) {
             Row (horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(R.string.change_brightness),
+                    text = stringResource(R.string.change_blur),
                     modifier = Modifier.padding(16.dp),
                     fontWeight = FontWeight.W500
                 )
                 Switch(
-                    checked = darken,
-                    onCheckedChange = onDarkCheck
+                    checked = blur,
+                    onCheckedChange = onBlurChange
                 )
             }
             if (animate) {
                 AnimatedVisibility(
-                    visible = darken,
+                    visible = blur,
                     enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
                     exit = fadeOut(
                         animationSpec = tween(
@@ -109,7 +109,7 @@ fun DarkenSwitchAndSlider(
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onDarkenChange(it.roundToInt())
+                                    onBlurPercentageChange(it.roundToInt())
                                 }
                             },
                             valueRange = 0f..100f,
@@ -120,7 +120,7 @@ fun DarkenSwitchAndSlider(
                     }
                 }
             } else {
-                if (darken) {
+                if (blur) {
                     Column {
                         Text(
                             text = stringResource(R.string.percentage, percentage.roundToInt()),
@@ -135,7 +135,7 @@ fun DarkenSwitchAndSlider(
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onDarkenChange(it.roundToInt())
+                                    onBlurPercentageChange(it.roundToInt())
                                 }
                             },
                             valueRange = 0f..100f,

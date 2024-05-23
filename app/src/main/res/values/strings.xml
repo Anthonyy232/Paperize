@@ -63,6 +63,8 @@
     <string name="wallpaper_changer_has_been_disabled">Wallpaper changer has been disabled.</string>
     <string name="dismiss">Dismiss</string>
     <string name="has_been_unselected">%1$s has been unselected.</string>
+    <string name="interval_home">Home Screen | %1$s</string>
+    <string name="interval_lock">Lock Screen | %1$s</string>
     <string name="interval">Interval | %1$s</string>
     <plurals name="minutes">
         <item quantity="one">%d minute</item>
@@ -133,14 +135,17 @@
     <string name="live_wallpaper_detected">Live Wallpaper Detected</string>
     <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">Please disable your live wallpaper to use the wallpaper changer.</string>
     <string name="ok">OK</string>
-    <string name="brightness_percentage">%1$s%%</string>
+    <string name="percentage">%1$s%%</string>
     <string name="fill">Fill</string>
     <string name="fit">Fit</string>
     <string name="stretch">Stretch</string>
     <string name="wallpaper_scaling">Wallpaper Scaling</string>
-    <string name="adjust_brightness">Adjust Brightness</string>
-    <plurals name="notification_content_text">
-        <item quantity="one">Rotation: %1$d/%2$d wallpaper\nInterval: %3$s</item>
-        <item quantity="other">Rotation: %1$d/%2$d wallpapers\nInterval: %3$s</item>
-    </plurals>
+    <string name="change_brightness">Change Brightness</string>
+    <string name="home_screen_btn">Home Screen</string>
+    <string name="lock_screen_btn">Lock Screen</string>
+    <string name="individual_scheduling">Individual Scheduling</string>
+    <string name="show_interval_sliders">Show interval sliders</string>
+    <string name="interval_text">Time Interval</string>
+    <string name="change_blur">Change Blur</string>
+    <string name="paperize_is_running">Paperize is running</string>
 </resources>

@@ -1,7 +1,0 @@
-v1.0.0
-Updated dependencies, refactored code for more efficient and cleaner code
-Added reset option in the settings
-Fixed issue with using other images format other than JPG (now supports JPEG, PNG, AVIF, WEBP and perhaps more, untested)
-Fixed issue where the app would instantly crash if the content URIs were not cleared when uninstalling and reinstalling
-Planning
-Nothing at the moment. Give me your suggestions!

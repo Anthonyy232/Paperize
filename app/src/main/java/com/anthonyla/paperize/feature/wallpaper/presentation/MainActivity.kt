@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
+
             if (isFirstLaunch) {
                 val contentResolver = context.contentResolver
                 val persistedUris = contentResolver.persistedUriPermissions
@@ -78,7 +79,7 @@ class MainActivity : ComponentActivity() {
             LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
                 lifecycleScope.launch {
                     val serviceIntent = Intent(this@MainActivity, WallpaperService::class.java)
-                    val isAlreadyRunning = withContext(Dispatchers.IO) {5
+                    val isAlreadyRunning = withContext(Dispatchers.IO) {
                         val activityManager = getSystemService(ACTIVITY_SERVICE) as? ActivityManager
                         activityManager?.getRunningServices(Integer.MAX_VALUE)?.any {
                             it.service == serviceIntent.component
@@ -88,7 +89,9 @@ class MainActivity : ComponentActivity() {
                         if (!isAlreadyRunning) {
                             val intent = Intent(context, WallpaperService::class.java).apply {
                                 action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes", settingsState.value.interval)
+                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
+                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
+                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
                             }
                             context.startForegroundService(intent)
                         }
@@ -103,12 +106,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PaperizeTheme(settingsState) {
+            PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch)
                 }
             }
-
         }
     }
 }

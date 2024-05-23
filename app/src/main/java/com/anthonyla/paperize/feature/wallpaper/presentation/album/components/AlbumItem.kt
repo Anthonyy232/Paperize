@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -68,7 +69,8 @@ fun AlbumItem(
                         imageModel = { album.coverUri },
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
+                            alignment = Alignment.Center,
+                            requestSize = IntSize(300, 300),
                         ),
                         loading = {
                             if (animate) {
@@ -90,7 +92,8 @@ fun AlbumItem(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .align(Alignment.Start),
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleSmall
             )
             Spacer(modifier = Modifier.padding(8.dp))
         }

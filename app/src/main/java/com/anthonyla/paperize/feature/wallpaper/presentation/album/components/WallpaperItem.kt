@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -32,7 +33,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
@@ -60,6 +63,8 @@ fun WallpaperItem(
     animate: Boolean = true,
     darken: Boolean = false,
     darkenPercentage: Int? = null,
+    blur: Boolean = false,
+    blurPercentage: Int? = null,
     scaling: ScalingConstants? = null
 ) {
     val context = LocalContext.current
@@ -113,7 +118,7 @@ fun WallpaperItem(
     Box(modifier = boxModifier) {
         if (showUri) {
             val dimension = wallpaperUri.toUri().getImageDimensions(context)
-            val imageAspectRatio = aspectRatio ?: (dimension.width.toFloat() / dimension.height.toFloat())
+            val imageAspectRatio = aspectRatio ?: ((dimension?.width?.toFloat() ?: 9f) / (dimension?.height?.toFloat() ?: 19.5f))
             GlideImage(
                 imageModel = { wallpaperUri },
                 imageOptions = ImageOptions(
@@ -124,6 +129,7 @@ fun WallpaperItem(
                             ScalingConstants.STRETCH -> ContentScale.FillBounds
                         }
                     } else { ContentScale.Crop },
+                    requestSize = IntSize(300, 300),
                     alignment = Alignment.Center,
                     colorFilter = if (darken && darkenPercentage != null && darkenPercentage < 100) {
                         ColorFilter.tint(
@@ -145,7 +151,14 @@ fun WallpaperItem(
                         .asBitmap()
                         .format(DecodeFormat.PREFER_RGB_565)
                 },
-                modifier = Modifier.aspectRatio(imageAspectRatio).background(if (scaling != null) Color.Black else Color.Transparent),
+                modifier = Modifier
+                    .aspectRatio(imageAspectRatio)
+                    .background(if (scaling != null) Color.Black else Color.Transparent)
+                    .blur(
+                        if (blur && blurPercentage != null && blurPercentage > 0 ) {
+                            blurPercentage.toFloat().div(100f) * 1.5.dp
+                        } else { 0.dp })
+                    .clip(RoundedCornerShape(roundedCornerShapeTransition))
             )
         }
         if (selectionMode) {

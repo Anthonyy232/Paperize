@@ -86,15 +86,13 @@ fun AlbumViewScreen(
         }
     )
 
-    BackHandler {
-        if (selectionMode) {
-            selectionMode = false
+    BackHandler(
+        enabled = selectionMode,
+        onBack = {
             albumViewScreenViewModel.onEvent(AlbumViewEvent.DeselectAll)
-        } else {
-            onBackClick()
-            albumViewScreenViewModel.onEvent(AlbumViewEvent.ClearState)
+            selectionMode = false
         }
-    }
+    )
 
     Scaffold(
         topBar = {

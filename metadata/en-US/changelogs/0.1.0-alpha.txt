@@ -1,4 +1,0 @@
-v0.1.0-alpha
-The main feature of the app is operational and ready for use
-There are a few minor features that are missing that will be added in v1.0.0 stable release
-Create an issue if there are any bugs

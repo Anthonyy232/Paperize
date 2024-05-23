@@ -61,11 +61,14 @@ class WallpaperScreenViewModel @Inject constructor (
                                 )
                             }
                         }.toList()
-                        val shuffledWallpapers = wallpapers.map { it.wallpaperUri }.shuffled()
+                        val shuffledWallpapers1 = wallpapers.map { it.wallpaperUri }.shuffled()
+                        val shuffledWallpapers2 = wallpapers.map { it.wallpaperUri }.shuffled()
                         val newSelectedAlbum = SelectedAlbum(
                             album = event.album.album.copy(
-                                wallpapersInQueue = shuffledWallpapers,
-                                currentWallpaper = shuffledWallpapers.firstOrNull()
+                                homeWallpapersInQueue = shuffledWallpapers1,
+                                lockWallpapersInQueue = shuffledWallpapers2,
+                                currentHomeWallpaper = shuffledWallpapers1.firstOrNull(),
+                                currentLockWallpaper = if (event.scheduleSeparately) shuffledWallpapers2.firstOrNull() else shuffledWallpapers1.firstOrNull(),
                             ),
                             wallpapers = wallpapers
                         )

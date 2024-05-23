@@ -10,7 +10,10 @@ import androidx.room.PrimaryKey
  * @param displayedAlbumName The displayed album name
  * @param coverUri The cover uri of the album
  * @param initialized Whether the album has been initialized
- * @param wallpapersInQueue The wallpapers in the queue to be displayed
+ * @param homeWallpapersInQueue The wallpapers in the queue to be displayed for the home screen or when the user schedules both lock and home together
+ * @param lockWallpapersInQueue The wallpapers in the queue to be displayed for the lock screen when scheduled separately
+ * @param currentHomeWallpaper The current wallpaper for the home screen
+ * @param currentLockWallpaper The current wallpaper for the lock screen
  */
 @Entity
 data class Album(
@@ -18,6 +21,8 @@ data class Album(
     val displayedAlbumName: String,
     val coverUri: String?,
     val initialized: Boolean = false,
-    val wallpapersInQueue: List<String> = emptyList(),
-    val currentWallpaper: String? = null
+    val homeWallpapersInQueue: List<String> = emptyList(),
+    val lockWallpapersInQueue: List<String> = emptyList(),
+    val currentHomeWallpaper: String? = null,
+    val currentLockWallpaper: String? = null
 )

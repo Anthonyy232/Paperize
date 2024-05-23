@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
@@ -105,6 +106,7 @@ fun AlbumBottomSheet(
                                 imageOptions = ImageOptions(
                                     contentScale = ContentScale.Crop,
                                     alignment = Alignment.Center,
+                                    requestSize = IntSize(150, 150),
                                 ),
                                 loading = {
                                     if (animate) {
