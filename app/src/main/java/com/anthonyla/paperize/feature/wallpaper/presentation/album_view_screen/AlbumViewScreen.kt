@@ -162,7 +162,7 @@ fun AlbumViewScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (items = album.folders, key = { folder -> folder.folderUri.hashCode() }
+                    items (items = album.folders, key = { folder -> folder.folderUri }
                     ) { folder ->
                         if (settingsState.value.animate) {
                             FolderItem(
@@ -215,7 +215,7 @@ fun AlbumViewScreen(
                             )
                         }
                     }
-                    items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
+                    items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }
                     ) { wallpaper ->
                         if (settingsState.value.animate) {
                             WallpaperItem(

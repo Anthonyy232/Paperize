@@ -171,7 +171,7 @@ fun AddAlbumScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (items = addAlbumState.value.folders, key = { folder -> folder.folderUri.hashCode()}
+                    items (items = addAlbumState.value.folders, key = { folder -> folder.folderUri }
                     ) { folder ->
                         FolderItem(
                             folder = folder,
@@ -199,7 +199,7 @@ fun AddAlbumScreen(
                             )
                         )
                     }
-                    items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri.hashCode()}
+                    items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }
                     ) { wallpaper ->
                         WallpaperItem(
                             wallpaperUri = wallpaper.wallpaperUri,

@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.domain.model
 
+import androidx.compose.runtime.Stable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
