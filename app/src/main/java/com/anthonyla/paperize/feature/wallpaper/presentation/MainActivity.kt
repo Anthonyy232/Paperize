@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
                     }
                     if (selectedState.value.selectedAlbum != null && settingsState.value.enableChanger) {
                         if (!isAlreadyRunning) {
+                            settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                             val intent = Intent(context, WallpaperService::class.java).apply {
                                 action = WallpaperService.Actions.START.toString()
                                 putExtra("timeInMinutes1", settingsState.value.homeInterval)

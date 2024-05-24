@@ -1,11 +1,13 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
+import android.icu.util.UniversalTimeScale.toLong
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -181,18 +183,27 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetHomeWallpaperInterval -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val time = LocalDateTime.now()
-                    val formattedLastSetTime = time.format(formatter)
-                    val formattedNextSetTime = time.plusMinutes(event.interval.toLong()).format(formatter)
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, formattedLastSetTime)
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, formattedNextSetTime)
                     settingsDataStoreImpl.putInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL, event.interval)
+
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now()
+                    val nextSetTime: String?
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+                    if (_state.value.scheduleSeparately) {
+                        val nextSetTime1 = currentTime.plusMinutes(event.interval.toLong())
+                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                    }
+                    else {
+                        nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                    }
                     _state.update {
                         it.copy(
                             homeInterval = event.interval,
-                            lastSetTime = formattedLastSetTime,
-                            nextSetTime = formattedNextSetTime
+                            lastSetTime = currentTime.format(formatter),
+                            nextSetTime = nextSetTime
                         )
                     }
                 }
@@ -200,18 +211,49 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetLockWallpaperInterval -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val time = LocalDateTime.now()
-                    val formattedLastSetTime = time.format(formatter)
-                    val formattedNextSetTime = time.plusMinutes(event.interval.toLong()).format(formatter)
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, formattedLastSetTime)
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, formattedNextSetTime)
                     settingsDataStoreImpl.putInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL, event.interval)
+
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now()
+                    val nextSetTime: String?
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+                    if (_state.value.scheduleSeparately) {
+                        val nextSetTime1 = currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                        val nextSetTime2 = currentTime.plusMinutes(event.interval.toLong())
+                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                    }
+                    else {
+                        nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                    }
                     _state.update {
                         it.copy(
                             lockInterval = event.interval,
-                            lastSetTime = formattedLastSetTime,
-                            nextSetTime = formattedNextSetTime
+                            lastSetTime = currentTime.format(formatter),
+                            nextSetTime = nextSetTime
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.RefreshNextSetTime -> {
+                viewModelScope.launch {
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now()
+                    val nextSetTime: String?
+                    if (_state.value.scheduleSeparately) {
+                        val nextSetTime1 = currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
+                    }
+                    else {
+                        nextSetTime = currentTime.plusMinutes(_state.value.homeInterval.toLong()).format(formatter)
+                    }
+                    _state.update {
+                        it.copy(
+                            lastSetTime = currentTime.format(formatter),
+                            nextSetTime = nextSetTime
                         )
                     }
                 }

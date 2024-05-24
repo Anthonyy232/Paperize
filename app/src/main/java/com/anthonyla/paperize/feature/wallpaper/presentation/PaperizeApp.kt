@@ -130,11 +130,6 @@ fun PaperizeApp(
                                 settingsState.value.scheduleSeparately
                             )
                         )
-                        settingsViewModel.onEvent(
-                            SettingsEvent.SetHomeWallpaperInterval(
-                                settingsState.value.homeInterval
-                            )
-                        )
                     } ?: run {
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                     Intent(context, WallpaperService::class.java).also {
@@ -284,16 +279,12 @@ fun PaperizeApp(
                     if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            delay(2000)
+                            delay(3000)
                             val intent = Intent(context, WallpaperService::class.java).apply {
                                 action = WallpaperService.Actions.REQUEUE.toString()
                                 putExtra("timeInMinutes1", timeInMinutes)
                                 putExtra("timeInMinutes2", settingsState.value.lockInterval)
                                 putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                                selectedState.value.selectedAlbum?.album?.homeWallpapersInQueue.let { it1 ->
-                                    if (it1 != null) { putExtra("currentSize", it1.size) }
-                                }
-                                selectedState.value.selectedAlbum?.wallpapers?.let { it1 -> putExtra("totalSize", it1.size) }
                             }
                             context.startForegroundService(intent)
                         }
@@ -305,16 +296,12 @@ fun PaperizeApp(
                     if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            delay(2000)
+                            delay(3000)
                             val intent = Intent(context, WallpaperService::class.java).apply {
                                 action = WallpaperService.Actions.REQUEUE.toString()
                                 putExtra("timeInMinutes1", settingsState.value.homeInterval)
                                 putExtra("timeInMinutes2", timeInMinutes)
                                 putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                                selectedState.value.selectedAlbum?.album?.homeWallpapersInQueue.let { it1 ->
-                                    if (it1 != null) { putExtra("currentSize", it1.size) }
-                                }
-                                selectedState.value.selectedAlbum?.wallpapers?.let { it1 -> putExtra("totalSize", it1.size) }
                             }
                             context.startForegroundService(intent)
                         }

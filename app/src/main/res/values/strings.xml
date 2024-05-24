@@ -148,4 +148,5 @@
     <string name="interval_text">Time Interval</string>
     <string name="change_blur">Change Blur</string>
     <string name="paperize_is_running">Paperize is running</string>
+    <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
 </resources>
