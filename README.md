@@ -18,22 +18,21 @@
 - **On-Device Storage**: All your wallpapers and settings are stored on your device
 <div align="center">
     <br/>
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/eebec922-70a6-4d54-97d9-ab02cbfb7a36" width="30%" alt="onboarding" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/e22c1928-81f5-4b9a-822f-2d3c901bab3f" width="30%" alt="wallpaper" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/e106c0dc-23ff-4f4a-adfc-5ebe93219ae0" width="30%" alt="album" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/57122f72-78f8-45ed-a9ac-de943061d6a2" width="30%" alt="onboarding" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/9f41d715-7b14-4ff2-9c30-87ad3d86d94c" width="30%" alt="wallpaper" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/47aa95c3-ef80-4c3c-a8cd-a51ac6824507" width="30%" alt="interval" />
+      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/4ce1b28d-f4b2-4048-a261-203156222263" width="30%" alt="album" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/66b092e5-4af4-4396-b145-63ee506d9257" width="30%" alt="settings" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/54ebd285-8da4-4446-83f1-ba0e7ee9476d" width="30%" alt="adding" />
     <br/>
     <br/>
-    <div><video controls src="https://github.com/Anthonyy232/Paperize/assets/60626873/086f27da-1648-456a-8581-79e56f4f4881" muted="false"></video></div>
+    <div><video controls src="https://github.com/Anthonyy232/Paperize/assets/60626873/015afb04-e3f3-4641-b8f9-707cfa26d16f" muted="true"></video></div>
 </div>
 
-
 ## Download
-
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Download app from Google Play" height="80">](https://play.google.com/store/apps/details?id=com.anthonyla.paperize)
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
 
-Playstore and F-Droid will be added soon
+F-Droid will be added soon
 
 ## Localization
 I want to allow more people to use the app. Currently, translations are provided using machine translation and AI -- which is not optimal.
@@ -56,7 +55,6 @@ I would love some help translating the app! Help me out with that [here](https:/
 - [AnimatedFABMenu](https://github.com/rajaumair7890/AnimatedFABMenu) - A animated floating action button with Material 3 design
 
 Thanks to the creators and maintainers of the open-source libraries used in this project.
-
 
 ## Build
 
