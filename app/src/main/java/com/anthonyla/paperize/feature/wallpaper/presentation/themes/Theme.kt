@@ -93,7 +93,6 @@ fun PaperizeTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-
     val isDarkMode = isDarkMode(darkMode = darkMode)
     val isDynamicTheming = isDynamicTheming(dynamicTheming = dynamicTheming)
     val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -109,9 +108,8 @@ fun PaperizeTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = TRANSPARENT
-            SystemBarStyle.light(TRANSPARENT, TRANSPARENT)
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkMode
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDarkMode
         }
     }
 

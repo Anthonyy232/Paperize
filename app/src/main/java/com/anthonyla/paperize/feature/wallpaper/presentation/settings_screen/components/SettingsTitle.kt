@@ -1,8 +1,19 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components
 
+import android.graphics.Color
+import android.os.Build
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -27,6 +38,7 @@ fun SettingsTitle(
     smallTopAppBarHeight: Dp,
     paddingMedium: Dp,
     scroll: ScrollState,
+    topInset: Dp,
     modifier: Modifier = Modifier
 ) {
     val titlePaddingStart = 16.dp
@@ -35,6 +47,8 @@ fun SettingsTitle(
     val titleFontScaleEnd = 0.7f
     var titleHeightPx by remember { mutableFloatStateOf(0f) }
     var titleWidthPx by remember { mutableFloatStateOf(0f) }
+    val fraction = (topInset - 74.dp) / (151.dp - 74.dp)
+    val statusPadding = lerp(0.dp, 24.dp, fraction.coerceIn(0f, 1f))
 
     Text(
         text = stringResource(id = R.string.settings_screen),
@@ -55,7 +69,7 @@ fun SettingsTitle(
                 val titleExtraStartPadding = titleWidthPx.toDp() * (1 - scaleXY.value) / 2f
 
                 val titleYFirstInterpolatedPoint = lerp(
-                    largeTopAppBarHeight - titleHeightPx.toDp() - paddingMedium,
+                    largeTopAppBarHeight - titleHeightPx.toDp() - paddingMedium + statusPadding,
                     largeTopAppBarHeight / 2,
                     collapseFraction
                 )
@@ -68,7 +82,7 @@ fun SettingsTitle(
 
                 val titleYSecondInterpolatedPoint = lerp(
                     largeTopAppBarHeight / 2,
-                    (smallTopAppBarHeight - titleHeightPx.toDp() / 2) - 5.dp,
+                    (smallTopAppBarHeight + statusPadding - titleHeightPx.toDp() / 2) - 5.dp,
                     collapseFraction
                 )
 

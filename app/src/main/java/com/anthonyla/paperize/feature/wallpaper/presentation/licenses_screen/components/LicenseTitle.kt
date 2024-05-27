@@ -27,7 +27,8 @@ fun LicenseTitle(
     smallTopAppBarHeight: Dp,
     paddingMedium: Dp,
     modifier: Modifier = Modifier,
-    offset: State<Int>
+    offset: State<Int>,
+    topInset: Dp,
 ) {
     val titlePaddingStart = 16.dp
     val titlePaddingEnd = 64.dp
@@ -35,6 +36,9 @@ fun LicenseTitle(
     val titleFontScaleEnd = 0.7f
     var titleHeightPx by remember { mutableFloatStateOf(0f) }
     var titleWidthPx by remember { mutableFloatStateOf(0f) }
+
+    val fraction = (topInset - 74.dp) / (151.dp - 74.dp)
+    val statusPadding = lerp(0.dp, 24.dp, fraction.coerceIn(0f, 1f))
 
     Text(
         text = stringResource(R.string.licenses),
@@ -55,7 +59,7 @@ fun LicenseTitle(
                 val titleExtraStartPadding = titleWidthPx.toDp() * (1 - scaleXY.value) / 2f
 
                 val titleYFirstInterpolatedPoint = lerp(
-                    largeTopAppBarHeight - titleHeightPx.toDp() - paddingMedium,
+                    largeTopAppBarHeight - titleHeightPx.toDp() - paddingMedium + statusPadding,
                     largeTopAppBarHeight / 2,
                     collapseFraction
                 )
@@ -68,7 +72,7 @@ fun LicenseTitle(
 
                 val titleYSecondInterpolatedPoint = lerp(
                     largeTopAppBarHeight / 2,
-                    (smallTopAppBarHeight - titleHeightPx.toDp() / 2) - 5.dp,
+                    (smallTopAppBarHeight + statusPadding - titleHeightPx.toDp() / 2) - 5.dp,
                     collapseFraction
                 )
 

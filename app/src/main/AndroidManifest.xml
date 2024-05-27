@@ -25,6 +25,7 @@
         android:theme="@style/Theme.Paperize" tools:targetApi="tiramisu">
         <activity
             android:name=".feature.wallpaper.presentation.MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:theme="@style/Theme.Paperize">
             <intent-filter>

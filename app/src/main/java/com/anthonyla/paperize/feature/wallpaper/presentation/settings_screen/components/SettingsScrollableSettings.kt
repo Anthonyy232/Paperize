@@ -10,13 +10,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -40,6 +50,7 @@ import kotlinx.coroutines.launch
 /**
  * Scrollable settings screen to wrap all settings components
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScrollableSettings(
     settingsState: StateFlow<SettingsState>,
@@ -51,6 +62,7 @@ fun SettingsScrollableSettings(
     onPrivacyClick: () -> Unit,
     onLicenseClick: () -> Unit,
     onResetClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -64,7 +76,7 @@ fun SettingsScrollableSettings(
     }
 
     val githubLink = "https://github.com/Anthonyy232/Paperize"
-    val playstoreLink = ""
+    val playstoreLink = "https://play.google.com/store/apps/details?id=com.anthonyla.paperize"
     val fdroidLink = ""
     val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
 
@@ -80,6 +92,24 @@ fun SettingsScrollableSettings(
                     )
                 }
             ) },
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.home_screen)
+                        )
+                    }
+                }
+            )
+        },
         modifier = Modifier.fillMaxSize(),
         content = { it
             Column(

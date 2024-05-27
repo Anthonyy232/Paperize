@@ -14,12 +14,15 @@ class WallpaperBootReceiver : BroadcastReceiver() {
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onReceive(context: Context, intent: Intent) {
         if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
-            Log.d("PaperizeWallpaperChanger", "Boot completed")
             val serviceIntent = Intent(context, WallpaperService::class.java)
             serviceIntent.action = WallpaperService.Actions.START.toString()
             runBlocking {
-                val timeInMinutes = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
-                serviceIntent.putExtra("timeInMinutes", timeInMinutes)
+                val timeInMinutes1 = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                val timeInMinutes2 = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                val scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
+                serviceIntent.putExtra("timeInMinutes1", timeInMinutes1)
+                serviceIntent.putExtra("timeInMinutes2", timeInMinutes2)
+                serviceIntent.putExtra("scheduleSeparately", scheduleSeparately)
             }
             context.startForegroundService(serviceIntent)
         }

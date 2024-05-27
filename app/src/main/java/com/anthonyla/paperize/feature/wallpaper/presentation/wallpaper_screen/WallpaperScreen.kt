@@ -5,11 +5,15 @@ import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -85,12 +89,12 @@ fun WallpaperScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val openDialog = rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
-
     if (openDialog.value) {
         ShowLiveWallpaperEnabledDialog(
             onDismissRequest = { openDialog.value = false }
         )
     }
+    val scrollState = rememberScrollState()
 
     Scaffold(
         snackbarHost = {
@@ -106,122 +110,100 @@ fun WallpaperScreen(
             ) },
         modifier = Modifier.fillMaxSize(),
         content = { padding ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(8.dp),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                item {
-                    ChangerSelectionRow(
-                        homeEnabled = homeEnabled,
-                        lockEnabled = lockEnabled,
-                        onHomeCheckedChange = onHomeCheckedChange,
-                        onLockCheckedChange = onLockCheckedChange
+                ChangerSelectionRow(
+                    homeEnabled = homeEnabled,
+                    lockEnabled = lockEnabled,
+                    onHomeCheckedChange = onHomeCheckedChange,
+                    onLockCheckedChange = onLockCheckedChange
+                )
+                if (homeEnabled || lockEnabled) {
+                    CurrentSelectedAlbum(
+                        selectedAlbum = selectedAlbum,
+                        onOpenBottomSheet = {
+                            if (albumState.value.albumsWithWallpapers.firstOrNull() != null) {
+                                if (isLiveWallpaperSet(context)) {
+                                    openDialog.value = true
+                                } else {
+                                    openBottomSheet = true
+                                }
+                            } else {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.no_albums_found),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        },
+                        onStop = {
+                            if (selectedAlbum != null) {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.has_been_unselected,
+                                            selectedAlbum.album.displayedAlbumName
+                                        ),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                                onStop()
+                            }
+                        },
+                        animate = animate,
+                        enableChanger = enableChanger,
+                        onToggleChanger = {
+                            if (!it) {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.wallpaper_changer_has_been_disabled),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                            onToggleChanger(it)
+                        }
                     )
                 }
-                item {
-                    if (homeEnabled || lockEnabled) {
-                        CurrentSelectedAlbum(
-                            selectedAlbum = selectedAlbum,
-                            onOpenBottomSheet = {
-                                if (albumState.value.albumsWithWallpapers.firstOrNull() != null) {
-                                    if (isLiveWallpaperSet(context)) {
-                                        openDialog.value = true
-                                    } else {
-                                        openBottomSheet = true
-                                    }
-                                } else {
-                                    scope.launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(R.string.no_albums_found),
-                                            actionLabel = context.getString(R.string.dismiss),
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                            },
-                            onStop = {
-                                if (selectedAlbum != null) {
-                                    scope.launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(
-                                                R.string.has_been_unselected,
-                                                selectedAlbum.album.displayedAlbumName
-                                            ),
-                                            actionLabel = context.getString(R.string.dismiss),
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                    onStop()
-                                }
-                            },
-                            animate = animate,
-                            enableChanger = enableChanger,
-                            onToggleChanger = {
-                                if (!it) {
-                                    scope.launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(R.string.wallpaper_changer_has_been_disabled),
-                                            actionLabel = context.getString(R.string.dismiss),
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                                onToggleChanger(it)
-                            }
-                        )
-                    }
-                }
-                item {
-                    if (animate) {
-                        AnimatedVisibility(
-                            visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = fadeOut()
-                        ) {
-                            if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                                CurrentAndNextChange(lastSetTime, nextSetTime)
-                            }
-                        }
-                    }
-                    else {
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
+                        enter = slideInVertically(initialOffsetY = { -it }),
+                        exit = fadeOut()
+                    ) {
                         if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
                             CurrentAndNextChange(lastSetTime, nextSetTime)
                         }
                     }
                 }
-                item {
-                    if (animate) {
-                        AnimatedVisibility(
-                            visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = fadeOut()
-                        ) {
-                            if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                                WallpaperPreviewAndScale(
-                                    currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                                    currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
-                                    animate = true,
-                                    darken = darken,
-                                    darkenPercentage = darkenPercentage,
-                                    scaling = scaling,
-                                    onScalingChange = onScalingChange,
-                                    homeEnabled = homeEnabled,
-                                    lockEnabled = lockEnabled,
-                                    blur = blur,
-                                    blurPercentage = blurPercentage
-                                )
-                            }
-                        }
+                else {
+                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                        CurrentAndNextChange(lastSetTime, nextSetTime)
                     }
-                    else {
+                }
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
+                        enter = slideInVertically(initialOffsetY = { -it }),
+                        exit = fadeOut()
+                    ) {
                         if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
                             WallpaperPreviewAndScale(
                                 currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
                                 currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
-                                animate = false,
+                                animate = true,
                                 darken = darken,
                                 darkenPercentage = darkenPercentage,
                                 scaling = scaling,
@@ -234,112 +216,123 @@ fun WallpaperScreen(
                         }
                     }
                 }
-                item {
-                    if (animate) {
-                        AnimatedVisibility(
-                            visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = fadeOut()
-                        ) {
-                            TimeSliders(
-                                timeInMinutes1 = interval1,
-                                timeInMinutes2 = interval2,
-                                onTimeChange1 = { days, hours, minutes ->
-                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    onTimeChange1(totalMinutes)
-                                },
-                                onTimeChange2 = { days, hours, minutes ->
-                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    onTimeChange2(totalMinutes)
-                                },
-                                showInterval = showInterval.value,
-                                animate = true,
-                                onShowIntervalChange = { showInterval.value = it },
-                                scheduleSeparately = scheduleSeparately,
-                                onScheduleSeparatelyChange = onScheduleSeparatelyChange,
-                                lockEnabled = lockEnabled,
-                                homeEnabled = homeEnabled
-                            )
-                        }
-                    }
-                    else {
-                        if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                            TimeSliders(
-                                timeInMinutes1 = interval1,
-                                timeInMinutes2 = interval2,
-                                onTimeChange1 = { days, hours, minutes ->
-                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    onScheduleWallpaperChanger1(totalMinutes)
-                                },
-                                onTimeChange2 = { days, hours, minutes ->
-                                    val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                    onScheduleWallpaperChanger2(totalMinutes)
-                                },
-                                showInterval = showInterval.value,
-                                animate = false,
-                                onShowIntervalChange = { showInterval.value = it },
-                                scheduleSeparately = scheduleSeparately,
-                                onScheduleSeparatelyChange = onScheduleSeparatelyChange,
-                                lockEnabled = lockEnabled,
-                                homeEnabled = homeEnabled,
-                            )
-                        }
+                else {
+                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                        WallpaperPreviewAndScale(
+                            currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
+                            currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
+                            animate = false,
+                            darken = darken,
+                            darkenPercentage = darkenPercentage,
+                            scaling = scaling,
+                            onScalingChange = onScalingChange,
+                            homeEnabled = homeEnabled,
+                            lockEnabled = lockEnabled,
+                            blur = blur,
+                            blurPercentage = blurPercentage
+                        )
                     }
                 }
-                item {
-                    if (animate) {
-                        AnimatedVisibility(
-                            visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = fadeOut()
-                        ) {
-                            DarkenSwitchAndSlider(
-                                onDarkCheck = onDarkCheck,
-                                darken = darken,
-                                onDarkenChange = onDarkenPercentage,
-                                darkenPercentage = darkenPercentage,
-                                animate = true
-                            )
-                        }
-                    }
-                    else {
-                        if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                            DarkenSwitchAndSlider(
-                                onDarkCheck = onDarkCheck,
-                                darken = darken,
-                                onDarkenChange = onDarkenPercentage,
-                                darkenPercentage = darkenPercentage,
-                                animate = false
-                            )
-                        }
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
+                        enter = slideInVertically(initialOffsetY = { -it }),
+                        exit = fadeOut()
+                    ) {
+                        TimeSliders(
+                            timeInMinutes1 = interval1,
+                            timeInMinutes2 = interval2,
+                            onTimeChange1 = { days, hours, minutes ->
+                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                onTimeChange1(totalMinutes)
+                            },
+                            onTimeChange2 = { days, hours, minutes ->
+                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                onTimeChange2(totalMinutes)
+                            },
+                            showInterval = showInterval.value,
+                            animate = true,
+                            onShowIntervalChange = { showInterval.value = it },
+                            scheduleSeparately = scheduleSeparately,
+                            onScheduleSeparatelyChange = onScheduleSeparatelyChange,
+                            lockEnabled = lockEnabled,
+                            homeEnabled = homeEnabled
+                        )
                     }
                 }
-                item {
-                    if (animate) {
-                        AnimatedVisibility(
-                            visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = fadeOut()
-                        ) {
-                            BlurSwitchAndSlider(
-                                onBlurPercentageChange = onBlurPercentageChange,
-                                onBlurChange = onBlurChange,
-                                blur = blur,
-                                blurPercentage = blurPercentage,
-                                animate = true
-                            )
-                        }
+                else {
+                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                        TimeSliders(
+                            timeInMinutes1 = interval1,
+                            timeInMinutes2 = interval2,
+                            onTimeChange1 = { days, hours, minutes ->
+                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                onScheduleWallpaperChanger1(totalMinutes)
+                            },
+                            onTimeChange2 = { days, hours, minutes ->
+                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
+                                onScheduleWallpaperChanger2(totalMinutes)
+                            },
+                            showInterval = showInterval.value,
+                            animate = false,
+                            onShowIntervalChange = { showInterval.value = it },
+                            scheduleSeparately = scheduleSeparately,
+                            onScheduleSeparatelyChange = onScheduleSeparatelyChange,
+                            lockEnabled = lockEnabled,
+                            homeEnabled = homeEnabled,
+                        )
                     }
-                    else {
-                        if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                            BlurSwitchAndSlider(
-                                onBlurPercentageChange = onBlurPercentageChange,
-                                onBlurChange = onBlurChange,
-                                blur = blur,
-                                blurPercentage = blurPercentage,
-                                animate = false
-                            )
-                        }
+                }
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
+                        enter = slideInVertically(initialOffsetY = { -it }),
+                        exit = fadeOut()
+                    ) {
+                        DarkenSwitchAndSlider(
+                            onDarkCheck = onDarkCheck,
+                            darken = darken,
+                            onDarkenChange = onDarkenPercentage,
+                            darkenPercentage = darkenPercentage,
+                            animate = true
+                        )
+                    }
+                }
+                else {
+                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                        DarkenSwitchAndSlider(
+                            onDarkCheck = onDarkCheck,
+                            darken = darken,
+                            onDarkenChange = onDarkenPercentage,
+                            darkenPercentage = darkenPercentage,
+                            animate = false
+                        )
+                    }
+                }
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
+                        enter = slideInVertically(initialOffsetY = { -it }),
+                        exit = fadeOut()
+                    ) {
+                        BlurSwitchAndSlider(
+                            onBlurPercentageChange = onBlurPercentageChange,
+                            onBlurChange = onBlurChange,
+                            blur = blur,
+                            blurPercentage = blurPercentage,
+                            animate = true
+                        )
+                    }
+                }
+                else {
+                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                        BlurSwitchAndSlider(
+                            onBlurPercentageChange = onBlurPercentageChange,
+                            onBlurChange = onBlurChange,
+                            blur = blur,
+                            blurPercentage = blurPercentage,
+                            animate = false
+                        )
                     }
                 }
             }

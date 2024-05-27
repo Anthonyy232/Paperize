@@ -6,20 +6,26 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.Surface
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,13 +50,18 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     private val context = this
+    private var topInset = 0.dp
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
         }
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        )
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val splashScreen = installSplashScreen()
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
@@ -107,12 +118,17 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-
             PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp(isFirstLaunch)
+                    PaperizeApp(isFirstLaunch, topInset)
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        topInset = window.decorView.rootWindowInsets.stableInsetTop.dp
     }
 }

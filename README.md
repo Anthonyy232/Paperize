@@ -65,7 +65,7 @@ This project is built using Kotlin, Java, and Gradle. Here are the steps to buil
 ### Prerequisites
 - Java 8 (1.8)
 - Android Studio Jellyfish | 2023.3.1 or later
-- Gradle 8.4.0 or later
+- Gradle 8.4.1 or later
 - Minimum SDK 26
 
 ### Steps

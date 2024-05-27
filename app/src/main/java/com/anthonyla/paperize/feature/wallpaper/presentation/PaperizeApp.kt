@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,6 +70,7 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun PaperizeApp(
     firstLaunch: Boolean,
+    topInsets: Dp,
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
@@ -550,7 +552,7 @@ fun PaperizeApp(
                     sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
                 } else { null }
             }
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val addEdit: AddEdit = backStackEntry.toRoute()
             AddAlbumScreen(
                 initialAlbumName = addEdit.wallpaper,
@@ -560,12 +562,6 @@ fun PaperizeApp(
                     navController.navigate(WallpaperView(it))
                 },
                 onShowFolderView = { folderName, wallpapers ->
-                    /*navController.navigate(
-                        FolderView(
-                            folderName,
-                            wallpapers
-                        )
-                    )*/
                     val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
                     navController.navigate("${NavScreens.FolderView.route}/$folderName/$encodedWallpapers")
                 }
@@ -601,42 +597,6 @@ fun PaperizeApp(
                 animate = settingsState.value.animate
             )
         }
-        // Navigate to folder view screen to view wallpapers in a particular folder
-        /*composable<FolderView> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) { backStackEntry ->
-            val folderView: FolderView = backStackEntry.toRoute()
-            if (folderView.wallpapers.isNotEmpty()) {
-                FolderViewScreen(
-                    folderName = folderView.folderName,
-                    wallpapers = folderView.wallpapers,
-                    onBackClick = { navController.navigateUp() },
-                    onShowWallpaperView = {
-                        navController.navigate(WallpaperView(it))
-                    },
-                    animate = settingsState.value.animate
-                )
-            } else { navController.navigateUp() }
-        }*/
         composable(
             route = NavScreens.FolderView.route.plus("/{folderName}/{wallpapers}"),
             arguments = listOf(
@@ -714,18 +674,12 @@ fun PaperizeApp(
                         navController.navigate(WallpaperView(it))
                     },
                     onShowFolderView = { folderName, wallpapers ->
-                        /*navController.navigate(
-                            com.anthonyla.paperize.feature.wallpaper.util.navigation.FolderView(
-                                folderName,
-                                wallpapers
-                            )
-                        )*/
                         val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
                         navController.navigate("${NavScreens.FolderView.route}/$folderName/$encodedWallpapers")
                     },
                     onDeleteAlbum = {
-                        albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpaper))
                         navController.navigateUp()
+                        albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpaper))
                     },
                     onTitleChange = { title, originalAlbumWithWallpaper ->
                         albumsViewModel.onEvent(AlbumsEvent.ChangeAlbumName(title, originalAlbumWithWallpaper))
@@ -761,6 +715,7 @@ fun PaperizeApp(
         ) {
             SettingsScreen(
                 settingsState = settingsViewModel.state,
+                topInsets = topInsets,
                 onBackClick = { navController.navigateUp() },
                 onDarkModeClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
@@ -821,6 +776,7 @@ fun PaperizeApp(
             }
         ) {
             PrivacyScreen(
+                topInsets = topInsets,
                 onBackClick = { navController.navigateUp() },
             )
         }
@@ -848,6 +804,7 @@ fun PaperizeApp(
             }
         ) {
             LicensesScreen(
+                topInsets = topInsets,
                 onBackClick = { navController.navigateUp() },
             )
         }

@@ -1,13 +1,11 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
-import android.icu.util.UniversalTimeScale.toLong
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async

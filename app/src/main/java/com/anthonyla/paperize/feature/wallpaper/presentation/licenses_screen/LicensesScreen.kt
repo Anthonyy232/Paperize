@@ -5,14 +5,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.data.rememberCurrentOffset
 import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.components.LicenseScrollableSettings
-import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.components.LicenseSmallTopAppBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.components.LicenseTitle
 
 @Composable
 fun LicensesScreen(
+    topInsets: Dp,
     onBackClick: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
@@ -25,14 +26,15 @@ fun LicensesScreen(
         LicenseScrollableSettings(
             largeTopAppBarHeightPx = largeTopAppBarHeight,
             lazyListState = lazyListState,
-            offset = offset
+            offset = offset,
+            onBackClick = onBackClick
         )
-        LicenseSmallTopAppBar(onBackClick = onBackClick)
         LicenseTitle(
             largeTopAppBarHeight = largeTopAppBarHeight,
             smallTopAppBarHeight = smallTopAppBarHeight,
             paddingMedium = paddingMedium,
-            offset = offset
+            offset = offset,
+            topInset = topInsets
         )
     }
 }

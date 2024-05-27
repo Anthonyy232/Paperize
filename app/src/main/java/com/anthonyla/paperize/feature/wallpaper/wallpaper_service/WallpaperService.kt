@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
@@ -60,6 +61,8 @@ class WallpaperService: Service() {
     private var nextSetTime1: LocalDateTime? = null
     private var nextSetTime2: LocalDateTime? = null
     private var scheduleSeparately: Boolean = false
+    private var lastRan1: LocalDateTime? = null
+    private var lastRan2: LocalDateTime? = null
 
     enum class Actions {
         START,
@@ -119,6 +122,10 @@ class WallpaperService: Service() {
                 timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                 timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                 scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                nextSetTime1 = null
+                nextSetTime2 = null
+                lastRan1 = null
+                lastRan2 = null
 
                 if (!scheduleSeparately) {
                     runnableCode1 = object : Runnable {
@@ -176,6 +183,10 @@ class WallpaperService: Service() {
                 timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                 timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                 scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                nextSetTime1 = null
+                nextSetTime2 = null
+                lastRan1 = null
+                lastRan2 = null
 
 
                 val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
@@ -310,7 +321,6 @@ class WallpaperService: Service() {
      * If none left, reshuffle the wallpapers and pick the first one
      */
     private suspend fun changeWallpaper(context: Context, setHomeOrLock: Boolean? = null) {
-        Log.d("PaperizeWallpaperChanger", "Changing wallpaper set: {$setHomeOrLock}")
         try {
             val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
             if (selectedAlbum == null) {
@@ -678,7 +688,8 @@ class WallpaperService: Service() {
                     decoder.setTargetSize(targetWidth, targetHeight)
                     decoder.isMutableRequired = true
                 }
-            } else {
+            }
+            else {
                 context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                     val options = BitmapFactory.Options().apply {
                         inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
