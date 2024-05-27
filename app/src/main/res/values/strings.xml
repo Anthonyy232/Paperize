@@ -149,4 +149,7 @@
     <string name="change_blur">Change Blur</string>
     <string name="paperize_is_running">Paperize is running</string>
     <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
+    <string name="delay_notice">Delay Notice</string>
+    <string name="delay_notice_dialog">Delay Notice</string>
+    <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">To minimize battery usage, changing wallpapers may have some delays once scheduled. When the device is asleep, the wallpaper may take longer to apply.</string>
 </resources>

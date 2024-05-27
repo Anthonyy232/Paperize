@@ -65,7 +65,8 @@ fun HomeScreen(
     blur: Boolean,
     onBlurPercentageChange: (Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    blurPercentage: Int
+    blurPercentage: Int,
+    firstSet: Boolean
 ) {
     var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabItems = getTabItems()
@@ -169,7 +170,8 @@ fun HomeScreen(
                         blur = blur,
                         onBlurPercentageChange = onBlurPercentageChange,
                         onBlurChange = onBlurChange,
-                        blurPercentage = blurPercentage
+                        blurPercentage = blurPercentage,
+                        firstSet = firstSet
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

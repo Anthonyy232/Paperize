@@ -41,6 +41,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowDelayNoticeDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowLiveWallpaperEnabledDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
@@ -78,18 +79,28 @@ fun WallpaperScreen(
     blur: Boolean,
     onBlurPercentageChange: (Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    blurPercentage: Int
+    blurPercentage: Int,
+    firstSet: Boolean
 ) {
     val context = LocalContext.current
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val openDialog = rememberSaveable { mutableStateOf(false) }
+    val openLiveDialog = rememberSaveable { mutableStateOf(false) }
+    val openNoticeDialog = rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
-    if (openDialog.value) {
+    if (openLiveDialog.value) {
         ShowLiveWallpaperEnabledDialog(
-            onDismissRequest = { openDialog.value = false }
+            onDismissRequest = { openLiveDialog.value = false }
+        )
+    }
+    if (openNoticeDialog.value) {
+        ShowDelayNoticeDialog(
+            onDismissRequest = {
+                openNoticeDialog.value = false
+                openBottomSheet = true
+            }
         )
     }
     val scrollState = rememberScrollState()
@@ -127,9 +138,14 @@ fun WallpaperScreen(
                         onOpenBottomSheet = {
                             if (albumState.value.albumsWithWallpapers.firstOrNull() != null) {
                                 if (isLiveWallpaperSet(context)) {
-                                    openDialog.value = true
+                                    openLiveDialog.value = true
                                 } else {
-                                    openBottomSheet = true
+                                    if (firstSet) {
+                                        openNoticeDialog.value = true
+                                    }
+                                    else {
+                                        openBottomSheet = true
+                                    }
                                 }
                             } else {
                                 scope.launch {

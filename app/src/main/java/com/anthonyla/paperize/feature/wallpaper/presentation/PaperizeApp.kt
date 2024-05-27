@@ -334,6 +334,7 @@ fun PaperizeApp(
                 scheduleSeparately = settingsState.value.scheduleSeparately,
                 blur = settingsState.value.blur,
                 blurPercentage = settingsState.value.blurPercentage,
+                firstSet = settingsState.value.firstSet,
                 onToggleChanger = { enableWallpaperChanger ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
                     if (selectedState.value.selectedAlbum!= null && enableWallpaperChanger && (settingsState.value.setHomeWallpaper || settingsState.value.setLockWallpaper)) {
@@ -357,6 +358,7 @@ fun PaperizeApp(
                     }
                 },
                 onSelectAlbum = {album ->
+                    settingsViewModel.onEvent(SettingsEvent.SetFirstSet)
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(null, album, settingsState.value.scheduleSeparately))
                     job?.cancel()
