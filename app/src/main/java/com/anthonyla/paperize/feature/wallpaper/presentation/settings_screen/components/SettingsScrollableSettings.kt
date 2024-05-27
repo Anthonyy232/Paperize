@@ -72,10 +72,10 @@ fun SettingsScrollableSettings(
         toContact = false
     }
 
+    val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
     val githubLink = "https://github.com/Anthonyy232/Paperize"
     val playstoreLink = "https://play.google.com/store/apps/details?id=com.anthonyla.paperize"
     val fdroidLink = ""
-    val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
 
     Scaffold(
         snackbarHost = {
@@ -162,14 +162,9 @@ fun SettingsScrollableSettings(
                         context.startActivity(openURL)
                     },
                     onPlaystoreClick = {
-                        coroutineScope.launch {
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar(
-                                message = context.getString(R.string.coming_soon),
-                                actionLabel = context.getString(R.string.dismiss),
-                                duration = SnackbarDuration.Short
-                            )
-                        }
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(playstoreLink)
+                        context.startActivity(openURL)
                     },
                     onFdroidClick = {
                         coroutineScope.launch {
