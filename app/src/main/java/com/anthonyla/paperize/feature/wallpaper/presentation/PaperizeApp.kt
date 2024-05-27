@@ -358,9 +358,11 @@ fun PaperizeApp(
                     }
                 },
                 onSelectAlbum = {album ->
-                    settingsViewModel.onEvent(SettingsEvent.SetFirstSet)
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(null, album, settingsState.value.scheduleSeparately))
+                    if (settingsState.value.firstSet) {
+                        settingsViewModel.onEvent(SettingsEvent.SetFirstSet)
+                    }
                     job?.cancel()
                     job = scope.launch {
                         val intent = Intent(context, WallpaperService::class.java).apply {

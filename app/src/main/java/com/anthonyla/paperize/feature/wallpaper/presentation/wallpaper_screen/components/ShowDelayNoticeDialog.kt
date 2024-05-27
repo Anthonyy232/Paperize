@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
