@@ -1,9 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.themes
 
 import android.app.Activity
-import android.graphics.Color.TRANSPARENT
 import android.os.Build
-import androidx.activity.SystemBarStyle
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

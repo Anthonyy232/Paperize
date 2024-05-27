@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.AndroidEntryPoint
