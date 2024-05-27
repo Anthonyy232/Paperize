@@ -10,28 +10,39 @@ import android.net.Uri
 import android.util.Log
 import android.util.Size
 import androidx.compose.ui.util.fastRoundToInt
+import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
+import com.lazygeniouz.dfc.file.DocumentFileCompat
 
 /**
  * Get the dimensions of the image from the uri
  */
 fun Uri.getImageDimensions(context: Context): Size? {
-    context.contentResolver.openInputStream(this)?.use { inputStream ->
-        val exif = ExifInterface(inputStream)
-        var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-        var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
-        if (width == 0 || height == 0) {
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
+    try {
+        context.contentResolver.openInputStream(this)?.use { inputStream ->
+            val exif = ExifInterface(inputStream)
+            var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+            var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+            if (width == 0 || height == 0) {
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(
+                    context.contentResolver.openInputStream(this),
+                    null,
+                    options
+                )
+                width = options.outWidth
+                height = options.outHeight
             }
-            BitmapFactory.decodeStream(context.contentResolver.openInputStream(this), null, options)
-            width = options.outWidth
-            height = options.outHeight
+            return Size(width, height)
         }
-        return Size(width, height)
-    }
-    return null
+        return null
+    } catch (e: Exception) { return null }
 }
 
 /**
@@ -130,5 +141,53 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
         Log.e("WallpaperUtil", "Error darkening bitmap: $e")
         return source
     }
+}
+
+/**
+ * Retrieve wallpaper URIs from a folder directory URI
+ */
+fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
+    val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
+    return listFilesRecursive(folderDocumentFile, context)
+}
+
+/**
+ * Helper function to recursively list files in a directory
+ */
+fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
+    val files = mutableListOf<String>()
+    parent?.listFiles()?.forEach { file ->
+        if (file.isDirectory()) {
+            files.addAll(listFilesRecursive(file, context))
+        } else {
+            val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
+            if (file.extension in allowedExtensions) {
+                files.add(file.uri.toString())
+            }
+        }
+    }
+    return files
+}
+
+/**
+ * Helper function to find the first valid URI from a list of wallpapers
+ * It will search through all wallpapers of an album first, and then all wallpapers of every folder of an album
+ */
+fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: List<Folder>): String? {
+    wallpapers.forEach { wallpaper ->
+        val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
+        if (file?.exists() == true) {
+            return wallpaper.wallpaperUri
+        }
+    }
+    folders.forEach { folder ->
+        folder.wallpapers.forEach { wallpaper ->
+            val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
+            if (file?.exists() == true) {
+                return wallpaper
+            }
+        }
+    }
+    return null
 }
 

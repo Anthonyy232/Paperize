@@ -38,7 +38,7 @@ class SettingsViewModel @Inject constructor (
             val firstSet = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_SET) ?: false }
             val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
-            val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
+            val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: true }
             val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.HOME_WALLPAPER) ?: false }
             val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.LOCK_WALLPAPER) ?: false }
             val homeWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }

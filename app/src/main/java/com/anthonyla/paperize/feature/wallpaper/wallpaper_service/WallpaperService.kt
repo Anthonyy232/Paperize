@@ -19,6 +19,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
@@ -28,14 +29,19 @@ import com.anthonyla.paperize.core.darkenBitmap
 import com.anthonyla.paperize.core.fillBitmap
 import com.anthonyla.paperize.core.fitBitmap
 import com.anthonyla.paperize.core.getImageDimensions
+import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.core.stretchBitmap
 import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
+import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -62,6 +68,7 @@ class WallpaperService: Service() {
     private var scheduleSeparately: Boolean = false
     private var lastRan1: LocalDateTime? = null
     private var lastRan2: LocalDateTime? = null
+    private var refresherTimer = LocalDateTime.now()
 
     enum class Actions {
         START,
@@ -85,6 +92,11 @@ class WallpaperService: Service() {
                 val self = this
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
+                        if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                            refreshAlbum(this@WallpaperService)
+                            refresherTimer = LocalDateTime.now()
+                            delay(5000)
+                        }
                         changeWallpaper(this@WallpaperService, true)
                     } catch (e: Exception) {
                         Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -99,6 +111,11 @@ class WallpaperService: Service() {
                 val self = this
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
+                        if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                            refreshAlbum(this@WallpaperService)
+                            refresherTimer = LocalDateTime.now()
+                            delay(5000)
+                        }
                         changeWallpaper(this@WallpaperService, false)
                     } catch (e: Exception) {
                         Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -125,6 +142,7 @@ class WallpaperService: Service() {
                 nextSetTime2 = null
                 lastRan1 = null
                 lastRan2 = null
+                refresherTimer = LocalDateTime.now()
 
                 if (!scheduleSeparately) {
                     runnableCode1 = object : Runnable {
@@ -132,6 +150,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, null)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -149,6 +172,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, true)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -164,6 +192,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, false)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -186,7 +219,7 @@ class WallpaperService: Service() {
                 nextSetTime2 = null
                 lastRan1 = null
                 lastRan2 = null
-
+                refresherTimer = LocalDateTime.now()
 
                 val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                 val currentTime = LocalDateTime.now()
@@ -205,7 +238,6 @@ class WallpaperService: Service() {
                     }
                 }
 
-
                 val notification = createNotification()
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(1, notification)
@@ -215,6 +247,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, null)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -232,6 +269,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, true)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -247,6 +289,11 @@ class WallpaperService: Service() {
                             val self = this
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
+                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
+                                        refreshAlbum(this@WallpaperService)
+                                        refresherTimer = LocalDateTime.now()
+                                        delay(5000)
+                                    }
                                     changeWallpaper(this@WallpaperService, false)
                                 } catch (e: Exception) {
                                     Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
@@ -761,6 +808,75 @@ class WallpaperService: Service() {
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)
             return null
+        }
+    }
+
+    private fun refreshAlbum(context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                var albumWithWallpapers = albumRepository.getAlbumsWithWallpaperAndFolder().first()
+                albumWithWallpapers.forEach { albumWithWallpaper ->
+                    // Delete wallpaper if the URI is invalid
+                    val invalidWallpapers = albumWithWallpaper.wallpapers.filterNot { wallpaper ->
+                        val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
+                        file?.exists() == true
+                    }
+                    if (invalidWallpapers.isNotEmpty()) {
+                        albumRepository.deleteWallpaperList(invalidWallpapers)
+                    }
+
+                    // Update folder wallpapers
+                    albumWithWallpaper.folders.forEach { folder ->
+                        DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                            if (!folderDirectory.isDirectory()) {
+                                albumRepository.deleteFolder(folder)
+                            } else {
+                                val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                albumRepository.updateFolder(folder.copy(wallpapers = wallpapers))
+                            }
+                        }
+                    }
+                }
+
+                // Update selected album
+                albumWithWallpapers = albumRepository.getAlbumsWithWallpaperAndFolder().first()
+                val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
+                if (selectedAlbum != null) {
+                    albumWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
+                        ?.let { foundAlbum ->
+                            val albumNameHashCode = foundAlbum.album.initialAlbumName.hashCode()
+                            val wallpapers: List<Wallpaper> =
+                                foundAlbum.wallpapers + foundAlbum.folders.flatMap { folder ->
+                                    folder.wallpapers.map { wallpaper ->
+                                        Wallpaper(
+                                            initialAlbumName = foundAlbum.album.initialAlbumName,
+                                            wallpaperUri = wallpaper,
+                                            key = wallpaper.hashCode() + albumNameHashCode,
+                                        )
+                                    }
+                                }
+                            val wallpapersUri = wallpapers.map { it.wallpaperUri }.toSet()
+                            if (wallpapersUri.isEmpty()) {
+                                selectedRepository.deleteAll()
+                                onDestroy()
+                            }
+                            else {
+                                val newSelectedAlbum = SelectedAlbum(
+                                    album = foundAlbum.album.copy(
+                                        homeWallpapersInQueue = wallpapersUri.shuffled(),
+                                        lockWallpapersInQueue = wallpapersUri.shuffled(),
+                                        currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
+                                        currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
+                                    ),
+                                    wallpapers = wallpapers
+                                )
+                                selectedRepository.upsertSelectedAlbum(newSelectedAlbum)
+                            }
+                        } ?: run { onDestroy() }
+                }
+            } catch (e: Exception) {
+                Log.e("PaperizeWallpaperChanger", "Error refreshing album", e)
+            }
         }
     }
 }

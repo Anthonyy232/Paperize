@@ -115,11 +115,11 @@ fun PaperizeApp(
                                     )
                                 }
                             }
-                        val wallpaperUriSet = wallpapers.map { it.wallpaperUri }.toSet()
+                        val wallpapersUri = wallpapers.map { it.wallpaperUri }.toSet()
                         val newSelectedAlbum = SelectedAlbum(
                             album = foundAlbum.album.copy(
-                                homeWallpapersInQueue = selectedAlbum.album.homeWallpapersInQueue.filter { it in wallpaperUriSet },
-                                lockWallpapersInQueue = selectedAlbum.album.lockWallpapersInQueue.filter { it in wallpaperUriSet },
+                                homeWallpapersInQueue = selectedAlbum.album.homeWallpapersInQueue.filter { it in wallpapersUri },
+                                lockWallpapersInQueue = selectedAlbum.album.lockWallpapersInQueue.filter { it in wallpapersUri },
                                 currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
                                 currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
                             ),

@@ -3,8 +3,11 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album
 import android.app.Application
 import android.content.Context
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.findFirstValidUri
+import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
@@ -99,7 +102,7 @@ class AlbumsViewModel @Inject constructor (
                             repository.deleteFolder(folder)
                         } else {
                             val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                            val folderCoverFile = folder.coverUri?.let { DocumentFileCompat.fromSingleUri(context, it.toUri()) }
+                            val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
                             val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
                             repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                         }
@@ -109,9 +112,9 @@ class AlbumsViewModel @Inject constructor (
             albumWithWallpapers = repository.getAlbumsWithWallpaperAndFolder().first()
             albumWithWallpapers.forEach { albumWithWallpaper ->
                 // Update album cover uri if null or invalid
-                val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFileCompat.fromSingleUri(context, it) }
+                val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFile.fromSingleUri(context, it) }
                 if (albumCoverFile == null || !albumCoverFile.exists()) {
-                    val newCoverUri = findFirstValidUri(albumWithWallpaper.wallpapers, albumWithWallpaper.folders)
+                    val newCoverUri = findFirstValidUri(context, albumWithWallpaper.wallpapers, albumWithWallpaper.folders)
                     repository.updateAlbum(albumWithWallpaper.album.copy(coverUri = newCoverUri))
                 }
             }
@@ -129,54 +132,6 @@ class AlbumsViewModel @Inject constructor (
                 ) }
             }
         }
-    }
-
-    /**
-     * Retrieve wallpaper URIs from a folder directory URI
-     */
-    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
-        return listFilesRecursive(folderDocumentFile, context)
-    }
-
-    /**
-     * Helper function to recursively list files in a directory
-     */
-    private fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
-        val files = mutableListOf<String>()
-        parent?.listFiles()?.forEach { file ->
-            if (file.isDirectory()) {
-                files.addAll(listFilesRecursive(file, context))
-            } else {
-                val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
-                if (file.extension in allowedExtensions) {
-                    files.add(file.uri.toString())
-                }
-            }
-        }
-        return files
-    }
-
-    /**
-     * Helper function to find the first valid URI from a list of wallpapers
-     * It will search through all wallpapers of an album first, and then all wallpapers of every folder of an album
-     */
-    private fun findFirstValidUri(wallpapers: List<Wallpaper>, folders: List<Folder>): String? {
-        wallpapers.forEach { wallpaper ->
-            val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
-            if (file?.exists() == true) {
-                return wallpaper.wallpaperUri
-            }
-        }
-        folders.forEach { folder ->
-            folder.wallpapers.forEach { wallpaper ->
-                val file = DocumentFileCompat.fromSingleUri(context, wallpaper.toUri())
-                if (file?.exists() == true) {
-                    return wallpaper
-                }
-            }
-        }
-        return null
     }
 }
 
