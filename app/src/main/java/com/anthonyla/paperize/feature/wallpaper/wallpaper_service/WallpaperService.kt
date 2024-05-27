@@ -299,17 +299,23 @@ class WallpaperService: Service() {
      */
     private fun createNotification(): Notification {
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-        val earliestTime = when {
+        var earliestTime = when {
             nextSetTime1 != null && nextSetTime2 != null -> (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
             nextSetTime1 != null -> nextSetTime1!!.format(formatter)
             nextSetTime2 != null -> nextSetTime2!!.format(formatter)
-            else -> null
+            else -> LocalDateTime.now().format(formatter)
         }
+        if (earliestTime != null) { // Edge case where numbers like 2131689515 pass through
+            if (earliestTime.length <= 10) {
+                earliestTime = LocalDateTime.now().format(formatter)
+            }
+        }
+
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this, "wallpaper_service_channel")
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.next_wallpaper_change, earliestTime ?: R.string.app_name))
+            .setContentText(getString(R.string.next_wallpaper_change, earliestTime))
             .setSmallIcon(R.drawable.notification_icon)
             .setContentIntent(pendingIntent)
             .build()

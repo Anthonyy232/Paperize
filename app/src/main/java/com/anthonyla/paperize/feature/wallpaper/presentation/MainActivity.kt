@@ -30,9 +30,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +48,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val albumsViewModel: AlbumsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     private val context = this
@@ -79,6 +83,9 @@ class MainActivity : ComponentActivity() {
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
 
             if (isFirstLaunch) {
+                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
+                settingsViewModel.onEvent(SettingsEvent.Reset)
+                albumsViewModel.onEvent(AlbumsEvent.Reset)
                 val contentResolver = context.contentResolver
                 val persistedUris = contentResolver.persistedUriPermissions
                 for (permission in persistedUris) {

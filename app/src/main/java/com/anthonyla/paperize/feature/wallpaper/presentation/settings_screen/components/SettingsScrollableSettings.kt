@@ -137,7 +137,6 @@ fun SettingsScrollableSettings(
                     animate = state.value.animate,
                     onAnimateClick = { onAnimateClick(it) }
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
                 ListSectionTitle(stringResource(R.string.about))
                 Spacer(modifier = Modifier.height(16.dp))

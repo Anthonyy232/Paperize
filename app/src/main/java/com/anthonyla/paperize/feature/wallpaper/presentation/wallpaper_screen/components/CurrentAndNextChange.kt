@@ -62,6 +62,11 @@ fun CurrentAndNextChange(
                             Text(parts[0].replace(',', ' '), style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
                             Text(parts[1], style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
                         }
+                        else if (parts.size == 3) {
+                            Text(stringResource(R.string.last_change), style = textFirst, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Text(parts[0].replace(',', ' '), style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Text(parts[1] + ' ' + parts[2], style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
+                        }
                     }
                 }
 
@@ -91,6 +96,11 @@ fun CurrentAndNextChange(
                             Text(stringResource(R.string.next_change), style = textFirst, modifier = Modifier.align(Alignment.CenterHorizontally))
                             Text(parts[0].replace(',', ' '), style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
                             Text(parts[1], style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
+                        }
+                        else if (parts.size == 3) {
+                            Text(stringResource(R.string.last_change), style = textFirst, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Text(parts[0].replace(',', ' '), style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Text(parts[1] + ' ' + parts[2], style = textSecond, modifier = Modifier.align(Alignment.CenterHorizontally))
                         }
                     }
                 }
