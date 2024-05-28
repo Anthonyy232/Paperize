@@ -8,8 +8,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.findFirstValidUri
 import com.anthonyla.paperize.core.getWallpaperFromFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -111,11 +109,17 @@ class AlbumsViewModel @Inject constructor (
             }
             albumWithWallpapers = repository.getAlbumsWithWallpaperAndFolder().first()
             albumWithWallpapers.forEach { albumWithWallpaper ->
-                // Update album cover uri if null or invalid
-                val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFile.fromSingleUri(context, it) }
-                if (albumCoverFile == null || !albumCoverFile.exists()) {
-                    val newCoverUri = findFirstValidUri(context, albumWithWallpaper.wallpapers, albumWithWallpaper.folders)
-                    repository.updateAlbum(albumWithWallpaper.album.copy(coverUri = newCoverUri))
+                // Delete empty albums
+                if (albumWithWallpaper.wallpapers.isEmpty() && albumWithWallpaper.folders.all { it.wallpapers.isEmpty() }) {
+                    repository.deleteAlbum(albumWithWallpaper.album)
+                }
+                else {
+                    // Update album cover uri if null or invalid
+                    val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFile.fromSingleUri(context, it) }
+                    if (albumCoverFile == null || !albumCoverFile.exists()) {
+                        val newCoverUri = findFirstValidUri(context, albumWithWallpaper.wallpapers, albumWithWallpaper.folders)
+                        repository.updateAlbum(albumWithWallpaper.album.copy(coverUri = newCoverUri))
+                    }
                 }
             }
         }

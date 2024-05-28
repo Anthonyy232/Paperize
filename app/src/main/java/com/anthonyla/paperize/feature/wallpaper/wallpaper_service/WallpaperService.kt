@@ -836,6 +836,11 @@ class WallpaperService: Service() {
                             }
                         }
                     }
+
+                    // Delete empty albums
+                    if (albumWithWallpaper.wallpapers.isEmpty() && albumWithWallpaper.folders.all { it.wallpapers.isEmpty() }) {
+                        albumRepository.deleteAlbum(albumWithWallpaper.album)
+                    }
                 }
 
                 // Update selected album
