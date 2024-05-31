@@ -92,7 +92,11 @@ fun PaperizeApp(
                     albumsViewModel.onEvent(AlbumsEvent.InitializeAlbum(albumWithWallpapers))
                 } else if (albumWithWallpapers.wallpapers.isEmpty() && albumWithWallpapers.folders.isEmpty() && albumWithWallpapers.album.initialized) {
                     if (navController.currentDestination?.route == Home::class.simpleName) {
-                        navController.popBackStack<Home>(inclusive = false)
+                        try {
+                            navController.popBackStack<Home>(inclusive = false)
+                        } catch (e: Exception) {
+                            navController.navigate(Home)
+                        }
                     }
                     albumsViewModel.onEvent(
                         AlbumsEvent.DeleteAlbumWithWallpapers(
