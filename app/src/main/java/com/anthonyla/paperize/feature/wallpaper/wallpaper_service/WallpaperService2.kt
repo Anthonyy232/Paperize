@@ -67,6 +67,7 @@ class WallpaperService2: Service() {
     private var timeInMinutes2: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var nextSetTime1: LocalDateTime? = null
     private var nextSetTime2: LocalDateTime? = null
+    private var nextSetTime: LocalDateTime? = null
 
     enum class Actions {
         START,
@@ -135,23 +136,10 @@ class WallpaperService2: Service() {
             CoroutineScope(Dispatchers.IO).launch {
                 nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
                 nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
+                nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
                 val notification = createNotification()
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notification?.let { notificationManager.notify(1, it) }
-                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                val currentTime = LocalDateTime.now()
-                settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                if (scheduleSeparately) {
-                    nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
-                    nextSetTime2 = currentTime.plusMinutes(timeInMinutes2.toLong())
-                    val earliestTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, earliestTime)
-                }
-                else {
-                    nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
-                    nextSetTime2 = nextSetTime1
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, currentTime.plusMinutes(timeInMinutes1.toLong()).format(formatter))
-                }
             }
             stopSelf()
         }
@@ -171,18 +159,12 @@ class WallpaperService2: Service() {
      */
     private fun createNotification(): Notification? {
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-        val earliestTime = when {
-            nextSetTime1 != null && nextSetTime2 != null -> (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)?.format(formatter)
-            nextSetTime1 != null -> nextSetTime1!!.format(formatter)
-            nextSetTime2 != null -> nextSetTime2!!.format(formatter)
-            else -> null
-        }
-        if (earliestTime != null) {
+        if (nextSetTime != null) {
             val intent = Intent(this, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(this, 3, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             return NotificationCompat.Builder(this, "wallpaper_service_channel")
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.next_wallpaper_change, earliestTime))
+                .setContentText(getString(R.string.next_wallpaper_change, nextSetTime!!.format(formatter)))
                 .setSmallIcon(R.drawable.notification_icon)
                 .setContentIntent(pendingIntent)
                 .build()
@@ -207,10 +189,6 @@ class WallpaperService2: Service() {
                 val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.LOCK_WALLPAPER) ?: false
                 nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
                 nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
-                val notification = createNotification()
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notification?.let { notificationManager.notify(1, it) }
-
                 if (!toggled || (!setHome && !setLock)) {
                     onDestroy()
                     return
@@ -222,25 +200,30 @@ class WallpaperService2: Service() {
                 if (setHomeOrLock == null) {
                     nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
                     nextSetTime2 = nextSetTime1
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, currentTime.plusMinutes(timeInMinutes1.toLong()).format(formatter))
+                    nextSetTime = nextSetTime1
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
                 }
                 else {
                     if (setHomeOrLock) { nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong()) }
                     else { nextSetTime2 = currentTime.plusMinutes(timeInMinutes2.toLong()) }
                     if (nextSetTime1 == null && nextSetTime2 != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime2!!.format(formatter))
+                        nextSetTime = nextSetTime2
                     }
                     else if (nextSetTime1 != null && nextSetTime2 == null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime1!!.format(formatter))
+                        nextSetTime = nextSetTime1
                     }
                     else {
-                        val earliestTime = if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, earliestTime!!.format(formatter))
+                        nextSetTime = if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
                     }
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
                 }
 
                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+
+                val notification = createNotification()
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notification?.let { notificationManager.notify(1, it) }
 
                 val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
