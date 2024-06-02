@@ -183,34 +183,6 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
-            is SettingsEvent.SetHomeWallpaperInterval -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL, event.interval)
-
-                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val currentTime = LocalDateTime.now()
-                    val nextSetTime: String?
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                    if (_state.value.scheduleSeparately) {
-                        val nextSetTime1 = currentTime.plusMinutes(event.interval.toLong())
-                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
-                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                    }
-                    else {
-                        nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                    }
-                    _state.update {
-                        it.copy(
-                            homeInterval = event.interval,
-                            lastSetTime = currentTime.format(formatter),
-                            nextSetTime = nextSetTime
-                        )
-                    }
-                }
-            }
-
             is SettingsEvent.SetFirstSet -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_SET, false)
@@ -222,10 +194,40 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetHomeWallpaperInterval -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL, event.interval)
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now()
+                    val nextSetTime: String?
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+                    if (_state.value.scheduleSeparately) {
+                        val nextSetTime1 = currentTime.plusMinutes(event.interval.toLong())
+                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+                    }
+                    else {
+                        nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, currentTime.plusMinutes(event.interval.toLong()).toString())
+                    }
+                    _state.update {
+                        it.copy(
+                            homeInterval = event.interval,
+                            lastSetTime = currentTime.format(formatter),
+                            nextSetTime = nextSetTime
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.SetLockWallpaperInterval -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL, event.interval)
-
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val currentTime = LocalDateTime.now()
                     val nextSetTime: String?
@@ -235,10 +237,14 @@ class SettingsViewModel @Inject constructor (
                         val nextSetTime2 = currentTime.plusMinutes(event.interval.toLong())
                         nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
                     }
                     else {
                         nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, currentTime.plusMinutes(event.interval.toLong()).toString())
                     }
                     _state.update {
                         it.copy(
@@ -380,6 +386,8 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.BLUR)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.BLUR_PERCENTAGE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_SET)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME_1)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME_2)
 
                     _state.update {
                         it.copy(

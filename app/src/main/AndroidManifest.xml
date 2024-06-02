@@ -2,16 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <queries>
-        <intent>
-            <action android:name="android.service.wallpaper.WallpaperService" />
-        </intent>
-    </queries>
 
     <application
         android:allowBackup="true"
@@ -33,11 +28,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService" android:foregroundServiceType="mediaPlayback"/>
-        <receiver android:name=".feature.wallpaper.wallpaper_service.WallpaperBootReceiver"
-            android:exported="true">
+        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver" />
+        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService1"/>
+        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService2"/>
+        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndTimeChangeReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
         <provider

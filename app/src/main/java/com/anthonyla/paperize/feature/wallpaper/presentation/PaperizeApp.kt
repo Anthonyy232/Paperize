@@ -56,7 +56,8 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.Startup
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.WallpaperView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionIn
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
-import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperScheduler
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,6 +84,7 @@ fun PaperizeApp(
     val context = LocalContext.current
     var job by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
+    val scheduler = WallpaperScheduler(context)
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
@@ -138,10 +140,7 @@ fun PaperizeApp(
                         )
                     } ?: run {
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
-                    Intent(context, WallpaperService::class.java).also {
-                        it.action = WallpaperService.Actions.STOP.toString()
-                        context.startForegroundService(it)
-                    }
+                    scheduler.cancelWallpaperAlarm()
                 }
             }
         }
@@ -179,9 +178,6 @@ fun PaperizeApp(
                 onAgree = {
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
                         settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
-                        navController.navigate(Home) {
-                            popUpTo<Startup> { inclusive = true }
-                        }
                     }
                     else { navController.navigate(Notification) }
                 }
@@ -211,12 +207,7 @@ fun PaperizeApp(
             }
         ) {
             NotificationScreen(
-                onAgree = {
-                    settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch)
-                    navController.navigate(Home) {
-                        popUpTo<Notification> { inclusive = true }
-                    }
-                }
+                onAgree = { settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch) }
             )
         }
         // Navigate to the home screen to view all albums and wallpapers
@@ -255,13 +246,12 @@ fun PaperizeApp(
                     if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", timeInMinutes)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = timeInMinutes,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSeparately
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                         }
                     }
                 },
@@ -270,13 +260,12 @@ fun PaperizeApp(
                     if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", timeInMinutes)
-                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = timeInMinutes,
+                                scheduleSeparately = settingsState.value.scheduleSeparately
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                         }
                     }
                 },
@@ -286,13 +275,12 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.REQUEUE.toString()
-                                putExtra("timeInMinutes1", timeInMinutes)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = timeInMinutes,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSeparately
+                            )
+                            alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                         }
                     }
 
@@ -303,13 +291,12 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.REQUEUE.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", timeInMinutes)
-                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = timeInMinutes,
+                                scheduleSeparately = settingsState.value.scheduleSeparately
+                            )
+                            alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                         }
                     }
 
@@ -318,10 +305,7 @@ fun PaperizeApp(
                     if (selectedState.value.selectedAlbum != null) {
                         wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
-                        Intent(context, WallpaperService::class.java).also {
-                            it.action = WallpaperService.Actions.STOP.toString()
-                            context.startForegroundService(it)
-                        }
+                        scheduler.cancelWallpaperAlarm()
                     }
                 },
                 animate = settingsState.value.animate,
@@ -345,21 +329,15 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSeparately
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                         }
                     }
-                    else {
-                        Intent(context, WallpaperService::class.java).also {
-                            it.action = WallpaperService.Actions.STOP.toString()
-                            context.startForegroundService(it)
-                        }
-                    }
+                    else { scheduler.cancelWallpaperAlarm() }
                 },
                 onSelectAlbum = {album ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
@@ -369,13 +347,12 @@ fun PaperizeApp(
                     }
                     job?.cancel()
                     job = scope.launch {
-                        val intent = Intent(context, WallpaperService::class.java).apply {
-                            action = WallpaperService.Actions.START.toString()
-                            putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                            putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                            putExtra("scheduleSeparately", settingsState.value.scheduleSeparately)
-                        }
-                        context.startForegroundService(intent)
+                        val alarmItem = WallpaperAlarmItem(
+                            timeInMinutes1 = settingsState.value.homeInterval,
+                            timeInMinutes2 = settingsState.value.lockInterval,
+                            scheduleSeparately = settingsState.value.scheduleSeparately
+                        )
+                        alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                     }
                 },
                 onDarkenPercentage = {
@@ -384,10 +361,7 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
@@ -397,10 +371,7 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
@@ -412,10 +383,7 @@ fun PaperizeApp(
                             job?.cancel()
                             job = scope.launch {
                                 delay(2000)
-                                val intent = Intent(context, WallpaperService::class.java).apply {
-                                    action = WallpaperService.Actions.UPDATE.toString()
-                                }
-                                context.startForegroundService(intent)
+                                scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                             }
                         }
                     }
@@ -427,33 +395,26 @@ fun PaperizeApp(
                         selectedState.value.selectedAlbum?.let {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                         }
-                        Intent(context, WallpaperService::class.java).also {
-                            it.action = WallpaperService.Actions.STOP.toString()
-                            context.startForegroundService(it)
-                        }
+                        scheduler.cancelWallpaperAlarm()
                     }
                     else if (selectedState.value.selectedAlbum!= null && (enableHome && !settingsState.value.setLockWallpaper) || (!enableHome && settingsState.value.setLockWallpaper)) {
                         settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(false))
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", false)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = false
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                         }
                     }
                     else if (selectedState.value.selectedAlbum != null && settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
@@ -464,49 +425,40 @@ fun PaperizeApp(
                         selectedState.value.selectedAlbum?.let {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                         }
-                        Intent(context, WallpaperService::class.java).also {
-                            it.action = WallpaperService.Actions.STOP.toString()
-                            context.startForegroundService(it)
-                        }
+                        scheduler.cancelWallpaperAlarm()
                     }
                     else if (selectedState.value.selectedAlbum!= null && (enableLock && !settingsState.value.setHomeWallpaper) || (!enableLock && settingsState.value.setHomeWallpaper)) {
                         settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(false))
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", false)
-                            }
-                            context.startForegroundService(intent)
-                        }
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = false
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}}
                     }
                     else if (selectedState.value.selectedAlbum != null && settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
-                onScheduleSeparatelyChange = {
-                    settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(it))
+                onScheduleSeparatelyChange = { changeSeparately ->
+                    settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(changeSeparately))
                     if (selectedState.value.selectedAlbum!= null && settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.START.toString()
-                                putExtra("timeInMinutes1", settingsState.value.homeInterval)
-                                putExtra("timeInMinutes2", settingsState.value.lockInterval)
-                                putExtra("scheduleSeparately", it)
-                            }
-                            context.startForegroundService(intent)
+                            val alarmItem = WallpaperAlarmItem(
+                                timeInMinutes1 = settingsState.value.homeInterval,
+                                timeInMinutes2 = settingsState.value.lockInterval,
+                                scheduleSeparately = changeSeparately
+                            )
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
                         }
                     }
                 },
@@ -516,10 +468,7 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
@@ -529,10 +478,7 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
-                            val intent = Intent(context, WallpaperService::class.java).apply {
-                                action = WallpaperService.Actions.UPDATE.toString()
-                            }
-                            context.startForegroundService(intent)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately)
                         }
                     }
                 },
@@ -741,17 +687,11 @@ fun PaperizeApp(
                     navController.navigate(Licenses)
                 },
                 onResetClick = {
-                    navController.navigate(Startup) {
-                        popUpTo<Settings> { inclusive = true }
-                    }
                     settingsViewModel.onEvent(SettingsEvent.Reset)
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                     albumsViewModel.onEvent(AlbumsEvent.Reset)
                     addAlbumViewModel.onEvent(AddAlbumEvent.Reset)
-                    Intent(context, WallpaperService::class.java).also {
-                        it.action = WallpaperService.Actions.STOP.toString()
-                        context.startForegroundService(it)
-                    }
+                    scheduler.cancelWallpaperAlarm()
                     val contentResolver = context.contentResolver
                     val persistedUris = contentResolver.persistedUriPermissions
                     for (permission in persistedUris) {
