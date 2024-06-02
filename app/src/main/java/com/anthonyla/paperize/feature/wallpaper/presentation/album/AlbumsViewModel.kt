@@ -93,7 +93,7 @@ class AlbumsViewModel @Inject constructor (
                     repository.deleteWallpaperList(invalidWallpapers)
                 }
 
-                // Update folder cover uri and children uri
+                // Update folder cover uri and wallpapers uri
                 albumWithWallpaper.folders.forEach { folder ->
                     DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
                         if (!folderDirectory.isDirectory()) {

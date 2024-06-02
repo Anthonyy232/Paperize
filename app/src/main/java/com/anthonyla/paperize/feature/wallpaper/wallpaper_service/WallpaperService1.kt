@@ -41,6 +41,7 @@ import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -123,6 +124,8 @@ class WallpaperService1: Service() {
     private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
+                refreshAlbum(this@WallpaperService1)
+                delay(1000)
                 changeWallpaper(this@WallpaperService1, setHomeOrLock)
             }
             stopSelf()
@@ -625,14 +628,16 @@ class WallpaperService1: Service() {
                         albumRepository.deleteWallpaperList(invalidWallpapers)
                     }
 
-                    // Update folder wallpapers
+                    // Update folder cover uri and wallpapers uri
                     albumWithWallpaper.folders.forEach { folder ->
                         DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
                             if (!folderDirectory.isDirectory()) {
                                 albumRepository.deleteFolder(folder)
                             } else {
                                 val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                albumRepository.updateFolder(folder.copy(wallpapers = wallpapers))
+                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                             }
                         }
                     }
@@ -668,10 +673,18 @@ class WallpaperService1: Service() {
                             else {
                                 val newSelectedAlbum = SelectedAlbum(
                                     album = foundAlbum.album.copy(
-                                        homeWallpapersInQueue = wallpapersUri.shuffled(),
-                                        lockWallpapersInQueue = wallpapersUri.shuffled(),
-                                        currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                                        currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
+                                        homeWallpapersInQueue = if (selectedAlbum.album.homeWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                            val firstElement = selectedAlbum.album.homeWallpapersInQueue.first()
+                                            val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                            listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                        } else { wallpapersUri.shuffled() },
+                                        lockWallpapersInQueue = if (selectedAlbum.album.lockWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                            val firstElement = selectedAlbum.album.lockWallpapersInQueue.first()
+                                            val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                            listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                        } else { wallpapersUri.shuffled() },
+                                        currentHomeWallpaper = if (selectedAlbum.album.currentHomeWallpaper in wallpapersUri) selectedAlbum.album.currentHomeWallpaper else selectedAlbum.album.homeWallpapersInQueue.firstOrNull { it in wallpapersUri },
+                                        currentLockWallpaper = if (selectedAlbum.album.currentLockWallpaper in wallpapersUri) selectedAlbum.album.currentLockWallpaper else selectedAlbum.album.lockWallpapersInQueue.firstOrNull { it in wallpapersUri }
                                     ),
                                     wallpapers = wallpapers
                                 )

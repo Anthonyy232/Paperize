@@ -101,9 +101,7 @@ fun PaperizeApp(
                         }
                     }
                     albumsViewModel.onEvent(
-                        AlbumsEvent.DeleteAlbumWithWallpapers(
-                            albumWithWallpapers
-                        )
+                        AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpapers)
                     )
                 }
             }
@@ -124,10 +122,18 @@ fun PaperizeApp(
                         val wallpapersUri = wallpapers.map { it.wallpaperUri }.toSet()
                         val newSelectedAlbum = SelectedAlbum(
                             album = foundAlbum.album.copy(
-                                homeWallpapersInQueue = selectedAlbum.album.homeWallpapersInQueue.filter { it in wallpapersUri },
-                                lockWallpapersInQueue = selectedAlbum.album.lockWallpapersInQueue.filter { it in wallpapersUri },
-                                currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                                currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
+                                homeWallpapersInQueue = if (selectedAlbum.album.homeWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                    val firstElement = selectedAlbum.album.homeWallpapersInQueue.first()
+                                    val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                    listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                } else { wallpapersUri.shuffled() },
+                                lockWallpapersInQueue = if (selectedAlbum.album.lockWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                    val firstElement = selectedAlbum.album.lockWallpapersInQueue.first()
+                                    val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                    listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                } else { wallpapersUri.shuffled() },
+                                currentHomeWallpaper = if (selectedAlbum.album.currentHomeWallpaper in wallpapersUri) selectedAlbum.album.currentHomeWallpaper else selectedAlbum.album.homeWallpapersInQueue.firstOrNull { it in wallpapersUri },
+                                currentLockWallpaper = if (selectedAlbum.album.currentLockWallpaper in wallpapersUri) selectedAlbum.album.currentLockWallpaper else selectedAlbum.album.lockWallpapersInQueue.firstOrNull { it in wallpapersUri }
                             ),
                             wallpapers = wallpapers
                         )
