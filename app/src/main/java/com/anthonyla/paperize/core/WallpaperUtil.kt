@@ -147,12 +147,18 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
  * Retrieve wallpaper URIs from a folder directory URI
  */
 fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-    val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
-    return listFilesRecursive(folderDocumentFile, context)
+    try {
+        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
+        return listFilesRecursive(folderDocumentFile, context)
+    } catch (e: Exception) {
+        val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
+        return listFilesRecursive(folderDocumentFile, context)
+    }
+
 }
 
 /**
- * Helper function to recursively list files in a directory
+ * Helper function to recursively list files in a directory for DocumentFileCompat
  */
 fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
     val files = mutableListOf<String>()
@@ -162,6 +168,21 @@ fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<Stri
         } else {
             val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
             if (file.extension in allowedExtensions) {
+                files.add(file.uri.toString())
+            }
+        }
+    }
+    return files
+}
+/** Overloaded version of the function for DocumentFile */
+fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
+    val files = mutableListOf<String>()
+    parent?.listFiles()?.forEach { file ->
+        if (file.isDirectory) {
+            files.addAll(listFilesRecursive(file, context))
+        } else {
+            val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
+            if ((file.name?.substringAfterLast(".") ?: "") in allowedExtensions) {
                 files.add(file.uri.toString())
             }
         }
@@ -189,5 +210,16 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
         }
     }
     return null
+}
+
+/**
+ * Get the folder name from the folder URI
+ */
+fun getFolderNameFromUri(folderUri: String, context: Context): String? {
+    return try {
+        DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
+    } catch (e: Exception) {
+        DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
+    }
 }
 

@@ -124,9 +124,9 @@ class WallpaperService2: Service() {
     private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
-                delay(5 * 1000)
+                delay(3000)
                 refreshAlbum(this@WallpaperService2)
-                delay(1000)
+                delay(2000)
                 changeWallpaper(this@WallpaperService2, setHomeOrLock)
             }
             stopSelf()

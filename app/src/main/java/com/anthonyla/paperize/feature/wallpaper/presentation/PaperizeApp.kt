@@ -523,7 +523,7 @@ fun PaperizeApp(
                 },
                 onShowFolderView = { folderName, wallpapers ->
                     val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                    navController.navigate("${NavScreens.FolderView.route}/$folderName/$encodedWallpapers")
+                    navController.navigate("${NavScreens.FolderView.route}/${folderName ?: " "}/$encodedWallpapers")
                 }
             )
         }
@@ -635,7 +635,7 @@ fun PaperizeApp(
                     },
                     onShowFolderView = { folderName, wallpapers ->
                         val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                        navController.navigate("${NavScreens.FolderView.route}/$folderName/$encodedWallpapers")
+                        navController.navigate("${NavScreens.FolderView.route}/${folderName ?: " "}/$encodedWallpapers")
                     },
                     onDeleteAlbum = {
                         navController.navigateUp()
