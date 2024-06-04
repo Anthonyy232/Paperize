@@ -180,7 +180,7 @@ fun AlbumViewScreen(
                                     )
                                 },
                                 onFolderViewClick = {
-                                    onShowFolderView(folder.folderName, folder.wallpapers)
+                                    if (folder.wallpapers.isNotEmpty()) onShowFolderView(folder.folderName, folder.wallpapers)
                                 },
                                 modifier = Modifier.padding(4.dp).animateItem(
                                     placementSpec = tween(
@@ -208,7 +208,7 @@ fun AlbumViewScreen(
                                     )
                                 },
                                 onFolderViewClick = {
-                                    onShowFolderView(folder.folderName, folder.wallpapers)
+                                    if (folder.wallpapers.isNotEmpty()) onShowFolderView(folder.folderName, folder.wallpapers)
                                 },
                                 modifier = Modifier.padding(4.dp),
                                 animate = false

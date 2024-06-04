@@ -140,6 +140,7 @@ class AddAlbumViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (event.directoryUri !in _state.value.folders.map { it.folderUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
+                        if (wallpapers.isEmpty()) { return@launch }
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
                         _state.update {
                             it.copy(

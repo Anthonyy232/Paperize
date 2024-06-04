@@ -189,6 +189,7 @@ class AlbumViewScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (event.directoryUri !in event.album.folders.map { it.folderUri }) {
                         val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
+                        if (wallpapers.isEmpty()) { return@launch }
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
                         repository.upsertFolder(
                             Folder(
