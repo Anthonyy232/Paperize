@@ -53,6 +53,7 @@ I would love some help translating the app! Help me out with that [here](https:/
 - [Landscapist](https://github.com/skydoves/landscapist) - A Compose and KPP image loading library that streamlines Glide, Coil, and Fresco
 - [Zoomable](https://github.com/usuiat/Zoomable) - A library that provides a zoomable and pannable view, which can be used with any view you want
 - [AnimatedFABMenu](https://github.com/rajaumair7890/AnimatedFABMenu) - A animated floating action button with Material 3 design
+- [DocumentFileCompat](https://github.com/ItzNotABug/DocumentFileCompat) - A DocumentFile wrapper that caches the result to improve efficiency
 
 Thanks to the creators and maintainers of the open-source libraries used in this project.
 
@@ -63,7 +64,8 @@ This project is built using Kotlin, Java, and Gradle. Here are the steps to buil
 ### Prerequisites
 - Java 8 (1.8)
 - Android Studio Jellyfish | 2023.3.1 or later
-- Gradle 8.4.1 or later
+- Android Gradle Plugin 8.4.1 or later
+- Gradle 8.8
 - Minimum SDK 26
 
 ### Steps
