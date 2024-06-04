@@ -93,16 +93,29 @@ class AlbumsViewModel @Inject constructor (
                     repository.deleteWallpaperList(invalidWallpapers)
                 }
 
-                // Update folder cover uri and children uri
+                // Update folder cover uri and wallpapers uri
                 albumWithWallpaper.folders.forEach { folder ->
-                    DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
-                        if (!folderDirectory.isDirectory()) {
-                            repository.deleteFolder(folder)
-                        } else {
-                            val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                            val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
-                            val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
-                            repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                    try {
+                        DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                            if (!folderDirectory.isDirectory()) {
+                                repository.deleteFolder(folder)
+                            } else {
+                                val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                            }
+                        }
+                    } catch (e: Exception) {
+                        DocumentFile.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                            if (!folderDirectory.isDirectory) {
+                                repository.deleteFolder(folder)
+                            } else {
+                                val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                            }
                         }
                     }
                 }

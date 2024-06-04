@@ -13,8 +13,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
-import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -51,29 +51,27 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 import kotlin.math.min
 
-
+/**
+ * Used in conjunction with [WallpaperService1] to schedule home screen and lock screen separately
+ */
 @AndroidEntryPoint
-class WallpaperService: Service() {
+class WallpaperService2: Service() {
+    private enum class Type { HOME, LOCK, BOTH }
+    private val handleThread = HandlerThread("MyThread2")
+    private lateinit var workerHandler: Handler
     @Inject lateinit var selectedRepository: SelectedAlbumRepository
     @Inject lateinit var albumRepository: AlbumRepository
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
-    private val handler1 = Handler(Looper.getMainLooper())
-    private val handler2 = Handler(Looper.getMainLooper())
-    private lateinit var runnableCode1: Runnable
-    private lateinit var runnableCode2: Runnable
+    private var scheduleSeparately: Boolean = false
     private var timeInMinutes1: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var timeInMinutes2: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var nextSetTime1: LocalDateTime? = null
     private var nextSetTime2: LocalDateTime? = null
-    private var scheduleSeparately: Boolean = false
-    private var lastRan1: LocalDateTime? = null
-    private var lastRan2: LocalDateTime? = null
-    private var refresherTimer = LocalDateTime.now()
+    private var nextSetTime: LocalDateTime? = null
 
     enum class Actions {
         START,
         REQUEUE,
-        STOP,
         UPDATE
     }
 
@@ -81,291 +79,99 @@ class WallpaperService: Service() {
         return null
     }
 
-    /**
-     * Set up the runnable code to change the wallpaper to prevent runnableCode from being null
-     */
     override fun onCreate() {
         super.onCreate()
-        startForeground(1, createNotification())
-        runnableCode1 = object : Runnable {
-            override fun run() {
-                val self = this
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                            refreshAlbum(this@WallpaperService)
-                            refresherTimer = LocalDateTime.now()
-                            delay(5000)
-                        }
-                        changeWallpaper(this@WallpaperService, true)
-                    } catch (e: Exception) {
-                        Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                    } finally {
-                        handler1.postDelayed(self, timeInMinutes1 * 60 * 1000L)
-                    }
-                }
-            }
-        }
-        runnableCode2 = object : Runnable {
-            override fun run() {
-                val self = this
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                            refreshAlbum(this@WallpaperService)
-                            refresherTimer = LocalDateTime.now()
-                            delay(5000)
-                        }
-                        changeWallpaper(this@WallpaperService, false)
-                    } catch (e: Exception) {
-                        Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                    } finally {
-                        handler2.postDelayed(self, timeInMinutes2 * 60 * 1000L + 10000)
-                    }
-                }
-            }
-        }
+        handleThread.start()
+        workerHandler = Handler(handleThread.looper)
     }
 
-    /**
-     * Start the service and schedule the wallpaper change
-     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when(intent?.action) {
-            Actions.START.toString() -> {
-                handler1.removeCallbacks(runnableCode1)
-                handler2.removeCallbacks(runnableCode2)
-                timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
-                nextSetTime1 = null
-                nextSetTime2 = null
-                lastRan1 = null
-                lastRan2 = null
-                refresherTimer = LocalDateTime.now()
-
-                if (!scheduleSeparately) {
-                    runnableCode1 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, null)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler1.postDelayed(self, timeInMinutes1 * 60 * 1000L)
-                                }
-                            }
+        if (intent != null) {
+            when (intent.action) {
+                Actions.START.toString() -> {
+                    timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                    val setHomeOrLock = if (scheduleSeparately) {
+                        when (intent.getIntExtra("type", Type.BOTH.ordinal)) {
+                            Type.HOME.ordinal -> true
+                            Type.LOCK.ordinal -> false
+                            else -> null
                         }
-                    }
-                    handler1.postDelayed(runnableCode1, 1000)
+                    } else { null }
+                    workerTaskStart(setHomeOrLock)
                 }
-                else {
-                    runnableCode1 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, true)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler1.postDelayed(self, timeInMinutes1 * 60 * 1000L)
-                                }
-                            }
-                        }
-                    }
-                    handler1.postDelayed(runnableCode1, 1000)
-                    runnableCode2 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, false)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler2.postDelayed(self, timeInMinutes2 * 60 * 1000L  + 10000)
-                                }
-                            }
-                        }
-                    }
-                    handler2.postDelayed(runnableCode2, 5000)
+                Actions.REQUEUE.toString() -> {
+                    timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                    workerTaskRequeue()
                 }
-            }
-            Actions.REQUEUE.toString() -> {
-                handler1.removeCallbacks(runnableCode1)
-                handler2.removeCallbacks(runnableCode2)
-                timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
-                nextSetTime1 = null
-                nextSetTime2 = null
-                lastRan1 = null
-                lastRan2 = null
-                refresherTimer = LocalDateTime.now()
-
-                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                val currentTime = LocalDateTime.now()
-                CoroutineScope(Dispatchers.IO).launch {
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                    if (scheduleSeparately) {
-                        nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
-                        nextSetTime2 = currentTime.plusMinutes(timeInMinutes2.toLong())
-                        val earliestTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, earliestTime)
-                    }
-                    else {
-                        nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
-                        nextSetTime2 = nextSetTime1
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, currentTime.plusMinutes(timeInMinutes1.toLong()).format(formatter))
-                    }
+                Actions.UPDATE.toString() -> {
+                    workerTaskUpdate()
                 }
-
-                val notification = createNotification()
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(1, notification)
-                if (!scheduleSeparately) {
-                    runnableCode1 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, null)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler1.postDelayed(self, timeInMinutes1 * 60 * 1000L)
-                                }
-                            }
-                        }
-                    }
-                    handler1.postDelayed(runnableCode1, timeInMinutes1 * 60 * 1000L)
-                }
-                else {
-                    runnableCode1 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, true)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler1.postDelayed(self, timeInMinutes1 * 60 * 1000L)
-                                }
-                            }
-                        }
-                    }
-                    handler1.postDelayed(runnableCode1, timeInMinutes1 * 60 * 1000L)
-                    runnableCode2 = object : Runnable {
-                        override fun run() {
-                            val self = this
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    if (LocalDateTime.now().minusDays(1).isAfter(refresherTimer)) {
-                                        refreshAlbum(this@WallpaperService)
-                                        refresherTimer = LocalDateTime.now()
-                                        delay(5000)
-                                    }
-                                    changeWallpaper(this@WallpaperService, false)
-                                } catch (e: Exception) {
-                                    Log.e("PaperizeWallpaperChanger", "Error in runnableCode", e)
-                                } finally {
-                                    handler2.postDelayed(self, timeInMinutes2 * 60 * 1000L + 10000)
-                                }
-                            }
-                        }
-                    }
-                    handler2.postDelayed(runnableCode2, timeInMinutes2 * 60 * 1000L + 10000)
-                }
-            }
-            Actions.UPDATE.toString() -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        updateCurrentWallpaper(this@WallpaperService)
-                    } catch (e: Exception) {
-                        Log.e("PaperizeWallpaperChanger", "Error in changing brightness", e)
-                    }
-                }
-            }
-            Actions.STOP.toString() -> {
-                handler1.removeCallbacks(runnableCode1)
-                handler2.removeCallbacks(runnableCode2)
-                CoroutineScope(Dispatchers.IO).launch {
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, "")
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, "")
-                }
-                stopSelf()
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
-    /**
-     * Clean up the service when it is destroyed
-     */
     override fun onDestroy() {
         super.onDestroy()
-        handler1.removeCallbacks(runnableCode1)
-        handler2.removeCallbacks(runnableCode2)
-        CoroutineScope(Dispatchers.IO).launch {
-            settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, "")
-            settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, "")
+        workerHandler.removeCallbacksAndMessages(null)
+        handleThread.quitSafely()
+    }
+
+    private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(3000)
+                refreshAlbum(this@WallpaperService2)
+                delay(2000)
+                changeWallpaper(this@WallpaperService2, setHomeOrLock)
+            }
+            stopSelf()
+        }
+    }
+
+    private fun workerTaskRequeue() {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
+                nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
+                nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
+                val notification = createNotification()
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notification?.let { notificationManager.notify(1, it) }
+            }
+            stopSelf()
+        }
+    }
+
+    private fun workerTaskUpdate() {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                updateCurrentWallpaper(this@WallpaperService2)
+            }
+            stopSelf()
         }
     }
 
     /**
      * Creates a notification for the wallpaper service
      */
-    private fun createNotification(): Notification {
+    private fun createNotification(): Notification? {
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-        var earliestTime = when {
-            nextSetTime1 != null && nextSetTime2 != null -> (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
-            nextSetTime1 != null -> nextSetTime1!!.format(formatter)
-            nextSetTime2 != null -> nextSetTime2!!.format(formatter)
-            else -> LocalDateTime.now().format(formatter)
+        if (nextSetTime != null) {
+            val intent = Intent(this, MainActivity::class.java)
+            val pendingIntent = PendingIntent.getActivity(this, 3, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            return NotificationCompat.Builder(this, "wallpaper_service_channel")
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.next_wallpaper_change, nextSetTime!!.format(formatter)))
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentIntent(pendingIntent)
+                .build()
         }
-        if (earliestTime != null) { // Edge case where numbers like 2131689515 pass through
-            if (earliestTime.length <= 10) {
-                earliestTime = LocalDateTime.now().format(formatter)
-            }
-        }
-
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        return NotificationCompat.Builder(this, "wallpaper_service_channel")
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.next_wallpaper_change, earliestTime))
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentIntent(pendingIntent)
-            .build()
+        return null
     }
 
     /**
@@ -383,6 +189,8 @@ class WallpaperService: Service() {
                 val toggled = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
                 val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.HOME_WALLPAPER) ?: false
                 val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.LOCK_WALLPAPER) ?: false
+                nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
+                nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
                 if (!toggled || (!setHome && !setLock)) {
                     onDestroy()
                     return
@@ -394,26 +202,30 @@ class WallpaperService: Service() {
                 if (setHomeOrLock == null) {
                     nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
                     nextSetTime2 = nextSetTime1
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, currentTime.plusMinutes(timeInMinutes1.toLong()).format(formatter))
+                    nextSetTime = nextSetTime1
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
                 }
                 else {
                     if (setHomeOrLock) { nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong()) }
                     else { nextSetTime2 = currentTime.plusMinutes(timeInMinutes2.toLong()) }
                     if (nextSetTime1 == null && nextSetTime2 != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime2!!.format(formatter))
+                        nextSetTime = nextSetTime2
                     }
                     else if (nextSetTime1 != null && nextSetTime2 == null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime1!!.format(formatter))
+                        nextSetTime = nextSetTime1
                     }
                     else {
-                        val earliestTime = if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, earliestTime!!.format(formatter))
+                        nextSetTime = if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
                     }
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
                 }
+
+                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
+                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
 
                 val notification = createNotification()
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(1, notification)
+                notification?.let { notificationManager.notify(1, it) }
 
                 val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
@@ -700,11 +512,6 @@ class WallpaperService: Service() {
                                 }
                         }
                     }
-                    if (wallpaper1 != null || wallpaper2 != null) {
-                        val notification = createNotification()
-                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManager.notify(1, notification)
-                    }
                 }
             }
         } catch (e: Exception) {
@@ -735,10 +542,20 @@ class WallpaperService: Service() {
             val targetHeight = (targetWidth * aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
-                ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                    decoder.setTargetSize(targetWidth, targetHeight)
-                    decoder.isMutableRequired = true
+                try {
+                    val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
+                    ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                        decoder.setTargetSize(targetWidth, targetHeight)
+                        decoder.isMutableRequired = true
+                    }
+                } catch (e: Exception) {
+                    context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+                        val options = BitmapFactory.Options().apply {
+                            inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                            inMutable = true
+                        }
+                        BitmapFactory.decodeStream(inputStream, null, options)
+                    }
                 }
             }
             else {
@@ -825,14 +642,29 @@ class WallpaperService: Service() {
                         albumRepository.deleteWallpaperList(invalidWallpapers)
                     }
 
-                    // Update folder wallpapers
+                    // Update folder cover uri and wallpapers uri
                     albumWithWallpaper.folders.forEach { folder ->
-                        DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
-                            if (!folderDirectory.isDirectory()) {
-                                albumRepository.deleteFolder(folder)
-                            } else {
-                                val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                albumRepository.updateFolder(folder.copy(wallpapers = wallpapers))
+                        try {
+                            DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                                if (!folderDirectory.isDirectory()) {
+                                    albumRepository.deleteFolder(folder)
+                                } else {
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                    albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                                }
+                            }
+                        } catch (e: Exception) {
+                            DocumentFile.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                                if (!folderDirectory.isDirectory) {
+                                    albumRepository.deleteFolder(folder)
+                                } else {
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                    albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                                }
                             }
                         }
                     }
@@ -868,10 +700,18 @@ class WallpaperService: Service() {
                             else {
                                 val newSelectedAlbum = SelectedAlbum(
                                     album = foundAlbum.album.copy(
-                                        homeWallpapersInQueue = wallpapersUri.shuffled(),
-                                        lockWallpapersInQueue = wallpapersUri.shuffled(),
-                                        currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                                        currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
+                                        homeWallpapersInQueue = if (selectedAlbum.album.homeWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                            val firstElement = selectedAlbum.album.homeWallpapersInQueue.first()
+                                            val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                            listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                        } else { wallpapersUri.shuffled() },
+                                        lockWallpapersInQueue = if (selectedAlbum.album.lockWallpapersInQueue.firstOrNull() in wallpapersUri) {
+                                            val firstElement = selectedAlbum.album.lockWallpapersInQueue.first()
+                                            val modifiedWallpapersUri = wallpapersUri.filter { it != firstElement }
+                                            listOf(firstElement) + modifiedWallpapersUri.shuffled()
+                                        } else { wallpapersUri.shuffled() },
+                                        currentHomeWallpaper = if (selectedAlbum.album.currentHomeWallpaper in wallpapersUri) selectedAlbum.album.currentHomeWallpaper else selectedAlbum.album.homeWallpapersInQueue.firstOrNull { it in wallpapersUri },
+                                        currentLockWallpaper = if (selectedAlbum.album.currentLockWallpaper in wallpapersUri) selectedAlbum.album.currentLockWallpaper else selectedAlbum.album.lockWallpapersInQueue.firstOrNull { it in wallpapersUri }
                                     ),
                                     wallpapers = wallpapers
                                 )

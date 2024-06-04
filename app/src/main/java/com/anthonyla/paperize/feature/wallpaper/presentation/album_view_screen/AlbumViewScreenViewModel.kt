@@ -3,13 +3,13 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import android.app.Application
 import android.content.Context
-import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.getFolderNameFromUri
+import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
-import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -215,27 +215,4 @@ class AlbumViewScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
-        return listFilesRecursive(folderDocumentFile, context)
-    }
-
-    private fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
-        val files = mutableListOf<String>()
-        parent?.listFiles()?.forEach { file ->
-            if (file.isDirectory()) {
-                files.addAll(listFilesRecursive(file, context))
-            } else {
-                val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
-                if (file.extension in allowedExtensions) {
-                    files.add(file.uri.toString())
-                }
-            }
-        }
-        return files
-    }
-
-    private fun getFolderNameFromUri(folderUri: String, context: Context): String? {
-        return DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
-    }
 }
