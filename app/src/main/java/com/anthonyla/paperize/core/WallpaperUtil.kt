@@ -223,3 +223,17 @@ fun getFolderNameFromUri(folderUri: String, context: Context): String? {
     }
 }
 
+/**
+ * Check if a URI is valid
+ */
+fun isValidUri(context: Context, uriString: String?): Boolean {
+    val uri = uriString?.toUri()
+    return try {
+        uri?.let {
+            val inputStream = context.contentResolver.openInputStream(it)
+            inputStream?.close()
+        }
+        true
+    } catch (e: Exception) { false }
+}
+

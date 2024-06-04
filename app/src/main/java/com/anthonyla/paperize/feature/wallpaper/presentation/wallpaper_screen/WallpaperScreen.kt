@@ -1,7 +1,11 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
+import android.app.AlarmManager
 import android.app.WallpaperManager
 import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -28,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
@@ -357,8 +362,23 @@ fun WallpaperScreen(
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
                         openBottomSheet = false
-                        onSelectAlbum(album)
-                        onScheduleWallpaperChanger1(interval1)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            val alarmManager = ContextCompat.getSystemService(context, AlarmManager::class.java)
+                            if (alarmManager?.canScheduleExactAlarms() == false) {
+                                Intent().also { intent ->
+                                    intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                    context.startActivity(intent)
+                                }
+                            }
+                            else {
+                                onSelectAlbum(album)
+                                onScheduleWallpaperChanger1(interval1)
+                            }
+                        }
+                        else {
+                            onSelectAlbum(album)
+                            onScheduleWallpaperChanger1(interval1)
+                        }
                     },
                     animate = animate
                 )

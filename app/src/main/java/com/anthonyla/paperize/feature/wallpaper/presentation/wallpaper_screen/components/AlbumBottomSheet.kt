@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
-import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,8 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.skydoves.landscapist.ImageOptions
@@ -55,17 +54,6 @@ fun AlbumBottomSheet(
     onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
     animate: Boolean
 ) {
-    fun isValidUri(context: Context, uriString: String?): Boolean {
-        val uri = uriString?.toUri()
-        return try {
-            uri?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                inputStream?.close()
-            }
-            true
-        } catch (e: Exception) { false }
-    }
-
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     ModalBottomSheet(

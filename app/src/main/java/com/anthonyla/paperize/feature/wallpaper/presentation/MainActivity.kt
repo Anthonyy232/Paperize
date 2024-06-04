@@ -3,11 +3,13 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.app.AlarmManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
@@ -85,6 +87,19 @@ class MainActivity : ComponentActivity() {
             PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch, topInset)
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = ContextCompat.getSystemService(context, AlarmManager::class.java)
+            if (alarmManager?.canScheduleExactAlarms() == false) {
+                Intent().also { intent ->
+                    intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                    context.startActivity(intent)
                 }
             }
         }
