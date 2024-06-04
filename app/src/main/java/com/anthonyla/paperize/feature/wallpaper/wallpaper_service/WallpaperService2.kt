@@ -542,10 +542,20 @@ class WallpaperService2: Service() {
             val targetHeight = (targetWidth * aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
-                ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                    decoder.setTargetSize(targetWidth, targetHeight)
-                    decoder.isMutableRequired = true
+                try {
+                    val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
+                    ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                        decoder.setTargetSize(targetWidth, targetHeight)
+                        decoder.isMutableRequired = true
+                    }
+                } catch (e: Exception) {
+                    context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+                        val options = BitmapFactory.Options().apply {
+                            inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                            inMutable = true
+                        }
+                        BitmapFactory.decodeStream(inputStream, null, options)
+                    }
                 }
             }
             else {
@@ -634,14 +644,27 @@ class WallpaperService2: Service() {
 
                     // Update folder cover uri and wallpapers uri
                     albumWithWallpaper.folders.forEach { folder ->
-                        DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
-                            if (!folderDirectory.isDirectory()) {
-                                albumRepository.deleteFolder(folder)
-                            } else {
-                                val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
-                                val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
-                                albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                        try {
+                            DocumentFileCompat.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                                if (!folderDirectory.isDirectory()) {
+                                    albumRepository.deleteFolder(folder)
+                                } else {
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                    albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                                }
+                            }
+                        } catch (e: Exception) {
+                            DocumentFile.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
+                                if (!folderDirectory.isDirectory) {
+                                    albumRepository.deleteFolder(folder)
+                                } else {
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
+                                    albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
+                                }
                             }
                         }
                     }

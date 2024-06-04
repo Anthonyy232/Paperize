@@ -22,8 +22,6 @@ class WallpaperReceiver: BroadcastReceiver() {
             val timeInMinutes2 = intent?.getIntExtra("timeInMinutes2", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
             val scheduleSeparately = intent?.getBooleanExtra("scheduleSeparately", false) ?: false
             val type = intent?.getIntExtra("type", Type.BOTH.ordinal) ?: Type.BOTH.ordinal
-            Log.d("PaperizeWallpaperChanger", "onReceive: timeInMinutes1=$timeInMinutes1, timeInMinutes2=$timeInMinutes2, scheduleSeparately=$scheduleSeparately, type=$type")
-
             val serviceIntent = Intent().apply {
                 putExtra("timeInMinutes1", timeInMinutes1)
                 putExtra("timeInMinutes2", timeInMinutes2)
