@@ -25,6 +25,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        ndk {
+            debugSymbolLevel = "FULL"
+        }
     }
 
 
