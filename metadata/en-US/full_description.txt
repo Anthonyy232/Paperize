@@ -6,7 +6,7 @@ Advanced Image Manipulation: Paperize isn’t just about changing wallpapers; it
 
 Home and Lock Screen Customization: With Paperize, you have the freedom to set your home screen and lock screen wallpapers together or separately, and at the same time or not. This gives you the ultimate control over your device’s look and feel.
 
-Supports Various Image Types: Paperize can handle a wide range of image types, offering you flexibility in your wallpaper choices. Whether it’s a JPEG, PNG, or a GIF, Paperize has got you covered.
+Supports Various Image Types: Paperize can handle a wide range of image types, offering you flexibility in your wallpaper choices. Whether it’s a JPEG, PNG, AVIF or a WEBP, Paperize has got you covered.
 
 Folder Support: Organize your wallpapers into folders for auto-updating. This feature allows you to categorize your wallpapers and have them change automatically, keeping your device’s look organized and cohesive.
 
