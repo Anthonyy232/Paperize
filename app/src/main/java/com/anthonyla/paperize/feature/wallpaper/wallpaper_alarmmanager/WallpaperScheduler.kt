@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService1
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService2
 import java.time.LocalDateTime
@@ -20,7 +21,6 @@ class WallpaperScheduler (
     private val context: Context,
 ): WallpaperAlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    enum class Type { HOME, LOCK, BOTH }
 
     override fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int?, changeImmediate: Boolean, cancelImmediate: Boolean) {
         if (cancelImmediate) cancelWallpaperAlarm()

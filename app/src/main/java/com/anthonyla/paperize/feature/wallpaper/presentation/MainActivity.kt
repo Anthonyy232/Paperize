@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -25,8 +26,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.anthonyla.paperize.core.SettingsConstants
+import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
@@ -35,7 +40,11 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperScheduler
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -72,6 +81,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { settingsViewModel.setKeepOnScreenCondition }
 
         setContent {
+            val scheduler = WallpaperScheduler(context)
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
             if (isFirstLaunch) {
@@ -84,9 +94,31 @@ class MainActivity : ComponentActivity() {
                     contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 }
             }
+            LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+                lifecycleScope.launch {
+                    if (settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) == true) {
+                        val shouldScheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
+                        val shouldScheduleAlarm = if (shouldScheduleSeparately) {
+                            !(isPendingIntentSet(Type.HOME.ordinal) && isPendingIntentSet(Type.LOCK.ordinal))
+                        } else {
+                            !isPendingIntentSet(Type.BOTH.ordinal)
+                        }
+                        if (shouldScheduleAlarm) {
+                            scheduler.scheduleWallpaperAlarm(
+                                WallpaperAlarmItem(
+                                    timeInMinutes1 = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+                                    timeInMinutes2 = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+                                    scheduleSeparately = shouldScheduleSeparately
+                                ), null, true, true
+                            )
+                        }
+                    }
+                }
+            }
+
             PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp(isFirstLaunch, topInset)
+                    PaperizeApp(isFirstLaunch, scheduler, topInset)
                 }
             }
         }
@@ -109,5 +141,16 @@ class MainActivity : ComponentActivity() {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         topInset = window.decorView.rootWindowInsets.stableInsetTop.dp
+    }
+
+    private fun isPendingIntentSet(requestCode: Int): Boolean {
+        val intent = Intent(context.applicationContext, WallpaperReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context.applicationContext,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+        return pendingIntent != null
     }
 }

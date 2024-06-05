@@ -18,6 +18,8 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 
+enum class Type { HOME, LOCK, BOTH }
+
 /**
  * Get the dimensions of the image from the uri
  */

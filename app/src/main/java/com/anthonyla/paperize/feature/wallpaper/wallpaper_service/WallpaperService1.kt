@@ -23,6 +23,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
+import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.core.blurBitmap
 import com.anthonyla.paperize.core.calculateInSampleSize
 import com.anthonyla.paperize.core.darkenBitmap
@@ -56,7 +57,6 @@ import kotlin.math.min
  */
 @AndroidEntryPoint
 class WallpaperService1: Service() {
-    private enum class Type { HOME, LOCK, BOTH }
     private val handleThread = HandlerThread("MyThread1")
     private lateinit var workerHandler: Handler
     @Inject lateinit var selectedRepository: SelectedAlbumRepository

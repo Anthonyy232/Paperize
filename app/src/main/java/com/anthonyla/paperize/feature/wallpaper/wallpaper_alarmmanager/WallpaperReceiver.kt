@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService1
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService2
 import dagger.hilt.android.AndroidEntryPoint
@@ -14,8 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class WallpaperReceiver: BroadcastReceiver() {
-    enum class Type { HOME, LOCK, BOTH }
-
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null) {
             val timeInMinutes1 = intent?.getIntExtra("timeInMinutes1", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
@@ -28,7 +27,7 @@ class WallpaperReceiver: BroadcastReceiver() {
                 putExtra("scheduleSeparately", scheduleSeparately)
                 putExtra("type", type)
             }
-            if (type == WallpaperScheduler.Type.BOTH.ordinal || type == WallpaperScheduler.Type.HOME.ordinal) {
+            if (type == Type.BOTH.ordinal || type == Type.HOME.ordinal) {
                 serviceIntent.setClass(context, WallpaperService1::class.java).apply {
                     action = WallpaperService1.Actions.START.toString()
                 }

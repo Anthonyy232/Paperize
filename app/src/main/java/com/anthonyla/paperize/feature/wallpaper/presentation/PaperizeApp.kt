@@ -71,6 +71,7 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun PaperizeApp(
     firstLaunch: Boolean,
+    scheduler : WallpaperScheduler,
     topInsets: Dp,
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
@@ -84,7 +85,6 @@ fun PaperizeApp(
     val context = LocalContext.current
     var job by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
-    val scheduler = WallpaperScheduler(context)
 
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value.albumsWithWallpapers) {
