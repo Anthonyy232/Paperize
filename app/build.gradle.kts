@@ -60,6 +60,12 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    ndkVersion = "26.3.11579264"
+    buildToolsVersion = "34.0.0"
+
+    aboutLibraries {
+        excludeFields = arrayOf("generated")
+    }
 }
 
 androidComponents {
