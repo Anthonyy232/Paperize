@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:name=".App"
         android:persistent="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
