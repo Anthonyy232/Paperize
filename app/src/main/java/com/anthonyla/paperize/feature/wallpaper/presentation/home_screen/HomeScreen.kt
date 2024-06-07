@@ -68,14 +68,21 @@ fun HomeScreen(
     blurPercentage: Int,
     firstSet: Boolean
 ) {
-    var tabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabItems = getTabItems()
-    val pagerState = rememberPagerState { tabItems.size }
+    val pagerState = rememberPagerState(0) { tabItems.size }
+    var tabIndex by rememberSaveable { mutableIntStateOf(pagerState.currentPage) }
     var addAlbumDialog by rememberSaveable { mutableStateOf(false) }
     if (addAlbumDialog) AddAlbumDialog(
         onDismissRequest = { addAlbumDialog = false },
         onConfirmation = { navigateToAddWallpaperScreen(it) }
     )
+
+    LaunchedEffect(tabIndex) {
+        pagerState.animateScrollToPage(tabIndex)
+    }
+    LaunchedEffect(pagerState.currentPage) {
+        tabIndex = pagerState.currentPage
+    }
 
     Scaffold (
         topBar = {
@@ -85,20 +92,8 @@ fun HomeScreen(
                 onSettingsClick = onSettingsClick,
             )
         }
-    ) { padding ->
-        LaunchedEffect(tabIndex) {
-            if (tabIndex in tabItems.indices) {
-                pagerState.animateScrollToPage(tabIndex)
-            }
-        }
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect { page ->
-                if (page in tabItems.indices) {
-                    tabIndex = page
-                }
-            }
-        }
-        Column(modifier = Modifier.padding(padding)) {
+    ) {
+        Column(modifier = Modifier.padding(it)) {
             TabRow(
                 selectedTabIndex = tabIndex,
                 indicator = { tabPositions ->
@@ -124,10 +119,8 @@ fun HomeScreen(
                         icon = {
                             Icon(
                                 imageVector =
-                                if (index == tabIndex)
-                                    item.filledIcon
-                                else
-                                    item.unfilledIcon,
+                                if (index == tabIndex) item.filledIcon
+                                else item.unfilledIcon,
                                 contentDescription = item.title
                             )
                         }
@@ -136,8 +129,7 @@ fun HomeScreen(
             }
             HorizontalPager(
                 state = pagerState,
-                beyondViewportPageCount = 1,
-                userScrollEnabled = true,
+                beyondViewportPageCount = 1
             ) { index ->
                 when(index) {
                     0 -> WallpaperScreen(

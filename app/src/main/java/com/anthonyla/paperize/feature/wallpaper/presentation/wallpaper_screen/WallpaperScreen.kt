@@ -95,6 +95,8 @@ fun WallpaperScreen(
     val openLiveDialog = rememberSaveable { mutableStateOf(false) }
     val openNoticeDialog = rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
     if (openLiveDialog.value) {
         ShowLiveWallpaperEnabledDialog(
             onDismissRequest = { openLiveDialog.value = false }
@@ -108,7 +110,6 @@ fun WallpaperScreen(
             }
         )
     }
-    val scrollState = rememberScrollState()
 
     Scaffold(
         snackbarHost = {

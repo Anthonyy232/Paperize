@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.core
+import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -237,5 +238,13 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
         }
         true
     } catch (e: Exception) { false }
+}
+
+/**
+ * Check if device uses a live wallpaper
+ */
+fun isLiveWallpaperSet(context: Context): Boolean {
+    val wallpaperManager = WallpaperManager.getInstance(context)
+    return wallpaperManager.wallpaperInfo != null
 }
 
