@@ -258,6 +258,7 @@ fun PaperizeApp(
                                 scheduleSeparately = settingsState.value.scheduleSeparately
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                 },
@@ -272,6 +273,7 @@ fun PaperizeApp(
                                 scheduleSeparately = settingsState.value.scheduleSeparately
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                 },
@@ -287,6 +289,7 @@ fun PaperizeApp(
                                 scheduleSeparately = settingsState.value.scheduleSeparately
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
+                            scheduler.scheduleRefresh()
                         }
                     }
 
@@ -303,6 +306,7 @@ fun PaperizeApp(
                                 scheduleSeparately = settingsState.value.scheduleSeparately
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
+                            scheduler.scheduleRefresh()
                         }
                     }
 
@@ -331,7 +335,21 @@ fun PaperizeApp(
                 firstSet = settingsState.value.firstSet,
                 onToggleChanger = { enableWallpaperChanger ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
-                    if (selectedState.value.selectedAlbum!= null && enableWallpaperChanger && (settingsState.value.setHomeWallpaper || settingsState.value.setLockWallpaper)) {
+                    if (selectedState.value.selectedAlbum != null && enableWallpaperChanger && (settingsState.value.setHomeWallpaper || settingsState.value.setLockWallpaper)) {
+                        wallpaperScreenViewModel.onEvent(
+                            WallpaperEvent.UpdateSelectedAlbum(
+                                selectedState.value.selectedAlbum!!.copy(
+                                    album = selectedState.value.selectedAlbum!!.album.copy(
+                                        currentHomeWallpaper = if (settingsState.value.setHomeWallpaper) selectedState.value.selectedAlbum!!.album.homeWallpapersInQueue.firstOrNull() else null,
+                                        currentLockWallpaper = if (settingsState.value.scheduleSeparately && settingsState.value.setLockWallpaper) selectedState.value.selectedAlbum!!.album.lockWallpapersInQueue.firstOrNull() else if (settingsState.value.setLockWallpaper) selectedState.value.selectedAlbum!!.album.homeWallpapersInQueue.firstOrNull() else null
+                                    )
+                                ),
+                                null,
+                                settingsState.value.scheduleSeparately,
+                                settingsState.value.setHomeWallpaper,
+                                settingsState.value.setLockWallpaper
+                            )
+                        )
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
@@ -341,13 +359,22 @@ fun PaperizeApp(
                                 scheduleSeparately = settingsState.value.scheduleSeparately
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                     else { scheduler.cancelWallpaperAlarm() }
                 },
                 onSelectAlbum = {album ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(true))
-                    wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(null, album, settingsState.value.scheduleSeparately))
+                    wallpaperScreenViewModel.onEvent(
+                        WallpaperEvent.UpdateSelectedAlbum(
+                            null,
+                            album,
+                            settingsState.value.scheduleSeparately,
+                            settingsState.value.setHomeWallpaper,
+                            settingsState.value.setLockWallpaper
+                        )
+                    )
                     if (settingsState.value.firstSet) {
                         settingsViewModel.onEvent(SettingsEvent.SetFirstSet)
                     }
@@ -359,6 +386,7 @@ fun PaperizeApp(
                             scheduleSeparately = settingsState.value.scheduleSeparately
                         )
                         alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                        scheduler.scheduleRefresh()
                     }
                 },
                 onDarkenPercentage = {
@@ -414,6 +442,7 @@ fun PaperizeApp(
                                 scheduleSeparately = false
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                     else if (selectedState.value.selectedAlbum != null && settingsState.value.enableChanger) {
@@ -443,7 +472,9 @@ fun PaperizeApp(
                                 timeInMinutes2 = settingsState.value.lockInterval,
                                 scheduleSeparately = false
                             )
-                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}}
+                            alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
+                        }
                     }
                     else if (selectedState.value.selectedAlbum != null && settingsState.value.enableChanger) {
                         job?.cancel()
@@ -456,6 +487,21 @@ fun PaperizeApp(
                 onScheduleSeparatelyChange = { changeSeparately ->
                     settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(changeSeparately))
                     if (selectedState.value.selectedAlbum!= null && settingsState.value.enableChanger) {
+                        wallpaperScreenViewModel.onEvent(
+                            WallpaperEvent.UpdateSelectedAlbum(
+                                selectedState.value.selectedAlbum!!.copy(
+                                    album = selectedState.value.selectedAlbum!!.album.copy(
+                                        currentHomeWallpaper = if (settingsState.value.setHomeWallpaper) selectedState.value.selectedAlbum!!.album.homeWallpapersInQueue.firstOrNull() else null,
+                                        currentLockWallpaper = if (changeSeparately && settingsState.value.setLockWallpaper) selectedState.value.selectedAlbum!!.album.lockWallpapersInQueue.firstOrNull() else if (settingsState.value.setLockWallpaper) selectedState.value.selectedAlbum!!.album.homeWallpapersInQueue.firstOrNull() else null
+                                    )
+
+                                ),
+                                null,
+                                settingsState.value.scheduleSeparately,
+                                settingsState.value.setHomeWallpaper,
+                                settingsState.value.setLockWallpaper
+                            )
+                        )
                         job?.cancel()
                         job = scope.launch {
                             delay(2000)
@@ -465,6 +511,7 @@ fun PaperizeApp(
                                 scheduleSeparately = changeSeparately
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                 },

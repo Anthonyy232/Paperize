@@ -19,7 +19,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 
-enum class Type { HOME, LOCK, BOTH }
+enum class Type { HOME, LOCK, BOTH, REFRESH }
 
 /**
  * Get the dimensions of the image from the uri
@@ -150,14 +150,15 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
  * Retrieve wallpaper URIs from a folder directory URI
  */
 fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-    try {
+    /*try {
         val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
         return listFilesRecursive(folderDocumentFile, context)
     } catch (e: Exception) {
         val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
         return listFilesRecursive(folderDocumentFile, context)
-    }
-
+    }*/
+    val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
+    return listFilesRecursive(folderDocumentFile, context)
 }
 
 /**
@@ -199,14 +200,14 @@ fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
  */
 fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: List<Folder>): String? {
     wallpapers.forEach { wallpaper ->
-        val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
+        val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
         if (file?.exists() == true) {
             return wallpaper.wallpaperUri
         }
     }
     folders.forEach { folder ->
         folder.wallpapers.forEach { wallpaper ->
-            val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
+            val file = DocumentFileCompat.fromSingleUri(context, wallpaper.toUri())
             if (file?.exists() == true) {
                 return wallpaper
             }
@@ -219,11 +220,12 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
  * Get the folder name from the folder URI
  */
 fun getFolderNameFromUri(folderUri: String, context: Context): String? {
-    return try {
+    /*return try {
         DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
     } catch (e: Exception) {
         DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
-    }
+    }*/
+    return DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
 }
 
 /**

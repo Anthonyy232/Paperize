@@ -101,7 +101,7 @@ class AlbumsViewModel @Inject constructor (
                                 repository.deleteFolder(folder)
                             } else {
                                 val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                val folderCoverFile = folder.coverUri?.let { DocumentFileCompat.fromSingleUri(context, it.toUri()) }
                                 val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
                                 repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                             }
@@ -112,7 +112,7 @@ class AlbumsViewModel @Inject constructor (
                                 repository.deleteFolder(folder)
                             } else {
                                 val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                val folderCoverFile = folder.coverUri?.let { DocumentFileCompat.fromSingleUri(context, it.toUri()) }
                                 val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
                                 repository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                             }
@@ -128,7 +128,7 @@ class AlbumsViewModel @Inject constructor (
                 }
                 else {
                     // Update album cover uri if null or invalid
-                    val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFile.fromSingleUri(context, it) }
+                    val albumCoverFile = albumWithWallpaper.album.coverUri?.toUri()?.let { DocumentFileCompat.fromSingleUri(context, it) }
                     if (albumCoverFile == null || !albumCoverFile.exists()) {
                         val newCoverUri = findFirstValidUri(context, albumWithWallpaper.wallpapers, albumWithWallpaper.folders)
                         repository.updateAlbum(albumWithWallpaper.album.copy(coverUri = newCoverUri))

@@ -22,6 +22,9 @@ class WallpaperScheduler (
 ): WallpaperAlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+    /**
+     * Schedules the wallpaper alarm based on the origin and changeImmediate
+     */
     override fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int?, changeImmediate: Boolean, cancelImmediate: Boolean) {
         if (cancelImmediate) cancelWallpaperAlarm()
         else {
@@ -37,21 +40,21 @@ class WallpaperScheduler (
         }
         if (wallpaperAlarmItem.scheduleSeparately) {
             when (origin) {
-                Type.HOME.ordinal -> {
-                    if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
-                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin)
-                }
                 Type.LOCK.ordinal -> {
                     if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.LOCK)
                     scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, origin)
                 }
+                Type.HOME.ordinal -> {
+                    if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
+                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin)
+                }
                 null -> {
                     if (changeImmediate) {
-                        changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
                         changeWallpaperImmediate(wallpaperAlarmItem, Type.LOCK)
+                        changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
                     }
-                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal)
                     scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, Type.LOCK.ordinal)
+                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal)
                 }
             }
         }
@@ -61,31 +64,41 @@ class WallpaperScheduler (
         }
     }
 
+    /**
+     * Update the alarms
+     */
     override fun updateWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem) {
         cancelWallpaperAlarm()
         if (wallpaperAlarmItem.scheduleSeparately) {
-            scheduleWallpaper(wallpaperAlarmItem, Type.HOME, null, true)
             scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, null, true)
+            scheduleWallpaper(wallpaperAlarmItem, Type.HOME, null, true)
         }
         else {
             scheduleWallpaper(wallpaperAlarmItem, Type.BOTH, null, true)
         }
     }
 
+    /**
+     * Update the wallpaper without scheduling alarms
+     */
     override fun updateWallpaper(scheduleSeparately: Boolean) {
         if (scheduleSeparately) {
-            updateWallpaper(Type.HOME)
             updateWallpaper(Type.LOCK)
+            updateWallpaper(Type.HOME)
         }
         else {
             updateWallpaper(Type.BOTH)
         }
     }
 
+    /**
+     * Cancels all active alarms
+     */
     override fun cancelWallpaperAlarm() {
         cancelAlarm(Type.HOME)
         cancelAlarm(Type.LOCK)
         cancelAlarm(Type.BOTH)
+        cancelAlarm(Type.REFRESH)
     }
 
     /**
@@ -95,6 +108,7 @@ class WallpaperScheduler (
         val nextTime = when (type) {
             Type.HOME, Type.BOTH -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.timeInMinutes1.toLong())
             Type.LOCK -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.timeInMinutes2.toLong())
+            else -> LocalDateTime.now()
         }
         val intent = Intent(context, WallpaperReceiver::class.java).apply {
             putExtra("timeInMinutes1", wallpaperAlarmItem.timeInMinutes1)
@@ -154,6 +168,27 @@ class WallpaperScheduler (
             }
             context.startService(serviceIntent)
         }
+    }
+
+    /**
+     * Schedules a refresh alarm every 24hrs
+     */
+    fun scheduleRefresh() {
+        cancelAlarm(Type.REFRESH)
+        val intent = Intent(context, WallpaperReceiver::class.java).apply {
+            putExtra("refresh", true)
+        }
+        val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+            PendingIntent.getBroadcast(
+                context,
+                Type.REFRESH.ordinal,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
+        )
     }
 
     /**

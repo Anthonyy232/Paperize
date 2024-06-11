@@ -72,7 +72,8 @@ class WallpaperService1: Service() {
     enum class Actions {
         START,
         REQUEUE,
-        UPDATE
+        UPDATE,
+        REFRESH
     }
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -110,6 +111,9 @@ class WallpaperService1: Service() {
                 Actions.UPDATE.toString() -> {
                     workerTaskUpdate()
                 }
+                Actions.REFRESH.toString() -> {
+                    workerTaskRefresh()
+                }
             }
         }
         return START_NOT_STICKY
@@ -124,8 +128,7 @@ class WallpaperService1: Service() {
     private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
-                refreshAlbum(this@WallpaperService1)
-                delay(2000)
+                if (scheduleSeparately) delay(5000)
                 changeWallpaper(this@WallpaperService1, setHomeOrLock)
             }
             stopSelf()
@@ -150,6 +153,15 @@ class WallpaperService1: Service() {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
                 updateCurrentWallpaper(this@WallpaperService1)
+            }
+            stopSelf()
+        }
+    }
+
+    private fun workerTaskRefresh() {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                refreshAlbum(this@WallpaperService1)
             }
             stopSelf()
         }
@@ -252,9 +264,7 @@ class WallpaperService1: Service() {
                                             it.copy(
                                                 album = it.album.copy(
                                                     homeWallpapersInQueue = if (setHomeOrLock) it.album.homeWallpapersInQueue.drop(1) else it.album.homeWallpapersInQueue,
-                                                    lockWallpapersInQueue = if (!setHomeOrLock) it.album.lockWallpapersInQueue.drop(1) else it.album.lockWallpapersInQueue,
-                                                    currentHomeWallpaper = if (setHomeOrLock) wallpaper else it.album.currentHomeWallpaper,
-                                                    currentLockWallpaper = if (!setHomeOrLock) wallpaper else it.album.currentLockWallpaper
+                                                    lockWallpapersInQueue = if (!setHomeOrLock) it.album.lockWallpapersInQueue.drop(1) else it.album.lockWallpapersInQueue
                                                 ),
                                                 wallpapers = it.wallpapers.filter { it == it1 },
                                             )
@@ -299,9 +309,7 @@ class WallpaperService1: Service() {
                                                 it.copy(
                                                     album = it.album.copy(
                                                         homeWallpapersInQueue = if (setHomeOrLock) newWallpaperInQueue.drop(1) else it.album.homeWallpapersInQueue,
-                                                        lockWallpapersInQueue = if (!setHomeOrLock) newWallpaperInQueue.drop(1) else it.album.lockWallpapersInQueue,
-                                                        currentHomeWallpaper = if (setHomeOrLock) wallpaper else it.album.currentHomeWallpaper,
-                                                        currentLockWallpaper = if (!setHomeOrLock) wallpaper else it.album.currentLockWallpaper
+                                                        lockWallpapersInQueue = if (!setHomeOrLock) newWallpaperInQueue.drop(1) else it.album.lockWallpapersInQueue
                                                     ),
                                                     wallpapers = it.wallpapers.filter { it == it1 }
                                                 )
@@ -344,9 +352,7 @@ class WallpaperService1: Service() {
                                             it.copy(
                                                 album = it.album.copy(
                                                     homeWallpapersInQueue = it.album.homeWallpapersInQueue.drop(1),
-                                                    lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper },
-                                                    currentHomeWallpaper = null,
-                                                    currentLockWallpaper = null
+                                                    lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper }
                                                 ),
                                                 wallpapers = it.wallpapers.filter { it == it1 },
                                             )
@@ -391,9 +397,7 @@ class WallpaperService1: Service() {
                                                 it.copy(
                                                     album = it.album.copy(
                                                         homeWallpapersInQueue = it.album.homeWallpapersInQueue.drop(1),
-                                                        lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper },
-                                                        currentHomeWallpaper = null,
-                                                        currentLockWallpaper = null
+                                                        lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper }
                                                     ),
                                                     wallpapers = it.wallpapers.filter { it == it1 }
                                                 )
@@ -468,8 +472,7 @@ class WallpaperService1: Service() {
                                         it.copy(
                                             album = it.album.copy(
                                                 homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
-                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 },
-                                                currentHomeWallpaper = null
+                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
                                             ),
                                             wallpapers = it.wallpapers.filter { it == it1 },
                                         )
@@ -498,8 +501,7 @@ class WallpaperService1: Service() {
                                         it.copy(
                                             album = it.album.copy(
                                                 homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
-                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 },
-                                                currentLockWallpaper = null
+                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
                                             ),
                                             wallpapers = it.wallpapers.filter { it == it1 },
                                         )
@@ -527,8 +529,16 @@ class WallpaperService1: Service() {
         setHome: Boolean, setLock: Boolean,
         setLockOrHome: Boolean? = null,
         blur: Boolean = false,
-        blurPercent: Int
+        blurPercent: Int,
     ): Boolean {
+        when {
+            setLockOrHome == true -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for home")
+            setLockOrHome == false -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for lock")
+            setHome && setLock -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for both")
+            setHome -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for home")
+            setLock -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for lock")
+            else -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for both")
+        }
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val imageSize = wallpaper.getImageDimensions(context) ?: return false
@@ -631,7 +641,7 @@ class WallpaperService1: Service() {
                 albumWithWallpapers.forEach { albumWithWallpaper ->
                     // Delete wallpaper if the URI is invalid
                     val invalidWallpapers = albumWithWallpaper.wallpapers.filterNot { wallpaper ->
-                        val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
+                        val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                         file?.exists() == true
                     }
                     if (invalidWallpapers.isNotEmpty()) {
@@ -646,7 +656,7 @@ class WallpaperService1: Service() {
                                     albumRepository.deleteFolder(folder)
                                 } else {
                                     val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFileCompat.fromSingleUri(context, it.toUri()) }
                                     val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
                                     albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                                 }
@@ -657,7 +667,7 @@ class WallpaperService1: Service() {
                                     albumRepository.deleteFolder(folder)
                                 } else {
                                     val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
-                                    val folderCoverFile = folder.coverUri?.let { DocumentFile.fromSingleUri(context, it.toUri()) }
+                                    val folderCoverFile = folder.coverUri?.let { DocumentFileCompat.fromSingleUri(context, it.toUri()) }
                                     val folderCover = folderCoverFile?.takeIf { it.exists() }?.uri?.toString() ?: wallpapers.randomOrNull()
                                     albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                                 }

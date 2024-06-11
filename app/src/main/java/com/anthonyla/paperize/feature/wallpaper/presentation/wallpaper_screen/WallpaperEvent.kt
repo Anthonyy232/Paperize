@@ -7,8 +7,10 @@ sealed class WallpaperEvent {
     data class UpdateSelectedAlbum(
         val selectedAlbum: SelectedAlbum?,
         val album: AlbumWithWallpaperAndFolder?,
-        val scheduleSeparately: Boolean = false
+        val scheduleSeparately: Boolean = false,
+        val setHome: Boolean = false,
+        val setLock: Boolean = false
     ): WallpaperEvent()
-    object Reset : WallpaperEvent()
-    object Refresh : WallpaperEvent()
+    data object Reset : WallpaperEvent()
+    data object Refresh : WallpaperEvent()
 }

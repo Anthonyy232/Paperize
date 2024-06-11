@@ -43,6 +43,7 @@ class WallpaperScreenViewModel @Inject constructor (
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
+                    if (!event.setHome && !event.setLock) return@launch
                     if (event.selectedAlbum != null) {
                         _state.update {
                             it.copy(
@@ -67,8 +68,8 @@ class WallpaperScreenViewModel @Inject constructor (
                             album = event.album.album.copy(
                                 homeWallpapersInQueue = shuffledWallpapers1,
                                 lockWallpapersInQueue = shuffledWallpapers2,
-                                currentHomeWallpaper = shuffledWallpapers1.firstOrNull(),
-                                currentLockWallpaper = if (event.scheduleSeparately) shuffledWallpapers2.firstOrNull() else shuffledWallpapers1.firstOrNull(),
+                                currentHomeWallpaper = if (event.setHome) shuffledWallpapers1.firstOrNull() else null,
+                                currentLockWallpaper = if (event.scheduleSeparately && event.setLock) shuffledWallpapers2.firstOrNull() else if (event.setLock) shuffledWallpapers1.firstOrNull() else null,
                             ),
                             wallpapers = wallpapers
                         )
