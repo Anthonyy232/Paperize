@@ -3,8 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id ("com.mikepenz.aboutlibraries.plugin")
-    id ("org.jetbrains.kotlin.plugin.serialization")
+    id("com.mikepenz.aboutlibraries.plugin")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -96,7 +97,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:1.7.0-beta02")
-    implementation("com.github.skydoves:landscapist-glide:2.3.3")
+    implementation("com.github.skydoves:landscapist-glide:2.3.4")
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.4.1")
@@ -116,7 +117,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.lazygeniouz:dfc:1.0.8")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
     implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:b6363490c3")
 }
 

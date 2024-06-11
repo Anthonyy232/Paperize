@@ -531,14 +531,6 @@ class WallpaperService1: Service() {
         blur: Boolean = false,
         blurPercent: Int,
     ): Boolean {
-        when {
-            setLockOrHome == true -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for home")
-            setLockOrHome == false -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for lock")
-            setHome && setLock -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for both")
-            setHome -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for home")
-            setLock -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for lock")
-            else -> Log.d("PaperizeWallpaperChanger", "Setting wallpaper for both")
-        }
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val imageSize = wallpaper.getImageDimensions(context) ?: return false
