@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.core.ScalingConstants
@@ -66,7 +65,6 @@ fun HomeScreen(
     onBlurPercentageChange: (Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
     blurPercentage: Int,
-    firstSet: Boolean
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -147,23 +145,22 @@ fun HomeScreen(
                         onDarkenPercentage = onDarkenPercentage,
                         onHomeCheckedChange = onHomeCheckedChange,
                         onLockCheckedChange = onLockCheckedChange,
+                        scheduleSeparately = scheduleSeparately,
+                        onScheduleSeparatelyChange = onScheduleSeparatelyChange,
                         onScheduleWallpaperChanger1 = onScheduleWallpaperChanger1,
                         onScheduleWallpaperChanger2 = onScheduleWallpaperChanger2,
                         onScalingChange = onScalingChange,
                         onSelectAlbum = onSelectAlbum,
+                        onTimeChange1 = onTimeChange1,
+                        onTimeChange2 = onTimeChange2,
                         onStop = onStop,
                         onToggleChanger = onToggleChanger,
                         scaling = scaling,
                         selectedAlbum = selectedAlbum,
-                        scheduleSeparately = scheduleSeparately,
-                        onScheduleSeparatelyChange = onScheduleSeparatelyChange,
-                        onTimeChange1 = onTimeChange1,
-                        onTimeChange2 = onTimeChange2,
                         blur = blur,
                         onBlurPercentageChange = onBlurPercentageChange,
                         onBlurChange = onBlurChange,
-                        blurPercentage = blurPercentage,
-                        firstSet = firstSet
+                        blurPercentage = blurPercentage
                     )
                     1 -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },

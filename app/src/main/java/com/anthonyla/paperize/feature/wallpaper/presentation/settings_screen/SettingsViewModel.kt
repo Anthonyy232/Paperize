@@ -35,7 +35,6 @@ class SettingsViewModel @Inject constructor (
     init {
         currentGetJob = viewModelScope.launch(Dispatchers.IO) {
             val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
-            val firstSet = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_SET) ?: false }
             val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
             val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: true }
@@ -60,7 +59,6 @@ class SettingsViewModel @Inject constructor (
                     homeInterval = homeWallpaperInterval.await(),
                     lockInterval = lockWallpaperInterval.await(),
                     firstLaunch = firstLaunch.await(),
-                    firstSet = firstSet.await(),
                     lastSetTime = lastSetTime.await(),
                     nextSetTime = nextSetTime.await(),
                     animate = animate.await(),
@@ -121,7 +119,6 @@ class SettingsViewModel @Inject constructor (
                     val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
                     val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
                     val blurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0 }
-                    val firstSet = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_SET) ?: true }
                     _state.update {
                         it.copy(
                             darkMode = darkMode.await(),
@@ -140,7 +137,6 @@ class SettingsViewModel @Inject constructor (
                             scheduleSeparately = scheduleSeparately.await(),
                             blur = blur.await(),
                             blurPercentage = blurPercentage.await(),
-                            firstSet = firstSet.await()
                         )
                     }
                 }
@@ -178,17 +174,6 @@ class SettingsViewModel @Inject constructor (
                     _state.update {
                         it.copy(
                             animate = event.animate
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.SetFirstSet -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_SET, false)
-                    _state.update {
-                        it.copy(
-                            firstSet = false
                         )
                     }
                 }
@@ -407,8 +392,7 @@ class SettingsViewModel @Inject constructor (
                             homeInterval = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
                             scheduleSeparately = false,
                             blur = false,
-                            blurPercentage = 0,
-                            firstSet = true
+                            blurPercentage = 0
                         )
                     }
                 }

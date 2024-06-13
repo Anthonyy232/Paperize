@@ -46,7 +46,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowDelayNoticeDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowLiveWallpaperEnabledDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
@@ -84,8 +83,7 @@ fun WallpaperScreen(
     blur: Boolean,
     onBlurPercentageChange: (Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    blurPercentage: Int,
-    firstSet: Boolean
+    blurPercentage: Int
 ) {
     val context = LocalContext.current
     val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
@@ -93,21 +91,12 @@ fun WallpaperScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val openLiveDialog = rememberSaveable { mutableStateOf(false) }
-    val openNoticeDialog = rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     if (openLiveDialog.value) {
         ShowLiveWallpaperEnabledDialog(
             onDismissRequest = { openLiveDialog.value = false }
-        )
-    }
-    if (openNoticeDialog.value) {
-        ShowDelayNoticeDialog(
-            onDismissRequest = {
-                openNoticeDialog.value = false
-                openBottomSheet = true
-            }
         )
     }
 
@@ -146,12 +135,7 @@ fun WallpaperScreen(
                                 if (isLiveWallpaperSet(context)) {
                                     openLiveDialog.value = true
                                 } else {
-                                    if (firstSet) {
-                                        openNoticeDialog.value = true
-                                    }
-                                    else {
-                                        openBottomSheet = true
-                                    }
+                                    openBottomSheet = true
                                 }
                             } else {
                                 scope.launch {

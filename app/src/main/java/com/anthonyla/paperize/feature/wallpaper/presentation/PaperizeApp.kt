@@ -332,7 +332,6 @@ fun PaperizeApp(
                 scheduleSeparately = settingsState.value.scheduleSeparately,
                 blur = settingsState.value.blur,
                 blurPercentage = settingsState.value.blurPercentage,
-                firstSet = settingsState.value.firstSet,
                 onToggleChanger = { enableWallpaperChanger ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
                     if (selectedState.value.selectedAlbum != null && enableWallpaperChanger && (settingsState.value.setHomeWallpaper || settingsState.value.setLockWallpaper)) {
@@ -375,9 +374,6 @@ fun PaperizeApp(
                             settingsState.value.setLockWallpaper
                         )
                     )
-                    if (settingsState.value.firstSet) {
-                        settingsViewModel.onEvent(SettingsEvent.SetFirstSet)
-                    }
                     job?.cancel()
                     job = scope.launch {
                         val alarmItem = WallpaperAlarmItem(

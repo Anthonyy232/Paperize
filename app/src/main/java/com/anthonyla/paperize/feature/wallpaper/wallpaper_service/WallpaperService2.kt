@@ -512,14 +512,15 @@ class WallpaperService2: Service() {
         setHome: Boolean, setLock: Boolean,
         setLockOrHome: Boolean? = null,
         blur: Boolean = false,
-        blurPercent: Int
+        blurPercent: Int,
+        lastHomeWallpaper: Uri? = null,
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val imageSize = wallpaper.getImageDimensions(context) ?: return false
             val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
             val device = context.resources.displayMetrics
-            val targetWidth = min(4 * device.widthPixels, imageSize.width)
+            val targetWidth = min(device.widthPixels, imageSize.width)
             val targetHeight = (targetWidth * aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

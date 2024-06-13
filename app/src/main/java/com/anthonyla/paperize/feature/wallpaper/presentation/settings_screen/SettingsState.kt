@@ -4,7 +4,6 @@ import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_D
 
 data class SettingsState(
     val firstLaunch: Boolean = true,
-    val firstSet: Boolean = true,
     // App settings
     val darkMode: Boolean? = null,
     val dynamicTheming: Boolean = false,
