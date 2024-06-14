@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
             if (isFirstLaunch) {
+                scheduler.cancelWallpaperAlarm()
                 wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
                 settingsViewModel.onEvent(SettingsEvent.Reset)
                 albumsViewModel.onEvent(AlbumsEvent.Reset)

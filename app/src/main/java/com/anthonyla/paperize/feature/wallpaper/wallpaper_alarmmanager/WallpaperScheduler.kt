@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService1
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService2
@@ -120,10 +119,7 @@ class WallpaperScheduler (
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                Intent().also {
-                    it.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-                    context.startActivity(it)
-                }
+                cancelWallpaperAlarm()
             }
             else {
                 alarmManager.setExactAndAllowWhileIdle(
@@ -179,16 +175,35 @@ class WallpaperScheduler (
             putExtra("refresh", true)
         }
         val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
-        alarmManager.setExact(
-            AlarmManager.RTC_WAKEUP,
-            nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-            PendingIntent.getBroadcast(
-                context,
-                Type.REFRESH.ordinal,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                cancelWallpaperAlarm()
+            }
+            else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+                    PendingIntent.getBroadcast(
+                        context,
+                        Type.REFRESH.ordinal,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    )
+                )
+            }
+        }
+        else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+                PendingIntent.getBroadcast(
+                    context,
+                    Type.REFRESH.ordinal,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
             )
-        )
+        }
     }
 
     /**
