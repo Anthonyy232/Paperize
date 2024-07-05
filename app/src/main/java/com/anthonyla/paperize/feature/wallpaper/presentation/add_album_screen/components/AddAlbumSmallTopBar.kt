@@ -102,7 +102,6 @@ fun AddAlbumSmallTopBar(
         ), label = stringResource(R.string.circle_3_animation)
     )
 
-
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
         title = {
@@ -174,7 +173,7 @@ fun AddAlbumSmallTopBar(
         },
         actions = {
             if(!selectionMode) {
-                if (!isEmpty) {
+                if (!isEmpty && editableTitle.isNotEmpty()) {
                     Box {
                         val primaryColor = MaterialTheme.colorScheme.inversePrimary
                         val secondaryColor = MaterialTheme.colorScheme.secondary

@@ -47,7 +47,7 @@ import javax.inject.Inject
 import kotlin.math.min
 
 /**
- * Used in conjunction with [WallpaperService1] to schedule home screen and lock screen separately
+ * Used in conjunction with [WallpaperService1] to schedule home screen and lock screen separately -- sets lock screen wallpaper
  */
 @AndroidEntryPoint
 class WallpaperService2: Service() {
@@ -238,7 +238,7 @@ class WallpaperService2: Service() {
                                     setLock = setLock,
                                     setLockOrHome = setHomeOrLock,
                                     blur = blur,
-                                    blurPercent = blurPercentage,
+                                    blurPercent = blurPercentage
                                 )) {
                                 selectedAlbum.wallpapers.firstOrNull { it.wallpaperUri == wallpaper }
                                     ?.let { it1 ->
@@ -326,7 +326,7 @@ class WallpaperService2: Service() {
                                     setHome = setHome,
                                     setLock = setLock,
                                     blur = blur,
-                                    blurPercent = blurPercentage,
+                                    blurPercent = blurPercentage
                                 )) {
                                 selectedAlbum.wallpapers.firstOrNull { it.wallpaperUri == wallpaper }
                                     ?.let { it1 ->
@@ -370,7 +370,7 @@ class WallpaperService2: Service() {
                                         setLock = setLock,
                                         setLockOrHome = setHomeOrLock,
                                         blur = blur,
-                                        blurPercent = blurPercentage,
+                                        blurPercent = blurPercentage
                                     )
                                 ) {
                                     selectedAlbum.wallpapers.firstOrNull { it.wallpaperUri == wallpaper }
@@ -513,7 +513,6 @@ class WallpaperService2: Service() {
         setLockOrHome: Boolean? = null,
         blur: Boolean = false,
         blurPercent: Int,
-        lastHomeWallpaper: Uri? = null,
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
@@ -564,8 +563,8 @@ class WallpaperService2: Service() {
                     image.recycle()
                 }
                 bitmap.recycle()
-                return true
             }
+            return true
         } catch (e: IOException) {
             Log.e("PaperizeWallpaperChanger", "Error setting wallpaper", e)
             return false

@@ -17,11 +17,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
@@ -45,10 +43,10 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddEdit
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.AlbumView
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.FolderView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Home
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Licenses
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavConstants.INITIAL_OFFSET
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavScreens
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Notification
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Privacy
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Settings
@@ -58,15 +56,11 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitio
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperScheduler
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @Composable
 fun PaperizeApp(
@@ -100,9 +94,7 @@ fun PaperizeApp(
                             navController.navigate(Home)
                         }
                     }
-                    albumsViewModel.onEvent(
-                        AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpapers)
-                    )
+                    albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpapers))
                 }
             }
             selectedState.value.selectedAlbum?.let { selectedAlbum ->
@@ -565,8 +557,7 @@ fun PaperizeApp(
                     navController.navigate(WallpaperView(it))
                 },
                 onShowFolderView = { folderName, wallpapers ->
-                    val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                    navController.navigate("${NavScreens.FolderView.route}/${folderName ?: " "}/$encodedWallpapers")
+                    navController.navigate(FolderView(folderName, wallpapers))
                 }
             )
         }
@@ -600,12 +591,7 @@ fun PaperizeApp(
                 animate = settingsState.value.animate
             )
         }
-        composable(
-            route = NavScreens.FolderView.route.plus("/{folderName}/{wallpapers}"),
-            arguments = listOf(
-                navArgument("folderName") { type = NavType.StringType },
-                navArgument("wallpapers") { type = NavType.StringType }
-            ),
+        composable<FolderView>(
             enterTransition = {
                 if (settingsState.value.animate) {
                     sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
@@ -627,15 +613,11 @@ fun PaperizeApp(
                 } else { null }
             }
         ) { backStackEntry ->
-            val folderName = backStackEntry.arguments?.getString("folderName")
-            val wallpapers = Gson().fromJson(
-                backStackEntry.arguments?.getString("wallpapers"),
-                Array<String>::class.java
-            ).toList()
-            if (wallpapers.isNotEmpty()) {
+            val folderView: FolderView = backStackEntry.toRoute()
+            if (folderView.wallpapers.isNotEmpty()) {
                 FolderViewScreen(
-                    folderName = folderName,
-                    wallpapers = wallpapers,
+                    folderName = folderView.folderName,
+                    wallpapers = folderView.wallpapers,
                     onBackClick = { navController.navigateUp() },
                     onShowWallpaperView = {
                         navController.navigate(WallpaperView(it))
@@ -677,8 +659,7 @@ fun PaperizeApp(
                         navController.navigate(WallpaperView(it))
                     },
                     onShowFolderView = { folderName, wallpapers ->
-                        val encodedWallpapers = runBlocking { encodeUri(uri = Gson().toJson(wallpapers)) }
-                        navController.navigate("${NavScreens.FolderView.route}/${folderName ?: " "}/$encodedWallpapers")
+                        navController.navigate(FolderView(folderName, wallpapers))
                     },
                     onDeleteAlbum = {
                         navController.navigateUp()
@@ -807,9 +788,3 @@ fun PaperizeApp(
         }
     }
 }
-
-// Encode an URI so it can be passed with navigation
-suspend fun encodeUri(uri: String): String =
-    withContext(Dispatchers.IO) {
-        URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-    }

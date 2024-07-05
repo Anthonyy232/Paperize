@@ -95,7 +95,7 @@ fun HomeScreen(
             TabRow(
                 selectedTabIndex = tabIndex,
                 indicator = { tabPositions ->
-                    if (tabIndex < tabPositions.size) {
+                    if (tabIndex in tabPositions.indices) {
                         TabRowDefaults.PrimaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
                             shape = RoundedCornerShape(
@@ -129,7 +129,7 @@ fun HomeScreen(
                 state = pagerState,
                 beyondViewportPageCount = 1
             ) { index ->
-                when(index) {
+                when(index.coerceIn(tabItems.indices)) {
                     0 -> WallpaperScreen(
                         animate = animate,
                         darken = darken,
@@ -162,7 +162,7 @@ fun HomeScreen(
                         onBlurChange = onBlurChange,
                         blurPercentage = blurPercentage
                     )
-                    1 -> LibraryScreen(
+                    else -> LibraryScreen(
                         onAddNewAlbumClick = { addAlbumDialog = true },
                         onViewAlbum = onAlbumViewClick,
                         animate = animate
