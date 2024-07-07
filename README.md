@@ -35,7 +35,7 @@
 F-Droid will be added soon
 
 ## Localization
-I want to allow more people to use the app. Currently, translations are provided using machine translation and AI -- which is not optimal.
+I want to allow more people to use the app. Currently, most of the translations are provided using machine translation and AI -- which is not optimal.
 
 I would love some help translating the app! Help me out with that [here](https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922)!
 
