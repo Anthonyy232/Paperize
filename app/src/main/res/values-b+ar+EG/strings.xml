@@ -144,7 +144,7 @@
   <string name="privacy_children_privacy_title">خصوصية الأطفال</string>
   <string name="privacy_children_privacy_content">%1$s مش مُخَصَّص للأطفال تحت ١٣ سنة. احنا مش بنجَمَّع أى معلومات من الأطفال عن قصد.</string>
   <string name="privacy_changes_notice_title">اللى اتغير فى الإشعار ده</string>
-  <string name="privacy_changes_notice_content">احنا ممكن نحدِّث إشعار الخصوصية ده من وقت للتانى. أى تغييرات هتبان فى الرنامج وعلى موقعنا.</string>
+  <string name="privacy_changes_notice_content">احنا ممكن نحدِّث إشعار الخصوصية ده من وقت للتانى. أى تغييرات هتبان فى البرنامج وعلى موقعنا.</string>
   <string name="privacy_contact_us_title">اتصل بينا</string>
   <string name="privacy_contact_us_content">لو عندك أى أسئلة أو استفسارات بشأن إشعار الخصوصية ده، اتصل بيا على %1$s.</string>
   <string name="no_albums_found">مافيش ألبومات موجودة</string>
