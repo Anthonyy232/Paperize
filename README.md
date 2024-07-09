@@ -63,7 +63,7 @@ This project is built using Kotlin, Java, and Gradle. Here are the steps to buil
 
 ### Prerequisites
 - Java 8 (1.8)
-- Android Studio Jellyfish | 2023.3.1 or later
+- Android Studio Jellyfish | 2024.1.1 or later
 - Android Gradle Plugin 8.5.0 or later
 - Gradle 8.8
 - Minimum SDK 26
