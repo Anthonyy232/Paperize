@@ -149,10 +149,10 @@ class WallpaperService1: Service() {
         }
     }
 
-    private fun workerTaskUpdate() {
+    private fun workerTaskUpdate(setHomeOrLock: Boolean? = null) {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
-                updateCurrentWallpaper(this@WallpaperService1)
+                updateCurrentWallpaper(this@WallpaperService1, setHomeOrLock)
             }
             stopSelf()
         }
@@ -425,7 +425,7 @@ class WallpaperService1: Service() {
         }
     }
 
-    private suspend fun updateCurrentWallpaper(context: Context) {
+    private suspend fun updateCurrentWallpaper(context: Context, setHomeOrLock: Boolean? = null) {
         try {
             val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
             if (selectedAlbum == null) {
@@ -439,10 +439,6 @@ class WallpaperService1: Service() {
                     onDestroy()
                     return
                 }
-                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                val time = LocalDateTime.now()
-                settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, time.format(formatter))
-                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, time.plusMinutes(timeInMinutes1.toLong()).format(formatter))
                 val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
                 val darkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100
@@ -452,36 +448,7 @@ class WallpaperService1: Service() {
                 selectedAlbum.let { it ->
                     val wallpaper1 = it.album.currentHomeWallpaper
                     val wallpaper2 = it.album.currentLockWallpaper
-                    if (wallpaper1 != null) {
-                        if (!setWallpaper(
-                                context = context,
-                                wallpaper = wallpaper1.toUri(),
-                                darken = darken,
-                                darkenPercent = darkenPercentage,
-                                scaling = scaling,
-                                setHome = setHome,
-                                setLock = setLock,
-                                setLockOrHome = true,
-                                blur = blur,
-                                blurPercent = blurPercentage
-                        )) {
-                            selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper1 }
-                                ?.let { it1 ->
-                                    selectedRepository.deleteWallpaper(it1)
-                                    selectedRepository.upsertSelectedAlbum(
-                                        it.copy(
-                                            album = it.album.copy(
-                                                homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
-                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
-                                            ),
-                                            wallpapers = it.wallpapers.filter { it == it1 },
-                                        )
-                                    )
-                                    albumRepository.deleteWallpaper(it1)
-                                }
-                        }
-                    }
-                    if (wallpaper2 != null) {
+                    if (wallpaper2 != null && (setHomeOrLock == null || setHomeOrLock == false)) {
                         if (!setWallpaper(
                                 context = context,
                                 wallpaper = wallpaper2.toUri(),
@@ -494,20 +461,49 @@ class WallpaperService1: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )) {
-                            selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper2 }
-                                ?.let { it1 ->
-                                    selectedRepository.deleteWallpaper(it1)
-                                    selectedRepository.upsertSelectedAlbum(
-                                        it.copy(
-                                            album = it.album.copy(
-                                                homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
-                                                lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
-                                            ),
-                                            wallpapers = it.wallpapers.filter { it == it1 },
+                                selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper2 }
+                                    ?.let { it1 ->
+                                        selectedRepository.deleteWallpaper(it1)
+                                        selectedRepository.upsertSelectedAlbum(
+                                            it.copy(
+                                                album = it.album.copy(
+                                                    homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
+                                                    lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
+                                                ),
+                                                wallpapers = it.wallpapers.filter { it == it1 },
+                                            )
                                         )
-                                    )
-                                    albumRepository.deleteWallpaper(it1)
-                                }
+                                        albumRepository.deleteWallpaper(it1)
+                                    }
+                        }
+                    }
+                    if (wallpaper1 != null && (setHomeOrLock == null || setHomeOrLock == true)) {
+                        if (!setWallpaper(
+                                context = context,
+                                wallpaper = wallpaper1.toUri(),
+                                darken = darken,
+                                darkenPercent = darkenPercentage,
+                                scaling = scaling,
+                                setHome = setHome,
+                                setLock = setLock,
+                                setLockOrHome = true,
+                                blur = blur,
+                                blurPercent = blurPercentage
+                            )) {
+                                selectedAlbum.wallpapers.firstOrNull{ it.wallpaperUri == wallpaper1 }
+                                    ?.let { it1 ->
+                                        selectedRepository.deleteWallpaper(it1)
+                                        selectedRepository.upsertSelectedAlbum(
+                                            it.copy(
+                                                album = it.album.copy(
+                                                    homeWallpapersInQueue = it.album.homeWallpapersInQueue.filter { it != wallpaper1 },
+                                                    lockWallpapersInQueue = it.album.lockWallpapersInQueue.filter { it != wallpaper1 }
+                                                ),
+                                                wallpapers = it.wallpapers.filter { it == it1 },
+                                            )
+                                        )
+                                        albumRepository.deleteWallpaper(it1)
+                                    }
                         }
                     }
                 }
