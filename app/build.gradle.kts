@@ -95,7 +95,7 @@ dependencies {
     implementation("androidx.compose.material:material:1.7.0-beta04")
     implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.compose.material:material-icons-extended:1.7.0-beta04")
+    implementation("androidx.compose.material:material-icons-extended:1.7.0-beta05")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.compose.animation:animation:1.7.0-beta04")
     implementation("androidx.core:core-splashscreen:1.2.0-alpha01")
