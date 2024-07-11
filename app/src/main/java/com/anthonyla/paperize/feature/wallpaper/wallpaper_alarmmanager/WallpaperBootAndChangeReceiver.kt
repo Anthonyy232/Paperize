@@ -1,8 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +20,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @AndroidEntryPoint
 class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) = goAsync {
         try {
             val scheduler = WallpaperScheduler(context)
