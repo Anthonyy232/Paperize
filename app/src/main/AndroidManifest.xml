@@ -30,7 +30,15 @@
         <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver" />
         <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService1"/>
         <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService2"/>
-        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndTimeChangeReceiver"
+        <service
+            android:name=".feature.wallpaper.wallpaper_tile.ChangeWallpaperTileService"
+            android:exported="true"
+            android:label="@string/change_wallpaper"
+            android:icon="@drawable/notification_icon"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter> <action android:name="android.service.quicksettings.action.QS_TILE" /> </intent-filter>
+        </service>
+        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
