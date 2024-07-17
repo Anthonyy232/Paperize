@@ -33,13 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.BlurSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ChangerSelectionRow
@@ -53,7 +50,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun WallpaperScreen(
-    albumsViewModel: AlbumsViewModel = hiltViewModel(),
+    albums: List<AlbumWithWallpaperAndFolder>,
     animate: Boolean,
     darken: Boolean,
     darkenPercentage: Int,
@@ -86,7 +83,6 @@ fun WallpaperScreen(
     blurPercentage: Int
 ) {
     val context = LocalContext.current
-    val albumState = albumsViewModel.state.collectAsStateWithLifecycle()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -131,7 +127,7 @@ fun WallpaperScreen(
                     CurrentSelectedAlbum(
                         selectedAlbum = selectedAlbum,
                         onOpenBottomSheet = {
-                            if (albumState.value.albumsWithWallpapers.firstOrNull() != null) {
+                            if (albums.firstOrNull() != null) {
                                 if (isLiveWallpaperSet(context)) {
                                     openLiveDialog.value = true
                                 } else {
@@ -342,7 +338,7 @@ fun WallpaperScreen(
             }
             if (((homeEnabled || lockEnabled)) && openBottomSheet) {
                 AlbumBottomSheet(
-                    albums = albumState.value.albumsWithWallpapers,
+                    albums = albums,
                     currentSelectedAlbum = selectedAlbum,
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->

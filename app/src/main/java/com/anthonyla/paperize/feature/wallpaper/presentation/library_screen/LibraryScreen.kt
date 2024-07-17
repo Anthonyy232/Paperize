@@ -18,21 +18,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.AlbumItem
 
 @Composable
 fun LibraryScreen(
-    albumsViewModel: AlbumsViewModel = hiltViewModel(),
+    albums: List<AlbumWithWallpaperAndFolder>,
     onAddNewAlbumClick: () -> Unit,
     onViewAlbum: (String) -> Unit,
     animate: Boolean
     ) {
     val lazyListState = rememberLazyGridState()
-    val state = albumsViewModel.state.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
@@ -56,7 +53,7 @@ fun LibraryScreen(
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
-                    items (state.value.albumsWithWallpapers, key = { album -> album.album.initialAlbumName}
+                    items (albums, key = { album -> album.album.initialAlbumName}
                     ) { album ->
                         AlbumItem(
                             album = album.album,

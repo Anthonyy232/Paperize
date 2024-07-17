@@ -232,6 +232,7 @@ fun PaperizeApp(
             }
         ) {
             HomeScreen(
+                albums = albumState.value.albumsWithWallpapers,
                 onSettingsClick = { navController.navigate(Settings) },
                 navigateToAddWallpaperScreen = {
                     navController.navigate(AddEdit(it))

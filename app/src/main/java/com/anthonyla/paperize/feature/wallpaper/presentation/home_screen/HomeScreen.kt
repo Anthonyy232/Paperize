@@ -32,6 +32,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 
 @Composable
 fun HomeScreen(
+    albums: List<AlbumWithWallpaperAndFolder>,
     animate : Boolean,
     darken: Boolean,
     darkenPercentage: Int,
@@ -131,6 +132,7 @@ fun HomeScreen(
             ) { index ->
                 when(index.coerceIn(tabItems.indices)) {
                     0 -> WallpaperScreen(
+                        albums = albums,
                         animate = animate,
                         darken = darken,
                         darkenPercentage = darkenPercentage,
@@ -163,6 +165,7 @@ fun HomeScreen(
                         blurPercentage = blurPercentage
                     )
                     else -> LibraryScreen(
+                        albums = albums,
                         onAddNewAlbumClick = { addAlbumDialog = true },
                         onViewAlbum = onAlbumViewClick,
                         animate = animate
