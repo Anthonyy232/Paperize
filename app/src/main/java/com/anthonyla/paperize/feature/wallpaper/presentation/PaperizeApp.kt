@@ -559,7 +559,8 @@ fun PaperizeApp(
                 },
                 onShowFolderView = { folderName, wallpapers ->
                     navController.navigate(FolderView(folderName, wallpapers))
-                }
+                },
+                animate = settingsState.value.animate
             )
         }
         // Navigate to wallpaper view screen to view individual wallpapers in full screen
@@ -655,6 +656,7 @@ fun PaperizeApp(
             if (albumWithWallpaper != null) {
                 AlbumViewScreen(
                     album = albumWithWallpaper,
+                    animate = settingsState.value.animate,
                     onBackClick = { navController.navigateUp() },
                     onShowWallpaperView = {
                         navController.navigate(WallpaperView(it))

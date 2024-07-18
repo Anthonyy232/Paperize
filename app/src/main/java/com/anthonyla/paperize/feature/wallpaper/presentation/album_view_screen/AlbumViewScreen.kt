@@ -5,11 +5,8 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,13 +31,12 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.components.AlbumViewTopBar
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 
 @Composable
 fun AlbumViewScreen(
     albumViewScreenViewModel: AlbumViewScreenViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
     album: AlbumWithWallpaperAndFolder,
+    animate: Boolean,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
     onShowFolderView: (String?, List<String>) -> Unit,
@@ -51,7 +47,6 @@ fun AlbumViewScreen(
     albumViewScreenViewModel.onEvent(AlbumViewEvent.SetSize(album.wallpapers.size + album.folders.size)) // For selectedAll state
     val lazyListState = rememberLazyStaggeredGridState()
     val albumState = albumViewScreenViewModel.state.collectAsStateWithLifecycle()
-    val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -119,38 +114,17 @@ fun AlbumViewScreen(
             )
         },
         floatingActionButton = {
-            if (settingsState.value.animate) {
-                AnimatedVisibility(
-                    visible = !lazyListState.isScrollInProgress || lazyListState.firstVisibleItemScrollOffset < 0,
-                    enter = scaleIn(tween(400, 50, FastOutSlowInEasing)),
-                    exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
-                ) {
-                    AddAlbumAnimatedFab(
-                        onImageClick = {
-                            selectionMode = false
-                            imagePickerLauncher.launch(arrayOf("image/*"))
-                        },
-                        onFolderClick = {
-                            selectionMode = false
-                            folderPickerLauncher.launch(null)
-                        },
-                        animate = true
-                    )
-                }
-            }
-            else {
-                AddAlbumAnimatedFab(
-                    onImageClick = {
-                        selectionMode = false
-                        imagePickerLauncher.launch(arrayOf("image/*"))
-                    },
-                    onFolderClick = {
-                        selectionMode = false
-                        folderPickerLauncher.launch(null)
-                    },
-                    animate = false
-                )
-            }
+            AddAlbumAnimatedFab(
+                onImageClick = {
+                    selectionMode = false
+                    imagePickerLauncher.launch(arrayOf("image/*"))
+                },
+                onFolderClick = {
+                    selectionMode = false
+                    folderPickerLauncher.launch(null)
+                },
+                animate = animate
+            )
         },
         content = { it ->
             LazyVerticalStaggeredGrid(
@@ -164,7 +138,7 @@ fun AlbumViewScreen(
                 content = {
                     items (items = album.folders, key = { folder -> folder.folderUri }
                     ) { folder ->
-                        if (settingsState.value.animate) {
+                        if (animate) {
                             FolderItem(
                                 folder = folder,
                                 itemSelected = albumState.value.selectedFolders.contains(folder.folderUri),
@@ -182,8 +156,10 @@ fun AlbumViewScreen(
                                 onFolderViewClick = {
                                     if (folder.wallpapers.isNotEmpty()) onShowFolderView(folder.folderName, folder.wallpapers)
                                 },
-                                modifier = Modifier.padding(4.dp).animateItem(
-                                    placementSpec = tween(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .animateItem(
+                                        placementSpec = tween(
                                         durationMillis = 800,
                                         delayMillis = 0,
                                         easing = FastOutSlowInEasing
@@ -217,7 +193,7 @@ fun AlbumViewScreen(
                     }
                     items (items = album.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }
                     ) { wallpaper ->
-                        if (settingsState.value.animate) {
+                        if (animate) {
                             WallpaperItem(
                                 wallpaperUri = wallpaper.wallpaperUri,
                                 itemSelected = albumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),

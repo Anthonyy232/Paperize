@@ -28,13 +28,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -62,7 +63,7 @@ fun FolderItem(
     modifier: Modifier = Modifier,
     animate: Boolean = true
 ) {
-    val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val transition = updateTransition(itemSelected, label = "")
 
@@ -84,8 +85,7 @@ fun FolderItem(
             true
         } catch (e: Exception) { false }
     }
-
-    val showCoverUri = folder.coverUri != null && isValidUri(LocalContext.current, folder.coverUri)
+    val showCoverUri by remember { mutableStateOf(folder.coverUri != null && isValidUri(context, folder.coverUri)) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -122,7 +122,7 @@ fun FolderItem(
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
-                            requestSize = IntSize(300, 300),
+                            requestSize = IntSize(250, 250),
                         ),
                         loading = {
                             if (animate) {

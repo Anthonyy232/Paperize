@@ -15,6 +15,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +41,7 @@ fun AlbumItem(
     modifier: Modifier = Modifier,
     animate: Boolean = true
 ) {
+    val context = LocalContext.current
     fun isValidUri(context: Context, uriString: String?): Boolean {
         val uri = uriString?.toUri()
         return try {
@@ -48,8 +52,7 @@ fun AlbumItem(
             true
         } catch (e: Exception) { false }
     }
-
-    val showCoverUri = album.coverUri != null && isValidUri(LocalContext.current, album.coverUri)
+    val showCoverUri by remember { mutableStateOf(album.coverUri != null && isValidUri(context, album.coverUri)) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -70,7 +73,7 @@ fun AlbumItem(
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
-                            requestSize = IntSize(300, 300),
+                            requestSize = IntSize(250, 250),
                         ),
                         loading = {
                             if (animate) {

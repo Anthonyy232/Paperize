@@ -21,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -40,8 +42,6 @@ import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.getImageDimensions
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -88,8 +88,8 @@ fun WallpaperItem(
             true
         } catch (e: Exception) { false }
     }
+    val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
 
-    val showUri = isValidUri(LocalContext.current, wallpaperUri)
     val boxModifier = if (clickable) {
         modifier
             .padding(paddingTransition)
@@ -115,6 +115,7 @@ fun WallpaperItem(
             .padding(paddingTransition)
             .clip(RoundedCornerShape(roundedCornerShapeTransition))
     }
+
     Box(modifier = boxModifier) {
         if (showUri) {
             val dimension = wallpaperUri.toUri().getImageDimensions(context)
@@ -129,7 +130,7 @@ fun WallpaperItem(
                             ScalingConstants.STRETCH -> ContentScale.FillBounds
                         }
                     } else { ContentScale.Crop },
-                    requestSize = IntSize(300, 300),
+                    requestSize = IntSize(250, 250),
                     alignment = Alignment.Center,
                     colorFilter = if (darken && darkenPercentage != null && darkenPercentage < 100) {
                         ColorFilter.tint(
@@ -144,12 +145,6 @@ fun WallpaperItem(
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         }
                     }
-                },
-                requestBuilder =  {
-                    Glide
-                        .with(LocalContext.current)
-                        .asBitmap()
-                        .format(DecodeFormat.PREFER_RGB_565)
                 },
                 modifier = Modifier
                     .aspectRatio(imageAspectRatio)

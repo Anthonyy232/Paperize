@@ -5,11 +5,8 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,26 +30,21 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 
 @Composable
 fun AddAlbumScreen(
     addAlbumViewModel: AddAlbumViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
     initialAlbumName: String,
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String?, List<String>) -> Unit
+    onShowFolderView: (String?, List<String>) -> Unit,
+    animate: Boolean
 ) {
     val context = LocalContext.current
     val lazyGridState = rememberLazyStaggeredGridState()
     val addAlbumState = addAlbumViewModel.state.collectAsStateWithLifecycle()
-    val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
-    if (addAlbumState.value.initialAlbumName.isEmpty()) {
-        addAlbumViewModel.onEvent(AddAlbumEvent.SetAlbumName(initialAlbumName))
-    }
     var showSpotlight by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(
@@ -126,40 +118,17 @@ fun AddAlbumScreen(
             )
         },
         floatingActionButton = {
-            if (settingsState.value.animate) {
-                AnimatedVisibility(
-                    visible = !lazyGridState.isScrollInProgress || lazyGridState.firstVisibleItemScrollOffset < 0,
-                    enter = scaleIn(tween(400, 50, FastOutSlowInEasing)),
-                    exit = scaleOut(tween(400, 50, FastOutSlowInEasing)),
-                ) {
-                    AddAlbumAnimatedFab(
-                        onImageClick = {
-                            selectionMode = false
-                            imagePickerLauncher.launch(arrayOf("image/*"))
-                        },
-                        onFolderClick = {
-                            selectionMode = false
-                            folderPickerLauncher.launch(null)
-                        },
-                        animate = true
-                    )
-                }
-            }
-            else {
-                AddAlbumAnimatedFab(
-                    onImageClick = {
-                        selectionMode = false
-                        imagePickerLauncher.launch(arrayOf("image/*"))
-                        showSpotlight = true
-                    },
-                    onFolderClick = {
-                        selectionMode = false
-                        folderPickerLauncher.launch(null)
-                        showSpotlight = true
-                    },
-                    animate = false
-                )
-            }
+            AddAlbumAnimatedFab(
+                onImageClick = {
+                    selectionMode = false
+                    imagePickerLauncher.launch(arrayOf("image/*"))
+                },
+                onFolderClick = {
+                    selectionMode = false
+                    folderPickerLauncher.launch(null)
+                },
+                animate = animate
+            )
         },
         content = {
             LazyVerticalStaggeredGrid(
@@ -225,7 +194,7 @@ fun AddAlbumScreen(
                                     easing = FastOutSlowInEasing
                                 ),
                             ),
-                            animate = settingsState.value.animate
+                            animate = animate
                         )
                     }
                 }
