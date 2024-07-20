@@ -55,7 +55,7 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.WallpaperView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionIn
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
-import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperScheduler
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -65,7 +65,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun PaperizeApp(
     firstLaunch: Boolean,
-    scheduler : WallpaperScheduler,
+    scheduler : WallpaperAlarmSchedulerImpl,
     topInsets: Dp,
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),

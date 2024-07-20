@@ -22,7 +22,7 @@ class WallpaperReceiver: BroadcastReceiver() {
                     action = WallpaperService1.Actions.REFRESH.toString()
                 }
                 context.startService(serviceIntent)
-                WallpaperScheduler(context).scheduleRefresh()
+                WallpaperAlarmSchedulerImpl(context).scheduleRefresh()
             }
             else {
                 val timeInMinutes1 = intent?.getIntExtra("timeInMinutes1", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
@@ -48,7 +48,7 @@ class WallpaperReceiver: BroadcastReceiver() {
 
                 // Schedule next alarm for next wallpaper change
                 val origin = intent?.getIntExtra("origin", -1)?.takeIf { it != -1 }
-                WallpaperScheduler(context).scheduleWallpaperAlarm(
+                WallpaperAlarmSchedulerImpl(context).scheduleWallpaperAlarm(
                     WallpaperAlarmItem(
                         timeInMinutes1 = timeInMinutes1,
                         timeInMinutes2 = timeInMinutes2,

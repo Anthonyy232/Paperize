@@ -16,7 +16,7 @@ import java.time.ZoneId
  * It uses the AlarmManager to schedule alarms for the WallpaperReceiver.
  * It also uses the WallpaperService to change the wallpaper due to receiver limitations.
  */
-class WallpaperScheduler (
+class WallpaperAlarmSchedulerImpl (
     private val context: Context,
 ): WallpaperAlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

@@ -28,7 +28,7 @@ class ChangeWallpaperTileService: TileService() {
 
     override fun onClick() {
         super.onClick()
-        val intent = Intent(this, WallpaperBootAndChangeReceiver::class.java).putExtra("changeImmediate", true)
+        val intent = Intent(this, WallpaperBootAndChangeReceiver::class.java)
         sendBroadcast(intent)
     }
 

@@ -23,7 +23,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) = goAsync {
         try {
-            val scheduler = WallpaperScheduler(context)
+            val scheduler = WallpaperAlarmSchedulerImpl(context)
             val toggleChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
             if (toggleChanger) {
                 val timeInMinutes1 = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
@@ -34,8 +34,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                     timeInMinutes2 = timeInMinutes2,
                     scheduleSeparately = scheduleSeparately
                 )
-                val changeImmediate = intent.getBooleanExtra("changeImmediate", false)
-                alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, changeImmediate, true)}
+                alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
             }
         } catch (e: Exception) {
             e.printStackTrace()
