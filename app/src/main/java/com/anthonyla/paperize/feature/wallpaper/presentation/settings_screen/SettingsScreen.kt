@@ -22,6 +22,7 @@ fun SettingsScreen(
     topInsets: Dp,
     onBackClick: () -> Unit,
     onDarkModeClick: (Boolean?) -> Unit,
+    onAmoledClick: (Boolean) -> Unit,
     onDynamicThemingClick: (Boolean) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
@@ -39,12 +40,13 @@ fun SettingsScreen(
             largeTopAppBarHeightPx = largeTopAppBarHeight,
             scroll = scroll,
             onDarkModeClick = onDarkModeClick,
+            onAmoledClick = onAmoledClick,
             onDynamicThemingClick = onDynamicThemingClick,
             onAnimateClick = onAnimateClick,
             onPrivacyClick = onPrivacyClick,
             onLicenseClick = onLicenseClick,
             onResetClick = onResetClick,
-            onBackClick = onBackClick,
+            onBackClick = onBackClick
         )
         SettingsTitle(
             scroll = scroll,

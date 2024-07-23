@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PaperizeTheme(settingsState.value.darkMode, settingsState.value.dynamicTheming) {
+            PaperizeTheme(settingsState.value.darkMode, settingsState.value.amoledTheme, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch, scheduler, topInset)
                 }

@@ -36,6 +36,7 @@ class SettingsViewModel @Inject constructor (
         currentGetJob = viewModelScope.launch(Dispatchers.IO) {
             val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
             val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
+            val amoledTheme = async { settingsDataStoreImpl.getBoolean(SettingsConstants.AMOLED_THEME_TYPE) ?: false }
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
             val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: true }
             val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.HOME_WALLPAPER) ?: false }
@@ -55,6 +56,7 @@ class SettingsViewModel @Inject constructor (
             _state.update {
                 it.copy(
                     darkMode = darkMode.await(),
+                    amoledTheme = amoledTheme.await(),
                     dynamicTheming = dynamicTheming.await(),
                     homeInterval = homeWallpaperInterval.await(),
                     lockInterval = lockWallpaperInterval.await(),
@@ -104,6 +106,7 @@ class SettingsViewModel @Inject constructor (
             is SettingsEvent.Refresh -> {
                 currentGetJob = viewModelScope.launch(Dispatchers.IO) {
                     val darkMode = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE) }
+                    val amoledTheme = async { settingsDataStoreImpl.getBoolean(SettingsConstants.AMOLED_THEME_TYPE) ?: false }
                     val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
                     val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
                     val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
@@ -122,6 +125,7 @@ class SettingsViewModel @Inject constructor (
                     _state.update {
                         it.copy(
                             darkMode = darkMode.await(),
+                            amoledTheme = amoledTheme.await(),
                             dynamicTheming = dynamicTheming.await(),
                             firstLaunch = firstLaunch.await(),
                             lastSetTime = lastSetTime.await(),
@@ -157,11 +161,30 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetAmoledTheme -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.AMOLED_THEME_TYPE, event.amoledTheme)
+                    if (event.amoledTheme) {
+                        settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, false)
+                    }
+                    _state.update {
+                        it.copy(
+                            amoledTheme = event.amoledTheme,
+                            dynamicTheming = if (event.amoledTheme) false else it.dynamicTheming
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.SetDynamicTheming -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, event.dynamicTheming)
+                    if (event.dynamicTheming) {
+                        settingsDataStoreImpl.putBoolean(SettingsConstants.AMOLED_THEME_TYPE, false)
+                    }
                     _state.update {
                         it.copy(
+                            amoledTheme = if (event.dynamicTheming) false else it.amoledTheme,
                             dynamicTheming = event.dynamicTheming
                         )
                     }
@@ -354,6 +377,7 @@ class SettingsViewModel @Inject constructor (
             is SettingsEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.AMOLED_THEME_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DYNAMIC_THEME_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_LAUNCH)
                     settingsDataStoreImpl.deleteString(SettingsConstants.LAST_SET_TIME)
@@ -377,6 +401,7 @@ class SettingsViewModel @Inject constructor (
                     _state.update {
                         it.copy(
                             darkMode = null,
+                            amoledTheme = false,
                             dynamicTheming = false,
                             firstLaunch = true,
                             lastSetTime = null,

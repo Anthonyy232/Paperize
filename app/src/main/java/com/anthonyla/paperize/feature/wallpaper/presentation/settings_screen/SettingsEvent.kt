@@ -9,6 +9,7 @@ sealed class SettingsEvent {
     data object SetFirstLaunch: SettingsEvent()
     data object RefreshNextSetTime: SettingsEvent()
     data class SetDarkMode(val darkMode: Boolean?): SettingsEvent()
+    data class SetAmoledTheme(val amoledTheme: Boolean): SettingsEvent()
     data class SetDynamicTheming(val dynamicTheming: Boolean): SettingsEvent()
     data class SetAnimate(val animate: Boolean): SettingsEvent()
     data class SetDarken(val darken: Boolean): SettingsEvent()

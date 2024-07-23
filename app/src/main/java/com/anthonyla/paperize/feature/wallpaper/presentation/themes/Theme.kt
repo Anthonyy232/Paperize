@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -80,6 +81,38 @@ private val DarkColors = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+private val AmoledDarkColors = darkColorScheme(
+    primary = md_theme_light_primary,
+    onPrimary = md_theme_light_onPrimary,
+    primaryContainer = md_theme_light_primaryContainer,
+    onPrimaryContainer = md_theme_light_onPrimaryContainer,
+    secondary = Color.Black,
+    onSecondary = Color.White,
+    secondaryContainer = Color.Black,
+    onSecondaryContainer = Color.White,
+    tertiary = md_theme_light_tertiary,
+    onTertiary = md_theme_light_onTertiary,
+    tertiaryContainer = Color.Black,
+    onTertiaryContainer = Color.White,
+    error = Color.Red,
+    errorContainer = Color.Black,
+    onError = Color.White,
+    onErrorContainer = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+    surfaceVariant = Color.Black,
+    onSurfaceVariant = Color.White,
+    outline = Color.White,
+    inverseOnSurface = Color.Black,
+    inverseSurface = Color.White,
+    inversePrimary = Color.White,
+    surfaceTint = Color.Black,
+    outlineVariant = md_theme_dark_outlineVariant,
+    scrim = md_theme_dark_scrim,
+)
+
 
 /**
  * App theming for dynamic theming when supported and dark mode.
@@ -87,6 +120,7 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun PaperizeTheme(
     darkMode: Boolean?,
+    amoledMode: Boolean,
     dynamicTheming: Boolean,
     content: @Composable () -> Unit
 ) {
@@ -97,7 +131,8 @@ fun PaperizeTheme(
     val colors = when {
         isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)
         isDynamicTheming && dynamicThemingSupported && !isDarkMode -> dynamicLightColorScheme(context)
-        isDarkMode -> DarkColors
+        isDarkMode && amoledMode -> AmoledDarkColors
+        isDarkMode && !amoledMode -> DarkColors
         else -> LightColors
     }
 

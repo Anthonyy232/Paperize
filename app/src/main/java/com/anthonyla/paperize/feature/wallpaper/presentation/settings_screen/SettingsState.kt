@@ -6,6 +6,7 @@ data class SettingsState(
     val firstLaunch: Boolean = true,
     // App settings
     val darkMode: Boolean? = null,
+    val amoledTheme: Boolean = false,
     val dynamicTheming: Boolean = false,
     val animate: Boolean = true,
     // Wallpaper settings

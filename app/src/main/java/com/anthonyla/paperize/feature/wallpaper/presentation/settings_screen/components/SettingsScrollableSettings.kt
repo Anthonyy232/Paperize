@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.ScrollState
@@ -47,6 +48,7 @@ import kotlinx.coroutines.launch
 /**
  * Scrollable settings screen to wrap all settings components
  */
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScrollableSettings(
@@ -55,11 +57,12 @@ fun SettingsScrollableSettings(
     scroll: ScrollState,
     onDynamicThemingClick: (Boolean) -> Unit,
     onDarkModeClick: (Boolean?) -> Unit,
+    onAmoledClick: (Boolean) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
     onLicenseClick: () -> Unit,
     onResetClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -108,7 +111,7 @@ fun SettingsScrollableSettings(
             )
         },
         modifier = Modifier.fillMaxSize(),
-        content = { it
+        content = {
             Column(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Top,
@@ -127,11 +130,17 @@ fun SettingsScrollableSettings(
                     onDarkModeClick = { onDarkModeClick(it) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                if (state.value.darkMode == null || state.value.darkMode == true) {
+                    AmoledListItem(
+                        amoledMode = state.value.amoledTheme,
+                        onAmoledClick = { onAmoledClick(it) }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
                 DynamicThemingListItem(
                     dynamicTheming = state.value.dynamicTheming,
                     onDynamicThemingClick = { onDynamicThemingClick(it) }
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
                 AnimationListItem(
                     animate = state.value.animate,

@@ -153,4 +153,7 @@
     <string name="delay_notice_dialog">Delay Notice</string>
     <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">To minimize battery usage, changing wallpapers may have some delays once scheduled. When the device is asleep, the wallpaper may take longer to apply.</string>
     <string name="change_wallpaper">Change wallpaper</string>
+    <string name="theme">Theme</string>
+    <string name="amoled_mode">AMOLED Mode</string>
+    <string name="full_dark_mode">Full dark mode</string>
 </resources>

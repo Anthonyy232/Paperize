@@ -15,7 +15,6 @@ import androidx.compose.material.icons.outlined.Brightness6
 import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +37,6 @@ import com.anthonyla.paperize.R
 /**
  * Three-state selector for dark mode in settings
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
     val options = listOf(
@@ -77,7 +75,7 @@ fun DarkModeListItem(darkMode: Boolean?, onDarkModeClick: (Boolean?) -> Unit) {
                 },
             headlineContent = {
                 Text(
-                    text = stringResource(R.string.dark_mode),
+                    text = stringResource(R.string.theme),
                     style = MaterialTheme.typography.titleMedium
 
                 ) },

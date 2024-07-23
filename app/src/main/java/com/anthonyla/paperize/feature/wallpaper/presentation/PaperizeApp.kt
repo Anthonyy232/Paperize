@@ -707,6 +707,9 @@ fun PaperizeApp(
                 onDarkModeClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
                 },
+                onAmoledClick = {
+                    settingsViewModel.onEvent(SettingsEvent.SetAmoledTheme(it))
+                },
                 onDynamicThemingClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDynamicTheming(it))
                 },
