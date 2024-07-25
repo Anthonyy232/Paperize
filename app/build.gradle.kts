@@ -67,8 +67,8 @@ android {
     ndkVersion = "26.3.11579264"
     buildToolsVersion = "34.0.0"
     dependenciesInfo {
-        includeInApk = true
-        includeInBundle = true
+        includeInApk = false
+        includeInBundle = false
     }
 
     aboutLibraries {
