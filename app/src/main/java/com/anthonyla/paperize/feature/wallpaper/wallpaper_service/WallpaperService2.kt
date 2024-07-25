@@ -518,8 +518,8 @@ class WallpaperService2: Service() {
             val imageSize = wallpaper.getImageDimensions(context) ?: return false
             val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
             val device = context.resources.displayMetrics
-            val targetWidth = min(device.widthPixels, imageSize.width)
-            val targetHeight = (3 * targetWidth * aspectRatio).toInt()
+            val targetWidth = min(3 * device.widthPixels, imageSize.width)
+            val targetHeight = (targetWidth * aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 try {
@@ -559,6 +559,7 @@ class WallpaperService2: Service() {
                         setLock -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
                         else -> {}
                     }
+                    wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()
                 }
                 bitmap.recycle()

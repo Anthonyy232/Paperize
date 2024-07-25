@@ -573,6 +573,7 @@ class WallpaperService1: Service() {
                         setLock -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
                         else -> {}
                     }
+                    wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()
                 }
                 bitmap.recycle()
