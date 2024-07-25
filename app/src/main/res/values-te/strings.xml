@@ -157,4 +157,7 @@
   <string name="theme">థీమ్</string>
   <string name="amoled_mode">AMOLED మోడ్</string>
   <string name="full_dark_mode">పూర్తి డార్క్ మోడ్</string>
+  <string name="change_next_short">వాల్‌పేపర్‌ని మార్చండి</string>
+  <string name="change_next_long">ఆల్బమ్‌లోని తదుపరి వాల్‌పేపర్‌కి మార్చండి</string>
+  <string name="cannot_change_wallpaper">వాల్‌పేపర్‌ని మార్చలేరు</string>
 </resources>

@@ -26,6 +26,10 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:resource="@xml/shortcuts" android:name="android.app.shortcuts" />
+        </activity>
+        <activity android:name=".feature.wallpaper.app_shortcut.BroadcastActivity"
+            android:theme="@android:style/Theme.NoDisplay">
         </activity>
         <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver" />
         <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService1"/>

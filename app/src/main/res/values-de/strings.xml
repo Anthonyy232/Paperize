@@ -157,4 +157,7 @@
   <string name="theme">Thema</string>
   <string name="amoled_mode">AMOLED-Modus</string>
   <string name="full_dark_mode">Komplett dunkler Modus</string>
+  <string name="change_next_short">Hintergrund ändern</string>
+  <string name="change_next_long">Zum nächsten Hintergrundbild im Album wechseln</string>
+  <string name="cannot_change_wallpaper">Hintergrundbild kann nicht geändert werden</string>
 </resources>

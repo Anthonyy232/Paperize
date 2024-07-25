@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">Modalità AMOLED</string>
   <string name="full_dark_mode">Modalità completamente oscura</string>
+  <string name="change_next_short">Cambia sfondo</string>
+  <string name="change_next_long">Passa allo sfondo successivo nell\'album</string>
+  <string name="cannot_change_wallpaper">Impossibile cambiare lo sfondo</string>
 </resources>

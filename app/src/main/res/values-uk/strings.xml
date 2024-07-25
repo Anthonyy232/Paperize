@@ -165,4 +165,7 @@
   <string name="theme">Тема</string>
   <string name="amoled_mode">Режим AMOLED</string>
   <string name="full_dark_mode">Повний темний режим</string>
+  <string name="change_next_short">Змінити шпалери</string>
+  <string name="change_next_long">Змінити на наступні шпалери в альбомі</string>
+  <string name="cannot_change_wallpaper">Неможливо змінити шпалери</string>
 </resources>

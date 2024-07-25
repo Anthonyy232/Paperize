@@ -173,4 +173,7 @@
   <string name="theme">سمة</string>
   <string name="amoled_mode">وضع أموليد</string>
   <string name="full_dark_mode">الوضع المظلم الكامل</string>
+  <string name="change_next_short">تغيير ورق الجدران</string>
+  <string name="change_next_long">التغيير إلى خلفية الشاشة التالية في الألبوم</string>
+  <string name="cannot_change_wallpaper">لا يمكن تغيير ورق الحائط</string>
 </resources>

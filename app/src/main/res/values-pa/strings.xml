@@ -157,4 +157,7 @@
   <string name="theme">ਥੀਮ</string>
   <string name="amoled_mode">AMOLED ਮੋਡ</string>
   <string name="full_dark_mode">ਪੂਰਾ ਡਾਰਕ ਮੋਡ</string>
+  <string name="change_next_short">ਵਾਲਪੇਪਰ ਬਦਲੋ</string>
+  <string name="change_next_long">ਐਲਬਮ ਵਿੱਚ ਅਗਲੇ ਵਾਲਪੇਪਰ ਵਿੱਚ ਬਦਲੋ</string>
+  <string name="cannot_change_wallpaper">ਵਾਲਪੇਪਰ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ</string>
 </resources>

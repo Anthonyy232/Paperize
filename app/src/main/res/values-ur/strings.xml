@@ -157,4 +157,7 @@
   <string name="theme">خیالیہ</string>
   <string name="amoled_mode">AMOLED موڈ</string>
   <string name="full_dark_mode">مکمل ڈارک موڈ</string>
+  <string name="change_next_short">وال پیپر تبدیل کریں۔</string>
+  <string name="change_next_long">البم میں اگلے وال پیپر میں تبدیل کریں۔</string>
+  <string name="cannot_change_wallpaper">وال پیپر تبدیل نہیں کیا جا سکتا</string>
 </resources>

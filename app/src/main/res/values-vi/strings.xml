@@ -153,4 +153,7 @@
   <string name="theme">chủ đề</string>
   <string name="amoled_mode">Chế độ AMOLED</string>
   <string name="full_dark_mode">Chế độ tối hoàn toàn</string>
+  <string name="change_next_short">Thay đổi hình nền</string>
+  <string name="change_next_long">Thay đổi hình nền tiếp theo trong album</string>
+  <string name="cannot_change_wallpaper">Không thể thay đổi hình nền</string>
 </resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="static"
+        android:enabled="true"
+        android:icon="@drawable/notification_icon"
+        android:shortcutShortLabel="@string/change_next_short"
+        android:shortcutLongLabel="@string/change_next_long"
+        android:shortcutDisabledMessage="@string/cannot_change_wallpaper">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.anthonyla.paperize"
+            android:targetClass="com.anthonyla.paperize.feature.wallpaper.app_shortcut.BroadcastActivity" />
+    </shortcut>
+</shortcuts>

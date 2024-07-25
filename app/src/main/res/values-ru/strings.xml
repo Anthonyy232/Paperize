@@ -165,4 +165,7 @@
   <string name="theme">Тема</string>
   <string name="amoled_mode">AMOLED-режим</string>
   <string name="full_dark_mode">Полный темный режим</string>
+  <string name="change_next_short">Сменить обои</string>
+  <string name="change_next_long">Перейти к следующим обоям в альбоме</string>
+  <string name="cannot_change_wallpaper">Не могу сменить обои</string>
 </resources>

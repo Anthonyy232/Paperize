@@ -157,4 +157,7 @@
   <string name="theme">થીમ</string>
   <string name="amoled_mode">AMOLED મોડ</string>
   <string name="full_dark_mode">સંપૂર્ણ ડાર્ક મોડ</string>
+  <string name="change_next_short">વૉલપેપર બદલો</string>
+  <string name="change_next_long">આલ્બમમાં આગલા વૉલપેપર પર બદલો</string>
+  <string name="cannot_change_wallpaper">વૉલપેપર બદલી શકાતું નથી</string>
 </resources>

@@ -161,4 +161,7 @@
   <string name="theme">Тема</string>
   <string name="amoled_mode">АМОЛЕД режим</string>
   <string name="full_dark_mode">Потпуно тамни режим</string>
+  <string name="change_next_short">Промените позадину</string>
+  <string name="change_next_long">Пребаците се на следећу позадину у албуму</string>
+  <string name="cannot_change_wallpaper">Није могуће променити позадину</string>
 </resources>

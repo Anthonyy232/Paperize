@@ -153,4 +153,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">Mode AMOLED</string>
   <string name="full_dark_mode">Mode peteng lengkap</string>
+  <string name="change_next_short">Ganti wallpaper</string>
+  <string name="change_next_long">Ganti wallpaper sabanjure ing album kasebut</string>
+  <string name="cannot_change_wallpaper">Ora bisa ngganti wallpaper</string>
 </resources>

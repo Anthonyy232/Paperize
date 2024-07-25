@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">AMOLED-modus</string>
   <string name="full_dark_mode">Vol donker modus</string>
+  <string name="change_next_short">Verander plakpapier</string>
+  <string name="change_next_long">Verander na die volgende muurpapier in die album</string>
+  <string name="cannot_change_wallpaper">Kan nie muurpapier verander nie</string>
 </resources>

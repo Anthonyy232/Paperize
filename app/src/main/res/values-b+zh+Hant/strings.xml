@@ -153,4 +153,7 @@
   <string name="theme">主題</string>
   <string name="amoled_mode">AMOLED模式</string>
   <string name="full_dark_mode">全深色模式</string>
+  <string name="change_next_short">更換壁紙</string>
+  <string name="change_next_long">改為相簿中的下一張壁紙</string>
+  <string name="cannot_change_wallpaper">無法更換壁紙</string>
 </resources>

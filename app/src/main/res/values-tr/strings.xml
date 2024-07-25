@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">AMOLED Modu</string>
   <string name="full_dark_mode">Tam karanlık mod</string>
+  <string name="change_next_short">Duvar kağıdını değiştir</string>
+  <string name="change_next_long">Albümdeki sonraki duvar kağıdına geçin</string>
+  <string name="cannot_change_wallpaper">Duvar kağıdı değiştirilemiyor</string>
 </resources>

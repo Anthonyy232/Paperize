@@ -161,4 +161,7 @@
   <string name="theme">Temă</string>
   <string name="amoled_mode">Modul AMOLED</string>
   <string name="full_dark_mode">Modul complet întunecat</string>
+  <string name="change_next_short">Schimbă imaginea de fundal</string>
+  <string name="change_next_long">Treceți la următorul tapet din album</string>
+  <string name="cannot_change_wallpaper">Nu se poate schimba imaginea de fundal</string>
 </resources>

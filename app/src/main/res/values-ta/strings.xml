@@ -157,4 +157,7 @@
   <string name="theme">தீம்</string>
   <string name="amoled_mode">AMOLED பயன்முறை</string>
   <string name="full_dark_mode">முழு இருண்ட பயன்முறை</string>
+  <string name="change_next_short">வால்பேப்பரை மாற்றவும்</string>
+  <string name="change_next_long">ஆல்பத்தின் அடுத்த வால்பேப்பருக்கு மாற்றவும்</string>
+  <string name="cannot_change_wallpaper">வால்பேப்பரை மாற்ற முடியாது</string>
 </resources>

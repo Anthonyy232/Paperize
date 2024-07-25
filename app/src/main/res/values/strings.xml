@@ -156,4 +156,7 @@
     <string name="theme">Theme</string>
     <string name="amoled_mode">AMOLED Mode</string>
     <string name="full_dark_mode">Full dark mode</string>
+    <string name="change_next_short">Change wallpaper</string>
+    <string name="change_next_long">Change to the next wallpaper in the album</string>
+    <string name="cannot_change_wallpaper">Cannot change wallpaper</string>
 </resources>

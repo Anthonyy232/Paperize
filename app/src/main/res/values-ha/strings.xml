@@ -157,4 +157,7 @@
   <string name="theme">Jigo</string>
   <string name="amoled_mode">Yanayin AMOLED</string>
   <string name="full_dark_mode">Cikakken yanayin duhu</string>
+  <string name="change_next_short">Canja fuskar bangon waya</string>
+  <string name="change_next_long">Canja zuwa fuskar bangon waya na gaba a cikin kundin</string>
+  <string name="cannot_change_wallpaper">Ba za a iya canza fuskar bangon waya ba</string>
 </resources>

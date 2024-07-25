@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">AMOLED-modus</string>
   <string name="full_dark_mode">Full mørk modus</string>
+  <string name="change_next_short">Bytt bakgrunn</string>
+  <string name="change_next_long">Bytt til neste bakgrunn i albumet</string>
+  <string name="cannot_change_wallpaper">Kan ikke endre bakgrunn</string>
 </resources>

@@ -165,4 +165,7 @@
   <string name="theme">נושא</string>
   <string name="amoled_mode">מצב AMOLED</string>
   <string name="full_dark_mode">מצב כהה מלא</string>
+  <string name="change_next_short">שנה טפט</string>
+  <string name="change_next_long">שנה לטפט הבא באלבום</string>
+  <string name="cannot_change_wallpaper">לא ניתן לשנות טפט</string>
 </resources>

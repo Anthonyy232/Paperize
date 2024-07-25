@@ -153,4 +153,7 @@
   <string name="theme">주제</string>
   <string name="amoled_mode">AMOLED 모드</string>
   <string name="full_dark_mode">풀 다크 모드</string>
+  <string name="change_next_short">배경화면 변경</string>
+  <string name="change_next_long">앨범의 다음 배경화면으로 변경</string>
+  <string name="cannot_change_wallpaper">배경화면을 변경할 수 없습니다.</string>
 </resources>

@@ -157,4 +157,7 @@
   <string name="theme">थीम</string>
   <string name="amoled_mode">AMOLED मोड</string>
   <string name="full_dark_mode">पूर्ण गडद मोड</string>
+  <string name="change_next_short">वॉलपेपर बदला</string>
+  <string name="change_next_long">अल्बममधील पुढील वॉलपेपरमध्ये बदला</string>
+  <string name="cannot_change_wallpaper">वॉलपेपर बदलू शकत नाही</string>
 </resources>

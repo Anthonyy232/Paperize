@@ -157,4 +157,7 @@
   <string name="theme">Θέμα</string>
   <string name="amoled_mode">Λειτουργία AMOLED</string>
   <string name="full_dark_mode">Πλήρης σκοτεινή λειτουργία</string>
+  <string name="change_next_short">Αλλαγή ταπετσαρίας</string>
+  <string name="change_next_long">Αλλαγή στην επόμενη ταπετσαρία του άλμπουμ</string>
+  <string name="cannot_change_wallpaper">Δεν είναι δυνατή η αλλαγή της ταπετσαρίας</string>
 </resources>

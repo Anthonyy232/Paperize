@@ -153,4 +153,7 @@
   <string name="theme">テーマ</string>
   <string name="amoled_mode">AMOLEDモード</string>
   <string name="full_dark_mode">完全なダークモード</string>
+  <string name="change_next_short">壁紙を変更する</string>
+  <string name="change_next_long">アルバム内の次の壁紙に変更する</string>
+  <string name="cannot_change_wallpaper">壁紙を変更できません</string>
 </resources>

@@ -165,4 +165,7 @@
   <string name="theme">Temat</string>
   <string name="amoled_mode">Tryb AMOLED</string>
   <string name="full_dark_mode">Tryb pełnej ciemności</string>
+  <string name="change_next_short">Zmień tapetę</string>
+  <string name="change_next_long">Zmień na następną tapetę w albumie</string>
+  <string name="cannot_change_wallpaper">Nie można zmienić tapety</string>
 </resources>

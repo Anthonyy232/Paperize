@@ -157,4 +157,7 @@
   <string name="theme">Téma</string>
   <string name="amoled_mode">AMOLED mód</string>
   <string name="full_dark_mode">Teljesen sötét mód</string>
+  <string name="change_next_short">Háttérkép módosítása</string>
+  <string name="change_next_long">Váltás az album következő háttérképére</string>
+  <string name="cannot_change_wallpaper">Háttérkép nem módosítható</string>
 </resources>

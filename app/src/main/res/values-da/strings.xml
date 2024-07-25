@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">AMOLED-tilstand</string>
   <string name="full_dark_mode">Fuld mørk tilstand</string>
+  <string name="change_next_short">Skift tapet</string>
+  <string name="change_next_long">Skift til det næste tapet i albummet</string>
+  <string name="cannot_change_wallpaper">Kan ikke ændre tapet</string>
 </resources>

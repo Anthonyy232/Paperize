@@ -157,4 +157,7 @@
   <string name="theme">Teema</string>
   <string name="amoled_mode">AMOLED-tila</string>
   <string name="full_dark_mode">Täysin tumma tila</string>
+  <string name="change_next_short">Vaihda taustakuva</string>
+  <string name="change_next_long">Vaihda albumin seuraavaan taustakuvaan</string>
+  <string name="cannot_change_wallpaper">Taustakuvaa ei voi vaihtaa</string>
 </resources>

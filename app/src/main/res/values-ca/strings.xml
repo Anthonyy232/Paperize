@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">Mode AMOLED</string>
   <string name="full_dark_mode">Mode fosc complet</string>
+  <string name="change_next_short">Canvia el fons de pantalla</string>
+  <string name="change_next_long">Canvia al fons de pantalla següent de l\'àlbum</string>
+  <string name="cannot_change_wallpaper">No es pot canviar el fons de pantalla</string>
 </resources>

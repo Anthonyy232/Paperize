@@ -157,4 +157,7 @@
   <string name="theme">Tema</string>
   <string name="amoled_mode">Modo AMOLED</string>
   <string name="full_dark_mode">Modo totalmente escuro</string>
+  <string name="change_next_short">Mudar papel de parede</string>
+  <string name="change_next_long">Mude para o próximo papel de parede do álbum</string>
+  <string name="cannot_change_wallpaper">Não é possível alterar o papel de parede</string>
 </resources>

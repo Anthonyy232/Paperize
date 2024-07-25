@@ -157,4 +157,7 @@
   <string name="theme">থিম</string>
   <string name="amoled_mode">AMOLED মোড</string>
   <string name="full_dark_mode">সম্পূর্ণ অন্ধকার মোড</string>
+  <string name="change_next_short">ওয়ালপেপার পরিবর্তন করুন</string>
+  <string name="change_next_long">অ্যালবামের পরবর্তী ওয়ালপেপারে পরিবর্তন করুন</string>
+  <string name="cannot_change_wallpaper">ওয়ালপেপার পরিবর্তন করা যাবে না</string>
 </resources>
