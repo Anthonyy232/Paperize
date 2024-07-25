@@ -82,6 +82,10 @@ All contributions to the app is welcome. Feel free to report any issues and crea
 
 Inspiration from j4velin for their wallpaper changer app
 
+## Donations
+
+If you want to donate, you can do so using GitHub sponsorship (one-time or monthly). I appreciate the thought, thanks!
+
 
 ## License
 Contact on my GitHub profile
