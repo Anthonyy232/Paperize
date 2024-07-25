@@ -150,4 +150,7 @@
   <string name="delay_notice_dialog">遅延通知</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">バッテリーの使用量を最小限に抑えるために、壁紙の変更はスケジュールされた後に多少の遅延が生じる場合があります。デバイスがスリープ状態の場合、壁紙の適用に時間がかかることがあります。</string>
   <string name="change_wallpaper">壁紙を変更する</string>
+  <string name="theme">テーマ</string>
+  <string name="amoled_mode">AMOLEDモード</string>
+  <string name="full_dark_mode">完全なダークモード</string>
 </resources>

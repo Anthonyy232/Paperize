@@ -162,4 +162,7 @@
   <string name="delay_notice_dialog">Повідомлення про затримку</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Щоб мінімізувати використання заряду батареї, зміна шпалер може мати певні затримки після запланованої зміни. Коли пристрій перебуває в режимі сну, застосування шпалер може зайняти більше часу.</string>
   <string name="change_wallpaper">Змінити шпалери</string>
+  <string name="theme">Тема</string>
+  <string name="amoled_mode">Режим AMOLED</string>
+  <string name="full_dark_mode">Повний темний режим</string>
 </resources>

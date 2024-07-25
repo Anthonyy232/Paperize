@@ -162,4 +162,7 @@
   <string name="delay_notice_dialog">הודעת עיכוב</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">כדי למזער את השימוש בסוללה, ייתכן שיהיו עיכובים בהחלפת טפטים לאחר שתוזמנו. כאשר המכשיר במצב שינה, הטפט עשוי להימשך זמן רב יותר להחיל אותו.</string>
   <string name="change_wallpaper">שנה טפט</string>
+  <string name="theme">נושא</string>
+  <string name="amoled_mode">מצב AMOLED</string>
+  <string name="full_dark_mode">מצב כהה מלא</string>
 </resources>

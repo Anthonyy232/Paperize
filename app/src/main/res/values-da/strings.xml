@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Forsinket meddelelse</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">For at minimere batteriforbruget kan ændring af baggrunde have nogle forsinkelser, når det først er planlagt. Når enheden er i dvale, kan tapetet tage længere tid at påføre.</string>
   <string name="change_wallpaper">Skift tapet</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">AMOLED-tilstand</string>
+  <string name="full_dark_mode">Fuld mørk tilstand</string>
 </resources>

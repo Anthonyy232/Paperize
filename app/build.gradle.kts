@@ -19,8 +19,8 @@ android {
         applicationId = "com.anthonyla.paperize"
         minSdk = 26
         targetSdk = 34
-        versionCode = 28
-        versionName = "1.6.3"
+        versionCode = 29
+        versionName = "1.6.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -90,7 +90,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.7.0-beta06")
     implementation("androidx.compose.ui:ui-graphics:1.7.0-beta06")
     implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-beta06")
-    implementation("androidx.compose.material3:material3:1.3.0-beta04")
+    implementation("androidx.compose.material3:material3:1.3.0-beta05")
     implementation("androidx.navigation:navigation-compose:2.8.0-beta06")
     implementation("androidx.compose.material:material:1.7.0-beta06")
     implementation("androidx.datastore:datastore:1.1.1")

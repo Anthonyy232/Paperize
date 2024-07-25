@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">विलंब सूचना</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">बॅटरीचा वापर कमी करण्यासाठी, एकदा शेड्यूल केल्यावर वॉलपेपर बदलण्यात काही विलंब होऊ शकतो. जेव्हा डिव्हाइस झोपलेले असते, तेव्हा वॉलपेपर लागू होण्यासाठी जास्त वेळ लागू शकतो.</string>
   <string name="change_wallpaper">वॉलपेपर बदला</string>
+  <string name="theme">थीम</string>
+  <string name="amoled_mode">AMOLED मोड</string>
+  <string name="full_dark_mode">पूर्ण गडद मोड</string>
 </resources>

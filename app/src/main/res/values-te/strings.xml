@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">ఆలస్యం నోటీసు</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">బ్యాటరీ వినియోగాన్ని తగ్గించడానికి, వాల్‌పేపర్‌లను మార్చడం ఒకసారి షెడ్యూల్ చేసిన తర్వాత కొంత ఆలస్యం కావచ్చు. పరికరం నిద్రలో ఉన్నప్పుడు, వాల్‌పేపర్ వర్తించడానికి ఎక్కువ సమయం పట్టవచ్చు.</string>
   <string name="change_wallpaper">వాల్‌పేపర్‌ని మార్చండి</string>
+  <string name="theme">థీమ్</string>
+  <string name="amoled_mode">AMOLED మోడ్</string>
+  <string name="full_dark_mode">పూర్తి డార్క్ మోడ్</string>
 </resources>

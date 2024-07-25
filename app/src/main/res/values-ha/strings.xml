@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Sanarwa Jinkiri</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Don rage amfani da baturi, canza fuskar bangon waya na iya samun ɗan jinkiri da zarar an tsara shi. Lokacin da na\'urar ke barci, fuskar bangon waya na iya ɗaukar lokaci mai tsawo kafin a shafa.</string>
   <string name="change_wallpaper">Canja fuskar bangon waya</string>
+  <string name="theme">Jigo</string>
+  <string name="amoled_mode">Yanayin AMOLED</string>
+  <string name="full_dark_mode">Cikakken yanayin duhu</string>
 </resources>

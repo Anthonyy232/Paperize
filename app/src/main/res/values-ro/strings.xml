@@ -158,4 +158,7 @@
   <string name="delay_notice_dialog">Notificare de întârziere</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Pentru a minimiza utilizarea bateriei, schimbarea imaginilor de fundal poate avea unele întârzieri odată programată. Când dispozitivul este adormit, aplicarea tapetului poate dura mai mult.</string>
   <string name="change_wallpaper">Schimbă imaginea de fundal</string>
+  <string name="theme">Temă</string>
+  <string name="amoled_mode">Modul AMOLED</string>
+  <string name="full_dark_mode">Modul complet întunecat</string>
 </resources>

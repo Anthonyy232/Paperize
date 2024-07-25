@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Paperize</string>
-  <string name="SettingsIcon">Possibilités</string>
+  <string name="SettingsIcon">Options</string>
   <string name="dropdownmenu_settings">Paramètres</string>
   <string name="home_screen">Maison</string>
   <string name="wallpaper_screen">Fond d\'écran</string>
   <string name="library_screen">Bibliothèque</string>
   <string name="settings_screen">Paramètres</string>
-  <string name="settings_back">Dos</string>
+  <string name="settings_back">Retour</string>
   <string name="LibraryFloatingButton">Ajouter une nouvelle bibliothèque</string>
   <string name="set_wallpaper_description">Activer le fond d\'écran animé</string>
   <string name="add_wallpaper">Ajouter un fond d\'écran</string>
@@ -17,7 +17,7 @@
   <string name="image_is_selected">L\'image est sélectionnée</string>
   <string name="image_is_not_selected">L\'image n\'est pas sélectionnée</string>
   <string name="select_all_images_for_deletion">Sélectionnez toutes les images à supprimer</string>
-  <string name="delete_confirmation">Supprimer la confirmation</string>
+  <string name="delete_confirmation">Confirmer la suppression</string>
   <string name="all_images_selected_for_deletion">Toutes les images sélectionnées pour la suppression</string>
   <string name="add_album">Ajouter un album</string>
   <string name="add_wallpaper_screen">Ajouter un écran de fond d\'écran</string>
@@ -35,18 +35,18 @@
   <string name="more_options">Plus d\'options</string>
   <string name="startup">Démarrer</string>
   <string name="agree">Accepter</string>
-  <string name="welcome">Accueillir</string>
+  <string name="welcome">Bienvenue</string>
   <string name="notifications">Notifications</string>
   <string name="continue_button">J\'en suis</string>
-  <string name="notification_permission_is_required_for_this_app_to_work_properly">Une autorisation de notification est requise pour que cette application fonctionne correctement</string>
-  <string name="allow">Permettre</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">Autoriser les notifications est requis pour que cette application fonctionne correctement</string>
+  <string name="allow">Autoriser</string>
   <string name="notification_info_message">Les notifications peuvent être activées pour indiquer lorsque l\'application s\'exécute en arrière-plan.</string>
-  <string name="set_as_lock_screen">Configurer comme l\'écran de verrouillage</string>
+  <string name="set_as_lock_screen">Configurer comme écran de verrouillage</string>
   <string name="lock_screen">Écran verrouillé</string>
   <string name="home">Écran d\'accueil</string>
   <string name="last_change">Dernier changement</string>
   <string name="next_change">Prochain changement</string>
-  <string name="privacy_policy">politique de confidentialité</string>
+  <string name="privacy_policy">Politique de confidentialité</string>
   <string name="privacy_screen">Écran privé</string>
   <string name="licenses">Licences</string>
   <string name="licenses_screen">Écran Licences</string>
@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Avis de retard</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Pour minimiser l\'utilisation de la batterie, le changement de fond d\'écran peut entraîner certains retards une fois planifié. Lorsque l\'appareil est en veille, l\'application du papier peint peut prendre plus de temps.</string>
   <string name="change_wallpaper">Changer le fond d\'écran</string>
+  <string name="theme">Thème</string>
+  <string name="amoled_mode">Mode AMOLED</string>
+  <string name="full_dark_mode">Mode sombre complet</string>
 </resources>

@@ -519,7 +519,7 @@ class WallpaperService2: Service() {
             val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
             val device = context.resources.displayMetrics
             val targetWidth = min(device.widthPixels, imageSize.width)
-            val targetHeight = (targetWidth * aspectRatio).toInt()
+            val targetHeight = (3 * targetWidth * aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 try {

@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Avís de retard</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Per minimitzar l\'ús de la bateria, el canvi de fons de pantalla pot tenir alguns retards un cop programat. Quan el dispositiu està adormit, el fons de pantalla pot trigar més a aplicar-se.</string>
   <string name="change_wallpaper">Canvia el fons de pantalla</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">Mode AMOLED</string>
+  <string name="full_dark_mode">Mode fosc complet</string>
 </resources>

@@ -170,4 +170,7 @@
   <string name="delay_notice_dialog">إشعار تأخير</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">لتقليل استخدام البطارية، قد يحدث بعض التأخير في تغيير خلفيات الشاشة بمجرد جدولتها. عندما يكون الجهاز في وضع السكون، قد يستغرق تطبيق خلفية الشاشة وقتًا أطول.</string>
   <string name="change_wallpaper">تغيير ورق الجدران</string>
+  <string name="theme">سمة</string>
+  <string name="amoled_mode">وضع أموليد</string>
+  <string name="full_dark_mode">الوضع المظلم الكامل</string>
 </resources>

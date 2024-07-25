@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Aviso de atraso</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Para minimizar o uso da bateria, a troca de papéis de parede pode sofrer alguns atrasos após o agendamento. Quando o dispositivo está em suspensão, o papel de parede pode demorar mais para ser aplicado.</string>
   <string name="change_wallpaper">Mudar papel de parede</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">Modo AMOLED</string>
+  <string name="full_dark_mode">Modo totalmente escuro</string>
 </resources>

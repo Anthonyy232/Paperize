@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">تاخیر کا نوٹس</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">بیٹری کے استعمال کو کم سے کم کرنے کے لیے، ایک بار شیڈول کے مطابق وال پیپر تبدیل کرنے میں کچھ تاخیر ہو سکتی ہے۔ جب آلہ سو رہا ہو تو وال پیپر لگنے میں زیادہ وقت لگ سکتا ہے۔</string>
   <string name="change_wallpaper">وال پیپر تبدیل کریں۔</string>
+  <string name="theme">خیالیہ</string>
+  <string name="amoled_mode">AMOLED موڈ</string>
+  <string name="full_dark_mode">مکمل ڈارک موڈ</string>
 </resources>

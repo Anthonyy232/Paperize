@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Verspätungsbenachrichtigung</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Um den Akkuverbrauch zu minimieren, kann es beim geplanten Ändern des Hintergrundbilds zu Verzögerungen kommen. Wenn sich das Gerät im Ruhezustand befindet, kann die Anwendung des Hintergrundbilds länger dauern.</string>
   <string name="change_wallpaper">Hintergrund ändern</string>
+  <string name="theme">Thema</string>
+  <string name="amoled_mode">AMOLED-Modus</string>
+  <string name="full_dark_mode">Komplett dunkler Modus</string>
 </resources>

@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">தாமத அறிவிப்பு</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">பேட்டரி பயன்பாட்டைக் குறைக்க, வால்பேப்பர்களை மாற்றுவதற்கு திட்டமிடப்பட்டவுடன் சில தாமதங்கள் ஏற்படலாம். சாதனம் தூங்கும்போது, வால்பேப்பரைப் பயன்படுத்த அதிக நேரம் ஆகலாம்.</string>
   <string name="change_wallpaper">வால்பேப்பரை மாற்றவும்</string>
+  <string name="theme">தீம்</string>
+  <string name="amoled_mode">AMOLED பயன்முறை</string>
+  <string name="full_dark_mode">முழு இருண்ட பயன்முறை</string>
 </resources>

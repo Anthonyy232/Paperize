@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Vertragingsbericht</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Om het batterijgebruik tot een minimum te beperken, kan het wijzigen van de achtergrond enige vertraging oplopen zodra deze is gepland. Wanneer het apparaat in de slaapstand staat, kan het langer duren voordat de achtergrond is aangebracht.</string>
   <string name="change_wallpaper">Verander achtergrond</string>
+  <string name="theme">Thema</string>
+  <string name="amoled_mode">AMOLED-modus</string>
+  <string name="full_dark_mode">Volledige donkere modus</string>
 </resources>

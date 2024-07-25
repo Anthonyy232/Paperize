@@ -162,4 +162,7 @@
   <string name="delay_notice_dialog">Upozornění na zpoždění</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Aby se minimalizovalo využití baterie, může mít změna tapet po naplánování určité zpoždění. Když je zařízení v režimu spánku, aplikace tapety může trvat déle.</string>
   <string name="change_wallpaper">Změnit tapetu</string>
+  <string name="theme">Téma</string>
+  <string name="amoled_mode">Režim AMOLED</string>
+  <string name="full_dark_mode">Plně tmavý režim</string>
 </resources>

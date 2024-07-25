@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Gecikme Bildirimi</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Pil kullanımını en aza indirmek için, duvar kağıtlarının değiştirilmesi planlandığında bazı gecikmelere neden olabilir. Cihaz uykudayken duvar kağıdının uygulanması daha uzun sürebilir.</string>
   <string name="change_wallpaper">Duvar kağıdını değiştir</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">AMOLED Modu</string>
+  <string name="full_dark_mode">Tam karanlık mod</string>
 </resources>

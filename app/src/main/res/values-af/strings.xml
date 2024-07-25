@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Vertragingskennisgewing</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Om batterygebruik te verminder, kan die verandering van agtergronde \'n paar vertragings hê sodra dit geskeduleer is. Wanneer die toestel slaap, kan die muurpapier langer neem om aan te bring.</string>
   <string name="change_wallpaper">Verander plakpapier</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">AMOLED-modus</string>
+  <string name="full_dark_mode">Vol donker modus</string>
 </resources>

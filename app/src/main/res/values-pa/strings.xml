@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">ਦੇਰੀ ਨੋਟਿਸ</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਨੂੰ ਘੱਟ ਕਰਨ ਲਈ, ਇੱਕ ਵਾਰ ਨਿਯਤ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਾਲਪੇਪਰ ਬਦਲਣ ਵਿੱਚ ਕੁਝ ਦੇਰੀ ਹੋ ਸਕਦੀ ਹੈ। ਜਦੋਂ ਡਿਵਾਈਸ ਸਲੀਪ ਹੁੰਦੀ ਹੈ, ਤਾਂ ਵਾਲਪੇਪਰ ਲਾਗੂ ਹੋਣ ਵਿੱਚ ਜ਼ਿਆਦਾ ਸਮਾਂ ਲੈ ਸਕਦਾ ਹੈ।</string>
   <string name="change_wallpaper">ਵਾਲਪੇਪਰ ਬਦਲੋ</string>
+  <string name="theme">ਥੀਮ</string>
+  <string name="amoled_mode">AMOLED ਮੋਡ</string>
+  <string name="full_dark_mode">ਪੂਰਾ ਡਾਰਕ ਮੋਡ</string>
 </resources>

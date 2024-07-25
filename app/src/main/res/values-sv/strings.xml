@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Förseningsmeddelande</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">För att minimera batterianvändningen kan byte av bakgrundsbilder ha vissa förseningar när de har schemalagts. När enheten ligger i viloläge kan tapeten ta längre tid att applicera.</string>
   <string name="change_wallpaper">Byt tapet</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">AMOLED-läge</string>
+  <string name="full_dark_mode">Full mörkt läge</string>
 </resources>

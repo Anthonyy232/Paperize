@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Ειδοποίηση καθυστέρησης</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Για να ελαχιστοποιηθεί η χρήση της μπαταρίας, η αλλαγή των ταπετσαριών ενδέχεται να έχει κάποιες καθυστερήσεις αφού προγραμματιστεί. Όταν η συσκευή κοιμάται, η ταπετσαρία μπορεί να χρειαστεί περισσότερο χρόνο για να εφαρμοστεί.</string>
   <string name="change_wallpaper">Αλλαγή ταπετσαρίας</string>
+  <string name="theme">Θέμα</string>
+  <string name="amoled_mode">Λειτουργία AMOLED</string>
+  <string name="full_dark_mode">Πλήρης σκοτεινή λειτουργία</string>
 </resources>

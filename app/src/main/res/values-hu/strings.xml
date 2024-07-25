@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Késleltetési értesítés</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Az akkumulátorhasználat minimalizálása érdekében a háttérképek cseréje az ütemezést követően némi késéssel járhat. Amikor a készülék alvó állapotban van, a háttérkép alkalmazása tovább tarthat.</string>
   <string name="change_wallpaper">Háttérkép módosítása</string>
+  <string name="theme">Téma</string>
+  <string name="amoled_mode">AMOLED mód</string>
+  <string name="full_dark_mode">Teljesen sötét mód</string>
 </resources>

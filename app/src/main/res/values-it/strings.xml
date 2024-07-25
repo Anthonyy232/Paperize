@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Avviso di ritardo</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Per ridurre al minimo l\'utilizzo della batteria, la modifica degli sfondi potrebbe subire alcuni ritardi rispetto alla pianificazione. Quando il dispositivo è in modalità di sospensione, l\'applicazione dello sfondo potrebbe richiedere più tempo.</string>
   <string name="change_wallpaper">Cambia sfondo</string>
+  <string name="theme">Tema</string>
+  <string name="amoled_mode">Modalità AMOLED</string>
+  <string name="full_dark_mode">Modalità completamente oscura</string>
 </resources>

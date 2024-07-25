@@ -154,4 +154,7 @@
   <string name="delay_notice_dialog">Viiveilmoitus</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Akun käytön minimoimiseksi taustakuvien vaihtamisessa saattaa esiintyä viivettä, kun se on ajoitettu. Kun laite on lepotilassa, taustakuvan asettaminen voi kestää kauemmin.</string>
   <string name="change_wallpaper">Vaihda taustakuva</string>
+  <string name="theme">Teema</string>
+  <string name="amoled_mode">AMOLED-tila</string>
+  <string name="full_dark_mode">Täysin tumma tila</string>
 </resources>

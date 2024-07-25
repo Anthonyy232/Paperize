@@ -150,4 +150,7 @@
   <string name="delay_notice_dialog">지연 통지</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">배터리 사용량을 최소화하기 위해 배경 화면 변경이 예정된 후에는 약간의 지연이 발생할 수 있습니다. 장치가 절전 모드일 때 배경화면을 적용하는 데 시간이 더 오래 걸릴 수 있습니다.</string>
   <string name="change_wallpaper">배경화면 변경</string>
+  <string name="theme">주제</string>
+  <string name="amoled_mode">AMOLED 모드</string>
+  <string name="full_dark_mode">풀 다크 모드</string>
 </resources>
