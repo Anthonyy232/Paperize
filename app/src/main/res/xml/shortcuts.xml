@@ -3,7 +3,7 @@
     <shortcut
         android:shortcutId="static"
         android:enabled="true"
-        android:icon="@drawable/notification_icon"
+        android:icon="@mipmap/app_icon"
         android:shortcutShortLabel="@string/change_next_short"
         android:shortcutLongLabel="@string/change_next_long"
         android:shortcutDisabledMessage="@string/cannot_change_wallpaper">
