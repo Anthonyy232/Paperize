@@ -31,6 +31,7 @@
 ## Download
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Download app from Google Play" height="80">](https://play.google.com/store/apps/details?id=com.anthonyla.paperize)
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Download app from IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize)
 
 F-Droid will be added soon
 
