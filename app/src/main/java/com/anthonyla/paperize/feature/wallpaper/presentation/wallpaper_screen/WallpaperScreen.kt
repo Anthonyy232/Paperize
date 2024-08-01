@@ -1,14 +1,9 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
 import android.app.AlarmManager
-import android.app.WallpaperManager
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +38,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShowLiveWallpaperEnabledDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
@@ -82,19 +76,14 @@ fun WallpaperScreen(
     onBlurChange: (Boolean) -> Unit,
     blurPercentage: Int
 ) {
+    val shouldShowScreen = homeEnabled || lockEnabled
+    val shouldShowSettings = shouldShowScreen && selectedAlbum != null
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val openLiveDialog = rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
-
-    if (openLiveDialog.value) {
-        ShowLiveWallpaperEnabledDialog(
-            onDismissRequest = { openLiveDialog.value = false }
-        )
-    }
 
     Scaffold(
         snackbarHost = {
@@ -126,13 +115,24 @@ fun WallpaperScreen(
                 if (homeEnabled || lockEnabled) {
                     CurrentSelectedAlbum(
                         selectedAlbum = selectedAlbum,
+                        animate = animate,
+                        enableChanger = enableChanger,
+                        onToggleChanger = {
+                            if (!it) {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.wallpaper_changer_has_been_disabled),
+                                        actionLabel = context.getString(R.string.dismiss),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                            onToggleChanger(it)
+                        },
                         onOpenBottomSheet = {
                             if (albums.firstOrNull() != null) {
-                                if (isLiveWallpaperSet(context)) {
-                                    openLiveDialog.value = true
-                                } else {
-                                    openBottomSheet = true
-                                }
+                                openBottomSheet = true
                             } else {
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
@@ -159,69 +159,14 @@ fun WallpaperScreen(
                                 }
                                 onStop()
                             }
-                        },
-                        animate = animate,
-                        enableChanger = enableChanger,
-                        onToggleChanger = {
-                            if (!it) {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.wallpaper_changer_has_been_disabled),
-                                        actionLabel = context.getString(R.string.dismiss),
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
-                            }
-                            onToggleChanger(it)
                         }
                     )
-                }
-                if (animate) {
-                    AnimatedVisibility(
-                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
-                        if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                            CurrentAndNextChange(lastSetTime, nextSetTime)
-                        }
-                    }
-                }
-                else {
-                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
+                    if (shouldShowSettings) {
                         CurrentAndNextChange(lastSetTime, nextSetTime)
-                    }
-                }
-                if (animate) {
-                    AnimatedVisibility(
-                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
-                        if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                            WallpaperPreviewAndScale(
-                                currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                                currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
-                                animate = true,
-                                darken = darken,
-                                darkenPercentage = darkenPercentage,
-                                scaling = scaling,
-                                onScalingChange = onScalingChange,
-                                homeEnabled = homeEnabled,
-                                lockEnabled = lockEnabled,
-                                blur = blur,
-                                blurPercentage = blurPercentage
-                            )
-                        }
-                    }
-                }
-                else {
-                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
                         WallpaperPreviewAndScale(
-                            currentHomeWallpaper = selectedAlbum.album.currentHomeWallpaper,
-                            currentLockWallpaper = selectedAlbum.album.currentLockWallpaper,
-                            animate = false,
+                            currentHomeWallpaper = selectedAlbum!!.album.currentHomeWallpaper,
+                            currentLockWallpaper = selectedAlbum!!.album.currentLockWallpaper,
+                            animate = animate,
                             darken = darken,
                             darkenPercentage = darkenPercentage,
                             scaling = scaling,
@@ -231,14 +176,6 @@ fun WallpaperScreen(
                             blur = blur,
                             blurPercentage = blurPercentage
                         )
-                    }
-                }
-                if (animate) {
-                    AnimatedVisibility(
-                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
                         TimeSliders(
                             timeInMinutes1 = interval1,
                             timeInMinutes2 = interval2,
@@ -251,92 +188,31 @@ fun WallpaperScreen(
                                 onTimeChange2(totalMinutes)
                             },
                             showInterval = showInterval.value,
-                            animate = true,
+                            animate = animate,
                             onShowIntervalChange = { showInterval.value = it },
                             scheduleSeparately = scheduleSeparately,
                             onScheduleSeparatelyChange = onScheduleSeparatelyChange,
                             lockEnabled = lockEnabled,
                             homeEnabled = homeEnabled
                         )
-                    }
-                }
-                else {
-                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                        TimeSliders(
-                            timeInMinutes1 = interval1,
-                            timeInMinutes2 = interval2,
-                            onTimeChange1 = { days, hours, minutes ->
-                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                onScheduleWallpaperChanger1(totalMinutes)
-                            },
-                            onTimeChange2 = { days, hours, minutes ->
-                                val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                onScheduleWallpaperChanger2(totalMinutes)
-                            },
-                            showInterval = showInterval.value,
-                            animate = false,
-                            onShowIntervalChange = { showInterval.value = it },
-                            scheduleSeparately = scheduleSeparately,
-                            onScheduleSeparatelyChange = onScheduleSeparatelyChange,
-                            lockEnabled = lockEnabled,
-                            homeEnabled = homeEnabled,
-                        )
-                    }
-                }
-                if (animate) {
-                    AnimatedVisibility(
-                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
                         DarkenSwitchAndSlider(
                             onDarkCheck = onDarkCheck,
                             darken = darken,
                             onDarkenChange = onDarkenPercentage,
                             darkenPercentage = darkenPercentage,
-                            animate = true
+                            animate = animate
                         )
-                    }
-                }
-                else {
-                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                        DarkenSwitchAndSlider(
-                            onDarkCheck = onDarkCheck,
-                            darken = darken,
-                            onDarkenChange = onDarkenPercentage,
-                            darkenPercentage = darkenPercentage,
-                            animate = false
-                        )
-                    }
-                }
-                if (animate) {
-                    AnimatedVisibility(
-                        visible = ((homeEnabled || lockEnabled)) && selectedAlbum != null,
-                        enter = slideInVertically(initialOffsetY = { -it }),
-                        exit = fadeOut()
-                    ) {
                         BlurSwitchAndSlider(
                             onBlurPercentageChange = onBlurPercentageChange,
                             onBlurChange = onBlurChange,
                             blur = blur,
                             blurPercentage = blurPercentage,
-                            animate = true
-                        )
-                    }
-                }
-                else {
-                    if (((homeEnabled || lockEnabled)) && selectedAlbum != null) {
-                        BlurSwitchAndSlider(
-                            onBlurPercentageChange = onBlurPercentageChange,
-                            onBlurChange = onBlurChange,
-                            blur = blur,
-                            blurPercentage = blurPercentage,
-                            animate = false
+                            animate = animate
                         )
                     }
                 }
             }
-            if (((homeEnabled || lockEnabled)) && openBottomSheet) {
+            if (shouldShowScreen && openBottomSheet) {
                 AlbumBottomSheet(
                     albums = albums,
                     currentSelectedAlbum = selectedAlbum,
@@ -366,9 +242,4 @@ fun WallpaperScreen(
             }
         },
     )
-}
-
-fun isLiveWallpaperSet(context: Context): Boolean {
-    val wallpaperManager = WallpaperManager.getInstance(context)
-    return wallpaperManager.wallpaperInfo != null
 }

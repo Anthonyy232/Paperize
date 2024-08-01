@@ -19,8 +19,8 @@ android {
         applicationId = "com.anthonyla.paperize"
         minSdk = 26
         targetSdk = 34
-        versionCode = 29
-        versionName = "1.6.4"
+        versionCode = 30
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true

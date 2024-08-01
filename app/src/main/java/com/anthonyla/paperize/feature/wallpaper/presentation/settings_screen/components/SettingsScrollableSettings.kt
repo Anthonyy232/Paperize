@@ -6,13 +6,11 @@ import android.net.Uri
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,16 +18,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,7 +35,6 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.data.Contact
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Scrollable settings screen to wrap all settings components
@@ -66,9 +57,6 @@ fun SettingsScrollableSettings(
 ) {
     val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-
     var toContact by rememberSaveable { mutableStateOf(false) }
     if (toContact) {
         Contact(context)
@@ -78,20 +66,9 @@ fun SettingsScrollableSettings(
     val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
     val githubLink = "https://github.com/Anthonyy232/Paperize"
     val playstoreLink = "https://play.google.com/store/apps/details?id=com.anthonyla.paperize"
-    val fdroidLink = ""
+    val fdroidLink = "https://f-droid.org/en/packages/com.anthonyla.paperize/"
 
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 16.dp, vertical = 24.dp)),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                }
-            ) },
         topBar = {
             TopAppBar(
                 title = {},
@@ -175,14 +152,9 @@ fun SettingsScrollableSettings(
                         context.startActivity(openURL)
                     },
                     onFdroidClick = {
-                        coroutineScope.launch {
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar(
-                                message = context.getString(R.string.coming_soon),
-                                actionLabel = context.getString(R.string.dismiss),
-                                duration = SnackbarDuration.Short
-                            )
-                        }
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(fdroidLink)
+                        context.startActivity(openURL)
                     },
                 )
                 Spacer(modifier = Modifier.height(16.dp))
