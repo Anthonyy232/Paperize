@@ -33,8 +33,8 @@
             android:theme="@android:style/Theme.NoDisplay">
         </activity>
         <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver" />
-        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService1"/>
-        <service android:name=".feature.wallpaper.wallpaper_service.WallpaperService2"/>
+        <service android:name=".feature.wallpaper.wallpaper_service.HomeWallpaperService"/>
+        <service android:name=".feature.wallpaper.wallpaper_service.LockWallpaperService"/>
         <service
             android:name=".feature.wallpaper.wallpaper_tile.ChangeWallpaperTileService"
             android:exported="true"

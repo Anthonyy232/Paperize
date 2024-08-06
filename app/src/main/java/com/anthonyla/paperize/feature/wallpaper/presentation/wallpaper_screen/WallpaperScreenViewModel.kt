@@ -31,7 +31,7 @@ class WallpaperScreenViewModel @Inject constructor (
             repository.getSelectedAlbum().collect { selectedAlbum ->
                 _state.update {
                     it.copy(
-                        selectedAlbum = selectedAlbum.firstOrNull(),
+                        selectedAlbum = selectedAlbum,
                         isDataLoaded = true
                     )
                 }
@@ -43,42 +43,30 @@ class WallpaperScreenViewModel @Inject constructor (
         when (event) {
             is WallpaperEvent.UpdateSelectedAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    if (!event.setHome && !event.setLock) return@launch
-                    if (event.selectedAlbum != null) {
-                        _state.update {
-                            it.copy(
-                                selectedAlbum = event.selectedAlbum
+                    val deleted = event.deleteAlbumName?.let {
+                        repository.cascadeDeleteAlbum(it)
+                        true
+                    } ?: false
+                    val wallpapers = event.album.wallpapers + event.album.folders.flatMap { folder ->
+                        folder.wallpapers.map { wallpaper ->
+                            Wallpaper(
+                                initialAlbumName = event.album.album.initialAlbumName,
+                                wallpaperUri = wallpaper,
+                                key = wallpaper.hashCode() + event.album.album.initialAlbumName.hashCode() + System.currentTimeMillis().toInt(),
                             )
                         }
-                        repository.upsertSelectedAlbum(event.selectedAlbum)
                     }
-                    else if (event.album != null) {
-                        val wallpapers: List<Wallpaper> = event.album.wallpapers + event.album.folders.asSequence().flatMap { folder ->
-                            folder.wallpapers.asSequence().map { wallpaper ->
-                                Wallpaper(
-                                    initialAlbumName = event.album.album.initialAlbumName,
-                                    wallpaperUri = wallpaper,
-                                    key = wallpaper.hashCode() + event.album.album.initialAlbumName.hashCode(),
-                                )
+                    val newSelectedAlbum = SelectedAlbum(
+                        album = event.album.album.copy(wallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()),
+                        wallpapers = wallpapers
+                    )
+                    repository.upsertSelectedAlbum(newSelectedAlbum)
+                    _state.update {
+                        it.copy(
+                            selectedAlbum = it.selectedAlbum?.let { selectedAlbums ->
+                                selectedAlbums.filterNot { selectedAlbum -> deleted && selectedAlbum.album.initialAlbumName == event.deleteAlbumName } + newSelectedAlbum
                             }
-                        }.toList()
-                        val shuffledWallpapers1 = wallpapers.map { it.wallpaperUri }.shuffled()
-                        val shuffledWallpapers2 = wallpapers.map { it.wallpaperUri }.shuffled()
-                        val newSelectedAlbum = SelectedAlbum(
-                            album = event.album.album.copy(
-                                homeWallpapersInQueue = shuffledWallpapers1,
-                                lockWallpapersInQueue = shuffledWallpapers2,
-                                currentHomeWallpaper = if (event.setHome) shuffledWallpapers1.firstOrNull() else null,
-                                currentLockWallpaper = if (event.scheduleSeparately && event.setLock) shuffledWallpapers2.firstOrNull() else if (event.setLock) shuffledWallpapers1.firstOrNull() else null,
-                            ),
-                            wallpapers = wallpapers
                         )
-                        _state.update {
-                            it.copy(
-                                selectedAlbum = newSelectedAlbum
-                            )
-                        }
-                        repository.upsertSelectedAlbum(newSelectedAlbum)
                     }
                 }
             }
@@ -87,12 +75,22 @@ class WallpaperScreenViewModel @Inject constructor (
             }
             is WallpaperEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    _state.update {
-                        it.copy(
-                            selectedAlbum = null
-                        )
+                    if (event.album == null) {
+                        repository.deleteAll()
+                        _state.update {
+                            it.copy(
+                                selectedAlbum = null
+                            )
+                        }
                     }
-                    repository.deleteAll()
+                    else {
+                        repository.cascadeDeleteAlbum(event.album.album.initialAlbumName)
+                        _state.update {
+                            it.copy(
+                                selectedAlbum = it.selectedAlbum?.filter { selectedAlbum -> selectedAlbum.album.initialAlbumName != event.album.album.initialAlbumName }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -103,7 +101,7 @@ class WallpaperScreenViewModel @Inject constructor (
         viewModelScope.launch(Dispatchers.IO) {
             repository.getSelectedAlbum().collect { selectedAlbum ->
                 _state.update { it.copy(
-                    selectedAlbum = selectedAlbum.firstOrNull(),
+                    selectedAlbum = selectedAlbum,
                 ) }
             }
         }

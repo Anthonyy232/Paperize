@@ -39,10 +39,14 @@ class SettingsViewModel @Inject constructor (
             val amoledTheme = async { settingsDataStoreImpl.getBoolean(SettingsConstants.AMOLED_THEME_TYPE) ?: false }
             val dynamicTheming = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false }
             val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: true }
-            val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.HOME_WALLPAPER) ?: false }
-            val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.LOCK_WALLPAPER) ?: false }
+            val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false }
+            val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false }
+            val setCurrentHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) }
+            val setCurrentLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) }
             val homeWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
             val lockWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
+            val homeAlbumName = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) }
+            val lockAlbumName = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) }
             val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
             val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
             val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
@@ -60,6 +64,8 @@ class SettingsViewModel @Inject constructor (
                     dynamicTheming = dynamicTheming.await(),
                     homeInterval = homeWallpaperInterval.await(),
                     lockInterval = lockWallpaperInterval.await(),
+                    homeAlbumName = homeAlbumName.await(),
+                    lockAlbumName = lockAlbumName.await(),
                     firstLaunch = firstLaunch.await(),
                     lastSetTime = lastSetTime.await(),
                     nextSetTime = nextSetTime.await(),
@@ -70,6 +76,8 @@ class SettingsViewModel @Inject constructor (
                     wallpaperScaling = wallpaperScaling.await(),
                     setHomeWallpaper = setHomeWallpaper.await(),
                     setLockWallpaper = setLockWallpaper.await(),
+                    currentHomeWallpaper = setCurrentHomeWallpaper.await(),
+                    currentLockWallpaper = setCurrentLockWallpaper.await(),
                     scheduleSeparately = scheduleSeparately.await(),
                     blur = blur.await(),
                     blurPercentage = blurPercentage.await()
@@ -115,8 +123,12 @@ class SettingsViewModel @Inject constructor (
                     val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: true }
                     val darkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 0 }
                     val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
-                    val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.HOME_WALLPAPER) ?: false }
-                    val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.LOCK_WALLPAPER) ?: false }
+                    val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false }
+                    val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false }
+                    val homeAlbumName = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) }
+                    val lockAlbumName = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) }
+                    val currentHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) }
+                    val currentLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) }
                     val homeWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
                     val lockWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
                     val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
@@ -136,6 +148,10 @@ class SettingsViewModel @Inject constructor (
                             darken = darken.await(),
                             setHomeWallpaper = setHomeWallpaper.await(),
                             setLockWallpaper = setLockWallpaper.await(),
+                            homeAlbumName = homeAlbumName.await(),
+                            lockAlbumName = lockAlbumName.await(),
+                            currentHomeWallpaper = currentHomeWallpaper.await(),
+                            currentLockWallpaper = currentLockWallpaper.await(),
                             lockInterval = lockWallpaperInterval.await(),
                             homeInterval = homeWallpaperInterval.await(),
                             scheduleSeparately = scheduleSeparately.await(),
@@ -288,7 +304,7 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetHome -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putBoolean(SettingsConstants.HOME_WALLPAPER, event.home)
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER, event.home)
                     _state.update {
                         it.copy(
                             setHomeWallpaper = event.home
@@ -299,7 +315,7 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetLock -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putBoolean(SettingsConstants.LOCK_WALLPAPER, event.lock)
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER, event.lock)
                     _state.update {
                         it.copy(
                             setLockWallpaper = event.lock
@@ -374,6 +390,80 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetCurrentHomeWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.currentHomeWallpaper != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, event.currentHomeWallpaper)
+                    }
+                    else {
+                        settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_HOME_WALLPAPER)
+                    }
+                    _state.update {
+                        it.copy(
+                            currentHomeWallpaper = event.currentHomeWallpaper
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetCurrentLockWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.currentLockWallpaper != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, event.currentLockWallpaper)
+                    }
+                    else {
+                        settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_LOCK_WALLPAPER)
+                    }
+                    _state.update {
+                        it.copy(
+                            currentLockWallpaper = event.currentLockWallpaper
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetAlbumName -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.homeAlbumName != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_ALBUM_NAME, event.homeAlbumName)
+                    }
+                    if (event.lockAlbumName != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_ALBUM_NAME, event.lockAlbumName)
+                    }
+                    val enableChanger: Boolean = when {
+                        event.homeAlbumName != null && event.lockAlbumName != null -> { true }
+                        event.homeAlbumName != null && !_state.value.lockAlbumName.isNullOrEmpty() -> { true }
+                        event.lockAlbumName != null && !_state.value.homeAlbumName.isNullOrEmpty() -> { true }
+                        else -> { false }
+                    }
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, enableChanger)
+                    _state.update {
+                        it.copy(
+                            homeAlbumName = event.homeAlbumName ?: it.homeAlbumName,
+                            lockAlbumName = event.lockAlbumName ?: it.lockAlbumName,
+                            enableChanger = enableChanger
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.RemoveSelectedAlbum -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.removeHome) {
+                        settingsDataStoreImpl.deleteString(SettingsConstants.HOME_ALBUM_NAME)
+                    }
+                    if (event.removeLock) {
+                        settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_ALBUM_NAME)
+                    }
+                    _state.update {
+                        it.copy(
+                            homeAlbumName = if (event.removeHome) null else it.homeAlbumName,
+                            lockAlbumName = if (event.removeLock) null else it.lockAlbumName,
+                            enableChanger = false
+                        )
+                    }
+                }
+            }
             is SettingsEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
@@ -387,8 +477,12 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteInt(SettingsConstants.DARKEN_PERCENTAGE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARKEN)
                     settingsDataStoreImpl.deleteString(SettingsConstants.WALLPAPER_SCALING)
-                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.HOME_WALLPAPER)
-                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.LOCK_WALLPAPER)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_HOME_WALLPAPER)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_LOCK_WALLPAPER)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.HOME_ALBUM_NAME)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_ALBUM_NAME)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.SCHEDULE_SEPARATELY)
@@ -413,8 +507,12 @@ class SettingsViewModel @Inject constructor (
                             wallpaperScaling = ScalingConstants.FILL,
                             setHomeWallpaper = false,
                             setLockWallpaper = false,
+                            currentHomeWallpaper = null,
+                            currentLockWallpaper = null,
                             lockInterval = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
                             homeInterval = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+                            homeAlbumName = null,
+                            lockAlbumName = null,
                             scheduleSeparately = false,
                             blur = false,
                             blurPercentage = 0

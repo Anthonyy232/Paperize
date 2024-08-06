@@ -28,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -61,7 +60,6 @@ fun TimeSliders(
     animate: Boolean,
     onShowIntervalChange: (Boolean) -> Unit,
     scheduleSeparately: Boolean,
-    onScheduleSeparatelyChange: (Boolean) -> Unit,
     onTimeChange1: (Int, Int, Int) -> Unit,
     onTimeChange2: (Int, Int, Int) -> Unit,
     lockEnabled: Boolean,
@@ -352,19 +350,6 @@ fun TimeSliders(
                                         modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
                                     )
                                 }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(text = stringResource(R.string.individual_scheduling), fontWeight = FontWeight.W500)
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Switch(
-                                    checked = scheduleSeparately,
-                                    onCheckedChange = onScheduleSeparatelyChange
-                                )
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))

@@ -23,21 +23,21 @@ fun ChangerSelectionRow(
     MultiChoiceSegmentedButtonRow (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(start = 16.dp, end = 16.dp,))
+            .padding(PaddingValues(start = 16.dp, end = 16.dp))
     ) {
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-            onCheckedChange = onHomeCheckedChange,
-            checked = homeEnabled
-        ) {
-            Text(text = stringResource(R.string.home_screen_btn))
-        }
-        SegmentedButton(
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
             onCheckedChange = onLockCheckedChange,
             checked = lockEnabled
         ) {
             Text(stringResource(R.string.lock_screen_btn))
+        }
+        SegmentedButton(
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            onCheckedChange = onHomeCheckedChange,
+            checked = homeEnabled
+        ) {
+            Text(text = stringResource(R.string.home_screen_btn))
         }
     }
 }

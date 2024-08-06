@@ -30,8 +30,8 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                 val timeInMinutes2 = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
                 val alarmItem = WallpaperAlarmItem(
-                    timeInMinutes1 = timeInMinutes1,
-                    timeInMinutes2 = timeInMinutes2,
+                    homeInterval = timeInMinutes1,
+                    lockInterval = timeInMinutes2,
                     scheduleSeparately = scheduleSeparately
                 )
                 alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}

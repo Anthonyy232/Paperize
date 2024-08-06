@@ -192,7 +192,7 @@ fun WallpaperPreviewAndScale(
                                 },
                                 contentDescription = null,
                                 tint = Color.Unspecified,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier.size(32.dp)
                             )
                             Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis )
                         }

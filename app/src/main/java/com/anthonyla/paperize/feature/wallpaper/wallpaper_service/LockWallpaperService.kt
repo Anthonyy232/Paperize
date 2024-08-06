@@ -1,0 +1,360 @@
+package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
+
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.app.WallpaperManager
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.IBinder
+import android.util.DisplayMetrics
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.ScalingConstants
+import com.anthonyla.paperize.core.SettingsConstants
+import com.anthonyla.paperize.core.blurBitmap
+import com.anthonyla.paperize.core.calculateInSampleSize
+import com.anthonyla.paperize.core.darkenBitmap
+import com.anthonyla.paperize.core.fillBitmap
+import com.anthonyla.paperize.core.fitBitmap
+import com.anthonyla.paperize.core.getImageDimensions
+import com.anthonyla.paperize.core.stretchBitmap
+import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import javax.inject.Inject
+import kotlin.math.min
+
+/**
+ * Service to change lock screen
+ */
+@AndroidEntryPoint
+class LockWallpaperService: Service() {
+    private val handleThread = HandlerThread("LockThread")
+    private lateinit var workerHandler: Handler
+    @Inject lateinit var selectedRepository: SelectedAlbumRepository
+    @Inject lateinit var albumRepository: AlbumRepository
+    @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
+    private var scheduleSeparately: Boolean = false
+    private var timeInMinutes1: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+    private var timeInMinutes2: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+    private var nextSetTime1: LocalDateTime? = null
+    private var nextSetTime2: LocalDateTime? = null
+    private var nextSetTime: LocalDateTime? = null
+
+    enum class Actions {
+        START,
+        REQUEUE,
+        UPDATE
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        handleThread.start()
+        workerHandler = Handler(handleThread.looper)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent != null) {
+            when (intent.action) {
+                Actions.START.toString() -> {
+                    timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                    //workerTaskStart()
+                }
+                Actions.REQUEUE.toString() -> {
+                    timeInMinutes1 = intent.getIntExtra("timeInMinutes1", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    timeInMinutes2 = intent.getIntExtra("timeInMinutes2", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
+                    scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
+                    workerTaskRequeue()
+                }
+                Actions.UPDATE.toString() -> {
+                    workerTaskUpdate()
+                }
+            }
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        workerHandler.removeCallbacksAndMessages(null)
+        handleThread.quitSafely()
+    }
+
+    private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                changeWallpaper(this@LockWallpaperService, setHomeOrLock)
+                if (setHomeOrLock != null && !setHomeOrLock) {
+                    updateCurrentWallpaper(this@LockWallpaperService, true)
+                }
+            }
+            stopSelf()
+        }
+    }
+
+    private fun workerTaskRequeue() {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
+                nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
+                nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
+                val notification = createNotification()
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notification?.let { notificationManager.notify(1, it) }
+            }
+            stopSelf()
+        }
+    }
+
+    private fun workerTaskUpdate(setHomeOrLock: Boolean? = null) {
+        workerHandler.post {
+            CoroutineScope(Dispatchers.IO).launch {
+                updateCurrentWallpaper(this@LockWallpaperService, setHomeOrLock)
+            }
+            stopSelf()
+        }
+    }
+
+    /**
+     * Creates a notification for the wallpaper service
+     */
+    private fun createNotification(): Notification? {
+        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+        if (nextSetTime != null) {
+            val intent = Intent(this, MainActivity::class.java)
+            val pendingIntent = PendingIntent.getActivity(this, 3, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            return NotificationCompat.Builder(this, "wallpaper_service_channel")
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.next_wallpaper_change, nextSetTime!!.format(formatter)))
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentIntent(pendingIntent)
+                .build()
+        }
+        return null
+    }
+
+    /**
+     * Changes the wallpaper to the next wallpaper in the queue of the selected album
+     * If none left, reshuffle the wallpapers and pick the first one
+     */
+    private suspend fun changeWallpaper(context: Context, setHomeOrLock: Boolean? = null) {
+        try {
+            val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
+            if (selectedAlbum == null) {
+                onDestroy()
+                return
+            }
+            else {
+                val toggled = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
+                val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false
+                val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false
+                nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
+                nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
+                if (!toggled || (!setHome && !setLock)) {
+                    onDestroy()
+                    return
+                }
+                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                val currentTime = LocalDateTime.now()
+                settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+
+                if (setHomeOrLock == null) {
+                    nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong())
+                    nextSetTime2 = nextSetTime1
+                    nextSetTime = nextSetTime1
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
+                }
+                else {
+                    if (setHomeOrLock) { nextSetTime1 = currentTime.plusMinutes(timeInMinutes1.toLong()) }
+                    else { nextSetTime2 = currentTime.plusMinutes(timeInMinutes2.toLong()) }
+                    if (nextSetTime1 == null && nextSetTime2 != null) {
+                        nextSetTime = nextSetTime2
+                    }
+                    else if (nextSetTime1 != null && nextSetTime2 == null) {
+                        nextSetTime = nextSetTime1
+                    }
+                    else {
+                        nextSetTime = if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
+                    }
+                    nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
+                }
+
+                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
+                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+
+                val notification = createNotification()
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notification?.let { notificationManager.notify(1, it) }
+
+                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
+                val darkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100
+                val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
+                val blurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0
+            }
+        } catch (e: Exception) {
+            Log.e("PaperizeWallpaperChanger", "Error in changing wallpaper", e)
+        }
+    }
+
+    private suspend fun updateCurrentWallpaper(context: Context, setHomeOrLock: Boolean? = null) {
+        try {
+            val selectedAlbum = selectedRepository.getSelectedAlbum().first().firstOrNull()
+            if (selectedAlbum == null) {
+                onDestroy()
+                return
+            }
+            else {
+                val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false
+                val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false
+                if (!setHome && !setLock) {
+                    onDestroy()
+                    return
+                }
+                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
+                val darkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100
+                val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
+                val blurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0
+            }
+        } catch (e: Exception) {
+            Log.e("PaperizeWallpaperChanger", "Error in updating", e)
+        }
+    }
+
+    /**
+     * Sets the wallpaper to the given uri
+     */
+    private fun setWallpaper(
+        context: Context,
+        wallpaper: Uri,
+        darken: Boolean,
+        darkenPercent: Int,
+        scaling: ScalingConstants,
+        setHome: Boolean, setLock: Boolean,
+        setLockOrHome: Boolean? = null,
+        blur: Boolean = false,
+        blurPercent: Int,
+    ): Boolean {
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        try {
+            val imageSize = wallpaper.getImageDimensions(context) ?: return false
+            val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
+            val device = context.resources.displayMetrics
+            val targetWidth = min(3 * device.widthPixels, imageSize.width)
+            val targetHeight = (targetWidth * aspectRatio).toInt()
+
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                try {
+                    val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
+                    ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                        decoder.setTargetSize(targetWidth, targetHeight)
+                        decoder.isMutableRequired = true
+                    }
+                } catch (e: Exception) {
+                    context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+                        val options = BitmapFactory.Options().apply {
+                            inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                            inMutable = true
+                        }
+                        BitmapFactory.decodeStream(inputStream, null, options)
+                    }
+                }
+            }
+            else {
+                context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+                    val options = BitmapFactory.Options().apply {
+                        inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                        inMutable = true
+                    }
+                    BitmapFactory.decodeStream(inputStream, null, options)
+                }
+            }
+
+            if (bitmap == null) return false
+            else {
+                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent)?.let { image ->
+                    when {
+                        setLockOrHome == true -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
+                        setLockOrHome == false -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
+                        setHome && setLock -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK or WallpaperManager.FLAG_SYSTEM)
+                        setHome -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
+                        setLock -> wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
+                        else -> {}
+                    }
+                    wallpaperManager.forgetLoadedWallpaper()
+                    image.recycle()
+                }
+                bitmap.recycle()
+            }
+            return true
+        } catch (e: IOException) {
+            Log.e("PaperizeWallpaperChanger", "Error setting wallpaper", e)
+            return false
+        }
+    }
+
+    /**
+     * Darkens the bitmap by the given percentage and returns it
+     * 0 - lightest, 100 - darkest
+     */
+    private fun processBitmap(
+        device: DisplayMetrics,
+        source: Bitmap, darken: Boolean,
+        darkenPercent: Int,
+        scaling: ScalingConstants,
+        blur: Boolean,
+        blurPercent: Int
+    ): Bitmap? {
+        try {
+            var processedBitmap = source
+
+            // Apply wallpaper scaling effects
+            processedBitmap = when (scaling) {
+                ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+                ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+                ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+            }
+
+            // Apply brightness effect
+            if (darken && darkenPercent < 100) {
+                processedBitmap = darkenBitmap(processedBitmap, darkenPercent)
+            }
+
+            // Apply blur effect
+            if (blur && blurPercent > 0) {
+                processedBitmap = blurBitmap(processedBitmap, blurPercent)
+            }
+            return processedBitmap
+        } catch (e: Exception) {
+            Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)
+            return null
+        }
+    }
+}

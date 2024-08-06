@@ -38,6 +38,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.IndividualSchedulingAndToggleRow
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
@@ -50,40 +51,44 @@ fun WallpaperScreen(
     darkenPercentage: Int,
     enableChanger: Boolean,
     homeEnabled: Boolean,
-    interval1: Int,
-    interval2: Int,
+    homeInterval: Int,
+    lockInterval: Int,
     lastSetTime: String?,
     lockEnabled: Boolean,
     nextSetTime: String?,
+    currentHomeWallpaper: String?,
+    currentLockWallpaper: String?,
     onDarkCheck: (Boolean) -> Unit,
     onDarkenPercentage: (Int) -> Unit,
     onHomeCheckedChange: (Boolean) -> Unit,
     onLockCheckedChange: (Boolean) -> Unit,
     scheduleSeparately: Boolean,
     onScheduleSeparatelyChange: (Boolean) -> Unit,
-    onScheduleWallpaperChanger1: (Int) -> Unit,
-    onScheduleWallpaperChanger2: (Int) -> Unit,
+    onScheduleWallpaperChanger: () -> Unit,
     onScalingChange: (ScalingConstants) -> Unit,
-    onSelectAlbum: (AlbumWithWallpaperAndFolder) -> Unit,
-    onTimeChange1: (Int) -> Unit,
-    onTimeChange2: (Int) -> Unit,
-    onStop: () -> Unit,
+    onSelectAlbum: (AlbumWithWallpaperAndFolder, Boolean, Boolean) -> Unit,
+    onHomeTimeChange: (Int) -> Unit,
+    onLockTimeChange: (Int) -> Unit,
+    onStop: (Boolean, Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
     scaling: ScalingConstants,
-    selectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: SelectedAlbum?,
+    lockSelectedAlbum: SelectedAlbum?,
     blur: Boolean,
     onBlurPercentageChange: (Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
     blurPercentage: Int
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
-    val shouldShowSettings = shouldShowScreen && selectedAlbum != null
+    val shouldShowSettings = shouldShowScreen && (homeSelectedAlbum != null || lockSelectedAlbum != null)
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val showInterval = rememberSaveable { mutableStateOf(false) }
+    val lock = rememberSaveable { mutableStateOf(false) }
+    val home = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -112,9 +117,20 @@ fun WallpaperScreen(
                     onHomeCheckedChange = onHomeCheckedChange,
                     onLockCheckedChange = onLockCheckedChange
                 )
+                if (homeEnabled && lockEnabled) {
+                    IndividualSchedulingAndToggleRow(
+                        animate = animate,
+                        scheduleSeparately = scheduleSeparately,
+                        enableChanger = enableChanger,
+                        onToggleChanger = onToggleChanger,
+                        onScheduleSeparatelyChange = onScheduleSeparatelyChange
+                    )
+                }
                 if (homeEnabled || lockEnabled) {
                     CurrentSelectedAlbum(
-                        selectedAlbum = selectedAlbum,
+                        homeSelectedAlbum = homeSelectedAlbum,
+                        lockSelectedAlbum = lockSelectedAlbum,
+                        scheduleSeparately = scheduleSeparately,
                         animate = animate,
                         enableChanger = enableChanger,
                         onToggleChanger = {
@@ -130,9 +146,11 @@ fun WallpaperScreen(
                             }
                             onToggleChanger(it)
                         },
-                        onOpenBottomSheet = {
+                        onOpenBottomSheet = { changeLock, changeHome ->
                             if (albums.firstOrNull() != null) {
                                 openBottomSheet = true
+                                lock.value = changeLock
+                                home.value = changeHome
                             } else {
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
@@ -144,28 +162,32 @@ fun WallpaperScreen(
                                 }
                             }
                         },
-                        onStop = {
-                            if (selectedAlbum != null) {
+                        onStop = { lock, home ->
+                            if (homeSelectedAlbum != null || lockSelectedAlbum != null) {
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar(
                                         message = context.getString(
                                             R.string.has_been_unselected,
-                                            selectedAlbum.album.displayedAlbumName
+                                            when {
+                                                home && lock -> homeSelectedAlbum?.album?.displayedAlbumName ?: ""
+                                                home -> homeSelectedAlbum?.album?.displayedAlbumName ?: ""
+                                                lock -> lockSelectedAlbum?.album?.displayedAlbumName ?: ""
+                                                else -> ""
+                                            }
                                         ),
                                         actionLabel = context.getString(R.string.dismiss),
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                                onStop()
+                                onStop(lock, home)
                             }
                         }
                     )
-                    if (shouldShowSettings) {
-                        CurrentAndNextChange(lastSetTime, nextSetTime)
+                    if (true) {
                         WallpaperPreviewAndScale(
-                            currentHomeWallpaper = selectedAlbum!!.album.currentHomeWallpaper,
-                            currentLockWallpaper = selectedAlbum!!.album.currentLockWallpaper,
+                            currentHomeWallpaper = currentHomeWallpaper,
+                            currentLockWallpaper = currentLockWallpaper,
                             animate = animate,
                             darken = darken,
                             darkenPercentage = darkenPercentage,
@@ -176,22 +198,22 @@ fun WallpaperScreen(
                             blur = blur,
                             blurPercentage = blurPercentage
                         )
+                        CurrentAndNextChange(lastSetTime, nextSetTime)
                         TimeSliders(
-                            timeInMinutes1 = interval1,
-                            timeInMinutes2 = interval2,
+                            timeInMinutes1 = homeInterval,
+                            timeInMinutes2 = lockInterval,
                             onTimeChange1 = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                onTimeChange1(totalMinutes)
+                                onHomeTimeChange(totalMinutes)
                             },
                             onTimeChange2 = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
-                                onTimeChange2(totalMinutes)
+                                onLockTimeChange(totalMinutes)
                             },
                             showInterval = showInterval.value,
                             animate = animate,
                             onShowIntervalChange = { showInterval.value = it },
                             scheduleSeparately = scheduleSeparately,
-                            onScheduleSeparatelyChange = onScheduleSeparatelyChange,
                             lockEnabled = lockEnabled,
                             homeEnabled = homeEnabled
                         )
@@ -215,7 +237,7 @@ fun WallpaperScreen(
             if (shouldShowScreen && openBottomSheet) {
                 AlbumBottomSheet(
                     albums = albums,
-                    currentSelectedAlbum = selectedAlbum,
+                    currentSelectedAlbum = null,
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
                         openBottomSheet = false
@@ -228,13 +250,13 @@ fun WallpaperScreen(
                                 }
                             }
                             else {
-                                onSelectAlbum(album)
-                                onScheduleWallpaperChanger1(interval1)
+                                onSelectAlbum(album, lock.value, home.value)
+                                onScheduleWallpaperChanger()
                             }
                         }
                         else {
-                            onSelectAlbum(album)
-                            onScheduleWallpaperChanger1(interval1)
+                            onSelectAlbum(album, lock.value, home.value)
+                            onScheduleWallpaperChanger()
                         }
                     },
                     animate = animate

@@ -53,23 +53,13 @@ class AddAlbumViewModel @Inject constructor(
                             initialAlbumName = _state.value.initialAlbumName,
                             displayedAlbumName = _state.value.displayedAlbumName,
                             coverUri = albumCoverUri,
+                            initialized = false,
                         ),
                         wallpapers = _state.value.wallpapers,
                         folders = _state.value.folders,
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
-                    _state.update { it.copy(
-                        initialAlbumName = "",
-                        displayedAlbumName = "",
-                        coverUri = "",
-                        wallpapers = emptyList(),
-                        folders = emptyList(),
-                        selectedFolders = emptyList(),
-                        selectedWallpapers = emptyList(),
-                        isEmpty = false,
-                        allSelected = false,
-                        selectedCount = 0,
-                    ) }
+                    _state.update { AddAlbumState() }
                 }
             }
             is AddAlbumEvent.DeleteSelected -> {
@@ -121,7 +111,7 @@ class AddAlbumViewModel @Inject constructor(
                         Wallpaper(
                             initialAlbumName = _state.value.initialAlbumName,
                             wallpaperUri = uri,
-                            key = uri.hashCode() + _state.value.initialAlbumName.hashCode(),
+                            key = uri.hashCode() + _state.value.initialAlbumName.hashCode() + System.currentTimeMillis().toInt()
                         )
                     }
                     _state.update {
@@ -156,7 +146,7 @@ class AddAlbumViewModel @Inject constructor(
                                         folderUri = event.directoryUri,
                                         coverUri = wallpapers.randomOrNull(),
                                         wallpapers = wallpapers,
-                                        key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode()
+                                        key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode() + System.currentTimeMillis().toInt()
                                     )
                                 )
                             )
