@@ -165,8 +165,7 @@ fun AlbumViewScreen(
                                             delayMillis = 0,
                                             easing = FastOutSlowInEasing
                                         ),
-                                    ),
-                                animate = true
+                                    )
                             )
                         }
                         else {
@@ -187,8 +186,7 @@ fun AlbumViewScreen(
                                 onFolderViewClick = {
                                     if (folder.wallpapers.isNotEmpty()) onShowFolderView(folder.folderName, folder.wallpapers)
                                 },
-                                modifier = Modifier.padding(4.dp),
-                                animate = false
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                     }

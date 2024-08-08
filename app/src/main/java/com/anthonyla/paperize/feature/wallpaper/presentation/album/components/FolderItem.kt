@@ -60,7 +60,6 @@ fun FolderItem(
     onItemSelection: () -> Unit,
     onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier,
-    animate: Boolean = true
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current

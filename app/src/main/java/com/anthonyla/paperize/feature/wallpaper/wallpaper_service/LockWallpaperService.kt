@@ -115,7 +115,7 @@ class LockWallpaperService: Service() {
         handleThread.quitSafely()
     }
 
-    private fun workerTaskStart(setHomeOrLock: Boolean? = null) {
+    private fun workerTaskStart() {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
                 changeWallpaper(this@LockWallpaperService)
