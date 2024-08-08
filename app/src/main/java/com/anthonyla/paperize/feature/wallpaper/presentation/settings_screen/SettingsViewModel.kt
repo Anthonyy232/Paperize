@@ -227,18 +227,18 @@ class SettingsViewModel @Inject constructor (
                     val nextSetTime: String?
                     settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
                     if (_state.value.scheduleSeparately) {
-                        val nextSetTime1 = currentTime.plusMinutes(event.interval.toLong())
-                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
-                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
+                        val homeNextSetTime = currentTime.plusMinutes(event.interval.toLong())
+                        val lockNextSetTime = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                        nextSetTime = (if (homeNextSetTime!!.isBefore(lockNextSetTime)) homeNextSetTime else lockNextSetTime)!!.format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, homeNextSetTime.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, lockNextSetTime.toString())
                     }
                     else {
                         nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, currentTime.plusMinutes(event.interval.toLong()).toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
                     }
                     _state.update {
                         it.copy(
@@ -262,14 +262,14 @@ class SettingsViewModel @Inject constructor (
                         val nextSetTime2 = currentTime.plusMinutes(event.interval.toLong())
                         nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, nextSetTime1.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, nextSetTime2.toString())
                     }
                     else {
                         nextSetTime = currentTime.plusMinutes(event.interval.toLong()).format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, currentTime.plusMinutes(event.interval.toLong()).toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
                     }
                     _state.update {
                         it.copy(
@@ -292,14 +292,14 @@ class SettingsViewModel @Inject constructor (
                         val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
                         nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, nextSetTime1.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, nextSetTime2.toString())
                     }
                     else {
                         nextSetTime = currentTime.plusMinutes(_state.value.homeInterval.toLong()).format(formatter)
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, currentTime.plusMinutes(_state.value.homeInterval.toLong()).toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, currentTime.plusMinutes(_state.value.lockInterval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.homeInterval.toLong()).toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.lockInterval.toLong()).toString())
                     }
                     _state.update {
                         it.copy(
@@ -564,8 +564,8 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.BLUR)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.BLUR_PERCENTAGE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_SET)
-                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME_1)
-                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME_2)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.HOME_NEXT_SET_TIME)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_NEXT_SET_TIME)
 
                     _state.update {
                         it.copy(

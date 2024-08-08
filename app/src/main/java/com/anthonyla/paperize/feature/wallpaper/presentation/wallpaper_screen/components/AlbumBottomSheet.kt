@@ -49,7 +49,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun AlbumBottomSheet(
     onDismiss: () -> Unit,
-    currentSelectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: SelectedAlbum?,
+    lockSelectedAlbum: SelectedAlbum?,
     albums: List<AlbumWithWallpaperAndFolder>,
     onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
     animate: Boolean
@@ -63,7 +64,13 @@ fun AlbumBottomSheet(
         containerColor = MaterialTheme.colorScheme.background,
         tonalElevation = 5.dp,
         modifier = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            Modifier.fillMaxSize().padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            Modifier
+                .fillMaxSize()
+                .padding(
+                    bottom = WindowInsets.navigationBars
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                )
         } else {
             Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
         }
@@ -124,20 +131,12 @@ fun AlbumBottomSheet(
                     }
                 },
                 trailingContent = {
-                    if (currentSelectedAlbum != null) {
-                        if (currentSelectedAlbum.album.initialAlbumName == it.album.initialAlbumName) {
-                            Icon(
-                                contentDescription = stringResource(R.string.currently_selected_album),
-                                imageVector = Icons.Filled.RadioButtonChecked,
-                            )
-                        }
-                        else {
-                            Icon(
-                                contentDescription = stringResource(R.string.currently_selected_album),
-                                imageVector = Icons.Filled.RadioButtonUnchecked,
-                            )
-                        }
-                    }
+                    val isSelected = (homeSelectedAlbum?.album?.initialAlbumName == it.album.initialAlbumName) ||
+                            (lockSelectedAlbum?.album?.displayedAlbumName == it.album.displayedAlbumName)
+                    Icon(
+                        contentDescription = if (isSelected) stringResource(R.string.currently_selected_album) else stringResource(R.string.unselected_album),
+                        imageVector = if (isSelected) Icons.Filled.RadioButtonChecked else Icons.Filled.RadioButtonUnchecked,
+                    )
                 },
             )
         }

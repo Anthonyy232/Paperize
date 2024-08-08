@@ -30,6 +30,6 @@ object SettingsConstants {
     const val SCHEDULE_SEPARATELY = "schedule_separately"
     const val BLUR = "blur"
     const val BLUR_PERCENTAGE = "blur_percentage"
-    const val NEXT_SET_TIME_1 = "next_set_time_1"
-    const val NEXT_SET_TIME_2 = "next_set_time_2"
+    const val HOME_NEXT_SET_TIME = "next_set_time_1"
+    const val LOCK_NEXT_SET_TIME = "next_set_time_2"
 }

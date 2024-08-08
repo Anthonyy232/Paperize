@@ -127,8 +127,8 @@ class LockWallpaperService: Service() {
     private fun workerTaskRequeue() {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
-                val nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
-                val nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
+                val nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
+                val nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
                 val nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
                 val notification = createNotification(nextSetTime)
                 val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -397,34 +397,21 @@ class LockWallpaperService: Service() {
                 }
                 // Run notification
                 if (homeInterval != lockInterval) {
-                    var nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_1))
-                    var nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME_2))
-                    val nextSetTime: LocalDateTime?
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val homeNextSetTime = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
+                    val lockNextSetTime: LocalDateTime?
+                    val nextSetTime: LocalDateTime?
                     val currentTime = LocalDateTime.now()
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                    if (setHome && setLock && !scheduleSeparately) {
-                        nextSetTime1 = currentTime.plusMinutes(homeInterval.toLong())
-                        nextSetTime2 = nextSetTime1
-                        nextSetTime = nextSetTime1
-                        nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
+                    lockNextSetTime = currentTime.plusMinutes(lockInterval.toLong())
+                    nextSetTime = if (lockNextSetTime.isBefore(homeNextSetTime) && lockNextSetTime.isAfter(currentTime)) lockNextSetTime
+                    else if (homeNextSetTime.isAfter(currentTime)) homeNextSetTime
+                    else currentTime.plusMinutes(lockInterval.toLong())
+                    nextSetTime?.let {
+                        settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter))
+                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, homeNextSetTime.toString())
+                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, lockNextSetTime.toString())
                     }
-                    else {
-                        if (setHome) { nextSetTime1 = currentTime.plusMinutes(homeInterval.toLong()) }
-                        else { nextSetTime2 = currentTime.plusMinutes(lockInterval.toLong()) }
-                        nextSetTime = if (nextSetTime1 == null && nextSetTime2 != null) {
-                            nextSetTime2
-                        }
-                        else if (nextSetTime1 != null && nextSetTime2 == null) {
-                            nextSetTime1
-                        }
-                        else {
-                            if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
-                        }
-                        nextSetTime?.let { settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter)) }
-                    }
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_1, nextSetTime1.toString())
-                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME_2, nextSetTime2.toString())
                     val notification = createNotification(nextSetTime)
                     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notification?.let { notificationManager.notify(1, it) }

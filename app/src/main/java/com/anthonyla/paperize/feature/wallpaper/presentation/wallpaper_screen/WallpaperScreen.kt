@@ -237,7 +237,8 @@ fun WallpaperScreen(
             if (shouldShowScreen && openBottomSheet) {
                 AlbumBottomSheet(
                     albums = albums,
-                    currentSelectedAlbum = null,
+                    homeSelectedAlbum = homeSelectedAlbum,
+                    lockSelectedAlbum = lockSelectedAlbum,
                     onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
                         openBottomSheet = false
