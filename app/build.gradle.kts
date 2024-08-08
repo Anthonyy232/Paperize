@@ -118,7 +118,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-beta06")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.0-beta06")
     implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
