@@ -57,7 +57,10 @@ class WallpaperScreenViewModel @Inject constructor (
                         }
                     }
                     val newSelectedAlbum = SelectedAlbum(
-                        album = event.album.album.copy(wallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()),
+                        album = event.album.album.copy(
+                            lockWallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled(),
+                            homeWallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()
+                        ),
                         wallpapers = wallpapers
                     )
                     repository.upsertSelectedAlbum(newSelectedAlbum)

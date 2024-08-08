@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -42,7 +43,7 @@ fun FolderViewScreen(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize(),
-                columns = StaggeredGridCells.Fixed(2),
+                columns = StaggeredGridCells.Adaptive(150.dp),
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
@@ -53,19 +54,22 @@ fun FolderViewScreen(
                                 wallpaperUri = wallpaper,
                                 itemSelected = false,
                                 selectionMode = false,
+                                allowHapticFeedback = false,
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {
                                     onShowWallpaperView(wallpaper)
                                 },
-                                modifier = Modifier.padding(4.dp).animateItem(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                                    .animateItem(
                                     placementSpec = tween(
                                         durationMillis = 800,
                                         delayMillis = 0,
                                         easing = FastOutSlowInEasing
                                     ),
-                                ),
-                                animate = true
+                                )
                             )
                         }
                         else {
@@ -73,13 +77,15 @@ fun FolderViewScreen(
                                 wallpaperUri = wallpaper,
                                 itemSelected = false,
                                 selectionMode = false,
+                                allowHapticFeedback = false,
                                 onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {
                                     onShowWallpaperView(wallpaper)
                                 },
-                                modifier = Modifier.padding(4.dp),
-                                animate = false
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
                             )
                         }
                     }

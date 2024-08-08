@@ -44,6 +44,13 @@ class AlbumsViewModel @Inject constructor (
             is AlbumsEvent.DeleteAlbumWithWallpapers -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     repository.cascadeDeleteAlbum(event.albumWithWallpaperAndFolder.album)
+                    _state.update {
+                        it.copy(
+                            albumsWithWallpapers = it.albumsWithWallpapers.filterNot { albumWithWallpaper ->
+                                albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album
+                            }
+                        )
+                    }
                 }
             }
             is AlbumsEvent.ChangeAlbumName -> {
@@ -52,12 +59,21 @@ class AlbumsViewModel @Inject constructor (
                         repository.updateAlbum(
                             event.albumWithWallpaperAndFolder.album.copy(displayedAlbumName = event.title)
                         )
+                        _state.update {
+                            it.copy(
+                                albumsWithWallpapers = it.albumsWithWallpapers.map { albumWithWallpaper ->
+                                    if (albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album) {
+                                        albumWithWallpaper.copy(
+                                            album = albumWithWallpaper.album.copy(displayedAlbumName = event.title)
+                                        )
+                                    } else {
+                                        albumWithWallpaper
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
-            }
-            is AlbumsEvent.RefreshAlbums -> {
-                updateAlbums()
-                refreshAlbums()
             }
             is AlbumsEvent.InitializeAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -66,12 +82,31 @@ class AlbumsViewModel @Inject constructor (
                             initialized = true
                         )
                     )
+                    _state.update {
+                        it.copy(
+                            albumsWithWallpapers = it.albumsWithWallpapers.map { albumWithWallpaper ->
+                                if (albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album) {
+                                    albumWithWallpaper.copy(
+                                        album = albumWithWallpaper.album.copy(
+                                            initialized = true
+                                        )
+                                    )
+                                } else {
+                                    albumWithWallpaper
+                                }
+                            }
+                        )
+                    }
                 }
+            }
+            is AlbumsEvent.RefreshAlbums -> {
+                updateAlbums()
+                refreshAlbums()
             }
             is AlbumsEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    _state.update { AlbumsState() }
                     repository.deleteAllData()
+                    _state.update { AlbumsState() }
                 }
             }
         }

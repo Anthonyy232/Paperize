@@ -44,7 +44,7 @@ fun HomeScreen(
     lockEnabled : Boolean,
     navigateToAddWallpaperScreen: (String) -> Unit,
     nextSetTime: String?,
-    onAlbumViewClick: (String) -> Unit,
+    onViewAlbum: (String) -> Unit,
     onDarkCheck: (Boolean) -> Unit,
     onDarkenPercentage: (Int) -> Unit,
     onHomeCheckedChange: (Boolean) -> Unit,
@@ -169,8 +169,7 @@ fun HomeScreen(
                     else -> LibraryScreen(
                         albums = albums,
                         onAddNewAlbumClick = { addAlbumDialog = true },
-                        onViewAlbum = onAlbumViewClick,
-                        animate = animate
+                        onViewAlbum = onViewAlbum,
                     )
                 }
             }

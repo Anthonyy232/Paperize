@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -74,32 +75,41 @@ fun CurrentSelectedAlbum(
         Row {
             ListItem(
                 modifier = Modifier
-                    .padding(PaddingValues(vertical = 8.dp, horizontal = 16.dp))
+                    .padding(PaddingValues(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 8.dp))
                     .weight(1f)
                     .clip(RoundedCornerShape(16.dp))
                     .clickable { onOpenBottomSheet(true, false) },
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (lockSelectedAlbum != null) {
-                            IconButton(onClick = { onStop(true, false) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Stop,
-                                    contentDescription = stringResource(R.string.stop_the_album)
-                                )
+                    Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Box (modifier = Modifier.weight(1f)) {
+                            if (lockSelectedAlbum != null) {
+                                IconButton(
+                                    onClick = { onStop(true, false) }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Stop,
+                                        contentDescription = stringResource(R.string.stop_the_album)
+                                    )
+                                }
                             }
                         }
-                        IconButton(onClick = { onOpenBottomSheet(true, false) }) {
-                            Icon(
-                                contentDescription = stringResource(R.string.click_to_select_a_different_album),
-                                imageVector = Icons.Filled.ArrowDropDown,
-                            )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Box (modifier = Modifier.weight(1f)) {
+                            IconButton(
+                                onClick = { onOpenBottomSheet(true, false) }
+                            ) {
+                                Icon(
+                                    contentDescription = stringResource(R.string.click_to_select_a_different_album),
+                                    imageVector = Icons.Filled.ArrowDropDown,
+                                )
+                            }
                         }
                     }
                 },
                 supportingContent = {},
                 leadingContent = {
-                    Column (horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        Box(modifier = Modifier.size(50.dp)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Box(modifier = Modifier.size(48.dp)) {
                             if (lockSelectedAlbum != null) {
                                 if (showLockCoverUri) {
                                     GlideImage(
@@ -140,31 +150,36 @@ fun CurrentSelectedAlbum(
             )
             ListItem(
                 modifier = Modifier
-                    .padding(PaddingValues(vertical = 8.dp, horizontal = 16.dp))
+                    .padding(PaddingValues(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 16.dp))
                     .weight(1f)
                     .clip(RoundedCornerShape(16.dp))
                     .clickable { onOpenBottomSheet(false, true) },
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (homeSelectedAlbum != null) {
-                            IconButton(onClick = { onStop(false, true) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Stop,
-                                    contentDescription = stringResource(R.string.stop_the_album)
-                                )
+                    Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Box (modifier = Modifier.weight(1f)) {
+                            if (homeSelectedAlbum != null) {
+                                IconButton(onClick = { onStop(false, true) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Stop,
+                                        contentDescription = stringResource(R.string.stop_the_album)
+                                    )
+                                }
                             }
                         }
-                        IconButton(onClick = { onOpenBottomSheet(false, true) }) {
-                            Icon(
-                                contentDescription = stringResource(R.string.click_to_select_a_different_album),
-                                imageVector = Icons.Filled.ArrowDropDown,
-                            )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Box (modifier = Modifier.weight(1f)) {
+                            IconButton(onClick = { onOpenBottomSheet(false, true) }) {
+                                Icon(
+                                    contentDescription = stringResource(R.string.click_to_select_a_different_album),
+                                    imageVector = Icons.Filled.ArrowDropDown,
+                                )
+                            }
                         }
                     }
                 },
                 supportingContent = {},
                 leadingContent = {
-                    Box(modifier = Modifier.size(50.dp)) {
+                    Box(modifier = Modifier.size(48.dp)) {
                         if (homeSelectedAlbum != null) {
                             if (showHomeCoverUri) {
                                 GlideImage(
@@ -211,13 +226,7 @@ fun CurrentSelectedAlbum(
             modifier = Modifier
                 .padding(PaddingValues(vertical = 8.dp, horizontal = 16.dp))
                 .clip(RoundedCornerShape(16.dp))
-                .clickable {
-                    if (homeSelectedAlbum != null) {
-                        onToggleChanger(!enableChanger)
-                    } else {
-                        onOpenBottomSheet(true, true)
-                    }
-                },
+                .clickable { onOpenBottomSheet(true, true) },
             headlineContent = {
                 Text(
                     text = homeSelectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),

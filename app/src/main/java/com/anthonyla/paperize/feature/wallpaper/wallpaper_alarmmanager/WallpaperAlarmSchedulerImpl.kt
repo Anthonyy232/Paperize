@@ -99,7 +99,10 @@ class WallpaperAlarmSchedulerImpl (
     override fun cancelWallpaperAlarm(cancelLock: Boolean, cancelHome: Boolean) {
         if (cancelLock) cancelAlarm(Type.LOCK)
         if (cancelHome) cancelAlarm(Type.HOME)
-        if (cancelLock && cancelHome) cancelAlarm(Type.SINGLE)
+        if (cancelLock && cancelHome) {
+            cancelAlarm(Type.SINGLE)
+            cancelAlarm(Type.REFRESH)
+        }
     }
 
     /**
@@ -111,8 +114,8 @@ class WallpaperAlarmSchedulerImpl (
             else -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
         }
         val intent = Intent(context, WallpaperReceiver::class.java).apply {
-            putExtra("timeInMinutes1", wallpaperAlarmItem.homeInterval)
-            putExtra("timeInMinutes2", wallpaperAlarmItem.lockInterval)
+            putExtra("homeInterval", wallpaperAlarmItem.homeInterval)
+            putExtra("lockInterval", wallpaperAlarmItem.lockInterval)
             putExtra("scheduleSeparately", wallpaperAlarmItem.scheduleSeparately)
             putExtra("type", type.ordinal)
             putExtra("setHome", wallpaperAlarmItem.setHome)
@@ -214,11 +217,11 @@ class WallpaperAlarmSchedulerImpl (
                 if (wallpaperAlarmItem.setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
                 if (wallpaperAlarmItem.setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
             }
-            Type.HOME.ordinal -> {
-                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.HOME.ordinal)
-            }
             Type.LOCK.ordinal -> {
                 startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.LOCK.ordinal)
+            }
+            Type.HOME.ordinal -> {
+                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.HOME.ordinal)
             }
         }
     }
@@ -232,11 +235,11 @@ class WallpaperAlarmSchedulerImpl (
                 if (setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.UPDATE.toString())
                 if (setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.UPDATE.toString())
             }
-            Type.HOME.ordinal -> {
-                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.UPDATE.toString())
-            }
             Type.LOCK.ordinal -> {
                 startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.UPDATE.toString())
+            }
+            Type.HOME.ordinal -> {
+                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.UPDATE.toString())
             }
         }
     }
@@ -257,11 +260,11 @@ class WallpaperAlarmSchedulerImpl (
     /**
      * Starts the service to change the wallpaper
      */
-    private fun startService(context: Context, serviceClass: Class<*>, action: String, timeInMinutes1: Int? = null, timeInMinutes2: Int? = null, scheduleSeparately: Boolean? = null, type: Int? = null) {
+    private fun startService(context: Context, serviceClass: Class<*>, action: String, homeInterval: Int? = null, lockInterval: Int? = null, scheduleSeparately: Boolean? = null, type: Int? = null) {
         val serviceIntent = Intent(context, serviceClass).apply {
             this.action = action
-            timeInMinutes1?.let { putExtra("timeInMinutes1", it) }
-            timeInMinutes2?.let { putExtra("timeInMinutes2", it) }
+            homeInterval?.let { putExtra("homeInterval", it) }
+            lockInterval?.let { putExtra("lockInterval", it) }
             scheduleSeparately?.let { putExtra("scheduleSeparately", it) }
             type?.let { putExtra("type", it) }
         }

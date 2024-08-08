@@ -19,6 +19,7 @@ object SettingsConstants {
     const val HOME_WALLPAPER_CHANGE_INTERVAL = "home_wallpaper_change_interval"
     const val LOCK_WALLPAPER_CHANGE_INTERVAL = "lock_wallpaper_change_interval"
     const val WALLPAPER_CHANGE_INTERVAL_DEFAULT = 15
+    const val WALLPAPER_CHANGE_INTERVAL_MIN = 1
     const val FIRST_LAUNCH = "first_launch"
     const val FIRST_SET = "first_set"
     const val LAST_SET_TIME = "last_set_time"

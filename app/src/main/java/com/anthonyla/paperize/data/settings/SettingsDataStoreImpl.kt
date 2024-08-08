@@ -9,10 +9,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.anthonyla.paperize.core.SettingsConstants.SETTINGS_DATASTORE
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
 private val Context.dataStore : DataStore<Preferences> by preferencesDataStore(name = SETTINGS_DATASTORE)
-class SettingsDataStoreImpl @Inject constructor (private val context: Context): SettingsDataStore {
+class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
     override suspend fun putBoolean(key: String, value: Boolean) {
         val preferencesKey = booleanPreferencesKey(key)
         context.dataStore.edit {

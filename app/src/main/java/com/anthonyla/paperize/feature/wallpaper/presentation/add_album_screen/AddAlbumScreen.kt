@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -136,7 +137,7 @@ fun AddAlbumScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
-                columns = StaggeredGridCells.Fixed(2),
+                columns = StaggeredGridCells.Adaptive(150.dp),
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
@@ -170,32 +171,59 @@ fun AddAlbumScreen(
                     }
                     items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }
                     ) { wallpaper ->
-                        WallpaperItem(
-                            wallpaperUri = wallpaper.wallpaperUri,
-                            itemSelected = addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
-                            selectionMode = selectionMode,
-                            onActivateSelectionMode = { selectionMode = it },
-                            onItemSelection = {
-                                addAlbumViewModel.onEvent(
-                                    if (!addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
-                                        AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
-                                    else {
-                                        AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
-                                    }
-                                )
-                            },
-                            onWallpaperViewClick = {
-                                onShowWallpaperView(wallpaper.wallpaperUri)
-                            },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                ),
-                            ),
-                            animate = animate
-                        )
+                        if (animate) {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper.wallpaperUri,
+                                itemSelected = addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    addAlbumViewModel.onEvent(
+                                        if (!addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                            AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
+                                        else {
+                                            AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                        }
+                                    )
+                                },
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper.wallpaperUri)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                                    .animateItem(
+                                        placementSpec = tween(
+                                            durationMillis = 800,
+                                            delayMillis = 0,
+                                            easing = FastOutSlowInEasing
+                                        ),
+                                    )
+                            )
+                        }
+                        else {
+                            WallpaperItem(
+                                wallpaperUri = wallpaper.wallpaperUri,
+                                itemSelected = addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    addAlbumViewModel.onEvent(
+                                        if (!addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
+                                            AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
+                                        else {
+                                            AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
+                                        }
+                                    )
+                                },
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(wallpaper.wallpaperUri)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                            )
+                        }
                     }
                 }
             )

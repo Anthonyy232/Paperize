@@ -2,12 +2,12 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,7 +43,10 @@ fun IndividualSchedulingAndToggleRow(
     val columnModifier = remember {
         if (animate) {
             Modifier.animateContentSize(
-                animationSpec = tween(durationMillis = 200, easing = LinearOutSlowInEasing)
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
             )
         } else { Modifier }
     }
@@ -76,20 +79,12 @@ fun IndividualSchedulingAndToggleRow(
             if (animate) {
                 AnimatedVisibility(
                     visible = scheduleSeparately,
-                    enter = expandVertically(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                    ),
-                    exit = fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = LinearOutSlowInEasing
-                        )
-                    )
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 48.dp)) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp)) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 2.dp)
                     }
                     Row(
@@ -98,7 +93,7 @@ fun IndividualSchedulingAndToggleRow(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Enable Wallpaper Changer",
+                            text = stringResource(R.string.enable_wallpaper_changer),
                             modifier = Modifier.padding(16.dp),
                             fontWeight = FontWeight.W500
                         )
@@ -118,7 +113,7 @@ fun IndividualSchedulingAndToggleRow(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Enable wallpaper changer",
+                            text = stringResource(R.string.enable_wallpaper_changer),
                             modifier = Modifier.padding(16.dp),
                             fontWeight = FontWeight.W500
                         )

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -41,7 +42,7 @@ fun AlbumViewScreen(
     onShowWallpaperView: (String) -> Unit,
     onShowFolderView: (String?, List<String>) -> Unit,
     onDeleteAlbum: () -> Unit,
-    onTitleChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
+    onAlbumNameChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
     onSelectionDeleted: () -> Unit,
 ) {
     albumViewScreenViewModel.onEvent(AlbumViewEvent.SetSize(album.wallpapers.size + album.folders.size)) // For selectedAll state
@@ -100,7 +101,7 @@ fun AlbumViewScreen(
                     onBackClick()
                 },
                 onDeleteAlbum = onDeleteAlbum,
-                onTitleChange = { onTitleChange(it, album) },
+                onTitleChange = { onAlbumNameChange(it, album) },
                 onSelectAllClick = {
                     if (!albumState.value.allSelected) albumViewScreenViewModel.onEvent(AlbumViewEvent.SelectAll(album))
                     else albumViewScreenViewModel.onEvent(AlbumViewEvent.DeselectAll)
@@ -132,7 +133,7 @@ fun AlbumViewScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
-                columns = StaggeredGridCells.Fixed(2),
+                columns = StaggeredGridCells.Adaptive(150.dp),
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
@@ -160,11 +161,11 @@ fun AlbumViewScreen(
                                     .padding(4.dp)
                                     .animateItem(
                                         placementSpec = tween(
-                                        durationMillis = 800,
-                                        delayMillis = 0,
-                                        easing = FastOutSlowInEasing
+                                            durationMillis = 800,
+                                            delayMillis = 0,
+                                            easing = FastOutSlowInEasing
+                                        ),
                                     ),
-                                ),
                                 animate = true
                             )
                         }
@@ -213,14 +214,14 @@ fun AlbumViewScreen(
                                 },
                                 modifier = Modifier
                                     .padding(4.dp)
+                                    .size(150.dp, 350.dp)
                                     .animateItem(
                                         placementSpec = tween(
                                             durationMillis = 800,
                                             delayMillis = 0,
                                             easing = FastOutSlowInEasing
                                         )
-                                    ),
-                                animate = true
+                                    )
                             )
                         }
                         else {
@@ -241,8 +242,9 @@ fun AlbumViewScreen(
                                 onWallpaperViewClick = {
                                     onShowWallpaperView(wallpaper.wallpaperUri)
                                 },
-                                modifier = Modifier.padding(4.dp),
-                                animate = false
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
                             )
                         }
                     }

@@ -159,4 +159,5 @@
     <string name="change_next_short">Change wallpaper</string>
     <string name="change_next_long">Change to the next wallpaper in the album</string>
     <string name="cannot_change_wallpaper">Cannot change wallpaper</string>
+    <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
 </resources>

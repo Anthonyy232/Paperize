@@ -80,7 +80,7 @@ fun WallpaperScreen(
     blurPercentage: Int
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
-    val shouldShowSettings = shouldShowScreen && (homeSelectedAlbum != null || lockSelectedAlbum != null)
+    val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -134,9 +134,9 @@ fun WallpaperScreen(
                         animate = animate,
                         enableChanger = enableChanger,
                         onToggleChanger = {
-                            if (!it) {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
+                            scope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                if (!it) {
                                     snackbarHostState.showSnackbar(
                                         message = context.getString(R.string.wallpaper_changer_has_been_disabled),
                                         actionLabel = context.getString(R.string.dismiss),
@@ -184,7 +184,7 @@ fun WallpaperScreen(
                             }
                         }
                     )
-                    if (true) {
+                    if (shouldShowSettings) {
                         WallpaperPreviewAndScale(
                             currentHomeWallpaper = currentHomeWallpaper,
                             currentLockWallpaper = currentLockWallpaper,
@@ -200,13 +200,13 @@ fun WallpaperScreen(
                         )
                         CurrentAndNextChange(lastSetTime, nextSetTime)
                         TimeSliders(
-                            timeInMinutes1 = homeInterval,
-                            timeInMinutes2 = lockInterval,
-                            onTimeChange1 = { days, hours, minutes ->
+                            homeInterval = homeInterval,
+                            lockInterval = lockInterval,
+                            onHomeIntervalChange = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                 onHomeTimeChange(totalMinutes)
                             },
-                            onTimeChange2 = { days, hours, minutes ->
+                            onLockIntervalChange = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                 onLockTimeChange(totalMinutes)
                             },
