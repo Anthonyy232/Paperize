@@ -31,9 +31,8 @@
 ## Download
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Download app from Google Play" height="80">](https://play.google.com/store/apps/details?id=com.anthonyla.paperize)
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Download app from F-Droid" height="80">](https://f-droid.org/en/packages/com.anthonyla.paperize/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Download app from IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize)
-
-F-Droid will be added soon
 
 ## Localization
 I want to allow more people to use the app. Currently, most of the translations are provided using machine translation and AI -- which is not optimal.
@@ -65,7 +64,7 @@ This project is built using Kotlin, Java, and Gradle. Here are the steps to buil
 ### Prerequisites
 - Java 8 (1.8)
 - Android Studio Jellyfish | 2024.1.1 or later
-- Android Gradle Plugin 8.5.0 or later
+- Android Gradle Plugin 8.5.1 or later
 - Gradle 8.9
 - Minimum SDK 26
 

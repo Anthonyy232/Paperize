@@ -42,7 +42,7 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
     try {
         val pInfo: PackageInfo =
             context.packageManager.getPackageInfo(context.packageName, 0)
-        version = pInfo.versionName
+        version = pInfo.versionName.toString()
     } catch (e: PackageManager.NameNotFoundException) {
         e.printStackTrace()
     }
