@@ -13,12 +13,12 @@ ksp {
 
 android {
     namespace = "com.anthonyla.paperize"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.anthonyla.paperize"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 29
         versionName = "1.6.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -89,9 +89,9 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui:1.7.0-beta07")
     implementation("androidx.compose.ui:ui-graphics:1.7.0-beta07")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-beta06")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-beta07")
     implementation("androidx.compose.material3:material3:1.3.0-beta05")
-    implementation("androidx.navigation:navigation-compose:2.8.0-beta06")
+    implementation("androidx.navigation:navigation-compose:2.8.0-beta07")
     implementation("androidx.compose.material:material:1.7.0-beta07")
     implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
@@ -102,7 +102,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
-    implementation("net.engawapg.lib:zoomable:1.7.0-beta02")
+    implementation("net.engawapg.lib:zoomable:2.0.0-beta01")
     implementation("com.github.skydoves:landscapist-glide:2.3.6")
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
     implementation("androidx.hilt:hilt-work:1.2.0")
@@ -114,9 +114,9 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.0-beta06")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-beta06")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.0-beta06")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.0-beta07")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.7.0-beta07")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.0-beta07")
     implementation("com.google.dagger:hilt-android:2.52")
     ksp("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.room:room-runtime:2.6.1")
