@@ -57,11 +57,8 @@ data class AddEdit(val wallpaper: String)
 @Serializable
 data class WallpaperView(val wallpaper: String)
 
-/** Reverted back to passing JSON due to bug in navigation compose causing crash
- * Data class for FolderView screen
-@Serializable
-data class FolderView(val folderName: String?, val wallpapers: List<String>)
+/**
+ * Object for FolderView screen
  */
-sealed class NavScreens(val route: String) {
-    data object FolderView : NavScreens("folder_view_screen")
-}
+@Serializable
+object FolderView
