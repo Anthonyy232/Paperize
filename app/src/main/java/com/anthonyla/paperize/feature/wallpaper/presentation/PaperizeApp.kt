@@ -536,7 +536,7 @@ fun PaperizeApp(
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, setHome, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(false, setHome, settingsState.value.setLockWallpaper)
                             val alarmItem = WallpaperAlarmItem(
                                 homeInterval = settingsState.value.homeInterval,
                                 lockInterval = settingsState.value.lockInterval,

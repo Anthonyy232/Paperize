@@ -396,7 +396,7 @@ class LockWallpaperService: Service() {
                     }
                 }
                 // Run notification
-                if (homeInterval != lockInterval) {
+                if (homeInterval != lockInterval || setLock && !setHome) {
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val homeNextSetTime = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
                     val lockNextSetTime: LocalDateTime?
