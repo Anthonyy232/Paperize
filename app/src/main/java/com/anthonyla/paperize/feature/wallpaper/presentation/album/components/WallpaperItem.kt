@@ -115,7 +115,7 @@ fun WallpaperItem(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.image_is_selected),
                     modifier = Modifier
-                        .padding(4.dp)
+                        .padding(9.dp)
                         .clip(CircleShape)
                         .background(bgColor)
                         .border(2.dp, bgColor, CircleShape)
