@@ -379,40 +379,40 @@ fun PaperizeApp(
                 },
                 onSelectAlbum = {album, lock, home ->
                     val notSameAlbum = settingsState.value.homeAlbumName != settingsState.value.lockAlbumName
-                    settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                     when {
                         lock && home -> {
-                            wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
-                                album = album,
-                                deleteAlbumName = if (notSameAlbum) settingsState.value.lockAlbumName else null)
-                            )
                             settingsViewModel.onEvent(SettingsEvent.SetAlbumName(
                                 homeAlbumName = album.album.initialAlbumName,
                                 lockAlbumName = album.album.initialAlbumName,
                             ))
-                        }
-                        lock -> {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
                                 album = album,
                                 deleteAlbumName = if (notSameAlbum) settingsState.value.lockAlbumName else null)
                             )
+                        }
+                        lock -> {
                             settingsViewModel.onEvent(SettingsEvent.SetAlbumName(
                                 homeAlbumName = null,
                                 lockAlbumName = album.album.initialAlbumName,
                             ))
-                        }
-                        home -> {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
                                 album = album,
-                                deleteAlbumName = if (notSameAlbum) settingsState.value.homeAlbumName else null)
+                                deleteAlbumName = if (notSameAlbum) settingsState.value.lockAlbumName else null)
                             )
+                        }
+                        home -> {
                             settingsViewModel.onEvent(SettingsEvent.SetAlbumName(
                                 homeAlbumName = album.album.initialAlbumName,
                                 lockAlbumName = null,
                             ))
+                            wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
+                                album = album,
+                                deleteAlbumName = if (notSameAlbum) settingsState.value.homeAlbumName else null)
+                            )
                         }
                     }
                     scope.launch {
+                        settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                         delay(1000) // Delay for enableChanger to refresh
                         if (settingsState.value.enableChanger) {
                             val currentHomeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }

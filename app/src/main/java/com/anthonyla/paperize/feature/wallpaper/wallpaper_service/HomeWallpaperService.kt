@@ -402,6 +402,8 @@ class HomeWallpaperService: Service() {
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
+                                    settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
+
                                 }
                                 else {
                                     val wallpaperToDelete = homeAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -433,6 +435,7 @@ class HomeWallpaperService: Service() {
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = homeAlbum.album.homeWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
+                                settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
                             }
                             else {
                                 val wallpaperToDelete = homeAlbum.wallpapers.find { it.wallpaperUri == wallpaper }

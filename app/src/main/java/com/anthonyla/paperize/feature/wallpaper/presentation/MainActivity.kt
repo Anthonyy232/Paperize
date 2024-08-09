@@ -115,9 +115,52 @@ class MainActivity : ComponentActivity() {
                                     WallpaperAlarmItem(
                                         homeInterval = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
                                         lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+                                        setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false,
+                                        setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false,
                                         scheduleSeparately = shouldScheduleSeparately
-                                    ), null, true, true
+                                    ),
+                                    origin = null,
+                                    changeImmediate = true,
+                                    cancelImmediate = true
                                 )
+                                settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
+                                val selectedState = wallpaperScreenViewModel.state.value
+                                val currentHomeAlbum = selectedState.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
+                                val currentLockAlbum = selectedState.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName }
+                                when {
+                                    settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                                        if (currentHomeAlbum != null && currentLockAlbum != null) {
+                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                                                currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                                            ))
+                                        }
+                                    }
+                                    !settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                                        if (currentHomeAlbum != null && currentLockAlbum != null) {
+                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                                                currentLockWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                                            ))
+                                        }
+                                    }
+                                    settingsState.value.setHomeWallpaper -> {
+                                        if (currentHomeAlbum != null) {
+                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                                                currentLockWallpaper = if (settingsState.value.scheduleSeparately) null else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                                            ))
+                                        }
+                                    }
+                                    settingsState.value.setLockWallpaper -> {
+                                        if (currentLockAlbum != null) {
+                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                                                currentHomeWallpaper = if (settingsState.value.scheduleSeparately) null else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                                                currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                                            ))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
