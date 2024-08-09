@@ -33,6 +33,8 @@
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Download app from F-Droid" height="80">](https://f-droid.org/en/packages/com.anthonyla.paperize/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Download app from IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize)
 
+Please don't contact me about uploading the app on the Play store. Google has terminated my developer account without giving me a reason so I can't appeal the decision (in typical Google fashion)
+
 ## Localization
 I want to allow more people to use the app. Currently, most of the translations are provided using machine translation and AI -- which is not optimal.
 
