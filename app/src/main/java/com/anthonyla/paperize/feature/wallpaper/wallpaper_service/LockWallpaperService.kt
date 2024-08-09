@@ -37,6 +37,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -160,6 +161,8 @@ class LockWallpaperService: Service() {
      * Creates a notification for the wallpaper service
      */
     private fun createNotification(nextSetTime: LocalDateTime?): Notification? {
+        val changeWallpaperIntent = Intent(this, WallpaperBootAndChangeReceiver::class.java)
+        val pendingChangeWallpaperIntent = PendingIntent.getBroadcast(this, 0, changeWallpaperIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
         if (nextSetTime != null) {
             val intent = Intent(this, MainActivity::class.java)
@@ -169,6 +172,7 @@ class LockWallpaperService: Service() {
                 .setContentText(getString(R.string.next_wallpaper_change, nextSetTime.format(formatter)))
                 .setSmallIcon(R.drawable.notification_icon)
                 .setContentIntent(pendingIntent)
+                .addAction(R.drawable.notification_icon, getString(R.string.change_wallpaper), pendingChangeWallpaperIntent)
                 .build()
         }
         return null
