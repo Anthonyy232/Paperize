@@ -90,4 +90,4 @@ If you want to donate, you can do so using GitHub sponsorship (one-time or month
 ## License
 Contact on my GitHub profile
 
-Anthony La © GNU GPL v3.0
+[Anthony La](https://github.com/Anthonyy232) © GNU GPL v3.0
