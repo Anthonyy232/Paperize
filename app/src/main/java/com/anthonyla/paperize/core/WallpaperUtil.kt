@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.core
-import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -25,7 +24,7 @@ enum class Type { HOME, LOCK, SINGLE, REFRESH }
  * Get the dimensions of the image from the uri
  */
 fun Uri.getImageDimensions(context: Context): Size? {
-    try {
+    return try {
         context.contentResolver.openInputStream(this)?.use { inputStream ->
             val exif = ExifInterface(inputStream)
             var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
@@ -42,18 +41,24 @@ fun Uri.getImageDimensions(context: Context): Size? {
                 width = options.outWidth
                 height = options.outHeight
             }
-            return Size(width, height)
+            Size(width, height)
         }
-        return null
-    } catch (e: Exception) { return null }
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error getting image dimensions: $e")
+        null
+    }
 }
 
 /**
  * Calculate the inSampleSize for the image
  */
 fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
-    return if (imageSize.width <= width && imageSize.height <= height) { 1 }
-    else { (imageSize.width/ width.toFloat()).fastRoundToInt() }
+    if (imageSize.width > width || imageSize.height > height) {
+        val heightRatio = (imageSize.height.toFloat() / height.toFloat()).fastRoundToInt()
+        val widthRatio = (imageSize.width.toFloat() / width.toFloat()).fastRoundToInt()
+        return if (heightRatio < widthRatio) { heightRatio } else { widthRatio }
+    }
+    else { return 1 }
 }
 
 /**
@@ -61,40 +66,48 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
  * The bitmap will fit into the given width while maintaining the same aspect ratio
  */
 fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    val aspectRatio = source.height.toFloat() / source.width.toFloat()
-    val newHeight = (width * aspectRatio).toInt()
-    val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(newBitmap)
-    val scaledBitmap = Bitmap.createScaledBitmap(source, width, newHeight, true)
-    val top = (height - newHeight) / 2f
-    canvas.drawBitmap(scaledBitmap, 0f, top, null)
-    scaledBitmap.recycle()
-    return newBitmap
+    return try {
+        val aspectRatio = source.height.toFloat() / source.width.toFloat()
+        val newHeight = (width * aspectRatio).toInt()
+        val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(newBitmap)
+        val scaledBitmap = Bitmap.createScaledBitmap(source, width, newHeight, true)
+        val top = (height - newHeight) / 2f
+        canvas.drawBitmap(scaledBitmap, 0f, top, null)
+        scaledBitmap.recycle()
+        newBitmap
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error fitting bitmap: $e")
+        source
+    }
 }
 
 /**
- * Scale a bitmap using the fill height method
+ * Scale a bitmap using the fit method
  */
 fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    try {
+    return try {
         val aspectRatio = source.width.toFloat() / source.height.toFloat()
-        var newWidth = width
-        var newHeight = (newWidth / aspectRatio).toInt()
-        if (newHeight < height) {
+        val newWidth: Int
+        val newHeight: Int
+        if (width > height * aspectRatio) {
+            newWidth = width
+            newHeight = (width / aspectRatio).toInt()
+        } else {
             newHeight = height
-            newWidth = (newHeight * aspectRatio).toInt()
+            newWidth = (height * aspectRatio).toInt()
         }
         val scaledBitmap = Bitmap.createScaledBitmap(source, newWidth, newHeight, true)
-        val x = (width - newWidth) / 2f
-        val y = (height - newHeight) / 2f
+        val x = ((width - newWidth) / 2f)
+        val y = ((height - newHeight) / 2f)
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawBitmap(scaledBitmap, x, y, null)
         scaledBitmap.recycle()
-        return bitmap
+        bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error filling bitmap: $e")
-        return source
+        source
     }
 }
 
@@ -102,16 +115,16 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Stretch the bitmap to fit the given width and height
  */
 fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    try {
+    return try {
         val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(newBitmap)
         val bitmap = Bitmap.createScaledBitmap(source, width, height, true)
         canvas.drawBitmap(bitmap, 0f, 0f, null)
         bitmap.recycle()
-        return newBitmap
+        newBitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error stretching bitmap: $e")
-        return source
+        source
     }
 }
 
@@ -119,7 +132,7 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Darken the bitmap by a certain percentage - 0 is darkest, 100 is original
  */
 fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
-    try {
+    return try {
         val safePercentage = (100 - percent).coerceIn(0, 100)
         val factor = 1 - safePercentage / 100f
         val canvas = Canvas(source)
@@ -129,20 +142,23 @@ fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
             })
         }
         canvas.drawBitmap(source, 0f, 0f, paint)
-        return source
+        source
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error darkening bitmap: $e")
-        return source
+        source
     }
 }
 
+/**
+ * Blur the bitmap by a certain percentage
+ */
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
-    try {
+    return try {
         val factor = percent.toFloat().div(100f) * 10
-        return Toolkit.blur(source, factor.toInt())
+        Toolkit.blur(source, factor.toInt())
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error darkening bitmap: $e")
-        return source
+        source
     }
 }
 
@@ -150,12 +166,12 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
  * Retrieve wallpaper URIs from a folder directory URI
  */
 fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-    try {
+    return try {
         val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
-        return listFilesRecursive(folderDocumentFile, context)
+        listFilesRecursive(folderDocumentFile, context)
     } catch (e: Exception) {
         val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
-        return listFilesRecursive(folderDocumentFile, context)
+        listFilesRecursive(folderDocumentFile, context)
     }
 }
 
@@ -176,6 +192,7 @@ fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<Stri
     }
     return files
 }
+
 /** Overloaded version of the function for DocumentFile */
 fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
     val files = mutableListOf<String>()
@@ -251,13 +268,5 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
         }
         true
     } catch (e: Exception) { false }
-}
-
-/**
- * Check if device uses a live wallpaper
- */
-fun isLiveWallpaperSet(context: Context): Boolean {
-    val wallpaperManager = WallpaperManager.getInstance(context)
-    return wallpaperManager.wallpaperInfo != null
 }
 

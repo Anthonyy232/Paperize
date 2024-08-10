@@ -486,7 +486,7 @@ class LockWallpaperService: Service() {
             val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
             val device = context.resources.displayMetrics
             val targetWidth = min(2 * device.widthPixels, imageSize.width)
-            val targetHeight = (targetWidth * aspectRatio).toInt()
+            val targetHeight = (targetWidth / aspectRatio).toInt()
 
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 try {
