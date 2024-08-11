@@ -50,7 +50,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
-import kotlin.math.min
 
 /**
  * Service for changing home screen
@@ -241,7 +240,7 @@ class HomeWallpaperService: Service() {
                                     delay(5000)
                                     selectedAlbum = selectedRepository.getSelectedAlbum().first()
                                     homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
-                                    delay(5000)
+                                    delay(1000)
                                 }
                                 if (homeAlbum != null) {
                                     if (success) {
@@ -280,7 +279,7 @@ class HomeWallpaperService: Service() {
                                 delay(5000)
                                 selectedAlbum = selectedRepository.getSelectedAlbum().first()
                                 homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
-                                delay(5000)
+                                delay(1000)
                             }
                             if (homeAlbum != null) {
                                 if (success) {
@@ -552,21 +551,18 @@ class HomeWallpaperService: Service() {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
             val imageSize = wallpaper.getImageDimensions(context) ?: return false
-            val aspectRatio = imageSize.height.toFloat() / imageSize.width.toFloat()
             val device = context.resources.displayMetrics
-            val targetWidth = min(2 * device.widthPixels, imageSize.width)
-            val targetHeight = (targetWidth / aspectRatio).toInt()
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 try {
                     val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
                     ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                        decoder.setTargetSize(targetWidth, targetHeight)
+                        decoder.setTargetSampleSize(calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels))
                         decoder.isMutableRequired = true
                     }
                 } catch (e: Exception) {
                     context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                         val options = BitmapFactory.Options().apply {
-                            inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                            inSampleSize = calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
                             inMutable = true
                         }
                         BitmapFactory.decodeStream(inputStream, null, options)
@@ -576,7 +572,7 @@ class HomeWallpaperService: Service() {
             else {
                 context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                     val options = BitmapFactory.Options().apply {
-                        inSampleSize = calculateInSampleSize(imageSize, targetWidth, targetHeight)
+                        inSampleSize = calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
                         inMutable = true
                     }
                     BitmapFactory.decodeStream(inputStream, null, options)

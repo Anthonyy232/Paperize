@@ -3,6 +3,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
@@ -270,3 +271,20 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
     } catch (e: Exception) { false }
 }
 
+/**
+ * Calculate the brightness of a bitmap (0-100)
+ * https://gist.github.com/httnn/b1d772caf76cdc0c11e2
+ */
+fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
+    var brightness = 0.0
+    val pixels = IntArray(bitmap.width * bitmap.height)
+    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+    for (i in pixels.indices step pixelSpacing.coerceAtLeast(1)) {
+        val color = pixels[i]
+        val R = Color.red(color)
+        val G = Color.green(color)
+        val B = Color.blue(color)
+        brightness += 0.299*R + 0.587*G + 0.114*B
+    }
+    return (brightness / (pixels.size / pixelSpacing)).toInt()
+}
