@@ -56,6 +56,8 @@ class SettingsViewModel @Inject constructor (
             val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
             val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
             val blurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0 }
+            val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
+            val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
 
             _state.update {
                 it.copy(
@@ -80,7 +82,9 @@ class SettingsViewModel @Inject constructor (
                     currentLockWallpaper = setCurrentLockWallpaper.await(),
                     scheduleSeparately = scheduleSeparately.await(),
                     blur = blur.await(),
-                    blurPercentage = blurPercentage.await()
+                    blurPercentage = blurPercentage.await(),
+                    nextHomeWallpaper = nextHomeWallpaper.await(),
+                    nextLockWallpaper = nextLockWallpaper.await()
                 )
             }
             setKeepOnScreenCondition = false
@@ -135,6 +139,8 @@ class SettingsViewModel @Inject constructor (
                     val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
                     val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
                     val blurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0 }
+                    val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
+                    val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
                     _state.update {
                         it.copy(
                             darkMode = darkMode.await(),
@@ -158,6 +164,8 @@ class SettingsViewModel @Inject constructor (
                             scheduleSeparately = scheduleSeparately.await(),
                             blur = blur.await(),
                             blurPercentage = blurPercentage.await(),
+                            nextHomeWallpaper = nextHomeWallpaper.await(),
+                            nextLockWallpaper = nextLockWallpaper.await()
                         )
                     }
                 }
@@ -485,6 +493,8 @@ class SettingsViewModel @Inject constructor (
                                 lockAlbumName = if (event.removeLock) null else it.lockAlbumName,
                                 currentHomeWallpaper = null,
                                 currentLockWallpaper = null,
+                                nextHomeWallpaper = null,
+                                nextLockWallpaper = null,
                                 enableChanger = false,
                                 lastSetTime = null,
                                 nextSetTime = null
@@ -539,6 +549,65 @@ class SettingsViewModel @Inject constructor (
 
                 }
             }
+
+            is SettingsEvent.SetNextHomeWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    event.nextHomeWallpaper?.let {
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, it)
+                    }
+                    _state.update {
+                        it.copy(
+                            nextHomeWallpaper = event.nextHomeWallpaper
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetNextLockWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    event.nextLockWallpaper?.let {
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, it)
+                    }
+                    _state.update {
+                        it.copy(
+                            nextLockWallpaper = event.nextLockWallpaper
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetNextWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.nextHomeWallpaper != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, event.nextHomeWallpaper)
+                    }
+                    if (event.nextLockWallpaper != null) {
+                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, event.nextLockWallpaper)
+                    }
+                    _state.update {
+                        it.copy(
+                            nextHomeWallpaper = event.nextHomeWallpaper ?: it.nextHomeWallpaper,
+                            nextLockWallpaper = event.nextLockWallpaper ?: it.nextLockWallpaper
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.RefreshNextWallpaper -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_HOME_WALLPAPER) }
+                    val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_LOCK_WALLPAPER) }
+                    _state.update {
+                        it.copy(
+                            nextHomeWallpaper = nextHomeWallpaper.await(),
+                            nextLockWallpaper = nextLockWallpaper.await(),
+                            currentHomeWallpaper = nextHomeWallpaper.await(),
+                            currentLockWallpaper = nextLockWallpaper.await()
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
@@ -566,6 +635,8 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_SET)
                     settingsDataStoreImpl.deleteString(SettingsConstants.HOME_NEXT_SET_TIME)
                     settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_NEXT_SET_TIME)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_HOME_WALLPAPER)
+                    settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_LOCK_WALLPAPER)
 
                     _state.update {
                         it.copy(
@@ -590,7 +661,9 @@ class SettingsViewModel @Inject constructor (
                             lockAlbumName = null,
                             scheduleSeparately = false,
                             blur = false,
-                            blurPercentage = 0
+                            blurPercentage = 0,
+                            nextHomeWallpaper = null,
+                            nextLockWallpaper = null
                         )
                     }
                 }

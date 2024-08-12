@@ -29,4 +29,8 @@ sealed class SettingsEvent {
     data class SetBlurPercentage(val blurPercentage: Int): SettingsEvent()
     data class SetChangerToggle(val toggle: Boolean): SettingsEvent()
     data class SetWallpaperScaling(val scaling: ScalingConstants): SettingsEvent()
+    data class SetNextHomeWallpaper(val nextHomeWallpaper: String?): SettingsEvent()
+    data class SetNextLockWallpaper(val nextLockWallpaper: String?): SettingsEvent()
+    data class SetNextWallpaper(val nextHomeWallpaper: String?, val nextLockWallpaper: String?): SettingsEvent()
+    data object RefreshNextWallpaper: SettingsEvent()
 }

@@ -112,6 +112,7 @@ dependencies {
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.2")
     implementation("androidx.compose.foundation:foundation:1.7.0-beta07")
     implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
+    implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

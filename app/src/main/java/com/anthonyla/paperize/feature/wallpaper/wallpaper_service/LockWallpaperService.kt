@@ -42,6 +42,7 @@ import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -86,6 +87,7 @@ class LockWallpaperService: Service() {
         if (intent != null) {
             when (intent.action) {
                 Actions.START.toString() -> {
+                    Log.d("PaperizeWallpaperChanger", "Lock starting service")
                     homeInterval = intent.getIntExtra("homeInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     lockInterval = intent.getIntExtra("lockInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
@@ -202,14 +204,12 @@ class LockWallpaperService: Service() {
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
                 val blurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0
                 val lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
-                val homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: ""
-                val homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
                 val lockAlbum = selectedAlbum.find { it.album.initialAlbumName == lockAlbumName }
                 if (lockAlbum == null) {
                     onDestroy()
                     return
                 }
-
+                Log.d("PaperizeWallpaperChanger", "Size of lock ${lockAlbum.album.homeWallpapersInQueue.size}")
                 when {
                     // Case: Set home and lock screen wallpapers using separate albums (home screen and lock screen album)
                     setHome && setLock && scheduleSeparately -> {
@@ -234,6 +234,7 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = blurPercentage
                                 )
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -265,6 +266,7 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -286,22 +288,15 @@ class LockWallpaperService: Service() {
                             }
                         }
                         if (homeInterval != lockInterval) {
-                            wallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER)
-                            if (!wallpaper.isNullOrEmpty()) {
-                                setWallpaper(
-                                    context = context,
-                                    wallpaper = wallpaper.toUri(),
-                                    darken = darken,
-                                    darkenPercent = darkenPercentage,
-                                    scaling = scaling,
-                                    blur = blur,
-                                    blurPercent = blurPercentage
-                                )
-                            }
+                            delay(15000)
+                            val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply { this.action = HomeWallpaperService.Actions.UPDATE.toString() }
+                            context.startService(serviceIntent)
                         }
                     }
                     // Case: Set home and lock screen wallpapers using the same album (home screen album)
                     setHome && setLock && !scheduleSeparately -> {
+                        val homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: ""
+                        val homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
                         if (homeAlbum == null) {
                             onDestroy()
                             return
@@ -317,6 +312,7 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
                             if (success) {
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
                             }
@@ -345,6 +341,8 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = blurPercentage
                                 )
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -377,6 +375,8 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())

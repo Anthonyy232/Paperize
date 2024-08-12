@@ -41,7 +41,7 @@ class WallpaperScreenViewModel @Inject constructor (
 
     fun onEvent(event: WallpaperEvent) {
         when (event) {
-            is WallpaperEvent.UpdateSelectedAlbum -> {
+            is WallpaperEvent.AddSelectedAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     val deleted = event.deleteAlbumName?.let {
                         repository.cascadeDeleteAlbum(it)
@@ -68,6 +68,22 @@ class WallpaperScreenViewModel @Inject constructor (
                         it.copy(
                             selectedAlbum = it.selectedAlbum?.let { selectedAlbums ->
                                 selectedAlbums.filterNot { selectedAlbum -> deleted && selectedAlbum.album.initialAlbumName == event.deleteAlbumName } + newSelectedAlbum
+                            }
+                        )
+                    }
+                }
+            }
+            is WallpaperEvent.UpdateSelectedAlbum -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    repository.upsertSelectedAlbum(event.album)
+                    _state.update {
+                        it.copy(
+                            selectedAlbum = it.selectedAlbum?.map { selectedAlbum ->
+                                if (selectedAlbum.album.initialAlbumName == event.album.album.initialAlbumName) {
+                                    event.album
+                                } else {
+                                    selectedAlbum
+                                }
                             }
                         )
                     }

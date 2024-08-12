@@ -87,6 +87,7 @@ class HomeWallpaperService: Service() {
         if (intent != null) {
             when (intent.action) {
                 Actions.START.toString() -> {
+                    Log.d("PaperizeWallpaperChanger", "Home starting service")
                     homeInterval = intent.getIntExtra("homeInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     lockInterval = intent.getIntExtra("lockInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
@@ -119,7 +120,6 @@ class HomeWallpaperService: Service() {
     private fun workerTaskStart() {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
-                delay(1000)
                 changeWallpaper(this@HomeWallpaperService)
             }
             stopSelf()
@@ -210,11 +210,10 @@ class HomeWallpaperService: Service() {
                     onDestroy()
                     return
                 }
-
+                Log.d("PaperizeWallpaperChanger", "Size of home ${homeAlbum.album.homeWallpapersInQueue.size}")
                 when {
                     // Case: Set home and lock screen wallpapers using separate albums (home screen and lock screen album)
                     setHome && setLock && scheduleSeparately -> {
-                        val delay = ((homeInterval % lockInterval == 0) || (lockInterval % homeInterval == 0)) && (homeAlbumName == lockAlbumName)
                         var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
                             // Reshuffle the wallpapers and pick the first one
@@ -236,31 +235,24 @@ class HomeWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = blurPercentage
                                 )
-                                if (delay) {
-                                    delay(5000)
-                                    selectedAlbum = selectedRepository.getSelectedAlbum().first()
-                                    homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
-                                    delay(1000)
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
+                                if (success) {
+                                    selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = newWallpapers.drop(1))))
+                                    settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
                                 }
-                                if (homeAlbum != null) {
-                                    if (success) {
-                                        selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = newWallpapers.drop(1))))
-                                        settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
-                                    }
-                                    else {
-                                        val wallpaperToDelete = homeAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
-                                        if (wallpaperToDelete != null) {
-                                            albumRepository.deleteWallpaper(wallpaperToDelete)
-                                            selectedRepository.deleteWallpaper(wallpaperToDelete)
-                                            selectedRepository.upsertSelectedAlbum(
-                                                homeAlbum.copy(
-                                                    album = homeAlbum.album.copy(
-                                                        homeWallpapersInQueue = homeAlbum.album.homeWallpapersInQueue.filterNot { it == wallpaper }
-                                                    ),
-                                                    wallpapers = homeAlbum.wallpapers.filterNot { it.wallpaperUri == wallpaper }
-                                                )
+                                else {
+                                    val wallpaperToDelete = homeAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
+                                    if (wallpaperToDelete != null) {
+                                        albumRepository.deleteWallpaper(wallpaperToDelete)
+                                        selectedRepository.deleteWallpaper(wallpaperToDelete)
+                                        selectedRepository.upsertSelectedAlbum(
+                                            homeAlbum.copy(
+                                                album = homeAlbum.album.copy(
+                                                    homeWallpapersInQueue = homeAlbum.album.homeWallpapersInQueue.filterNot { it == wallpaper }
+                                                ),
+                                                wallpapers = homeAlbum.wallpapers.filterNot { it.wallpaperUri == wallpaper }
                                             )
-                                        }
+                                        )
                                     }
                                 }
                             }
@@ -275,11 +267,11 @@ class HomeWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
-                            if (delay) {
-                                delay(5000)
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
+                            if ((homeInterval % lockInterval == 0) || (lockInterval % homeInterval == 0) && (homeAlbumName == lockAlbumName)) {
+                                delay(1000)
                                 selectedAlbum = selectedRepository.getSelectedAlbum().first()
                                 homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
-                                delay(1000)
                             }
                             if (homeAlbum != null) {
                                 if (success) {
@@ -327,6 +319,7 @@ class HomeWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = blurPercentage
                                 )
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
@@ -358,6 +351,7 @@ class HomeWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = homeAlbum.album.homeWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
@@ -402,6 +396,8 @@ class HomeWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = blurPercentage
                                 )
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
@@ -435,6 +431,8 @@ class HomeWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = blurPercentage
                             )
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(homeAlbum.copy(album = homeAlbum.album.copy(homeWallpapersInQueue = homeAlbum.album.homeWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())

@@ -32,4 +32,6 @@ object SettingsConstants {
     const val BLUR_PERCENTAGE = "blur_percentage"
     const val HOME_NEXT_SET_TIME = "next_set_time_1"
     const val LOCK_NEXT_SET_TIME = "next_set_time_2"
+    const val NEXT_HOME_WALLPAPER = "next_home_wallpaper"
+    const val NEXT_LOCK_WALLPAPER = "next_lock_wallpaper"
 }

@@ -111,6 +111,7 @@ class WallpaperAlarmSchedulerImpl (
     private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, update: Boolean = false) {
         val nextTime = when (type) {
             Type.LOCK -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
+            Type.HOME -> if (wallpaperAlarmItem.scheduleSeparately) LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10) else LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
             else -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
         }
         val intent = Intent(context, WallpaperReceiver::class.java).apply {
