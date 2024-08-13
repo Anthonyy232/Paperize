@@ -48,7 +48,8 @@ fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
     animate: Boolean,
     darken: Boolean,
-    darkenPercentage: Int,
+    homeDarkenPercentage: Int,
+    lockDarkenPercentage: Int,
     enableChanger: Boolean,
     homeEnabled: Boolean,
     homeInterval: Int,
@@ -59,7 +60,7 @@ fun WallpaperScreen(
     currentHomeWallpaper: String?,
     currentLockWallpaper: String?,
     onDarkCheck: (Boolean) -> Unit,
-    onDarkenPercentage: (Int) -> Unit,
+    onDarkenPercentage: (Int, Int) -> Unit,
     onHomeCheckedChange: (Boolean) -> Unit,
     onLockCheckedChange: (Boolean) -> Unit,
     scheduleSeparately: Boolean,
@@ -75,9 +76,10 @@ fun WallpaperScreen(
     homeSelectedAlbum: SelectedAlbum?,
     lockSelectedAlbum: SelectedAlbum?,
     blur: Boolean,
-    onBlurPercentageChange: (Int) -> Unit,
+    onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    blurPercentage: Int
+    homeBlurPercentage: Int,
+    lockBlurPercentage: Int
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -188,15 +190,16 @@ fun WallpaperScreen(
                         WallpaperPreviewAndScale(
                             currentHomeWallpaper = currentHomeWallpaper,
                             currentLockWallpaper = currentLockWallpaper,
-                            animate = animate,
                             darken = darken,
-                            darkenPercentage = darkenPercentage,
+                            homeDarkenPercentage = homeDarkenPercentage,
+                            lockDarkenPercentage = lockDarkenPercentage,
                             scaling = scaling,
                             onScalingChange = onScalingChange,
                             homeEnabled = homeEnabled,
                             lockEnabled = lockEnabled,
                             blur = blur,
-                            blurPercentage = blurPercentage
+                            homeBlurPercentage = homeBlurPercentage,
+                            lockBlurPercentage = lockBlurPercentage,
                         )
                         CurrentAndNextChange(lastSetTime, nextSetTime)
                         TimeSliders(
@@ -221,15 +224,19 @@ fun WallpaperScreen(
                             onDarkCheck = onDarkCheck,
                             darken = darken,
                             onDarkenChange = onDarkenPercentage,
-                            darkenPercentage = darkenPercentage,
-                            animate = animate
+                            homeDarkenPercentage = homeDarkenPercentage,
+                            lockDarkenPercentage = lockDarkenPercentage,
+                            animate = animate,
+                            bothEnabled = homeEnabled && lockEnabled
                         )
                         BlurSwitchAndSlider(
                             onBlurPercentageChange = onBlurPercentageChange,
                             onBlurChange = onBlurChange,
                             blur = blur,
-                            blurPercentage = blurPercentage,
-                            animate = animate
+                            homeBlurPercentage = homeBlurPercentage,
+                            lockBlurPercentage = lockBlurPercentage,
+                            animate = animate,
+                            bothEnabled = homeEnabled && lockEnabled
                         )
                     }
                 }

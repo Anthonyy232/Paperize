@@ -60,8 +60,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @Composable
 fun PaperizeApp(
@@ -216,13 +214,15 @@ fun PaperizeApp(
                 homeSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName },
                 lockSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName },
                 enableChanger = settingsState.value.enableChanger,
-                darkenPercentage = settingsState.value.darkenPercentage,
+                homeDarkenPercentage = settingsState.value.homeDarkenPercentage,
+                lockDarkenPercentage = settingsState.value.lockDarkenPercentage,
                 darken = settingsState.value.darken,
                 homeEnabled = settingsState.value.setHomeWallpaper,
                 lockEnabled = settingsState.value.setLockWallpaper,
                 scheduleSeparately = settingsState.value.scheduleSeparately,
                 blur = settingsState.value.blur,
-                blurPercentage = settingsState.value.blurPercentage,
+                homeBlurPercentage = settingsState.value.homeBlurPercentage,
+                lockBlurPercentage = settingsState.value.lockBlurPercentage,
                 currentHomeWallpaper = settingsState.value.currentHomeWallpaper,
                 currentLockWallpaper = settingsState.value.currentLockWallpaper,
                 onSettingsClick = { navController.navigate(Settings) },
@@ -467,8 +467,8 @@ fun PaperizeApp(
                         }
                     }
                 },
-                onDarkenPercentage = {
-                    settingsViewModel.onEvent(SettingsEvent.SetDarkenPercentage(it))
+                onDarkenPercentage = { home, lock ->
+                    settingsViewModel.onEvent(SettingsEvent.SetDarkenPercentage(home, lock))
                     if (settingsState.value.enableChanger && settingsState.value.darken) {
                         job?.cancel()
                         job = scope.launch {
@@ -479,7 +479,7 @@ fun PaperizeApp(
                 },
                 onDarkCheck = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarken(it))
-                    if (settingsState.value.enableChanger && (settingsState.value.darken && settingsState.value.darkenPercentage < 100)) {
+                    if (settingsState.value.enableChanger && (settingsState.value.darken && settingsState.value.homeDarkenPercentage < 100)) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -668,7 +668,7 @@ fun PaperizeApp(
                 },
                 onBlurChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetBlur(it))
-                    if (settingsState.value.enableChanger && (settingsState.value.blur && settingsState.value.blurPercentage > 0)) {
+                    if (settingsState.value.enableChanger && settingsState.value.blur) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -676,8 +676,8 @@ fun PaperizeApp(
                         }
                     }
                 },
-                onBlurPercentageChange = {
-                    settingsViewModel.onEvent(SettingsEvent.SetBlurPercentage(it))
+                onBlurPercentageChange = { home, lock ->
+                    settingsViewModel.onEvent(SettingsEvent.SetBlurPercentage(home, lock))
                     if (settingsState.value.enableChanger && settingsState.value.blur) {
                         job?.cancel()
                         job = scope.launch {
@@ -965,9 +965,3 @@ fun PaperizeApp(
         }
     }
 }
-
-// Encode an URI so it can be passed with navigation
-suspend fun encodeUri(uri: String): String =
-    withContext(Dispatchers.IO) {
-        URLEncoder.encode(uri, StandardCharsets.UTF_8.toString())
-    }

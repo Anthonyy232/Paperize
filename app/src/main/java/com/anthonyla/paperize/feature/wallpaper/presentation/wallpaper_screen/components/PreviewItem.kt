@@ -33,10 +33,10 @@ import com.skydoves.landscapist.glide.GlideImage
 fun PreviewItem(
     wallpaperUri: String,
     darken: Boolean = false,
-    darkenPercentage: Int? = null,
+    darkenPercentage: Int,
     blur: Boolean = false,
-    blurPercentage: Int? = null,
-    scaling: ScalingConstants? = null
+    blurPercentage: Int,
+    scaling: ScalingConstants
 ) {
     val context = LocalContext.current
     val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
@@ -48,16 +48,14 @@ fun PreviewItem(
         GlideImage(
             imageModel = { wallpaperUri },
             imageOptions = ImageOptions(
-                contentScale = if (scaling != null) {
-                    when (scaling) {
-                        ScalingConstants.FILL -> ContentScale.FillHeight
-                        ScalingConstants.FIT -> ContentScale.FillWidth
-                        ScalingConstants.STRETCH -> ContentScale.FillBounds
-                    }
-                } else { ContentScale.Crop },
+                contentScale = when (scaling) {
+                    ScalingConstants.FILL -> ContentScale.FillHeight
+                    ScalingConstants.FIT -> ContentScale.FillWidth
+                    ScalingConstants.STRETCH -> ContentScale.FillBounds
+                },
                 requestSize = IntSize(300, 300),
                 alignment = Alignment.Center,
-                colorFilter = if (darken && darkenPercentage != null && darkenPercentage < 100) {
+                colorFilter = if (darken && darkenPercentage < 100) {
                     ColorFilter.tint(
                         Color.Black.copy(alpha = (100 - darkenPercentage).toFloat().div(100f)),
                         BlendMode.Darken
@@ -70,7 +68,7 @@ fun PreviewItem(
                 .border(3.dp, Color.Black, RoundedCornerShape(16.dp))
                 .background(Color.Black)
                 .blur(
-                    if (blur && blurPercentage != null && blurPercentage > 0 ) {
+                    if (blur && blurPercentage > 0) {
                         blurPercentage.toFloat().div(100f) * 1.5.dp
                     } else { 0.dp })
         )

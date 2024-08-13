@@ -47,16 +47,19 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun BlurSwitchAndSlider(
-    onBlurPercentageChange: (Int) -> Unit,
+    onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
     blur: Boolean,
-    blurPercentage: Int,
+    bothEnabled: Boolean,
+    homeBlurPercentage: Int,
+    lockBlurPercentage: Int,
     animate: Boolean
 ) {
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     var job by remember { mutableStateOf<Job?>(null) }
-    var percentage by rememberSaveable { mutableFloatStateOf(blurPercentage.toFloat()) }
+    var homePercentage by rememberSaveable { mutableFloatStateOf(homeBlurPercentage.toFloat()) }
+    var lockPercentage by rememberSaveable { mutableFloatStateOf(lockBlurPercentage.toFloat()) }
 
     Surface(
         tonalElevation = 10.dp,
@@ -94,54 +97,128 @@ fun BlurSwitchAndSlider(
                             easing = LinearOutSlowInEasing
                         )
                     )
-                    ) {
+                ) {
                     Column {
-                        Text(
-                            text = stringResource(R.string.percentage, percentage.roundToInt()),
-                            modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                            fontWeight = FontWeight.W400
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (bothEnabled) {
+                            Text(
+                                text = stringResource(R.string.home_screen) + " | " + stringResource(R.string.percentage, homePercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                        }
+                        else {
+                            Text(
+                                text = stringResource(R.string.percentage, homePercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                        }
                         Slider(
-                            value = percentage,
+                            value = homePercentage,
                             onValueChange = {
                                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                percentage = it
+                                homePercentage = it
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onBlurPercentageChange(it.roundToInt())
+                                    if (bothEnabled) {
+                                        onBlurPercentageChange(it.roundToInt(), lockPercentage.roundToInt())
+                                    } else {
+                                        onBlurPercentageChange(it.roundToInt(), it.roundToInt())
+                                    }
                                 }
                             },
                             valueRange = 0f..100f,
                             steps = 100,
                             modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
                         )
+                        if (bothEnabled) {
+                            Text(
+                                text = stringResource(R.string.lock_screen) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Slider(
+                                value = lockPercentage,
+                                onValueChange = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    lockPercentage = it
+                                    job?.cancel()
+                                    job = scope.launch {
+                                        delay(500)
+                                        onBlurPercentageChange(homePercentage.roundToInt(), it.roundToInt())
+                                    }
+                                },
+                                valueRange = 0f..100f,
+                                steps = 100,
+                                modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             } else {
                 if (blur) {
                     Column {
-                        Text(
-                            text = stringResource(R.string.percentage, percentage.roundToInt()),
-                            modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                            fontWeight = FontWeight.W500
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (bothEnabled) {
+                            Text(
+                                text = stringResource(R.string.home_screen) + " | " + stringResource(R.string.percentage, homePercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                        }
+                        else {
+                            Text(
+                                text = stringResource(R.string.percentage, homePercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                        }
                         Slider(
-                            value = percentage,
+                            value = homePercentage,
                             onValueChange = {
                                 view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                percentage = it
+                                homePercentage = it
                                 job?.cancel()
                                 job = scope.launch {
                                     delay(500)
-                                    onBlurPercentageChange(it.roundToInt())
+                                    if (bothEnabled) {
+                                        onBlurPercentageChange(it.roundToInt(), lockPercentage.roundToInt())
+                                    } else {
+                                        onBlurPercentageChange(it.roundToInt(), it.roundToInt())
+                                    }
                                 }
                             },
                             valueRange = 0f..100f,
                             steps = 100,
                             modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
                         )
+                        if (bothEnabled) {
+                            Text(
+                                text = stringResource(R.string.lock_screen) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
+                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
+                                fontWeight = FontWeight.W400
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Slider(
+                                value = lockPercentage,
+                                onValueChange = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    lockPercentage = it
+                                    job?.cancel()
+                                    job = scope.launch {
+                                        delay(500)
+                                        onBlurPercentageChange(homePercentage.roundToInt(), it.roundToInt())
+                                    }
+                                },
+                                valueRange = 0f..100f,
+                                steps = 100,
+                                modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }

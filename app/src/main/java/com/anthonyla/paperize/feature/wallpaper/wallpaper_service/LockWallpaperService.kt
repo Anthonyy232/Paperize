@@ -87,7 +87,6 @@ class LockWallpaperService: Service() {
         if (intent != null) {
             when (intent.action) {
                 Actions.START.toString() -> {
-                    Log.d("PaperizeWallpaperChanger", "Lock starting service")
                     homeInterval = intent.getIntExtra("homeInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     lockInterval = intent.getIntExtra("lockInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
@@ -200,16 +199,17 @@ class LockWallpaperService: Service() {
                 }
                 val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
-                val darkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100
+                val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
+                val lockDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
-                val blurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0
+                val homeBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0
+                val lockBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0
                 val lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
                 val lockAlbum = selectedAlbum.find { it.album.initialAlbumName == lockAlbumName }
                 if (lockAlbum == null) {
                     onDestroy()
                     return
                 }
-                Log.d("PaperizeWallpaperChanger", "Size of lock ${lockAlbum.album.homeWallpapersInQueue.size}")
                 when {
                     // Case: Set home and lock screen wallpapers using separate albums (home screen and lock screen album)
                     setHome && setLock && scheduleSeparately -> {
@@ -229,10 +229,10 @@ class LockWallpaperService: Service() {
                                     context = context,
                                     wallpaper = wallpaper.toUri(),
                                     darken = darken,
-                                    darkenPercent = darkenPercentage,
+                                    darkenPercent = lockDarkenPercentage,
                                     scaling = scaling,
                                     blur = blur,
-                                    blurPercent = blurPercentage
+                                    blurPercent = lockBlurPercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 if (success) {
@@ -261,10 +261,10 @@ class LockWallpaperService: Service() {
                                 context = context,
                                 wallpaper = wallpaper.toUri(),
                                 darken = darken,
-                                darkenPercent = darkenPercentage,
+                                darkenPercent = lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = blurPercentage
+                                blurPercent = lockBlurPercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
                             if (success) {
@@ -307,10 +307,10 @@ class LockWallpaperService: Service() {
                                 context = context,
                                 wallpaper = wallpaper.toUri(),
                                 darken = darken,
-                                darkenPercent = darkenPercentage,
+                                darkenPercent = lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = blurPercentage
+                                blurPercent = lockBlurPercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
                             if (success) {
@@ -336,10 +336,10 @@ class LockWallpaperService: Service() {
                                     context = context,
                                     wallpaper = wallpaper.toUri(),
                                     darken = darken,
-                                    darkenPercent = darkenPercentage,
+                                    darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
                                     blur = blur,
-                                    blurPercent = blurPercentage
+                                    blurPercent = homeBlurPercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
@@ -370,10 +370,10 @@ class LockWallpaperService: Service() {
                                 context = context,
                                 wallpaper = wallpaper.toUri(),
                                 darken = darken,
-                                darkenPercent = darkenPercentage,
+                                darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = blurPercentage
+                                blurPercent = homeBlurPercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
@@ -448,18 +448,20 @@ class LockWallpaperService: Service() {
 
                 val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
-                val darkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100
+                val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
+                val lockDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
-                val blurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0
+                val homeBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0
+                val lockBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0
                 val currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) ?: ""
                 setWallpaper(
                     context = context,
                     wallpaper = currentLockWallpaper.toUri(),
                     darken = darken,
-                    darkenPercent = darkenPercentage,
+                    darkenPercent = if (!setHome) homeDarkenPercentage else lockDarkenPercentage,
                     scaling = scaling,
                     blur = blur,
-                    blurPercent = blurPercentage
+                    blurPercent = if (!setHome) homeBlurPercentage else lockBlurPercentage
                 )
             }
         } catch (e: Exception) {
@@ -532,7 +534,8 @@ class LockWallpaperService: Service() {
      */
     private fun processBitmap(
         device: DisplayMetrics,
-        source: Bitmap, darken: Boolean,
+        source: Bitmap,
+        darken: Boolean,
         darkenPercent: Int,
         scaling: ScalingConstants,
         blur: Boolean,

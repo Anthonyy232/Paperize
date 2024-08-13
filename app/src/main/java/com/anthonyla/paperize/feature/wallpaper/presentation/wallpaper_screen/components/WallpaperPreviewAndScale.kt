@@ -41,15 +41,16 @@ import com.anthonyla.paperize.core.ScalingConstants
 fun WallpaperPreviewAndScale(
     currentHomeWallpaper: String?,
     currentLockWallpaper: String?,
-    animate: Boolean,
     darken: Boolean,
-    darkenPercentage: Int,
+    homeDarkenPercentage: Int,
+    lockDarkenPercentage: Int,
     homeEnabled: Boolean,
     lockEnabled: Boolean,
     scaling: ScalingConstants,
     onScalingChange: (ScalingConstants) -> Unit,
     blur: Boolean,
-    blurPercentage: Int,
+    homeBlurPercentage: Int,
+    lockBlurPercentage: Int,
 ) {
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
@@ -98,10 +99,10 @@ fun WallpaperPreviewAndScale(
                             PreviewItem(
                                 wallpaperUri = currentLockWallpaper,
                                 darken = darken,
-                                darkenPercentage = darkenPercentage,
+                                darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = blurPercentage
+                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -117,10 +118,10 @@ fun WallpaperPreviewAndScale(
                             PreviewItem(
                                 wallpaperUri = currentHomeWallpaper,
                                 darken = darken,
-                                darkenPercentage = darkenPercentage,
+                                darkenPercentage = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = blurPercentage
+                                blurPercentage = homeBlurPercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

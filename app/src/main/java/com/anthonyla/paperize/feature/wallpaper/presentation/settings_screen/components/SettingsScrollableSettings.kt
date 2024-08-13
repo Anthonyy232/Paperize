@@ -65,8 +65,8 @@ fun SettingsScrollableSettings(
 
     val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
     val githubLink = "https://github.com/Anthonyy232/Paperize"
-    val playstoreLink = "https://play.google.com/store/apps/details?id=com.anthonyla.paperize"
     val fdroidLink = "https://f-droid.org/en/packages/com.anthonyla.paperize/"
+    val izzyOnDroidLink = "https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize"
 
     Scaffold(
         topBar = {
@@ -146,14 +146,14 @@ fun SettingsScrollableSettings(
                         openURL.data = Uri.parse(githubLink)
                         context.startActivity(openURL)
                     },
-                    onPlaystoreClick = {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(playstoreLink)
-                        context.startActivity(openURL)
-                    },
                     onFdroidClick = {
                         val openURL = Intent(Intent.ACTION_VIEW)
                         openURL.data = Uri.parse(fdroidLink)
+                        context.startActivity(openURL)
+                    },
+                    onIzzyOnDroidClick = {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(izzyOnDroidLink)
                         context.startActivity(openURL)
                     },
                 )

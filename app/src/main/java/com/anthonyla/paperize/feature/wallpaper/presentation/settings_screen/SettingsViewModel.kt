@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.ScalingConstants
@@ -50,12 +51,14 @@ class SettingsViewModel @Inject constructor (
             val lastSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME) }
             val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
             val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
-            val darkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 100 }
+            val homeDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100 }
+            val lockDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100 }
             val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
             val wallpaperScaling = async { ScalingConstants.valueOf(settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING) ?: ScalingConstants.FILL.name) }
             val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
             val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
-            val blurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0 }
+            val homeBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0 }
+            val lockBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0 }
             val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
             val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
 
@@ -73,7 +76,8 @@ class SettingsViewModel @Inject constructor (
                     nextSetTime = nextSetTime.await(),
                     animate = animate.await(),
                     enableChanger = enableChanger.await(),
-                    darkenPercentage = darkenPercentage.await(),
+                    homeDarkenPercentage = homeDarkenPercentage.await(),
+                    lockDarkenPercentage = lockDarkenPercentage.await(),
                     darken = darken.await(),
                     wallpaperScaling = wallpaperScaling.await(),
                     setHomeWallpaper = setHomeWallpaper.await(),
@@ -82,12 +86,14 @@ class SettingsViewModel @Inject constructor (
                     currentLockWallpaper = setCurrentLockWallpaper.await(),
                     scheduleSeparately = scheduleSeparately.await(),
                     blur = blur.await(),
-                    blurPercentage = blurPercentage.await(),
+                    homeBlurPercentage = homeBlurPercentage.await(),
+                    lockBlurPercentage = lockBlurPercentage.await(),
                     nextHomeWallpaper = nextHomeWallpaper.await(),
                     nextLockWallpaper = nextLockWallpaper.await()
                 )
             }
             setKeepOnScreenCondition = false
+            Log.d("PaperizeWallpaperChanger", "home blur ${homeBlurPercentage.await()} lock blur ${lockBlurPercentage.await()}")
         }
     }
 
@@ -126,7 +132,8 @@ class SettingsViewModel @Inject constructor (
                     val nextSetTime = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME) }
                     val animate = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true }
                     val enableChanger = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false }
-                    val darkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.DARKEN_PERCENTAGE) ?: 0 }
+                    val homeDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 0 }
+                    val lockDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 0 }
                     val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
                     val setHomeWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false }
                     val setLockWallpaper = async { settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false }
@@ -138,7 +145,8 @@ class SettingsViewModel @Inject constructor (
                     val lockWallpaperInterval = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT }
                     val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
                     val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
-                    val blurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.BLUR_PERCENTAGE) ?: 0 }
+                    val homeBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0 }
+                    val lockBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0 }
                     val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
                     val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
                     _state.update {
@@ -151,7 +159,8 @@ class SettingsViewModel @Inject constructor (
                             nextSetTime = nextSetTime.await(),
                             animate = animate.await(),
                             enableChanger = enableChanger.await(),
-                            darkenPercentage = darkenPercentage.await(),
+                            homeDarkenPercentage = homeDarkenPercentage.await(),
+                            lockDarkenPercentage = lockDarkenPercentage.await(),
                             darken = darken.await(),
                             setHomeWallpaper = setHomeWallpaper.await(),
                             setLockWallpaper = setLockWallpaper.await(),
@@ -163,7 +172,8 @@ class SettingsViewModel @Inject constructor (
                             homeInterval = homeWallpaperInterval.await(),
                             scheduleSeparately = scheduleSeparately.await(),
                             blur = blur.await(),
-                            blurPercentage = blurPercentage.await(),
+                            homeBlurPercentage = homeBlurPercentage.await(),
+                            lockBlurPercentage = lockBlurPercentage.await(),
                             nextHomeWallpaper = nextHomeWallpaper.await(),
                             nextLockWallpaper = nextLockWallpaper.await()
                         )
@@ -340,17 +350,6 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
-            is SettingsEvent.SetDarkenPercentage -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putInt(SettingsConstants.DARKEN_PERCENTAGE, event.darkenPercentage)
-                    _state.update {
-                        it.copy(
-                            darkenPercentage = event.darkenPercentage
-                        )
-                    }
-                }
-            }
-
             is SettingsEvent.SetDarken -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.DARKEN, event.darken)
@@ -395,12 +394,35 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
-            is SettingsEvent.SetBlurPercentage -> {
+            is SettingsEvent.SetDarkenPercentage -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putInt(SettingsConstants.BLUR_PERCENTAGE, event.blurPercentage)
+                    if (event.lockDarkenPercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE, event.lockDarkenPercentage)
+                    }
+                    if (event.homeDarkenPercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.HOME_DARKEN_PERCENTAGE, event.homeDarkenPercentage)
+                    }
                     _state.update {
                         it.copy(
-                            blurPercentage = event.blurPercentage
+                            homeDarkenPercentage = event.homeDarkenPercentage ?: it.homeDarkenPercentage,
+                            lockDarkenPercentage = event.lockDarkenPercentage ?: it.lockDarkenPercentage
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetBlurPercentage -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.lockBlurPercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.LOCK_BLUR_PERCENTAGE, event.lockBlurPercentage)
+                    }
+                    if (event.homeBlurPercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.HOME_BLUR_PERCENTAGE, event.homeBlurPercentage)
+                    }
+                    _state.update {
+                        it.copy(
+                            homeBlurPercentage = event.homeBlurPercentage ?: it.homeBlurPercentage,
+                            lockBlurPercentage = event.lockBlurPercentage ?: it.lockBlurPercentage
                         )
                     }
                 }
@@ -618,7 +640,8 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ANIMATE_TYPE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_CHANGER)
-                    settingsDataStoreImpl.deleteInt(SettingsConstants.DARKEN_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_DARKEN_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARKEN)
                     settingsDataStoreImpl.deleteString(SettingsConstants.WALLPAPER_SCALING)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER)
@@ -631,7 +654,8 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.SCHEDULE_SEPARATELY)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.BLUR)
-                    settingsDataStoreImpl.deleteInt(SettingsConstants.BLUR_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_BLUR_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_BLUR_PERCENTAGE)
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.FIRST_SET)
                     settingsDataStoreImpl.deleteString(SettingsConstants.HOME_NEXT_SET_TIME)
                     settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_NEXT_SET_TIME)
@@ -648,7 +672,10 @@ class SettingsViewModel @Inject constructor (
                             nextSetTime = null,
                             animate = true,
                             enableChanger = false,
-                            darkenPercentage = 100,
+                            homeDarkenPercentage = 100,
+                            lockDarkenPercentage = 100,
+                            homeBlurPercentage = 0,
+                            lockBlurPercentage = 0,
                             darken = false,
                             wallpaperScaling = ScalingConstants.FILL,
                             setHomeWallpaper = false,
@@ -661,7 +688,6 @@ class SettingsViewModel @Inject constructor (
                             lockAlbumName = null,
                             scheduleSeparately = false,
                             blur = false,
-                            blurPercentage = 0,
                             nextHomeWallpaper = null,
                             nextLockWallpaper = null
                         )
