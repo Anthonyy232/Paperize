@@ -8,10 +8,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
@@ -25,12 +22,11 @@ import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.core.blurBitmap
-import com.anthonyla.paperize.core.calculateInSampleSize
 import com.anthonyla.paperize.core.darkenBitmap
 import com.anthonyla.paperize.core.fillBitmap
 import com.anthonyla.paperize.core.fitBitmap
-import com.anthonyla.paperize.core.getImageDimensions
 import com.anthonyla.paperize.core.getWallpaperFromFolder
+import com.anthonyla.paperize.core.retrieveBitmap
 import com.anthonyla.paperize.core.stretchBitmap
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
@@ -234,7 +230,7 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = lockBlurPercentage
                                 )
-                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -266,7 +262,7 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = lockBlurPercentage
                             )
-                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -312,7 +308,7 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = lockBlurPercentage
                             )
-                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
                             }
@@ -341,8 +337,8 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = homeBlurPercentage
                                 )
-                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
-                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else "")
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
+                                settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -375,8 +371,8 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = homeBlurPercentage
                             )
-                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
-                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
+                            settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
@@ -483,35 +479,8 @@ class LockWallpaperService: Service() {
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
-            val imageSize = wallpaper.getImageDimensions(context) ?: return false
             val device = context.resources.displayMetrics
-            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                try {
-                    val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
-                    ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                        decoder.setTargetSampleSize(calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels))
-                        decoder.isMutableRequired = true
-                    }
-                } catch (e: Exception) {
-                    context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
-                        val options = BitmapFactory.Options().apply {
-                            inSampleSize = calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
-                            inMutable = true
-                        }
-                        BitmapFactory.decodeStream(inputStream, null, options)
-                    }
-                }
-            }
-            else {
-                context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
-                    val options = BitmapFactory.Options().apply {
-                        inSampleSize = calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
-                        inMutable = true
-                    }
-                    BitmapFactory.decodeStream(inputStream, null, options)
-                }
-            }
-
+            val bitmap = retrieveBitmap(context, wallpaper, device)
             if (bitmap == null) return false
             else {
                 processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent)?.let { image ->

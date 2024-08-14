@@ -135,7 +135,7 @@ fun BlurSwitchAndSlider(
                         )
                         if (bothEnabled) {
                             Text(
-                                text = stringResource(R.string.lock_screen) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
+                                text = stringResource(R.string.lock) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
                                 modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
                                 fontWeight = FontWeight.W400
                             )
@@ -198,7 +198,7 @@ fun BlurSwitchAndSlider(
                         )
                         if (bothEnabled) {
                             Text(
-                                text = stringResource(R.string.lock_screen) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
+                                text = stringResource(R.string.lock) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
                                 modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
                                 fontWeight = FontWeight.W400
                             )

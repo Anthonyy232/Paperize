@@ -6,8 +6,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.ImageDecoder
 import android.graphics.Paint
 import android.net.Uri
+import android.os.Build
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
 import androidx.compose.ui.util.fastRoundToInt
@@ -60,6 +63,50 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
         return if (heightRatio < widthRatio) { heightRatio } else { widthRatio }
     }
     else { return 1 }
+}
+
+/**
+ * Retrieve a bitmap from a URI that is scaled down to the device's screen size
+ */
+fun retrieveBitmap(
+    context: Context,
+    wallpaper: Uri,
+    device: DisplayMetrics
+): Bitmap? {
+    val imageSize = wallpaper.getImageDimensions(context) ?: return null
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        try {
+            val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
+            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.setTargetSampleSize(
+                    calculateInSampleSize(
+                        imageSize,
+                        device.widthPixels,
+                        device.heightPixels
+                    )
+                )
+                decoder.isMutableRequired = true
+            }
+        } catch (e: Exception) {
+            context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inSampleSize =
+                        calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
+                    inMutable = true
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
+            }
+        }
+    } else {
+        context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
+            val options = BitmapFactory.Options().apply {
+                inSampleSize =
+                    calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
+                inMutable = true
+            }
+            BitmapFactory.decodeStream(inputStream, null, options)
+        }
+    }
 }
 
 /**

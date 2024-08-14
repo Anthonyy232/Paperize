@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.ScalingConstants
@@ -93,7 +92,6 @@ class SettingsViewModel @Inject constructor (
                 )
             }
             setKeepOnScreenCondition = false
-            Log.d("PaperizeWallpaperChanger", "home blur ${homeBlurPercentage.await()} lock blur ${lockBlurPercentage.await()}")
         }
     }
 
