@@ -335,3 +335,42 @@ fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
     }
     return (brightness / (pixels.size / pixelSpacing)).toInt()
 }
+
+/**
+ * Darkens the bitmap by the given percentage and returns it
+ * 0 - lightest, 100 - darkest
+ */
+fun processBitmap(
+    device: DisplayMetrics,
+    source: Bitmap,
+    darken: Boolean,
+    darkenPercent: Int,
+    scaling: ScalingConstants,
+    blur: Boolean,
+    blurPercent: Int
+): Bitmap? {
+    try {
+        var processedBitmap = source
+
+        // Apply wallpaper scaling effects
+        processedBitmap = when (scaling) {
+            ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+            ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+            ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+        }
+
+        // Apply brightness effect
+        if (darken && darkenPercent < 100) {
+            processedBitmap = darkenBitmap(processedBitmap, darkenPercent)
+        }
+
+        // Apply blur effect
+        if (blur && blurPercent > 0) {
+            processedBitmap = blurBitmap(processedBitmap, blurPercent)
+        }
+        return processedBitmap
+    } catch (e: Exception) {
+        Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)
+        return null
+    }
+}

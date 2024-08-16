@@ -7,12 +7,10 @@ import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
-import android.util.DisplayMetrics
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
@@ -21,13 +19,9 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
-import com.anthonyla.paperize.core.blurBitmap
-import com.anthonyla.paperize.core.darkenBitmap
-import com.anthonyla.paperize.core.fillBitmap
-import com.anthonyla.paperize.core.fitBitmap
 import com.anthonyla.paperize.core.getWallpaperFromFolder
+import com.anthonyla.paperize.core.processBitmap
 import com.anthonyla.paperize.core.retrieveBitmap
-import com.anthonyla.paperize.core.stretchBitmap
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
@@ -494,45 +488,6 @@ class LockWallpaperService: Service() {
         } catch (e: IOException) {
             Log.e("PaperizeWallpaperChanger", "Error setting wallpaper", e)
             return false
-        }
-    }
-
-    /**
-     * Darkens the bitmap by the given percentage and returns it
-     * 0 - lightest, 100 - darkest
-     */
-    private fun processBitmap(
-        device: DisplayMetrics,
-        source: Bitmap,
-        darken: Boolean,
-        darkenPercent: Int,
-        scaling: ScalingConstants,
-        blur: Boolean,
-        blurPercent: Int
-    ): Bitmap? {
-        try {
-            var processedBitmap = source
-
-            // Apply wallpaper scaling effects
-            processedBitmap = when (scaling) {
-                ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-                ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-                ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-            }
-
-            // Apply brightness effect
-            if (darken && darkenPercent < 100) {
-                processedBitmap = darkenBitmap(processedBitmap, darkenPercent)
-            }
-
-            // Apply blur effect
-            if (blur && blurPercent > 0) {
-                processedBitmap = blurBitmap(processedBitmap, blurPercent)
-            }
-            return processedBitmap
-        } catch (e: Exception) {
-            Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)
-            return null
         }
     }
 
