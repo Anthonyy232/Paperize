@@ -205,11 +205,9 @@ class LockWallpaperService: Service() {
                     setHome && setLock && scheduleSeparately -> {
                         var wallpaper = lockAlbum.album.lockWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
-                            // Reshuffle the wallpapers and pick the first one
                             val newWallpapers = lockAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
                             wallpaper = newWallpapers.firstOrNull()
                             if (wallpaper == null) {
-                                // Delete invalid album if no valid wallpaper
                                 selectedRepository.cascadeDeleteAlbum(lockAlbum.album.initialAlbumName)
                                 onDestroy()
                                 return
@@ -312,11 +310,9 @@ class LockWallpaperService: Service() {
                     setLock -> {
                         var wallpaper = lockAlbum.album.lockWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
-                            // Reshuffle the wallpapers and pick the first one
                             val newWallpapers = lockAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
                             wallpaper = newWallpapers.firstOrNull()
                             if (wallpaper == null) {
-                                // Delete invalid album if no valid wallpaper
                                 selectedRepository.cascadeDeleteAlbum(lockAlbum.album.initialAlbumName)
                                 onDestroy()
                                 return

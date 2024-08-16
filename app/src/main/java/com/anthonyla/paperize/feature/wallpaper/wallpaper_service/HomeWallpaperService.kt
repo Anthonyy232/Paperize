@@ -205,11 +205,9 @@ class HomeWallpaperService: Service() {
                     setHome && setLock && scheduleSeparately -> {
                         var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
-                            // Reshuffle the wallpapers and pick the first one
                             val newWallpapers = homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
                             wallpaper = newWallpapers.firstOrNull()
                             if (wallpaper == null) {
-                                // Delete invalid album if no valid wallpaper
                                 selectedRepository.cascadeDeleteAlbum(homeAlbum.album.initialAlbumName)
                                 onDestroy()
                                 return
@@ -289,11 +287,9 @@ class HomeWallpaperService: Service() {
                     setHome && setLock && !scheduleSeparately -> {
                         var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
-                            // Reshuffle the wallpapers and pick the first one
                             val newWallpapers = homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
                             wallpaper = newWallpapers.firstOrNull()
                             if (wallpaper == null) {
-                                // Delete invalid album if no valid wallpaper
                                 selectedRepository.cascadeDeleteAlbum(homeAlbum.album.initialAlbumName)
                                 onDestroy()
                                 return
@@ -381,11 +377,9 @@ class HomeWallpaperService: Service() {
                     setHome -> {
                         var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                         if (wallpaper == null) {
-                            // Reshuffle the wallpapers and pick the first one
                             val newWallpapers = homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
                             wallpaper = newWallpapers.firstOrNull()
                             if (wallpaper == null) {
-                                // Delete invalid album if no valid wallpaper
                                 selectedRepository.cascadeDeleteAlbum(homeAlbum.album.initialAlbumName)
                                 onDestroy()
                                 return
