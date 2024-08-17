@@ -160,4 +160,7 @@
   <string name="change_next_short">وال پیپر تبدیل کریں۔</string>
   <string name="change_next_long">البم میں اگلے وال پیپر میں تبدیل کریں۔</string>
   <string name="cannot_change_wallpaper">وال پیپر تبدیل نہیں کیا جا سکتا</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>

@@ -156,4 +156,7 @@
   <string name="change_next_short">Ganti wallpaper</string>
   <string name="change_next_long">Ganti wallpaper sabanjure ing album kasebut</string>
   <string name="cannot_change_wallpaper">Ora bisa ngganti wallpaper</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>

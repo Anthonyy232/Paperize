@@ -160,4 +160,7 @@
   <string name="change_next_short">Canvia el fons de pantalla</string>
   <string name="change_next_long">Canvia al fons de pantalla següent de l\'àlbum</string>
   <string name="cannot_change_wallpaper">No es pot canviar el fons de pantalla</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>

@@ -160,4 +160,7 @@
   <string name="change_next_short">Skift tapet</string>
   <string name="change_next_long">Skift til det næste tapet i albummet</string>
   <string name="cannot_change_wallpaper">Kan ikke ændre tapet</string>
+  <string name="enable_wallpaper_changer">Aktivér Tapet Skifter</string>
+  <string name="unselected_album">Fravalgte album</string>
+  <string name="lock">Lås</string>
 </resources>

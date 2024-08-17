@@ -156,4 +156,7 @@
   <string name="change_next_short">更换壁纸</string>
   <string name="change_next_long">切换到相册中的下一张壁纸</string>
   <string name="cannot_change_wallpaper">无法更改壁纸</string>
+  <string name="enable_wallpaper_changer">启用壁纸更改</string>
+  <string name="unselected_album">未选中的相册</string>
+  <string name="lock">锁定</string>
 </resources>

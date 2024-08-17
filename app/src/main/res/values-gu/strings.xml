@@ -160,4 +160,7 @@
   <string name="change_next_short">વૉલપેપર બદલો</string>
   <string name="change_next_long">આલ્બમમાં આગલા વૉલપેપર પર બદલો</string>
   <string name="cannot_change_wallpaper">વૉલપેપર બદલી શકાતું નથી</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>

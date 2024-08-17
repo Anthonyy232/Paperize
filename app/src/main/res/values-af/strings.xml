@@ -160,4 +160,7 @@
   <string name="change_next_short">Verander plakpapier</string>
   <string name="change_next_long">Verander na die volgende muurpapier in die album</string>
   <string name="cannot_change_wallpaper">Kan nie muurpapier verander nie</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>
