@@ -14,19 +14,19 @@
 - **Supports Various Image Types**: Paperize can handle a wide range of image types
   - Including: JPEG, PNG, AVIF, WEBP
 - **Folder Support**: Organize your wallpapers into folders for auto-updating
-- **Home and Lock Screen Wallpaper**: Choose to change either your home screen, lock screen, or both
+- **Home and Lock Screen Wallpaper**: Choose the same or separate albums for your home screen and lock screen
+- **Wallpaper effects**: Change the brightness and the blur of your wallpaper
 - **On-Device Storage**: All your wallpapers and settings are stored on your device
 <div align="center">
     <br/>
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/57122f72-78f8-45ed-a9ac-de943061d6a2" width="30%" alt="onboarding" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/9f41d715-7b14-4ff2-9c30-87ad3d86d94c" width="30%" alt="wallpaper" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/47aa95c3-ef80-4c3c-a8cd-a51ac6824507" width="30%" alt="interval" />
+      <img src="https://github.com/user-attachments/assets/f054e7f1-d67f-4500-a547-64bccd986bbd" width="30%" alt="wallpaper" />
+      <img src="https://github.com/user-attachments/assets/cdf0d989-ae11-44ba-b33c-4aeec6b6116e" width="30%" alt="interval" />
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/4ce1b28d-f4b2-4048-a261-203156222263" width="30%" alt="album" />
-      <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/66b092e5-4af4-4396-b145-63ee506d9257" width="30%" alt="settings" />
+      <img src="https://github.com/user-attachments/assets/d23f290d-bb2c-4b89-9321-b426e45864f9" width="30%" alt="settings" />
     <br/>
     <br/>
-    <div><video controls src="https://github.com/Anthonyy232/Paperize/assets/60626873/015afb04-e3f3-4641-b8f9-707cfa26d16f" muted="true"></video></div>
-</div>
+    <div><video controls src="https://github.com/user-attachments/assets/4940d296-cff5-4117-b19e-84e643aa06a1" muted="true"></video></div>
 
 ## Download
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
