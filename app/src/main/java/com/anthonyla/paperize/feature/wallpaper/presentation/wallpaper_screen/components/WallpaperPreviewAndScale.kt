@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,7 +32,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 
 /**
  * SetLockScreenSwitch is a composable that displays a switch to set the wallpaper as the lock screen wallpaper
@@ -43,15 +41,16 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.Wa
 fun WallpaperPreviewAndScale(
     currentHomeWallpaper: String?,
     currentLockWallpaper: String?,
-    animate: Boolean,
     darken: Boolean,
-    darkenPercentage: Int,
+    homeDarkenPercentage: Int,
+    lockDarkenPercentage: Int,
     homeEnabled: Boolean,
     lockEnabled: Boolean,
     scaling: ScalingConstants,
     onScalingChange: (ScalingConstants) -> Unit,
     blur: Boolean,
-    blurPercentage: Int,
+    homeBlurPercentage: Int,
+    lockBlurPercentage: Int,
 ) {
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
@@ -97,28 +96,13 @@ fun WallpaperPreviewAndScale(
                     ) {
                         Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
                         if (currentLockWallpaper != null) {
-                            WallpaperItem(
+                            PreviewItem(
                                 wallpaperUri = currentLockWallpaper,
-                                itemSelected = false,
-                                selectionMode = false,
-                                onActivateSelectionMode = {},
-                                onItemSelection = {},
-                                onWallpaperViewClick = {},
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .border(
-                                        3.dp,
-                                        color = Color.Black,
-                                        shape = RoundedCornerShape(16.dp)
-                                    ),
-                                aspectRatio = 9f / 19.5f,
-                                clickable = false,
-                                animate = animate,
                                 darken = darken,
-                                darkenPercentage = darkenPercentage,
+                                darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = blurPercentage
+                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -131,28 +115,13 @@ fun WallpaperPreviewAndScale(
                     ) {
                         Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
                         if (currentHomeWallpaper != null) {
-                            WallpaperItem(
+                            PreviewItem(
                                 wallpaperUri = currentHomeWallpaper,
-                                itemSelected = false,
-                                selectionMode = false,
-                                onActivateSelectionMode = {},
-                                onItemSelection = {},
-                                onWallpaperViewClick = {},
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .border(
-                                        3.dp,
-                                        color = Color.Black,
-                                        shape = RoundedCornerShape(16.dp)
-                                    ),
-                                aspectRatio = 9f / 19.5f,
-                                clickable = false,
-                                animate = animate,
                                 darken = darken,
-                                darkenPercentage = darkenPercentage,
+                                darkenPercentage = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = blurPercentage
+                                blurPercentage = homeBlurPercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -192,7 +161,7 @@ fun WallpaperPreviewAndScale(
                                 },
                                 contentDescription = null,
                                 tint = Color.Unspecified,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier.size(32.dp)
                             )
                             Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis )
                         }

@@ -26,9 +26,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.Al
 fun LibraryScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
     onAddNewAlbumClick: () -> Unit,
-    onViewAlbum: (String) -> Unit,
-    animate: Boolean
-    ) {
+    onViewAlbum: (String) -> Unit
+) {
     val lazyListState = rememberLazyGridState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -49,7 +48,7 @@ fun LibraryScreen(
             LazyVerticalGrid(
                 state = lazyListState,
                 modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(150.dp),
                 contentPadding = PaddingValues(4.dp, 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 content = {
@@ -59,7 +58,6 @@ fun LibraryScreen(
                             album = album.album,
                             onAlbumViewClick = { onViewAlbum(album.album.initialAlbumName) },
                             modifier = Modifier.padding(4.dp),
-                            animate = animate
                         )
                     }
                 }

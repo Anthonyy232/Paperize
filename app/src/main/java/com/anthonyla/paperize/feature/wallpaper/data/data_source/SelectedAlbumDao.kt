@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
@@ -31,13 +30,13 @@ interface SelectedAlbumDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>)
 
-    @Delete
-    suspend fun deleteAlbum(album: Album)
+    @Query("DELETE FROM album WHERE initialAlbumName = :initialAlbumName")
+    suspend fun deleteAlbum(initialAlbumName: String)
 
     @Delete
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
-    @Query("DELETE FROM wallpaper WHERE initialAlbumName=:initialAlbumName")
+    @Query("DELETE FROM wallpaper WHERE initialAlbumName = :initialAlbumName")
     suspend fun cascadeDeleteWallpaper(initialAlbumName: String)
 
     @Query("DELETE FROM album")
@@ -46,12 +45,15 @@ interface SelectedAlbumDao {
     @Query("DELETE FROM wallpaper")
     suspend fun deleteAllWallpapers()
 
-    @Update
-    suspend fun updateAlbum(album: Album)
-
     @Transaction
     suspend fun deleteAll() {
         deleteAllAlbums()
         deleteAllWallpapers()
+    }
+
+    @Transaction
+    suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum) {
+        upsertAlbum(selectedAlbum.album)
+        upsertWallpaperList(selectedAlbum.wallpapers)
     }
 }

@@ -156,4 +156,7 @@
   <string name="change_next_short">壁紙を変更する</string>
   <string name="change_next_long">アルバム内の次の壁紙に変更する</string>
   <string name="cannot_change_wallpaper">壁紙を変更できません</string>
+  <string name="enable_wallpaper_changer">壁紙変更を有効にする</string>
+  <string name="unselected_album">選択されていないアルバム</string>
+  <string name="lock">ロック</string>
 </resources>

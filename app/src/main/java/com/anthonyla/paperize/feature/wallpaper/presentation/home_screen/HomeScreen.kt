@@ -35,37 +35,41 @@ fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
     animate : Boolean,
     darken: Boolean,
-    darkenPercentage: Int,
+    homeDarkenPercentage: Int,
+    lockDarkenPercentage: Int,
     enableChanger: Boolean,
     homeEnabled : Boolean,
-    interval1: Int,
-    interval2: Int,
+    homeInterval: Int,
+    lockInterval: Int,
     lastSetTime: String?,
     lockEnabled : Boolean,
     navigateToAddWallpaperScreen: (String) -> Unit,
     nextSetTime: String?,
-    onAlbumViewClick: (String) -> Unit,
+    onViewAlbum: (String) -> Unit,
     onDarkCheck: (Boolean) -> Unit,
-    onDarkenPercentage: (Int) -> Unit,
+    onDarkenPercentage: (Int, Int) -> Unit,
     onHomeCheckedChange: (Boolean) -> Unit,
     onLockCheckedChange: (Boolean) -> Unit,
     onScalingChange: (ScalingConstants) -> Unit,
-    onScheduleWallpaperChanger1: (Int) -> Unit,
-    onScheduleWallpaperChanger2: (Int) -> Unit,
-    onSelectAlbum: (AlbumWithWallpaperAndFolder) -> Unit,
+    onScheduleWallpaperChanger: () -> Unit,
+    onSelectAlbum: (AlbumWithWallpaperAndFolder, Boolean, Boolean) -> Unit,
     onScheduleSeparatelyChange: (Boolean) -> Unit,
-    onTimeChange1: (Int) -> Unit,
-    onTimeChange2: (Int) -> Unit,
+    onHomeTimeChange: (Int) -> Unit,
+    onLockTimeChange: (Int) -> Unit,
     onSettingsClick: () -> Unit,
-    onStop: () -> Unit,
+    onStop: (Boolean, Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
     scaling: ScalingConstants,
-    selectedAlbum: SelectedAlbum?,
     scheduleSeparately: Boolean,
     blur: Boolean,
-    onBlurPercentageChange: (Int) -> Unit,
+    onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    blurPercentage: Int,
+    homeBlurPercentage: Int,
+    lockBlurPercentage: Int,
+    currentHomeWallpaper: String?,
+    currentLockWallpaper: String?,
+    homeSelectedAlbum: SelectedAlbum?,
+    lockSelectedAlbum: SelectedAlbum?,
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -117,9 +121,7 @@ fun HomeScreen(
                         text = { Text(text = item.title) },
                         icon = {
                             Icon(
-                                imageVector =
-                                if (index == tabIndex) item.filledIcon
-                                else item.unfilledIcon,
+                                imageVector = if (index == tabIndex) item.filledIcon else item.unfilledIcon,
                                 contentDescription = item.title
                             )
                         }
@@ -130,16 +132,17 @@ fun HomeScreen(
                 state = pagerState,
                 beyondViewportPageCount = 1
             ) { index ->
-                when(index.coerceIn(tabItems.indices)) {
+                when (index.coerceIn(tabItems.indices)) {
                     0 -> WallpaperScreen(
                         albums = albums,
                         animate = animate,
                         darken = darken,
-                        darkenPercentage = darkenPercentage,
+                        homeDarkenPercentage = homeDarkenPercentage,
+                        lockDarkenPercentage = lockDarkenPercentage,
                         enableChanger = enableChanger,
                         homeEnabled = homeEnabled,
-                        interval1 = interval1,
-                        interval2 = interval2,
+                        homeInterval = homeInterval,
+                        lockInterval = lockInterval,
                         lastSetTime = lastSetTime,
                         lockEnabled = lockEnabled,
                         nextSetTime = nextSetTime,
@@ -149,26 +152,28 @@ fun HomeScreen(
                         onLockCheckedChange = onLockCheckedChange,
                         scheduleSeparately = scheduleSeparately,
                         onScheduleSeparatelyChange = onScheduleSeparatelyChange,
-                        onScheduleWallpaperChanger1 = onScheduleWallpaperChanger1,
-                        onScheduleWallpaperChanger2 = onScheduleWallpaperChanger2,
+                        onScheduleWallpaperChanger = onScheduleWallpaperChanger,
                         onScalingChange = onScalingChange,
                         onSelectAlbum = onSelectAlbum,
-                        onTimeChange1 = onTimeChange1,
-                        onTimeChange2 = onTimeChange2,
+                        onHomeTimeChange = onHomeTimeChange,
+                        onLockTimeChange = onLockTimeChange,
                         onStop = onStop,
                         onToggleChanger = onToggleChanger,
                         scaling = scaling,
-                        selectedAlbum = selectedAlbum,
+                        homeSelectedAlbum = homeSelectedAlbum,
+                        lockSelectedAlbum = lockSelectedAlbum,
                         blur = blur,
                         onBlurPercentageChange = onBlurPercentageChange,
                         onBlurChange = onBlurChange,
-                        blurPercentage = blurPercentage
+                        homeBlurPercentage = homeBlurPercentage,
+                        lockBlurPercentage = lockBlurPercentage,
+                        currentHomeWallpaper = currentHomeWallpaper,
+                        currentLockWallpaper = currentLockWallpaper
                     )
                     else -> LibraryScreen(
                         albums = albums,
                         onAddNewAlbumClick = { addAlbumDialog = true },
-                        onViewAlbum = onAlbumViewClick,
-                        animate = animate
+                        onViewAlbum = onViewAlbum,
                     )
                 }
             }

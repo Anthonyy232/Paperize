@@ -176,4 +176,7 @@
   <string name="change_next_short">تغيير ورق الجدران</string>
   <string name="change_next_long">التغيير إلى خلفية الشاشة التالية في الألبوم</string>
   <string name="cannot_change_wallpaper">لا يمكن تغيير ورق الحائط</string>
+  <string name="enable_wallpaper_changer">تمكين محول الخلفية</string>
+  <string name="unselected_album">ألبوم غير محدد</string>
+  <string name="lock">قفل</string>
 </resources>

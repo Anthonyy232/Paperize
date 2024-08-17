@@ -160,4 +160,7 @@
   <string name="change_next_short">Αλλαγή ταπετσαρίας</string>
   <string name="change_next_long">Αλλαγή στην επόμενη ταπετσαρία του άλμπουμ</string>
   <string name="cannot_change_wallpaper">Δεν είναι δυνατή η αλλαγή της ταπετσαρίας</string>
+  <string name="enable_wallpaper_changer">Ενεργοποίηση Εναλλαγής Ταπετσαρίας</string>
+  <string name="unselected_album">Μη επιλεγμένο άλμπουμ</string>
+  <string name="lock">Κλείδωμα</string>
 </resources>

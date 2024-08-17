@@ -19,8 +19,8 @@ android {
         applicationId = "com.anthonyla.paperize"
         minSdk = 26
         targetSdk = 35
-        versionCode = 29
-        versionName = "1.6.4"
+        versionCode = 30
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -111,6 +111,8 @@ dependencies {
     implementation("com.mikepenz:aboutlibraries-core:11.2.2")
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.2")
     implementation("androidx.compose.foundation:foundation:1.7.0-beta07")
+    implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
+    implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

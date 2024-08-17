@@ -18,10 +18,10 @@ interface WallpaperAlarmScheduler {
     /**
      * Update the wallpaper without changing the alarm
      */
-    fun updateWallpaper(scheduleSeparately: Boolean)
+    fun updateWallpaper(scheduleSeparately: Boolean, setHome: Boolean, setLock: Boolean)
 
     /**
      * Cancel all wallpaper alarms
      */
-    fun cancelWallpaperAlarm()
+    fun cancelWallpaperAlarm(cancelLock: Boolean = true, cancelHome: Boolean = true)
 }

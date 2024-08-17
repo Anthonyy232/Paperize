@@ -6,15 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.anthonyla.paperize.core.Type
-import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService1
-import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.WallpaperService2
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
  * This class is responsible for scheduling wallpaper alarms.
- * It uses the AlarmManager to schedule alarms for the WallpaperReceiver.
- * It also uses the WallpaperService to change the wallpaper due to receiver limitations.
+ * It uses the AlarmManager to schedule alarms for the [WallpaperReceiver].
+ * It also uses [HomeWallpaperService] and [LockWallpaperService] to change the wallpaper due to receiver limitations.
  */
 class WallpaperAlarmSchedulerImpl (
     private val context: Context,
@@ -25,18 +25,21 @@ class WallpaperAlarmSchedulerImpl (
      * Schedules the wallpaper alarm based on the origin and changeImmediate
      */
     override fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int?, changeImmediate: Boolean, cancelImmediate: Boolean) {
+        // Cancel previous alarms before setting new ones to prevent stale alarms
         if (cancelImmediate) cancelWallpaperAlarm()
         else {
-            when(origin) {
+            when (origin) {
                 Type.HOME.ordinal -> cancelAlarm(Type.HOME)
                 Type.LOCK.ordinal -> cancelAlarm(Type.LOCK)
                 null -> {
                     cancelAlarm(Type.HOME)
                     cancelAlarm(Type.LOCK)
-                    cancelAlarm(Type.BOTH)
+                    cancelAlarm(Type.SINGLE)
                 }
             }
         }
+
+        // Schedule new wallpaper alarm
         if (wallpaperAlarmItem.scheduleSeparately) {
             when (origin) {
                 Type.LOCK.ordinal -> {
@@ -58,8 +61,8 @@ class WallpaperAlarmSchedulerImpl (
             }
         }
         else {
-            if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.BOTH)
-            scheduleWallpaper(wallpaperAlarmItem, Type.BOTH)
+            if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.SINGLE)
+            scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE)
         }
     }
 
@@ -73,31 +76,33 @@ class WallpaperAlarmSchedulerImpl (
             scheduleWallpaper(wallpaperAlarmItem, Type.HOME, null, true)
         }
         else {
-            scheduleWallpaper(wallpaperAlarmItem, Type.BOTH, null, true)
+            scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE, null, true)
         }
     }
 
     /**
      * Update the wallpaper without scheduling alarms
      */
-    override fun updateWallpaper(scheduleSeparately: Boolean) {
+    override fun updateWallpaper(scheduleSeparately: Boolean, setHome: Boolean, setLock: Boolean) {
         if (scheduleSeparately) {
-            updateWallpaper(Type.LOCK)
-            updateWallpaper(Type.HOME)
+            updateWallpaper(Type.LOCK, setHome, setLock)
+            updateWallpaper(Type.HOME, setHome, setLock)
         }
         else {
-            updateWallpaper(Type.BOTH)
+            updateWallpaper(Type.SINGLE, setHome, setLock)
         }
     }
 
     /**
      * Cancels all active alarms
      */
-    override fun cancelWallpaperAlarm() {
-        cancelAlarm(Type.HOME)
-        cancelAlarm(Type.LOCK)
-        cancelAlarm(Type.BOTH)
-        cancelAlarm(Type.REFRESH)
+    override fun cancelWallpaperAlarm(cancelLock: Boolean, cancelHome: Boolean) {
+        if (cancelLock) cancelAlarm(Type.LOCK)
+        if (cancelHome) cancelAlarm(Type.HOME)
+        if (cancelLock && cancelHome) {
+            cancelAlarm(Type.SINGLE)
+            cancelAlarm(Type.REFRESH)
+        }
     }
 
     /**
@@ -105,15 +110,17 @@ class WallpaperAlarmSchedulerImpl (
      */
     private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, update: Boolean = false) {
         val nextTime = when (type) {
-            Type.HOME, Type.BOTH -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.timeInMinutes1.toLong())
-            Type.LOCK -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.timeInMinutes2.toLong())
-            else -> LocalDateTime.now()
+            Type.LOCK -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
+            Type.HOME -> if (wallpaperAlarmItem.scheduleSeparately) LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10) else LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
+            else -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
         }
         val intent = Intent(context, WallpaperReceiver::class.java).apply {
-            putExtra("timeInMinutes1", wallpaperAlarmItem.timeInMinutes1)
-            putExtra("timeInMinutes2", wallpaperAlarmItem.timeInMinutes2)
+            putExtra("homeInterval", wallpaperAlarmItem.homeInterval)
+            putExtra("lockInterval", wallpaperAlarmItem.lockInterval)
             putExtra("scheduleSeparately", wallpaperAlarmItem.scheduleSeparately)
             putExtra("type", type.ordinal)
+            putExtra("setHome", wallpaperAlarmItem.setHome)
+            putExtra("setLock", wallpaperAlarmItem.setLock)
             putExtra("origin", origin)
         }
 
@@ -147,22 +154,18 @@ class WallpaperAlarmSchedulerImpl (
             )
         }
         if (update) {
-            val serviceIntent = Intent().apply {
-                putExtra("timeInMinutes1", wallpaperAlarmItem.timeInMinutes1)
-                putExtra("timeInMinutes2", wallpaperAlarmItem.timeInMinutes2)
-                putExtra("scheduleSeparately", wallpaperAlarmItem.scheduleSeparately)
-                putExtra("type", type.ordinal)
-            }
-            if (type == Type.BOTH || type == Type.HOME) {
-                serviceIntent.setClass(context, WallpaperService1::class.java).apply {
-                    action = WallpaperService1.Actions.REQUEUE.toString()
+            when (type.ordinal) {
+                Type.SINGLE.ordinal -> {
+                    if (wallpaperAlarmItem.setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
+                    if (wallpaperAlarmItem.setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
                 }
-            } else {
-                serviceIntent.setClass(context, WallpaperService2::class.java).apply {
-                    action = WallpaperService2.Actions.REQUEUE.toString()
+                Type.HOME.ordinal -> {
+                    startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.HOME.ordinal)
+                }
+                Type.LOCK.ordinal -> {
+                    startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.LOCK.ordinal)
                 }
             }
-            context.startService(serviceIntent)
         }
     }
 
@@ -210,39 +213,36 @@ class WallpaperAlarmSchedulerImpl (
      * Use the service to change the wallpaper
      */
     private fun changeWallpaperImmediate(wallpaperAlarmItem: WallpaperAlarmItem, type: Type) {
-        val serviceIntent = Intent().apply {
-            putExtra("timeInMinutes1", wallpaperAlarmItem.timeInMinutes1)
-            putExtra("timeInMinutes2", wallpaperAlarmItem.timeInMinutes2)
-            putExtra("scheduleSeparately", wallpaperAlarmItem.scheduleSeparately)
-            putExtra("type", type.ordinal)
-        }
-        if (type == Type.BOTH || type == Type.HOME) {
-            serviceIntent.setClass(context, WallpaperService1::class.java).apply {
-                action = WallpaperService1.Actions.START.toString()
+        when (type.ordinal) {
+            Type.SINGLE.ordinal -> {
+                if (wallpaperAlarmItem.setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
+                if (wallpaperAlarmItem.setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
             }
-        } else {
-            serviceIntent.setClass(context, WallpaperService2::class.java).apply {
-                action = WallpaperService2.Actions.START.toString()
+            Type.LOCK.ordinal -> {
+                startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.LOCK.ordinal)
+            }
+            Type.HOME.ordinal -> {
+                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.START.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.HOME.ordinal)
             }
         }
-        context.startService(serviceIntent)
     }
 
     /**
      * Updates the wallpaper without changing the alarm
      */
-    private fun updateWallpaper(type: Type) {
-        val serviceIntent = Intent()
-        if (type == Type.BOTH || type == Type.HOME) {
-            serviceIntent.setClass(context, WallpaperService1::class.java).apply {
-                action = WallpaperService1.Actions.UPDATE.toString()
+    private fun updateWallpaper(type: Type, setHome: Boolean, setLock: Boolean) {
+        when (type.ordinal) {
+            Type.SINGLE.ordinal -> {
+                if (setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.UPDATE.toString())
+                if (setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.UPDATE.toString())
             }
-        } else {
-            serviceIntent.setClass(context, WallpaperService2::class.java).apply {
-                action = WallpaperService2.Actions.UPDATE.toString()
+            Type.LOCK.ordinal -> {
+                startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.UPDATE.toString())
+            }
+            Type.HOME.ordinal -> {
+                startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.UPDATE.toString())
             }
         }
-        context.startService(serviceIntent)
     }
 
     /**
@@ -256,5 +256,19 @@ class WallpaperAlarmSchedulerImpl (
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
         alarmManager.cancel(pendingIntent)
+    }
+
+    /**
+     * Starts the service to change the wallpaper
+     */
+    private fun startService(context: Context, serviceClass: Class<*>, action: String, homeInterval: Int? = null, lockInterval: Int? = null, scheduleSeparately: Boolean? = null, type: Int? = null) {
+        val serviceIntent = Intent(context, serviceClass).apply {
+            this.action = action
+            homeInterval?.let { putExtra("homeInterval", it) }
+            lockInterval?.let { putExtra("lockInterval", it) }
+            scheduleSeparately?.let { putExtra("scheduleSeparately", it) }
+            type?.let { putExtra("type", it) }
+        }
+        context.startService(serviceIntent)
     }
 }

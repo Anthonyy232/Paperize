@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
-import android.content.Context
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -10,10 +9,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
@@ -61,7 +60,6 @@ fun FolderItem(
     onItemSelection: () -> Unit,
     onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier,
-    animate: Boolean = true
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -75,16 +73,6 @@ fun FolderItem(
         if (selected) 24.dp else 16.dp
     }
 
-    fun isValidUri(context: Context, uriString: String?): Boolean {
-        val uri = uriString?.toUri()
-        return try {
-            uri?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                inputStream?.close()
-            }
-            true
-        } catch (e: Exception) { false }
-    }
     val showCoverUri by remember { mutableStateOf(folder.coverUri != null && isValidUri(context, folder.coverUri)) }
 
     Card(
@@ -109,31 +97,25 @@ fun FolderItem(
                     }
                 }
             ),
-        shape = RoundedCornerShape(roundedCornerShapeTransition),
     ) {
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box {
+            Box (
+                modifier = Modifier.fillMaxHeight(0.8f)
+            ) {
                 if (showCoverUri) {
                     GlideImage(
                         imageModel = { folder.coverUri?.toUri() },
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
-                            requestSize = IntSize(250, 250),
+                            requestSize = IntSize(300, 300),
                         ),
-                        loading = {
-                            if (animate) {
-                                Box(modifier = Modifier.matchParentSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
-                            }
-                        },
                         modifier = Modifier
-                            .aspectRatio(0.8f)
-                            .clip(RoundedCornerShape(roundedCornerShapeTransition))
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
                     )
                 }
                 if (selectionMode) {
@@ -142,7 +124,7 @@ fun FolderItem(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = stringResource(R.string.image_is_selected),
                             modifier = Modifier
-                                .padding(4.dp)
+                                .padding(9.dp)
                                 .border(2.dp, iconSelectionColor, CircleShape)
                                 .clip(CircleShape)
                                 .background(iconSelectionColor)
@@ -157,27 +139,30 @@ fun FolderItem(
                     }
                 }
             }
-            Spacer(modifier = Modifier.padding(6.dp))
-            folder.folderName?.let { name ->
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.Start)
+                    .fillMaxHeight()
+                    .wrapContentHeight(Alignment.CenterVertically),
+            ) {
+                folder.folderName?.let { name ->
+                    Text(
+                        text = name,
+                        modifier = Modifier,
+                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
                 Text(
-                    text = name,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .align(Alignment.Start),
-                    fontSize = 16.sp,
+                    text = folder.wallpapers.size.toString().plus(" " + stringResource(R.string.wallpapers)),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
                     style = MaterialTheme.typography.titleSmall
                 )
             }
-            Text(
-                text = folder.wallpapers.size.toString().plus(" " + stringResource(R.string.wallpapers)),
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(Alignment.Start),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.tertiary,
-                style = MaterialTheme.typography.titleSmall
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }

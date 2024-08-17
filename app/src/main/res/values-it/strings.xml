@@ -160,4 +160,7 @@
   <string name="change_next_short">Cambia sfondo</string>
   <string name="change_next_long">Passa allo sfondo successivo nell\'album</string>
   <string name="cannot_change_wallpaper">Impossibile cambiare lo sfondo</string>
+  <string name="enable_wallpaper_changer">Abilita Cambio Sfondo</string>
+  <string name="unselected_album">Album deselezionato</string>
+  <string name="lock">Blocca</string>
 </resources>

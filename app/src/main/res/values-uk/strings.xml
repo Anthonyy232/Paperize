@@ -168,4 +168,7 @@
   <string name="change_next_short">Змінити шпалери</string>
   <string name="change_next_long">Змінити на наступні шпалери в альбомі</string>
   <string name="cannot_change_wallpaper">Неможливо змінити шпалери</string>
+  <string name="enable_wallpaper_changer">Увімкнути зміну шпалер</string>
+  <string name="unselected_album">Видалити альбом</string>
+  <string name="lock">Зачинити</string>
 </resources>

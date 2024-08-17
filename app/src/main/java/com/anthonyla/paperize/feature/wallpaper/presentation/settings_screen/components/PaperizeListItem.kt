@@ -36,7 +36,7 @@ import com.anthonyla.paperize.R
  * List item for app version and link to GitHub and PlayStore
  */
 @Composable
-fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, onFdroidClick: () -> Unit) {
+fun PaperizeListItem(onGitHubClick: () -> Unit, onIzzyOnDroidClick: () -> Unit, onFdroidClick: () -> Unit) {
     val context = LocalContext.current
     var version = ""
     try {
@@ -106,25 +106,7 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                IconButton(
-                    onClick = onPlaystoreClick,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.google_play),
-                        contentDescription = "Playstore",
-                        modifier = Modifier.size(12.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 IconButton(
                     onClick = onFdroidClick,
                     modifier = Modifier
@@ -135,6 +117,20 @@ fun PaperizeListItem(onGitHubClick: () -> Unit, onPlaystoreClick: () -> Unit, on
                         imageVector = ImageVector.vectorResource(id = R.drawable.fdroid),
                         contentDescription = "F-Droid",
                         modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                IconButton(
+                    onClick = onIzzyOnDroidClick,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.izzyondroid),
+                        contentDescription = "Izzy-On-Droid-Droid",
+                        modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }

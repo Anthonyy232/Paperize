@@ -55,6 +55,7 @@ I would love some help translating the app! Help me out with that [here](https:/
 - [Zoomable](https://github.com/usuiat/Zoomable) - A library that provides a zoomable and pannable view, which can be used with any view you want
 - [AnimatedFABMenu](https://github.com/rajaumair7890/AnimatedFABMenu) - A animated floating action button with Material 3 design
 - [DocumentFileCompat](https://github.com/ItzNotABug/DocumentFileCompat) - A DocumentFile wrapper that caches the result to improve efficiency
+- [LazyColumnScrollbar](https://github.com/nanihadesuka/LazyColumnScrollbar) - A Jetpack Compose scrollbar library
 
 Thanks to the creators and maintainers of the open-source libraries used in this project.
 

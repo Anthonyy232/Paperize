@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +32,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumSmallTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
+import my.nanihadesuka.compose.ScrollbarSettings
 
 @Composable
 fun AddAlbumScreen(
@@ -42,7 +46,7 @@ fun AddAlbumScreen(
     animate: Boolean
 ) {
     val context = LocalContext.current
-    val lazyGridState = rememberLazyStaggeredGridState()
+    val lazyListState = rememberLazyGridState()
     val addAlbumState = addAlbumViewModel.state.collectAsStateWithLifecycle()
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     var showSpotlight by rememberSaveable { mutableStateOf(false) }
@@ -131,74 +135,129 @@ fun AddAlbumScreen(
             )
         },
         content = {
-            LazyVerticalStaggeredGrid(
-                state = lazyGridState,
+            LazyVerticalGridScrollbar(
+                state = lazyListState,
+                settings = ScrollbarSettings.Default.copy(
+                    thumbUnselectedColor = MaterialTheme.colorScheme.primary,
+                    thumbSelectedColor = MaterialTheme.colorScheme.primary,
+                    thumbShape = RoundedCornerShape(16.dp),
+                    scrollbarPadding = 1.dp,
+                ),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
-                columns = StaggeredGridCells.Fixed(2),
-                contentPadding = PaddingValues(4.dp, 4.dp),
-                horizontalArrangement = Arrangement.Start,
-                content = {
-                    items (items = addAlbumState.value.folders, key = { folder -> folder.folderUri }
-                    ) { folder ->
-                        FolderItem(
-                            folder = folder,
-                            itemSelected = addAlbumState.value.selectedFolders.contains(folder.folderUri),
-                            selectionMode = selectionMode,
-                            onActivateSelectionMode = { selectionMode = it },
-                            onItemSelection = {
-                                addAlbumViewModel.onEvent(
-                                    if (!addAlbumState.value.selectedFolders.contains(folder.folderUri))
-                                        AddAlbumEvent.SelectFolder(folder.folderUri)
-                                    else {
-                                        AddAlbumEvent.RemoveFolderFromSelection(folder.folderUri)
-                                    }
-                                )
-                            },
-                            onFolderViewClick = {
-                                if (folder.wallpapers.isNotEmpty()) onShowFolderView(folder.folderName, folder.wallpapers)
-                            },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                ),
+            ) {
+                LazyVerticalGrid(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize(),
+                    columns = GridCells.Adaptive(150.dp),
+                    contentPadding = PaddingValues(4.dp, 4.dp),
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    items(count = addAlbumState.value.folders.size, key = { index -> addAlbumState.value.folders[index].folderUri }) { index ->
+                        if (animate) {
+                            FolderItem(
+                                folder = addAlbumState.value.folders[index],
+                                itemSelected = addAlbumState.value.selectedFolders.contains(addAlbumState.value.folders[index].folderUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    addAlbumViewModel.onEvent(
+                                        if (!addAlbumState.value.selectedFolders.contains(addAlbumState.value.folders[index].folderUri))
+                                            AddAlbumEvent.SelectFolder(addAlbumState.value.folders[index].folderUri)
+                                        else {
+                                            AddAlbumEvent.RemoveFolderFromSelection(addAlbumState.value.folders[index].folderUri)
+                                        }
+                                    )
+                                },
+                                onFolderViewClick = {
+                                    if (addAlbumState.value.folders[index].wallpapers.isNotEmpty()) onShowFolderView(addAlbumState.value.folders[index].folderName, addAlbumState.value.folders[index].wallpapers)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                                    .animateItem(
+                                        placementSpec = tween(
+                                            durationMillis = 800,
+                                            delayMillis = 0,
+                                            easing = FastOutSlowInEasing
+                                        ),
+                                    )
                             )
-                        )
+                        }
+                        else {
+                            FolderItem(
+                                folder = addAlbumState.value.folders[index],
+                                itemSelected = addAlbumState.value.selectedFolders.contains(addAlbumState.value.folders[index].folderUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    addAlbumViewModel.onEvent(
+                                        if (!addAlbumState.value.selectedFolders.contains(addAlbumState.value.folders[index].folderUri))
+                                            AddAlbumEvent.SelectFolder(addAlbumState.value.folders[index].folderUri)
+                                        else {
+                                            AddAlbumEvent.RemoveFolderFromSelection(addAlbumState.value.folders[index].folderUri)
+                                        }
+                                    )
+                                },
+                                onFolderViewClick = {
+                                    if (addAlbumState.value.folders[index].wallpapers.isNotEmpty()) onShowFolderView(addAlbumState.value.folders[index].folderName, addAlbumState.value.folders[index].wallpapers)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                            )
+                        }
                     }
-                    items (items = addAlbumState.value.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }
-                    ) { wallpaper ->
-                        WallpaperItem(
-                            wallpaperUri = wallpaper.wallpaperUri,
-                            itemSelected = addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri),
-                            selectionMode = selectionMode,
-                            onActivateSelectionMode = { selectionMode = it },
-                            onItemSelection = {
-                                addAlbumViewModel.onEvent(
-                                    if (!addAlbumState.value.selectedWallpapers.contains(wallpaper.wallpaperUri))
-                                        AddAlbumEvent.SelectWallpaper(wallpaper.wallpaperUri)
-                                    else {
-                                        AddAlbumEvent.RemoveWallpaperFromSelection(wallpaper.wallpaperUri)
-                                    }
-                                )
-                            },
-                            onWallpaperViewClick = {
-                                onShowWallpaperView(wallpaper.wallpaperUri)
-                            },
-                            modifier = Modifier.padding(4.dp).animateItem(
-                                placementSpec = tween(
-                                    durationMillis = 800,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                ),
-                            ),
-                            animate = animate
-                        )
+                    items(count = addAlbumState.value.wallpapers.size, key = { index -> addAlbumState.value.wallpapers[index].wallpaperUri }) { index ->
+                        if (animate) {
+                            WallpaperItem(
+                                wallpaperUri = addAlbumState.value.wallpapers[index].wallpaperUri,
+                                itemSelected = addAlbumState.value.selectedWallpapers.contains(addAlbumState.value.wallpapers[index].wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                    addAlbumViewModel.onEvent(
+                                        if (!addAlbumState.value.selectedWallpapers.contains(addAlbumState.value.wallpapers[index].wallpaperUri))
+                                            AddAlbumEvent.SelectWallpaper(addAlbumState.value.wallpapers[index].wallpaperUri)
+                                        else {
+                                            AddAlbumEvent.RemoveWallpaperFromSelection(addAlbumState.value.wallpapers[index].wallpaperUri)
+                                        }
+                                    )
+                                },
+                                onWallpaperViewClick = {
+                                    onShowWallpaperView(addAlbumState.value.wallpapers[index].wallpaperUri)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                                    .animateItem(
+                                        placementSpec = tween(
+                                            durationMillis = 800,
+                                            delayMillis = 0,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                            )
+                        }
+                        else {
+                            WallpaperItem(
+                                wallpaperUri = addAlbumState.value.wallpapers[index].wallpaperUri,
+                                itemSelected = addAlbumState.value.selectedWallpapers.contains(addAlbumState.value.wallpapers[index].wallpaperUri),
+                                selectionMode = selectionMode,
+                                onActivateSelectionMode = { selectionMode = it },
+                                onItemSelection = {
+                                },
+                                onWallpaperViewClick = {
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(150.dp, 350.dp)
+                            )
+                        }
                     }
                 }
-            )
+            }
         }
     )
 }

@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.domain.repository
 
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import kotlinx.coroutines.flow.Flow
@@ -17,30 +16,9 @@ interface SelectedAlbumRepository {
     suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum)
 
     /**
-     * Upsert or insert album to database
-     */
-    suspend fun upsertAlbum(album: Album)
-
-    /**
-     * Upsert or insert wallpaper to database
-     */
-    suspend fun updateAlbum(album: Album)
-
-    /**
      *  Delete album from database
      */
-    suspend fun deleteAlbum(album: Album)
-
-    /**
-     * Upsert or insert wallpaper to database
-     */
-    suspend fun upsertWallpaper(wallpaper: Wallpaper)
-
-    /**
-     * Upsert or insert list of wallpapers to database
-
-     */
-    suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>)
+    suspend fun deleteAlbum(initialAlbumName: String)
 
     /**
      * Delete wallpaper from database
@@ -48,9 +26,9 @@ interface SelectedAlbumRepository {
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
     /**
-     * Delete all wallpapers and folders from database
+     * Cascade delete album and its wallpaper and folder. Proper way to delete an AlbumWithWallpaperAndFolder
      */
-    suspend fun cascadeDeleteWallpaper(initialAlbumName: String)
+    suspend fun cascadeDeleteAlbum(initialAlbumName: String)
 
     /**
      * Delete all data from database

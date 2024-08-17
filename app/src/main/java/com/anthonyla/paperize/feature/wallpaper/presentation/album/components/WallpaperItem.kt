@@ -8,14 +8,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -25,23 +24,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.ScalingConstants
-import com.anthonyla.paperize.core.getImageDimensions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -54,18 +46,11 @@ fun WallpaperItem(
     wallpaperUri: String,
     itemSelected: Boolean,
     selectionMode: Boolean,
+    modifier: Modifier = Modifier,
+    allowHapticFeedback: Boolean = true,
     onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
     onWallpaperViewClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    aspectRatio: Float? = null,
-    clickable: Boolean = true,
-    animate: Boolean = true,
-    darken: Boolean = false,
-    darkenPercentage: Int? = null,
-    blur: Boolean = false,
-    blurPercentage: Int? = null,
-    scaling: ScalingConstants? = null
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -90,69 +75,36 @@ fun WallpaperItem(
     }
     val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
 
-    val boxModifier = if (clickable) {
-        modifier
-            .padding(paddingTransition)
-            .clip(RoundedCornerShape(roundedCornerShapeTransition))
-            .combinedClickable(
-                onClick = {
-                    if (!selectionMode) {
-                        onWallpaperViewClick()
-                    } else {
-                        onItemSelection()
-                    }
-                },
-                onLongClick = {
-                    if (!selectionMode) {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onActivateSelectionMode(true)
-                        onItemSelection()
-                    }
+    Box(
+        modifier = modifier
+        .padding(paddingTransition)
+        .clip(RoundedCornerShape(roundedCornerShapeTransition))
+        .combinedClickable(
+            onClick = {
+                if (!selectionMode) {
+                    onWallpaperViewClick()
+                } else {
+                    onItemSelection()
                 }
-            )
-    } else {
-        modifier
-            .padding(paddingTransition)
-            .clip(RoundedCornerShape(roundedCornerShapeTransition))
-    }
-
-    Box(modifier = boxModifier) {
+            },
+            onLongClick = {
+                if (!selectionMode) {
+                    if (allowHapticFeedback) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onActivateSelectionMode(true)
+                    onItemSelection()
+                }
+            }
+        )
+    ) {
         if (showUri) {
-            val dimension = wallpaperUri.toUri().getImageDimensions(context)
-            val imageAspectRatio = aspectRatio ?: ((dimension?.width?.toFloat() ?: 9f) / (dimension?.height?.toFloat() ?: 19.5f))
             GlideImage(
                 imageModel = { wallpaperUri },
                 imageOptions = ImageOptions(
-                    contentScale = if (scaling != null) {
-                        when (scaling) {
-                            ScalingConstants.FILL -> ContentScale.FillHeight
-                            ScalingConstants.FIT -> ContentScale.FillWidth
-                            ScalingConstants.STRETCH -> ContentScale.FillBounds
-                        }
-                    } else { ContentScale.Crop },
-                    requestSize = IntSize(250, 250),
+                    requestSize = IntSize(200, 200),
                     alignment = Alignment.Center,
-                    colorFilter = if (darken && darkenPercentage != null && darkenPercentage < 100) {
-                        ColorFilter.tint(
-                            Color.Black.copy(alpha = (100 - darkenPercentage).toFloat().div(100f)),
-                            BlendMode.Darken
-                        )
-                    } else { null }
                 ),
-                loading = {
-                    if (animate) {
-                        Box(modifier = Modifier.matchParentSize()) {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-                    }
-                },
                 modifier = Modifier
-                    .aspectRatio(imageAspectRatio)
-                    .background(if (scaling != null) Color.Black else Color.Transparent)
-                    .blur(
-                        if (blur && blurPercentage != null && blurPercentage > 0 ) {
-                            blurPercentage.toFloat().div(100f) * 1.5.dp
-                        } else { 0.dp })
+                    .fillMaxSize()
                     .clip(RoundedCornerShape(roundedCornerShapeTransition))
             )
         }
@@ -163,10 +115,10 @@ fun WallpaperItem(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.image_is_selected),
                     modifier = Modifier
-                        .padding(4.dp)
-                        .border(2.dp, bgColor, CircleShape)
+                        .padding(9.dp)
                         .clip(CircleShape)
                         .background(bgColor)
+                        .border(2.dp, bgColor, CircleShape)
                 )
             } else {
                 Icon(

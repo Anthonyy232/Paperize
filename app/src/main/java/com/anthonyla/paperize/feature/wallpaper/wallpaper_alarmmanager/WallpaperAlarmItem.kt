@@ -4,12 +4,16 @@ import com.anthonyla.paperize.core.SettingsConstants
 
 /**
  * Data class for storing wallpaper alarm item
- * @param timeInMinutes1: Int - time in minutes for home wallpaper or both if scheduled together
- * @param timeInMinutes2: Int - time in minutes for lock wallpaper
+ * @param homeInterval: Int - time in minutes for home wallpaper or both if scheduled together
+ * @param lockInterval: Int - time in minutes for lock wallpaper
  * @param scheduleSeparately: Boolean - schedule wallpapers separately
+ * @param setHome: Boolean - set home wallpaper
+ * @param setLock: Boolean - set lock wallpaper
  */
 data class WallpaperAlarmItem(
-    val timeInMinutes1: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-    val timeInMinutes2: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-    val scheduleSeparately: Boolean = false
+    val homeInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+    val lockInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+    val scheduleSeparately: Boolean = false,
+    val setHome : Boolean = false,
+    val setLock : Boolean = false
 )

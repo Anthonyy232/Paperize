@@ -160,4 +160,7 @@
   <string name="change_next_short">Vaihda taustakuva</string>
   <string name="change_next_long">Vaihda albumin seuraavaan taustakuvaan</string>
   <string name="cannot_change_wallpaper">Taustakuvaa ei voi vaihtaa</string>
+  <string name="enable_wallpaper_changer">Ota Taustakuvan Vaihtaja Käyttöön</string>
+  <string name="unselected_album">Valitsematon albumi</string>
+  <string name="lock">Lukitse</string>
 </resources>

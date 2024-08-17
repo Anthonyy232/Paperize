@@ -4,5 +4,5 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 
 data class WallpaperState (
     val isDataLoaded: Boolean = false,
-    val selectedAlbum: SelectedAlbum? = null
+    val selectedAlbum: List<SelectedAlbum>? = null
 )

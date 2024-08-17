@@ -26,15 +26,24 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
             val scheduler = WallpaperAlarmSchedulerImpl(context)
             val toggleChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
             if (toggleChanger) {
-                val timeInMinutes1 = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
-                val timeInMinutes2 = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                val homeInterval = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
+                val lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
+                val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false
+                val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false
                 val alarmItem = WallpaperAlarmItem(
-                    timeInMinutes1 = timeInMinutes1,
-                    timeInMinutes2 = timeInMinutes2,
-                    scheduleSeparately = scheduleSeparately
+                    homeInterval = homeInterval,
+                    lockInterval = lockInterval,
+                    scheduleSeparately = scheduleSeparately,
+                    setLock = setLock,
+                    setHome = setHome
                 )
-                alarmItem.let{scheduler.scheduleWallpaperAlarm(it, null, true, true)}
+                alarmItem.let{scheduler.scheduleWallpaperAlarm(
+                    wallpaperAlarmItem = it,
+                    origin = null,
+                    changeImmediate = true,
+                    cancelImmediate = true)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

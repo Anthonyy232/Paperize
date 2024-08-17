@@ -160,4 +160,7 @@
   <string name="change_next_short">Bytt bakgrunn</string>
   <string name="change_next_long">Bytt til neste bakgrunn i albumet</string>
   <string name="cannot_change_wallpaper">Kan ikke endre bakgrunn</string>
+  <string name="enable_wallpaper_changer">Aktiver bakgrunnsbilde Changer</string>
+  <string name="unselected_album">Ikke valgt album</string>
+  <string name="lock">Lås</string>
 </resources>

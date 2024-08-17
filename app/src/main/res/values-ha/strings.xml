@@ -160,4 +160,7 @@
   <string name="change_next_short">Canja fuskar bangon waya</string>
   <string name="change_next_long">Canja zuwa fuskar bangon waya na gaba a cikin kundin</string>
   <string name="cannot_change_wallpaper">Ba za a iya canza fuskar bangon waya ba</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>

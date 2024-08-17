@@ -160,4 +160,7 @@
   <string name="change_next_short">Duvar kağıdını değiştir</string>
   <string name="change_next_long">Albümdeki sonraki duvar kağıdına geçin</string>
   <string name="cannot_change_wallpaper">Duvar kağıdı değiştirilemiyor</string>
+  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
+  <string name="unselected_album">Unselected album</string>
+  <string name="lock">Lock</string>
 </resources>
