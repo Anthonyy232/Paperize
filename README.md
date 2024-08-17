@@ -2,11 +2,9 @@
 <div align="center">
     <img style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
     <h1>Paperize</h1>
-  <p align="center">
-</p>
+  <p align="center"></p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
-</div>  
-
+</div>
 
 
 ## Features
@@ -17,6 +15,8 @@
 - **Home and Lock Screen Wallpaper**: Choose the same or separate albums for your home screen and lock screen
 - **Wallpaper effects**: Change the brightness and the blur of your wallpaper
 - **On-Device Storage**: All your wallpapers and settings are stored on your device
+
+ 
 <div align="center">
     <br/>
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/57122f72-78f8-45ed-a9ac-de943061d6a2" width="30%" alt="onboarding" />
@@ -25,16 +25,14 @@
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/4ce1b28d-f4b2-4048-a261-203156222263" width="30%" alt="album" />
       <img src="https://github.com/user-attachments/assets/d23f290d-bb2c-4b89-9321-b426e45864f9" width="30%" alt="settings" />
     <br/>
-    <br/>
-    <div><video controls src="https://github.com/user-attachments/assets/ce7f5c7c-66a7-45fc-bb28-a53d8d9cf733" muted="true"></video></div>
+    <video controls src="https://github.com/user-attachments/assets/ce7f5c7c-66a7-45fc-bb28-a53d8d9cf733" muted="true"></video>
+</div>
 
 
 ## Download
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Download app from F-Droid" height="80">](https://f-droid.org/en/packages/com.anthonyla.paperize/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Download app from IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize)
-
-Please don't contact me about uploading the app on the Play store.
 
 ## Localization
 I want to allow more people to use the app. Currently, most of the translations are provided using machine translation and AI -- which is not optimal.
