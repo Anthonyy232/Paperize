@@ -1,6 +1,6 @@
 
 <div align="center">
-    <img width="1024" height="500" style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
+    <img style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
     <h1>Paperize</h1>
   <p align="center">
 </p>
