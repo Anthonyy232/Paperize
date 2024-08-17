@@ -1,6 +1,6 @@
 
 <div align="center">
-    <img width="300" height="300" style="display: block; border-radius: 9999px;" src="https://github.com/Anthonyy232/Paperize/assets/60626873/c40018a1-bc0a-4efd-bd4a-bc83fb23589e">
+    <img width="1024" height="500" style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
     <h1>Paperize</h1>
   <p align="center">
 </p>
@@ -26,7 +26,8 @@
       <img src="https://github.com/user-attachments/assets/d23f290d-bb2c-4b89-9321-b426e45864f9" width="30%" alt="settings" />
     <br/>
     <br/>
-    <div><video controls src="https://github.com/user-attachments/assets/4940d296-cff5-4117-b19e-84e643aa06a1" muted="true"></video></div>
+    <div><video controls src="https://github.com/user-attachments/assets/ce7f5c7c-66a7-45fc-bb28-a53d8d9cf733" muted="true"></video></div>
+
 
 ## Download
 [<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download app from GitHub" height="80">](https://github.com/Anthonyy232/Paperize/releases)
