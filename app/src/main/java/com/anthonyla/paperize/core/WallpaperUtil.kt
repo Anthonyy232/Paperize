@@ -345,7 +345,8 @@ fun processBitmap(
     source: Bitmap,
     darken: Boolean,
     darkenPercent: Int,
-    scaling: ScalingConstants,
+    scaling: Boolean,
+    scalingMode: ScalingConstants,
     blur: Boolean,
     blurPercent: Int
 ): Bitmap? {
@@ -353,10 +354,12 @@ fun processBitmap(
         var processedBitmap = source
 
         // Apply wallpaper scaling effects
-        processedBitmap = when (scaling) {
-            ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-            ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-            ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+        if (scaling) {
+            processedBitmap = when (scalingMode) {
+                ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+                ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+                ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+            }
         }
 
         // Apply brightness effect

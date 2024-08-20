@@ -16,6 +16,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,15 +47,17 @@ fun WallpaperPreviewAndScale(
     lockDarkenPercentage: Int,
     homeEnabled: Boolean,
     lockEnabled: Boolean,
-    scaling: ScalingConstants,
-    onScalingChange: (ScalingConstants) -> Unit,
+    scaling: Boolean,
+    onScalingChange: (Boolean) -> Unit,
+    scalingMode: ScalingConstants,
+    onScalingModeChange: (ScalingConstants) -> Unit,
     blur: Boolean,
     homeBlurPercentage: Int,
     lockBlurPercentage: Int,
 ) {
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
-            when (scaling) {
+            when (scalingMode) {
                 ScalingConstants.FILL -> 0
                 ScalingConstants.FIT -> 1
                 ScalingConstants.STRETCH -> 2
@@ -82,88 +85,106 @@ fun WallpaperPreviewAndScale(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                val modifier = if (lockEnabled && homeEnabled) {
-                    Modifier.weight(1f).padding(8.dp)
-                } else {
-                    Modifier.fillMaxSize(0.5f).padding(8.dp)
-                }
-
-                if (lockEnabled) {
-                    Column(
-                        modifier = modifier,
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
-                        if (currentLockWallpaper != null) {
-                            PreviewItem(
-                                wallpaperUri = currentLockWallpaper,
-                                darken = darken,
-                                darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
-                                scaling = scaling,
-                                blur = blur,
-                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-                if (homeEnabled) {
-                    Column(
-                        modifier = modifier,
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
-                        if (currentHomeWallpaper != null) {
-                            PreviewItem(
-                                wallpaperUri = currentHomeWallpaper,
-                                darken = darken,
-                                darkenPercentage = homeDarkenPercentage,
-                                scaling = scaling,
-                                blur = blur,
-                                blurPercentage = homeBlurPercentage
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
+            ){
+                Text(
+                    text = stringResource(R.string.resize),
+                    modifier = Modifier.padding(16.dp),
+                    fontWeight = FontWeight.W500
+                )
+                Switch(
+                    checked = scaling,
+                    onCheckedChange = onScalingChange
+                )
             }
-            SingleChoiceSegmentedButtonRow (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(start = 8.dp, end = 8.dp, bottom = 16.dp))
-            ) {
-                options.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                        onClick = {
-                            selectedIndex = index
-                            onScalingChange(
-                                when (index) {
-                                    0 -> ScalingConstants.FILL
-                                    1 -> ScalingConstants.FIT
-                                    2 -> ScalingConstants.STRETCH
-                                    else -> ScalingConstants.FILL
-                                }
-                            ) },
-                        selected = index == selectedIndex
-                    ) {
+
+            if (scaling) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val modifier = if (lockEnabled && homeEnabled) {
+                        Modifier.weight(1f).padding(8.dp)
+                    } else {
+                        Modifier.fillMaxSize(0.5f).padding(8.dp)
+                    }
+
+                    if (lockEnabled) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            modifier = modifier,
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
                         ) {
-                            Icon(
-                                painter = when (index) {
-                                    0 -> painterResource(id = R.drawable.fill)
-                                    1 -> painterResource(id = R.drawable.fit)
-                                    2 -> painterResource(id = R.drawable.stretch)
-                                    else -> painterResource(id = R.drawable.fill)
-                                },
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis )
+                            Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
+                            if (currentLockWallpaper != null) {
+                                PreviewItem(
+                                    wallpaperUri = currentLockWallpaper,
+                                    darken = darken,
+                                    darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
+                                    scalingMode = scalingMode,
+                                    blur = blur,
+                                    blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                    if (homeEnabled) {
+                        Column(
+                            modifier = modifier,
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
+                            if (currentHomeWallpaper != null) {
+                                PreviewItem(
+                                    wallpaperUri = currentHomeWallpaper,
+                                    darken = darken,
+                                    darkenPercentage = homeDarkenPercentage,
+                                    scalingMode = scalingMode,
+                                    blur = blur,
+                                    blurPercentage = homeBlurPercentage
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+                SingleChoiceSegmentedButtonRow (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingValues(start = 8.dp, end = 8.dp, bottom = 16.dp))
+                ) {
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                            onClick = {
+                                selectedIndex = index
+                                onScalingModeChange(
+                                    when (index) {
+                                        0 -> ScalingConstants.FILL
+                                        1 -> ScalingConstants.FIT
+                                        2 -> ScalingConstants.STRETCH
+                                        else -> ScalingConstants.FILL
+                                    }
+                                ) },
+                            selected = index == selectedIndex
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = when (index) {
+                                        0 -> painterResource(id = R.drawable.fill)
+                                        1 -> painterResource(id = R.drawable.fit)
+                                        2 -> painterResource(id = R.drawable.stretch)
+                                        else -> painterResource(id = R.drawable.fill)
+                                    },
+                                    contentDescription = null,
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis )
+                            }
                         }
                     }
                 }

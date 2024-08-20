@@ -28,6 +28,7 @@ object SettingsConstants {
     const val LOCK_DARKEN_PERCENTAGE = "darken_darken_percentage"
     const val DARKEN = "darken"
     const val WALLPAPER_SCALING = "wallpaper_scaling"
+    const val WALLPAPER_SCALING_MODE = "wallpaper_scaling_mode"
     const val SCHEDULE_SEPARATELY = "schedule_separately"
     const val BLUR = "blur"
     const val HOME_BLUR_PERCENTAGE = "home_blur_percentage"

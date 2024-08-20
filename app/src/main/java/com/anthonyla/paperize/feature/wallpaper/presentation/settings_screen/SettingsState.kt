@@ -28,7 +28,8 @@ data class SettingsState(
     val blur: Boolean = false,
     val homeBlurPercentage: Int = 0,
     val lockBlurPercentage: Int = 0,
-    val wallpaperScaling: ScalingConstants = ScalingConstants.FILL,
+    val wallpaperScaling: Boolean = true,
+    val wallpaperScalingMode: ScalingConstants = ScalingConstants.FILL,
     val nextHomeWallpaper: String? = null,
     val nextLockWallpaper: String? = null
 )

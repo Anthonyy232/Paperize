@@ -188,7 +188,8 @@ class HomeWallpaperService: Service() {
                     onDestroy()
                     return
                 }
-                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val scaling = settingsDataStoreImpl.getBoolean(SettingsConstants.WALLPAPER_SCALING) ?: true
+                val scalingMode = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING_MODE)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
                 val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
@@ -219,6 +220,7 @@ class HomeWallpaperService: Service() {
                                     darken = darken,
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
+                                    scalingMode = scalingMode,
                                     blur = blur,
                                     blurPercent = homeBlurPercentage
                                 )
@@ -251,6 +253,7 @@ class HomeWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = homeBlurPercentage
                             )
@@ -301,6 +304,7 @@ class HomeWallpaperService: Service() {
                                     darken = darken,
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
+                                    scalingMode = scalingMode,
                                     blur = blur,
                                     blurPercent = homeBlurPercentage
                                 )
@@ -335,6 +339,7 @@ class HomeWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = homeBlurPercentage
                             )
@@ -391,6 +396,7 @@ class HomeWallpaperService: Service() {
                                     darken = darken,
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
+                                    scalingMode = scalingMode,
                                     blur = blur,
                                     blurPercent = homeBlurPercentage
                                 )
@@ -426,6 +432,7 @@ class HomeWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = homeBlurPercentage
                             )
@@ -511,7 +518,8 @@ class HomeWallpaperService: Service() {
                     return
                 }
 
-                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val scaling = settingsDataStoreImpl.getBoolean(SettingsConstants.WALLPAPER_SCALING) ?: true
+                val scalingMode = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING_MODE)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
                 val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
@@ -523,6 +531,7 @@ class HomeWallpaperService: Service() {
                     darken = darken,
                     darkenPercent = homeDarkenPercentage,
                     scaling = scaling,
+                    scalingMode = scalingMode,
                     blur = blur,
                     blurPercent = homeBlurPercentage
                 )
@@ -540,7 +549,8 @@ class HomeWallpaperService: Service() {
         wallpaper: Uri,
         darken: Boolean,
         darkenPercent: Int,
-        scaling: ScalingConstants,
+        scaling: Boolean,
+        scalingMode: ScalingConstants,
         blur: Boolean = false,
         blurPercent: Int,
     ): Boolean {
@@ -550,7 +560,7 @@ class HomeWallpaperService: Service() {
             val bitmap = retrieveBitmap(context, wallpaper, device)
             if (bitmap == null) return false
             else {
-                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent)?.let { image ->
+                processBitmap(device, bitmap, darken, darkenPercent, scaling, scalingMode, blur, blurPercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
                     wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()

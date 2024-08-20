@@ -489,8 +489,19 @@ fun PaperizeApp(
                 },
                 scaling = settingsState.value.wallpaperScaling,
                 onScalingChange = {
-                    if (settingsState.value.wallpaperScaling != it) {
-                        settingsViewModel.onEvent(SettingsEvent.SetWallpaperScaling(it))
+                    settingsViewModel.onEvent(SettingsEvent.SetWallpaperScaling(it))
+                    if (settingsState.value.enableChanger) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(1000)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                scalingMode = settingsState.value.wallpaperScalingMode,
+                onScalingModeChange = {
+                    if (settingsState.value.wallpaperScalingMode != it) {
+                        settingsViewModel.onEvent(SettingsEvent.SetWallpaperScalingMode(it))
                         if (settingsState.value.enableChanger) {
                             job?.cancel()
                             job = scope.launch {

@@ -187,7 +187,8 @@ class LockWallpaperService: Service() {
                     onDestroy()
                     return
                 }
-                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val scaling = settingsDataStoreImpl.getBoolean(SettingsConstants.WALLPAPER_SCALING) ?: true
+                val scalingMode = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING_MODE)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
                 val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
                 val lockDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100
@@ -219,6 +220,7 @@ class LockWallpaperService: Service() {
                                     darken = darken,
                                     darkenPercent = lockDarkenPercentage,
                                     scaling = scaling,
+                                    scalingMode = scalingMode,
                                     blur = blur,
                                     blurPercent = lockBlurPercentage
                                 )
@@ -251,6 +253,7 @@ class LockWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = lockDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = lockBlurPercentage
                             )
@@ -297,6 +300,7 @@ class LockWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = lockDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = lockBlurPercentage
                             )
@@ -324,6 +328,7 @@ class LockWallpaperService: Service() {
                                     darken = darken,
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
+                                    scalingMode = scalingMode,
                                     blur = blur,
                                     blurPercent = homeBlurPercentage
                                 )
@@ -358,6 +363,7 @@ class LockWallpaperService: Service() {
                                 darken = darken,
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
+                                scalingMode = scalingMode,
                                 blur = blur,
                                 blurPercent = homeBlurPercentage
                             )
@@ -432,7 +438,8 @@ class LockWallpaperService: Service() {
                     return
                 }
 
-                val scaling = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
+                val scaling = settingsDataStoreImpl.getBoolean(SettingsConstants.WALLPAPER_SCALING) ?: true
+                val scalingMode = settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING_MODE)?.let { ScalingConstants.valueOf(it) } ?: ScalingConstants.FILL
                 val darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false
                 val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
                 val lockDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100
@@ -446,6 +453,7 @@ class LockWallpaperService: Service() {
                     darken = darken,
                     darkenPercent = if (!setHome) homeDarkenPercentage else lockDarkenPercentage,
                     scaling = scaling,
+                    scalingMode = scalingMode,
                     blur = blur,
                     blurPercent = if (!setHome) homeBlurPercentage else lockBlurPercentage
                 )
@@ -463,7 +471,8 @@ class LockWallpaperService: Service() {
         wallpaper: Uri,
         darken: Boolean,
         darkenPercent: Int,
-        scaling: ScalingConstants,
+        scaling: Boolean,
+        scalingMode: ScalingConstants,
         blur: Boolean = false,
         blurPercent: Int,
     ): Boolean {
@@ -473,7 +482,7 @@ class LockWallpaperService: Service() {
             val bitmap = retrieveBitmap(context, wallpaper, device)
             if (bitmap == null) return false
             else {
-                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent)?.let { image ->
+                processBitmap(device, bitmap, darken, darkenPercent, scaling, scalingMode, blur, blurPercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
                     wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()

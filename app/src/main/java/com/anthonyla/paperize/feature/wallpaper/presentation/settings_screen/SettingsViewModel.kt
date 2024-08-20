@@ -53,7 +53,8 @@ class SettingsViewModel @Inject constructor (
             val homeDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100 }
             val lockDarkenPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100 }
             val darken = async { settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false }
-            val wallpaperScaling = async { ScalingConstants.valueOf(settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING) ?: ScalingConstants.FILL.name) }
+            val wallpaperScaling = async { settingsDataStoreImpl.getBoolean(SettingsConstants.WALLPAPER_SCALING) ?: false }
+            val wallpaperScalingMode = async { ScalingConstants.valueOf(settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING_MODE) ?: ScalingConstants.FILL.name) }
             val scheduleSeparately = async { settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false }
             val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
             val homeBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0 }
@@ -79,6 +80,7 @@ class SettingsViewModel @Inject constructor (
                     lockDarkenPercentage = lockDarkenPercentage.await(),
                     darken = darken.await(),
                     wallpaperScaling = wallpaperScaling.await(),
+                    wallpaperScalingMode = wallpaperScalingMode.await(),
                     setHomeWallpaper = setHomeWallpaper.await(),
                     setLockWallpaper = setLockWallpaper.await(),
                     currentHomeWallpaper = setCurrentHomeWallpaper.await(),
@@ -361,10 +363,21 @@ class SettingsViewModel @Inject constructor (
 
             is SettingsEvent.SetWallpaperScaling -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    settingsDataStoreImpl.putString(SettingsConstants.WALLPAPER_SCALING, event.scaling.name)
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.WALLPAPER_SCALING, event.scaling)
                     _state.update {
                         it.copy(
                             wallpaperScaling = event.scaling
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetWallpaperScalingMode -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putString(SettingsConstants.WALLPAPER_SCALING_MODE, event.scalingMode.name)
+                    _state.update {
+                        it.copy(
+                            wallpaperScalingMode = event.scalingMode
                         )
                     }
                 }
@@ -675,7 +688,8 @@ class SettingsViewModel @Inject constructor (
                             homeBlurPercentage = 0,
                             lockBlurPercentage = 0,
                             darken = false,
-                            wallpaperScaling = ScalingConstants.FILL,
+                            wallpaperScaling = true,
+                            wallpaperScalingMode = ScalingConstants.FILL,
                             setHomeWallpaper = false,
                             setLockWallpaper = false,
                             currentHomeWallpaper = null,

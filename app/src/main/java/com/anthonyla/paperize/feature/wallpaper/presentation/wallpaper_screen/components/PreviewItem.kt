@@ -36,7 +36,7 @@ fun PreviewItem(
     darkenPercentage: Int,
     blur: Boolean = false,
     blurPercentage: Int,
-    scaling: ScalingConstants
+    scalingMode: ScalingConstants
 ) {
     val context = LocalContext.current
     val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
@@ -48,7 +48,7 @@ fun PreviewItem(
         GlideImage(
             imageModel = { wallpaperUri },
             imageOptions = ImageOptions(
-                contentScale = when (scaling) {
+                contentScale = when (scalingMode) {
                     ScalingConstants.FILL -> ContentScale.FillHeight
                     ScalingConstants.FIT -> ContentScale.FillWidth
                     ScalingConstants.STRETCH -> ContentScale.FillBounds
