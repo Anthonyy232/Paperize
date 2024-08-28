@@ -202,7 +202,7 @@ fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
  */
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
     return try {
-        val factor = percent.toFloat().div(100f) * 10
+        val factor = percent.toFloat().div(100f) * 20f
         Toolkit.blur(source, factor.toInt())
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error darkening bitmap: $e")
