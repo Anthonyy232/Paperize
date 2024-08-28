@@ -108,7 +108,7 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.5.1")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
-    implementation("com.mikepenz:aboutlibraries-core:11.2.2")
+    implementation("com.mikepenz:aboutlibraries-core:11.2.3")
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.2")
     implementation("androidx.compose.foundation:foundation:1.7.0-rc01")
     implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
