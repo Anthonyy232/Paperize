@@ -106,7 +106,7 @@ dependencies {
     implementation("com.github.skydoves:landscapist-glide:2.3.6")
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
     implementation("androidx.hilt:hilt-work:1.2.0")
-    implementation("com.airbnb.android:lottie-compose:6.5.0")
+    implementation("com.airbnb.android:lottie-compose:6.5.1")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation("com.mikepenz:aboutlibraries-core:11.2.2")
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.2")
