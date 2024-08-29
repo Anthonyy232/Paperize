@@ -162,4 +162,5 @@
     <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
     <string name="unselected_album">Unselected album</string>
     <string name="lock">Lock</string>
+    <string name="change_vignette">Change Vignette</string>
 </resources>

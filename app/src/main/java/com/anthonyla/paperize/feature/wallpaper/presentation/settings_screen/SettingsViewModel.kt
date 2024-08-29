@@ -58,6 +58,9 @@ class SettingsViewModel @Inject constructor (
             val blur = async { settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false }
             val homeBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0 }
             val lockBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0 }
+            val vignette = async { settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false }
+            val homeVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0 }
+            val lockVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0 }
             val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
             val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
 
@@ -88,7 +91,10 @@ class SettingsViewModel @Inject constructor (
                     homeBlurPercentage = homeBlurPercentage.await(),
                     lockBlurPercentage = lockBlurPercentage.await(),
                     nextHomeWallpaper = nextHomeWallpaper.await(),
-                    nextLockWallpaper = nextLockWallpaper.await()
+                    nextLockWallpaper = nextLockWallpaper.await(),
+                    vignette = vignette.await(),
+                    homeVignettePercentage = homeVignettePercentage.await(),
+                    lockVignettePercentage = lockVignettePercentage.await()
                 )
             }
             setKeepOnScreenCondition = false
@@ -147,6 +153,10 @@ class SettingsViewModel @Inject constructor (
                     val lockBlurPercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0 }
                     val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
                     val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
+                    val vignette = async { settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false }
+                    val homeVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0 }
+                    val lockVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0 }
+
                     _state.update {
                         it.copy(
                             darkMode = darkMode.await(),
@@ -173,7 +183,10 @@ class SettingsViewModel @Inject constructor (
                             homeBlurPercentage = homeBlurPercentage.await(),
                             lockBlurPercentage = lockBlurPercentage.await(),
                             nextHomeWallpaper = nextHomeWallpaper.await(),
-                            nextLockWallpaper = nextLockWallpaper.await()
+                            nextLockWallpaper = nextLockWallpaper.await(),
+                            vignette = vignette.await(),
+                            homeVignettePercentage = homeVignettePercentage.await(),
+                            lockVignettePercentage = lockVignettePercentage.await()
                         )
                     }
                 }
@@ -426,6 +439,34 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetVignette -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.VIGNETTE, event.vignette)
+                    _state.update {
+                        it.copy(
+                            vignette = event.vignette
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetVignettePercentage -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.lockVignettePercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE, event.lockVignettePercentage)
+                    }
+                    if (event.homeVignettePercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE, event.homeVignettePercentage)
+                    }
+                    _state.update {
+                        it.copy(
+                            homeVignettePercentage = event.homeVignettePercentage ?: it.homeVignettePercentage,
+                            lockVignettePercentage = event.lockVignettePercentage ?: it.lockVignettePercentage
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.SetCurrentHomeWallpaper -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     if (event.currentHomeWallpaper != null) {
@@ -659,6 +700,9 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_NEXT_SET_TIME)
                     settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_HOME_WALLPAPER)
                     settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_LOCK_WALLPAPER)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.VIGNETTE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE)
 
                     _state.update {
                         it.copy(
@@ -687,7 +731,10 @@ class SettingsViewModel @Inject constructor (
                             scheduleSeparately = false,
                             blur = false,
                             nextHomeWallpaper = null,
-                            nextLockWallpaper = null
+                            nextLockWallpaper = null,
+                            vignette = false,
+                            homeVignettePercentage = 0,
+                            lockVignettePercentage = 0
                         )
                     }
                 }

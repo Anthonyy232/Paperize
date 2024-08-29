@@ -225,6 +225,9 @@ fun PaperizeApp(
                 lockBlurPercentage = settingsState.value.lockBlurPercentage,
                 currentHomeWallpaper = settingsState.value.currentHomeWallpaper,
                 currentLockWallpaper = settingsState.value.currentLockWallpaper,
+                vignette = settingsState.value.vignette,
+                homeVignettePercentage = settingsState.value.homeVignettePercentage,
+                lockVignettePercentage = settingsState.value.lockVignettePercentage,
                 onSettingsClick = { navController.navigate(Settings) },
                 navigateToAddWallpaperScreen = {
                     navController.navigate(AddEdit(it))
@@ -479,7 +482,7 @@ fun PaperizeApp(
                 },
                 onDarkCheck = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarken(it))
-                    if (settingsState.value.enableChanger && (settingsState.value.darken && settingsState.value.homeDarkenPercentage < 100)) {
+                    if (settingsState.value.enableChanger && (it && settingsState.value.homeDarkenPercentage < 100)) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -668,7 +671,7 @@ fun PaperizeApp(
                 },
                 onBlurChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetBlur(it))
-                    if (settingsState.value.enableChanger && settingsState.value.blur) {
+                    if (settingsState.value.enableChanger && it) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -679,6 +682,26 @@ fun PaperizeApp(
                 onBlurPercentageChange = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetBlurPercentage(home, lock))
                     if (settingsState.value.enableChanger && settingsState.value.blur) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(3000)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                onVignetteChange = {
+                    settingsViewModel.onEvent(SettingsEvent.SetVignette(it))
+                    if (settingsState.value.enableChanger && it) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(1000)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                onVignettePercentageChange = { home, lock ->
+                    settingsViewModel.onEvent(SettingsEvent.SetVignettePercentage(home, lock))
+                    if (settingsState.value.enableChanger && settingsState.value.vignette) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)

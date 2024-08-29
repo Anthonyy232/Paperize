@@ -51,6 +51,9 @@ fun WallpaperPreviewAndScale(
     blur: Boolean,
     homeBlurPercentage: Int,
     lockBlurPercentage: Int,
+    vignette: Boolean,
+    homeVignettePercentage: Int,
+    lockVignettePercentage: Int
 ) {
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
@@ -102,7 +105,9 @@ fun WallpaperPreviewAndScale(
                                 darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage
+                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage,
+                                vignette = vignette,
+                                vignettePercentage = if (!homeEnabled) homeVignettePercentage else lockVignettePercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -121,7 +126,9 @@ fun WallpaperPreviewAndScale(
                                 darkenPercentage = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = homeBlurPercentage
+                                blurPercentage = homeBlurPercentage,
+                                vignette = vignette,
+                                vignettePercentage = homeVignettePercentage
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

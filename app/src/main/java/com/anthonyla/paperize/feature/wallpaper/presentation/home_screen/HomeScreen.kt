@@ -70,6 +70,11 @@ fun HomeScreen(
     currentLockWallpaper: String?,
     homeSelectedAlbum: SelectedAlbum?,
     lockSelectedAlbum: SelectedAlbum?,
+    homeVignettePercentage: Int,
+    lockVignettePercentage: Int,
+    onVignettePercentageChange: (Int, Int) -> Unit,
+    onVignetteChange: (Boolean) -> Unit,
+    vignette: Boolean
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -168,7 +173,12 @@ fun HomeScreen(
                         homeBlurPercentage = homeBlurPercentage,
                         lockBlurPercentage = lockBlurPercentage,
                         currentHomeWallpaper = currentHomeWallpaper,
-                        currentLockWallpaper = currentLockWallpaper
+                        currentLockWallpaper = currentLockWallpaper,
+                        homeVignettePercentage = homeVignettePercentage,
+                        lockVignettePercentage = lockVignettePercentage,
+                        onVignettePercentageChange = onVignettePercentageChange,
+                        onVignetteChange = onVignetteChange,
+                        vignette = vignette
                     )
                     else -> LibraryScreen(
                         albums = albums,

@@ -193,6 +193,8 @@ class HomeWallpaperService: Service() {
                 val homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
                 val homeBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0
+                val vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false
+                val homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0
                 val homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: ""
                 val lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
                 var homeAlbum = selectedAlbum.find { it.album.initialAlbumName == homeAlbumName }
@@ -220,7 +222,9 @@ class HomeWallpaperService: Service() {
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
                                     blur = blur,
-                                    blurPercent = homeBlurPercentage
+                                    blurPercent = homeBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = homeVignettePercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
@@ -252,7 +256,9 @@ class HomeWallpaperService: Service() {
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = homeBlurPercentage
+                                blurPercent = homeBlurPercentage,
+                                vignette = vignette,
+                                vignettePercent = homeVignettePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if ((homeInterval % lockInterval == 0) || (lockInterval % homeInterval == 0) && (homeAlbumName == lockAlbumName)) {
@@ -302,7 +308,9 @@ class HomeWallpaperService: Service() {
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
                                     blur = blur,
-                                    blurPercent = homeBlurPercentage
+                                    blurPercent = homeBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = homeVignettePercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
@@ -336,7 +344,9 @@ class HomeWallpaperService: Service() {
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = homeBlurPercentage
+                                blurPercent = homeBlurPercentage,
+                                vignette = vignette,
+                                vignettePercent = homeVignettePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
@@ -392,7 +402,9 @@ class HomeWallpaperService: Service() {
                                     darkenPercent = homeDarkenPercentage,
                                     scaling = scaling,
                                     blur = blur,
-                                    blurPercent = homeBlurPercentage
+                                    blurPercent = homeBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = homeVignettePercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
@@ -427,7 +439,9 @@ class HomeWallpaperService: Service() {
                                 darkenPercent = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercent = homeBlurPercentage
+                                blurPercent = homeBlurPercentage,
+                                vignette = vignette,
+                                vignettePercent = homeVignettePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
@@ -517,6 +531,9 @@ class HomeWallpaperService: Service() {
                 val blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false
                 val homeBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0
                 val currentHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) ?: ""
+                val vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false
+                val homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0
+
                 setWallpaper(
                     context = context,
                     wallpaper = currentHomeWallpaper.toUri(),
@@ -524,7 +541,9 @@ class HomeWallpaperService: Service() {
                     darkenPercent = homeDarkenPercentage,
                     scaling = scaling,
                     blur = blur,
-                    blurPercent = homeBlurPercentage
+                    blurPercent = homeBlurPercentage,
+                    vignette = vignette,
+                    vignettePercent = homeVignettePercentage
                 )
             }
         } catch (e: Exception) {
@@ -541,8 +560,10 @@ class HomeWallpaperService: Service() {
         darken: Boolean,
         darkenPercent: Int,
         scaling: ScalingConstants,
-        blur: Boolean = false,
+        blur: Boolean,
         blurPercent: Int,
+        vignette: Boolean,
+        vignettePercent: Int
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
@@ -550,7 +571,7 @@ class HomeWallpaperService: Service() {
             val bitmap = retrieveBitmap(context, wallpaper, device)
             if (bitmap == null) return false
             else {
-                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent)?.let { image ->
+                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
                     wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.isValidUri
+import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -32,18 +33,19 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun PreviewItem(
     wallpaperUri: String,
-    darken: Boolean = false,
+    darken: Boolean,
     darkenPercentage: Int,
-    blur: Boolean = false,
+    blur: Boolean,
     blurPercentage: Int,
-    scaling: ScalingConstants
+    scaling: ScalingConstants,
+    vignette: Boolean,
+    vignettePercentage: Int
 ) {
     val context = LocalContext.current
     val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-
     if (showUri) {
         GlideImage(
             imageModel = { wallpaperUri },
@@ -61,7 +63,15 @@ fun PreviewItem(
                         BlendMode.Darken
                     )
                 } else { null },
+                tag = vignette.toString() + vignettePercentage.toString(),
             ),
+            requestOptions = {
+                if (vignette && vignettePercentage > 0) {
+                    RequestOptions.bitmapTransform(VignetteBitmapTransformation(vignettePercentage))
+                } else {
+                    RequestOptions()
+                }
+            },
             modifier = Modifier
                 .size(screenWidth * 0.35f, screenHeight * 0.35f)
                 .clip(RoundedCornerShape(16.dp))
@@ -69,8 +79,13 @@ fun PreviewItem(
                 .background(Color.Black)
                 .blur(
                     if (blur && blurPercentage > 0) {
-                        blurPercentage.toFloat().div(100f) * 1.5.dp
-                    } else { 0.dp })
+                        blurPercentage
+                            .toFloat()
+                            .div(100f) * 1.5.dp
+                    } else {
+                        0.dp
+                    }
+                )
         )
     }
 }

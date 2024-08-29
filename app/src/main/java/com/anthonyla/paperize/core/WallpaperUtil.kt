@@ -8,6 +8,10 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.ImageDecoder
 import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
@@ -21,6 +25,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
+
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
 
@@ -211,6 +216,47 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
 }
 
 /**
+ * Apply a vignette effect to the bitmap
+ */
+fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
+    return try {
+        val image = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(image)
+        canvas.drawBitmap(source, 0f, 0f, Paint())
+        val rad: Int = if (source.width < source.height) {
+            val o = (source.height * 2) / 100
+            source.height - o * percent / 3
+        } else {
+            val o = (source.width * 2) / 100
+            source.width - o * percent / 3
+        }
+        val rect = Rect(0, 0, source.width, source.height)
+        val rectF = RectF(rect)
+        val colors = intArrayOf(0, 0, Color.BLACK)
+        val pos = floatArrayOf(0.0f, 0.1f, 1.0f)
+        val linGradLR: Shader = RadialGradient(
+            rect.centerX().toFloat(),
+            rect.centerY().toFloat(),
+            rad.toFloat(),
+            colors,
+            pos,
+            Shader.TileMode.CLAMP
+        )
+        val paint = Paint().apply {
+            shader = linGradLR
+            isAntiAlias = true
+            isDither = true
+            alpha = 128
+        }
+        canvas.drawRect(rectF, paint)
+        image
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error applying vignette effect: $e")
+        source
+    }
+}
+
+/**
  * Retrieve wallpaper URIs from a folder directory URI
  */
 fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
@@ -347,7 +393,9 @@ fun processBitmap(
     darkenPercent: Int,
     scaling: ScalingConstants,
     blur: Boolean,
-    blurPercent: Int
+    blurPercent: Int,
+    vignette: Boolean,
+    vignettePercent: Int
 ): Bitmap? {
     try {
         var processedBitmap = source
@@ -368,6 +416,12 @@ fun processBitmap(
         if (blur && blurPercent > 0) {
             processedBitmap = blurBitmap(processedBitmap, blurPercent)
         }
+
+        // Apply vignette effect
+        if (vignette && vignettePercent > 0) {
+            processedBitmap = vignetteBitmap(processedBitmap, vignettePercent)
+        }
+
         return processedBitmap
     } catch (e: Exception) {
         Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)

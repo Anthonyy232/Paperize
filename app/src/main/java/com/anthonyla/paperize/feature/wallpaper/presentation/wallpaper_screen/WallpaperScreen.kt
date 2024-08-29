@@ -40,6 +40,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.IndividualSchedulingAndToggleRow
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.VignetteSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
 
@@ -79,7 +80,12 @@ fun WallpaperScreen(
     onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
     homeBlurPercentage: Int,
-    lockBlurPercentage: Int
+    lockBlurPercentage: Int,
+    homeVignettePercentage: Int,
+    lockVignettePercentage: Int,
+    onVignettePercentageChange: (Int, Int) -> Unit,
+    onVignetteChange: (Boolean) -> Unit,
+    vignette: Boolean
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -200,6 +206,9 @@ fun WallpaperScreen(
                             blur = blur,
                             homeBlurPercentage = homeBlurPercentage,
                             lockBlurPercentage = lockBlurPercentage,
+                            vignette = vignette,
+                            homeVignettePercentage = homeVignettePercentage,
+                            lockVignettePercentage = lockVignettePercentage
                         )
                         CurrentAndNextChange(lastSetTime, nextSetTime)
                         TimeSliders(
@@ -235,6 +244,15 @@ fun WallpaperScreen(
                             blur = blur,
                             homeBlurPercentage = homeBlurPercentage,
                             lockBlurPercentage = lockBlurPercentage,
+                            animate = animate,
+                            bothEnabled = homeEnabled && lockEnabled
+                        )
+                        VignetteSwitchAndSlider(
+                            onVignettePercentageChange = onVignettePercentageChange,
+                            onVignetteChange = onVignetteChange,
+                            vignette = vignette,
+                            homeVignettePercentage = homeVignettePercentage,
+                            lockVignettePercentage = lockVignettePercentage,
                             animate = animate,
                             bothEnabled = homeEnabled && lockEnabled
                         )
