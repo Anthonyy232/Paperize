@@ -130,8 +130,7 @@ fun AddAlbumScreen(
                 onFolderClick = {
                     selectionMode = false
                     folderPickerLauncher.launch(null)
-                },
-                animate = animate
+                }
             )
         },
         content = {

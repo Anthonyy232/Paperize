@@ -126,8 +126,7 @@ fun AlbumViewScreen(
                 onFolderClick = {
                     selectionMode = false
                     folderPickerLauncher.launch(null)
-                },
-                animate = animate
+                }
             )
         },
         content = { it ->
