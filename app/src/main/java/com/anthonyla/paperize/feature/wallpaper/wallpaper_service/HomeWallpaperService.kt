@@ -19,6 +19,7 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
+import com.anthonyla.paperize.core.getDeviceScreenSize
 import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.core.processBitmap
 import com.anthonyla.paperize.core.retrieveBitmap
@@ -567,11 +568,11 @@ class HomeWallpaperService: Service() {
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
-            val device = context.resources.displayMetrics
-            val bitmap = retrieveBitmap(context, wallpaper, device)
+            val size = getDeviceScreenSize(context)
+            val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
             if (bitmap == null) return false
             else {
-                processBitmap(device, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent)?.let { image ->
+                processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
                     wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()

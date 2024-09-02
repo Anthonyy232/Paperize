@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.core
 import android.content.Context
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -17,10 +19,14 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import android.view.WindowManager
+import android.view.WindowMetrics
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
+import com.anthonyla.paperize.core.ScreenMetricsCompat.getScreenSize
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
@@ -71,12 +77,57 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
 }
 
 /**
+ * Get the screen size of the device without orientation
+ * https://stackoverflow.com/a/70087378
+ */
+object ScreenMetricsCompat {
+    private val api: Api =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ApiLevel30() else Api()
+    fun getScreenSize(context: Context): Size = api.getScreenSize(context)
+
+    @Suppress("DEPRECATION")
+    private open class Api {
+        open fun getScreenSize(context: Context): Size {
+            val display = context.getSystemService(WindowManager::class.java).defaultDisplay
+            val metrics = if (display != null) {
+                DisplayMetrics().also { display.getRealMetrics(it) }
+            } else {
+                Resources.getSystem().displayMetrics
+            }
+            return Size(metrics.widthPixels, metrics.heightPixels)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private class ApiLevel30 : Api() {
+        override fun getScreenSize(context: Context): Size {
+            val metrics: WindowMetrics = context.getSystemService(WindowManager::class.java).currentWindowMetrics
+            return Size(metrics.bounds.width(), metrics.bounds.height())
+        }
+    }
+}
+
+/**
+ * Get device screen size with orientation
+ */
+fun getDeviceScreenSize(context: Context): Size {
+    val orientation = context.resources.configuration.orientation
+    val size = getScreenSize(context)
+    return if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        Size(size.width, size.height)
+    } else {
+        Size(size.height, size.width)
+    }
+}
+
+/**
  * Retrieve a bitmap from a URI that is scaled down to the device's screen size
  */
 fun retrieveBitmap(
     context: Context,
     wallpaper: Uri,
-    device: DisplayMetrics
+    width: Int,
+    height: Int
 ): Bitmap? {
     val imageSize = wallpaper.getImageDimensions(context) ?: return null
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -86,8 +137,8 @@ fun retrieveBitmap(
                 decoder.setTargetSampleSize(
                     calculateInSampleSize(
                         imageSize,
-                        device.widthPixels,
-                        device.heightPixels
+                        width,
+                        height
                     )
                 )
                 decoder.isMutableRequired = true
@@ -96,7 +147,7 @@ fun retrieveBitmap(
             context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                 val options = BitmapFactory.Options().apply {
                     inSampleSize =
-                        calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
+                        calculateInSampleSize(imageSize, width, height)
                     inMutable = true
                 }
                 BitmapFactory.decodeStream(inputStream, null, options)
@@ -106,7 +157,7 @@ fun retrieveBitmap(
         context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
             val options = BitmapFactory.Options().apply {
                 inSampleSize =
-                    calculateInSampleSize(imageSize, device.widthPixels, device.heightPixels)
+                    calculateInSampleSize(imageSize, width, height)
                 inMutable = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
@@ -387,7 +438,8 @@ fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
  * 0 - lightest, 100 - darkest
  */
 fun processBitmap(
-    device: DisplayMetrics,
+    width: Int,
+    height: Int,
     source: Bitmap,
     darken: Boolean,
     darkenPercent: Int,
@@ -402,9 +454,9 @@ fun processBitmap(
 
         // Apply wallpaper scaling effects
         processedBitmap = when (scaling) {
-            ScalingConstants.FILL -> fillBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-            ScalingConstants.FIT -> fitBitmap(processedBitmap, device.widthPixels, device.heightPixels)
-            ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, device.widthPixels, device.heightPixels)
+            ScalingConstants.FILL -> fillBitmap(processedBitmap, width, height)
+            ScalingConstants.FIT -> fitBitmap(processedBitmap, width, height)
+            ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, width, height)
         }
 
         // Apply brightness effect
