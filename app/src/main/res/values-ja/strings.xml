@@ -159,4 +159,5 @@
   <string name="enable_wallpaper_changer">壁紙変更を有効にする</string>
   <string name="unselected_album">選択されていないアルバム</string>
   <string name="lock">ロック</string>
+  <string name="change_vignette">ビネットの変更</string>
 </resources>

@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Ενεργοποίηση Εναλλαγής Ταπετσαρίας</string>
   <string name="unselected_album">Μη επιλεγμένο άλμπουμ</string>
   <string name="lock">Κλείδωμα</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

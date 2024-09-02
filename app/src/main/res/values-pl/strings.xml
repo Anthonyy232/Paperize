@@ -171,4 +171,5 @@
   <string name="enable_wallpaper_changer">Włącz zmianę tapety</string>
   <string name="unselected_album">Niewybrany album</string>
   <string name="lock">Blokada</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

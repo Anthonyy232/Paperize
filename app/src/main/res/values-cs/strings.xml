@@ -171,4 +171,5 @@
   <string name="enable_wallpaper_changer">Povolit změnu tapety</string>
   <string name="unselected_album">Nevybrané album</string>
   <string name="lock">Zamknout</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Activar Cambiador de Fondos de Pantalla</string>
   <string name="unselected_album">Álbum no seleccionado</string>
   <string name="lock">Bloquear</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

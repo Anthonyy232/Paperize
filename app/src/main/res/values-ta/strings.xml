@@ -160,7 +160,8 @@
   <string name="change_next_short">வால்பேப்பரை மாற்றவும்</string>
   <string name="change_next_long">ஆல்பத்தின் அடுத்த வால்பேப்பருக்கு மாற்றவும்</string>
   <string name="cannot_change_wallpaper">வால்பேப்பரை மாற்ற முடியாது</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">வால்பேப்பர் சேஞ்சரை இயக்கவும்</string>
+  <string name="unselected_album">தேர்ந்தெடுக்கப்படாத ஆல்பம்</string>
+  <string name="lock">பூட்டு</string>
+  <string name="change_vignette">விக்னெட்டை மாற்றவும்</string>
 </resources>

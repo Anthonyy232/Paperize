@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Ota Taustakuvan Vaihtaja Käyttöön</string>
   <string name="unselected_album">Valitsematon albumi</string>
   <string name="lock">Lukitse</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

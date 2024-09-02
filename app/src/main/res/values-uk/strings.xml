@@ -171,4 +171,5 @@
   <string name="enable_wallpaper_changer">Увімкнути зміну шпалер</string>
   <string name="unselected_album">Видалити альбом</string>
   <string name="lock">Зачинити</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

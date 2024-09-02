@@ -179,4 +179,5 @@
   <string name="enable_wallpaper_changer">تمكين محول الخلفية</string>
   <string name="unselected_album">ألبوم غير محدد</string>
   <string name="lock">قفل</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

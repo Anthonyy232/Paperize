@@ -164,7 +164,8 @@
   <string name="change_next_short">Промените позадину</string>
   <string name="change_next_long">Пребаците се на следећу позадину у албуму</string>
   <string name="cannot_change_wallpaper">Није могуће променити позадину</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">Омогући мењач позадине</string>
+  <string name="unselected_album">Неодабрани албум</string>
+  <string name="lock">Закључај</string>
+  <string name="change_vignette">Промените вињету</string>
 </resources>

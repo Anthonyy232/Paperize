@@ -156,7 +156,8 @@
   <string name="change_next_short">Thay đổi hình nền</string>
   <string name="change_next_long">Thay đổi hình nền tiếp theo trong album</string>
   <string name="cannot_change_wallpaper">Không thể thay đổi hình nền</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">Bật Trình thay đổi hình nền</string>
+  <string name="unselected_album">Album chưa chọn</string>
+  <string name="lock">Khóa</string>
+  <string name="change_vignette">Thay đổi hình ảnh</string>
 </resources>

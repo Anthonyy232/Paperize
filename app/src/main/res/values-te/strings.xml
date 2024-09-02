@@ -160,7 +160,8 @@
   <string name="change_next_short">వాల్‌పేపర్‌ని మార్చండి</string>
   <string name="change_next_long">ఆల్బమ్‌లోని తదుపరి వాల్‌పేపర్‌కి మార్చండి</string>
   <string name="cannot_change_wallpaper">వాల్‌పేపర్‌ని మార్చలేరు</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">వాల్‌పేపర్ ఛేంజర్‌ని ప్రారంభించండి</string>
+  <string name="unselected_album">ఎంపిక చేయని ఆల్బమ్</string>
+  <string name="lock">తాళం వేయండి</string>
+  <string name="change_vignette">విగ్నేట్ మార్చండి</string>
 </resources>

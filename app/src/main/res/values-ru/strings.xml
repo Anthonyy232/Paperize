@@ -38,7 +38,7 @@
   <string name="welcome">Добро пожаловать</string>
   <string name="notifications">Уведомления</string>
   <string name="continue_button">Согласен </string>
-  <string name="notification_permission_is_required_for_this_app_to_work_properly">Для правильной работы этого приложения требуется разрешение на уведомление.</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">Для правильной работы этого приложения требуется разрешение на уведомление</string>
   <string name="allow">Разрешить</string>
   <string name="notification_info_message">Уведомления можно включить, чтобы они отображались, когда приложение работает в фоновом режиме.</string>
   <string name="set_as_lock_screen">Установить в качестве экрана блокировки</string>
@@ -110,7 +110,7 @@
   <string name="add_images_btn">Добавить изображения</string>
   <string name="add_folder_btn">Добавить папку</string>
   <string name="version">Версия: %1$s</string>
-  <string name="appearance">Появление</string>
+  <string name="appearance">Оформление</string>
   <string name="about">О нас</string>
   <string name="coming_soon">Скоро</string>
   <string name="new_album">Новый альбом</string>
@@ -130,8 +130,8 @@
   <string name="privacy_information_usage_title">Использование информации</string>
   <string name="privacy_information_usage_content">Персональные данные: Мы не собираем и не храним какие-либо личные данные, такие как имена, адреса электронной почты или номера телефонов.\n\nАналитика использования: %1$s не отслеживает ваше поведение при использовании и не собирает аналитические данные.</string>
   <string name="privacy_data_security_title">Безопасность данных</string>
-  <string name="privacy_data_security_content">Хранение на устройстве: все данные, используемые %1$s , остаются на вашем устройстве. Мы не передаем и не храним какие-либо данные снаружи.</string>
-  <string name="privacy_third_party_services_title">Сторонние услуги</string>
+  <string name="privacy_data_security_content">Хранение на устройстве: все данные, используемые %1$s, остаются на вашем устройстве. Мы не передаем и не храним какие-либо данные снаружи.</string>
+  <string name="privacy_third_party_services_title">Сторонние сервисы</string>
   <string name="privacy_third_party_services_content">Реклама: %1$s не отображает стороннюю рекламу.\n\nВнешние ссылки: наше приложение может содержать ссылки на внешние веб-сайты. Обратите внимание, что мы не несем ответственности за политику конфиденциальности на этих сайтах.</string>
   <string name="privacy_children_privacy_title">Конфиденциальность детей</string>
   <string name="privacy_children_privacy_content">%1$s не предназначен для детей младше 13 лет. Мы сознательно не собираем никакой информации от детей.</string>
@@ -150,7 +150,7 @@
   <string name="stretch">Растянуть</string>
   <string name="wallpaper_scaling">Масштабирование обоев</string>
   <string name="change_brightness">Изменить яркость</string>
-  <string name="home_screen_btn">Домашний экран</string>
+  <string name="home_screen_btn">Главный экран</string>
   <string name="lock_screen_btn">Экран блокировки</string>
   <string name="individual_scheduling">Индивидуальное планирование</string>
   <string name="show_interval_sliders">Показать ползунки интервалов</string>
@@ -171,4 +171,5 @@
   <string name="enable_wallpaper_changer">Включить смену обоев</string>
   <string name="unselected_album">Невыбранный альбом</string>
   <string name="lock">Заблокировать</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

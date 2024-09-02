@@ -160,7 +160,8 @@
   <string name="change_next_short">Háttérkép módosítása</string>
   <string name="change_next_long">Váltás az album következő háttérképére</string>
   <string name="cannot_change_wallpaper">Háttérkép nem módosítható</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">A Wallpaper Changer engedélyezése</string>
+  <string name="unselected_album">Nincs kijelölve album</string>
+  <string name="lock">Zár</string>
+  <string name="change_vignette">Változtassa meg a matricát</string>
 </resources>

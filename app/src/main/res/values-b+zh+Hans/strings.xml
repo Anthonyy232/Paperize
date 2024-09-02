@@ -140,7 +140,7 @@
   <string name="change_brightness">改变亮度</string>
   <string name="home_screen_btn">主屏幕</string>
   <string name="lock_screen_btn">锁定屏幕</string>
-  <string name="individual_scheduling">个人排程</string>
+  <string name="individual_scheduling">锁屏与主屏幕独立选择</string>
   <string name="show_interval_sliders">显示间隔滑块</string>
   <string name="interval_text">时间间隔</string>
   <string name="change_blur">更改模糊</string>
@@ -159,4 +159,5 @@
   <string name="enable_wallpaper_changer">启用壁纸更改</string>
   <string name="unselected_album">未选中的相册</string>
   <string name="lock">锁定</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

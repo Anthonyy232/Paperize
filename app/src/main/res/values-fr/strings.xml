@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Activer le changement de fond d\'écran</string>
   <string name="unselected_album">Album non sélectionné</string>
   <string name="lock">Verrouiller</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

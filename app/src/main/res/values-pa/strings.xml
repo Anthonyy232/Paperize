@@ -160,7 +160,8 @@
   <string name="change_next_short">ਵਾਲਪੇਪਰ ਬਦਲੋ</string>
   <string name="change_next_long">ਐਲਬਮ ਵਿੱਚ ਅਗਲੇ ਵਾਲਪੇਪਰ ਵਿੱਚ ਬਦਲੋ</string>
   <string name="cannot_change_wallpaper">ਵਾਲਪੇਪਰ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">ਵਾਲਪੇਪਰ ਚੇਂਜਰ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ</string>
+  <string name="unselected_album">ਅਣਚੁਣਿਆ ਐਲਬਮ</string>
+  <string name="lock">ਤਾਲਾ</string>
+  <string name="change_vignette">ਵਿਗਨੇਟ ਬਦਲੋ</string>
 </resources>

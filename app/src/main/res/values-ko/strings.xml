@@ -4,10 +4,10 @@
   <string name="SettingsIcon">옵션</string>
   <string name="dropdownmenu_settings">설정</string>
   <string name="home_screen">집</string>
-  <string name="wallpaper_screen">벽지</string>
-  <string name="library_screen">도서관</string>
+  <string name="wallpaper_screen">월페이퍼</string>
+  <string name="library_screen">라이브러리</string>
   <string name="settings_screen">설정</string>
-  <string name="settings_back">뒤쪽에</string>
+  <string name="settings_back">뒤로가기</string>
   <string name="LibraryFloatingButton">새 라이브러리 추가</string>
   <string name="set_wallpaper_description">라이브 배경화면 활성화</string>
   <string name="add_wallpaper">배경화면 추가</string>
@@ -51,7 +51,7 @@
   <string name="licenses">라이센스</string>
   <string name="licenses_screen">라이센스 화면</string>
   <string name="contact">연락하다</string>
-  <string name="contact_the_author_by_email">저자에게 이메일로 연락하기</string>
+  <string name="contact_the_author_by_email">제작자에게 이메일로 연락하기</string>
   <string name="reset_to_default">기본값으로 재설정</string>
   <string name="reset_all_data">모든 데이터 재설정</string>
   <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">모든 설정과 데이터를 기본값으로 재설정하시겠습니까?</string>
@@ -87,7 +87,7 @@
   <string name="are_you_sure_you_want_to_delete_these_wallpapers">이 배경화면을 삭제하시겠습니까?</string>
   <string name="are_you_sure_you_want_to_delete_this">정말로 삭제하시겠습니까?</string>
   <string name="delete_album_question">앨범을 삭제하시겠습니까?</string>
-  <string name="animation">생기</string>
+  <string name="animation">애니메이션</string>
   <string name="increase_visual_appeal">시각적 매력을 높여보세요</string>
   <string name="dark_mode">다크 모드</string>
   <string name="automatic_device_mode">자동 장치 모드</string>
@@ -156,7 +156,8 @@
   <string name="change_next_short">배경화면 변경</string>
   <string name="change_next_long">앨범의 다음 배경화면으로 변경</string>
   <string name="cannot_change_wallpaper">배경화면을 변경할 수 없습니다.</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">배경화면 변경기 활성화</string>
+  <string name="unselected_album">선택되지 않은 앨범</string>
+  <string name="lock">잠그다</string>
+  <string name="change_vignette">비네트 변경</string>
 </resources>

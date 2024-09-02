@@ -168,7 +168,8 @@
   <string name="change_next_short">שנה טפט</string>
   <string name="change_next_long">שנה לטפט הבא באלבום</string>
   <string name="cannot_change_wallpaper">לא ניתן לשנות טפט</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="unselected_album">Unselected album</string>
-  <string name="lock">Lock</string>
+  <string name="enable_wallpaper_changer">הפעל את מחליף טפטים</string>
+  <string name="unselected_album">אלבום שלא נבחר</string>
+  <string name="lock">לִנְעוֹל</string>
+  <string name="change_vignette">שנה ויגנט</string>
 </resources>

@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Aktivér Tapet Skifter</string>
   <string name="unselected_album">Fravalgte album</string>
   <string name="lock">Lås</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>

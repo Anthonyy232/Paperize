@@ -163,4 +163,5 @@
   <string name="enable_wallpaper_changer">Hintergrundwechsel aktivieren</string>
   <string name="unselected_album">Nicht ausgewähltes Album</string>
   <string name="lock">Sperren</string>
+  <string name="change_vignette">Change Vignette</string>
 </resources>
