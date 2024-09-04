@@ -45,7 +45,7 @@ I would love some help translating the app! Help me out with that [here](https:/
 
 - [Kotlin](https://kotlinlang.org/) - A programming language that is used for Android app development
 - [Jetpack Compose](https://developer.android.com/develop/ui/compose) - A declarative UI toolkit for building native Android UI
-- [Material 3](https://m3.material.io/) - A UI design system git for modern UI guidelines
+- [Material 3](https://m3.material.io/) - A UI design system for modern UI guidelines
 - [Dagger Hilt](https://dagger.dev/hilt/) - A dependency injection library
 - [Room](https://developer.android.com/training/data-storage/room) - A persistence library that provides an abstraction layer over SQLite interfacing with Kotlin
 - [AboutLibraries](https://github.com/mikepenz/AboutLibraries) - A library to offer some information of libraries
