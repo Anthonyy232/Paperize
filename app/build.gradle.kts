@@ -110,7 +110,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation("com.mikepenz:aboutlibraries-core:11.2.3")
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.3")
-    implementation("androidx.compose.foundation:foundation:1.7.0-rc01")
+    implementation("androidx.compose.foundation:foundation:1.7.0")
     implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
     implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
     testImplementation("junit:junit:4.13.2")
