@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
 import com.joaomgcd.taskerpluginlibrary.action.TaskerPluginRunnerActionNoOutputOrInput
 import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfig
@@ -18,6 +20,9 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
  */
 class ShortcutHelper(config: TaskerPluginConfig<Unit>) : TaskerPluginConfigHelperNoOutputOrInput<ShortcutActionRunner>(config) {
     override val runnerClass: Class<ShortcutActionRunner> get() = ShortcutActionRunner::class.java
+    override fun addToStringBlurb(input: TaskerInput<Unit>, blurbBuilder: StringBuilder) {
+        blurbBuilder.append("Changes the wallpaper")
+    }
 }
 
 class ActivityConfigBasicAction : Activity(), TaskerPluginConfigNoInput {
@@ -31,8 +36,10 @@ class ActivityConfigBasicAction : Activity(), TaskerPluginConfigNoInput {
 
 class ShortcutActionRunner : TaskerPluginRunnerActionNoOutputOrInput() {
     override fun run(context: Context, input: TaskerInput<Unit>): TaskerPluginResult<Unit> {
-        val intent = Intent(context, WallpaperBootAndChangeReceiver::class.java)
-        context.sendBroadcast(intent)
+        Handler(Looper.getMainLooper()).post {
+            val intent = Intent(context, WallpaperBootAndChangeReceiver::class.java)
+            context.sendBroadcast(intent)
+        }
         return TaskerPluginResultSucess()
     }
 }
