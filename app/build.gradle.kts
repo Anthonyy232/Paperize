@@ -20,7 +20,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 31
-        versionName = "2.1.0"
+        versionName = "2.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -84,30 +84,30 @@ androidComponents {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
     implementation("androidx.activity:activity-compose:1.9.2")
-    implementation(platform("androidx.compose:compose-bom:2024.08.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.09.00"))
     implementation("androidx.compose.ui:ui:1.7.0")
     implementation("androidx.compose.ui:ui-graphics:1.7.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.7.0-rc01")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.7.0")
     implementation("androidx.compose.material3:material3:1.3.0")
-    implementation("androidx.navigation:navigation-compose:2.8.0-rc01")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.compose.material:material:1.7.0")
     implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.compose.animation:animation:1.7.0")
-    implementation("androidx.core:core-splashscreen:1.2.0-alpha01")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+    implementation("androidx.core:core-splashscreen:1.2.0-alpha02")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:2.0.0-beta01")
     implementation("com.github.skydoves:landscapist-glide:2.3.6")
-    implementation("androidx.work:work-runtime-ktx:2.10.0-alpha02")
+    implementation("androidx.work:work-runtime-ktx:2.10.0-alpha03")
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.5.2")
-    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation("com.google.accompanist:accompanist-permissions:0.36.0")
     implementation("com.mikepenz:aboutlibraries-core:11.2.3")
     implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.3")
     implementation("androidx.compose.foundation:foundation:1.7.0")
