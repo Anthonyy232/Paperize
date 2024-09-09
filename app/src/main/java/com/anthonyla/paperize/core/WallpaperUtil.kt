@@ -84,7 +84,6 @@ object ScreenMetricsCompat {
     private val api: Api =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ApiLevel30() else Api()
     fun getScreenSize(context: Context): Size = api.getScreenSize(context)
-
     @Suppress("DEPRECATION")
     private open class Api {
         open fun getScreenSize(context: Context): Size {
@@ -457,6 +456,7 @@ fun processBitmap(
             ScalingConstants.FILL -> fillBitmap(processedBitmap, width, height)
             ScalingConstants.FIT -> fitBitmap(processedBitmap, width, height)
             ScalingConstants.STRETCH -> stretchBitmap(processedBitmap, width, height)
+            ScalingConstants.NONE -> processedBitmap
         }
 
         // Apply brightness effect

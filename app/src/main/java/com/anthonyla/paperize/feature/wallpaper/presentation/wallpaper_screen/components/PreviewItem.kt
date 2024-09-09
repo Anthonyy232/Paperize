@@ -54,9 +54,10 @@ fun PreviewItem(
                     ScalingConstants.FILL -> ContentScale.FillHeight
                     ScalingConstants.FIT -> ContentScale.FillWidth
                     ScalingConstants.STRETCH -> ContentScale.FillBounds
+                    ScalingConstants.NONE -> ContentScale.Crop
                 },
                 requestSize = IntSize(300, 300),
-                alignment = Alignment.Center,
+                alignment = if (scaling == ScalingConstants.NONE) Alignment.CenterStart else Alignment.Center,
                 colorFilter = if (darken && darkenPercentage < 100) {
                     ColorFilter.tint(
                         Color.Black.copy(alpha = (100 - darkenPercentage).toFloat().div(100f)),

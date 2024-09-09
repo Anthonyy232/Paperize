@@ -494,7 +494,7 @@ class LockWallpaperService: Service() {
             val size = getDeviceScreenSize(context)
             val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
             if (bitmap == null) return false
-            else {
+            else if (wallpaperManager.isSetWallpaperAllowed) {
                 processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
                     wallpaperManager.forgetLoadedWallpaper()
@@ -503,6 +503,7 @@ class LockWallpaperService: Service() {
                 bitmap.recycle()
                 return true
             }
+            else return false
         } catch (e: IOException) {
             Log.e("PaperizeWallpaperChanger", "Error setting wallpaper", e)
             return false

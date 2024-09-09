@@ -61,13 +61,15 @@ fun WallpaperPreviewAndScale(
                 ScalingConstants.FILL -> 0
                 ScalingConstants.FIT -> 1
                 ScalingConstants.STRETCH -> 2
+                ScalingConstants.NONE -> 3
             }
         )
     }
     val options = listOf(
         stringResource(R.string.fill),
         stringResource(R.string.fit),
-        stringResource(R.string.stretch)
+        stringResource(R.string.stretch),
+        stringResource(R.string.none)
     )
 
     Surface(
@@ -87,9 +89,13 @@ fun WallpaperPreviewAndScale(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val modifier = if (lockEnabled && homeEnabled) {
-                    Modifier.weight(1f).padding(8.dp)
+                    Modifier
+                        .weight(1f)
+                        .padding(8.dp)
                 } else {
-                    Modifier.fillMaxSize(0.5f).padding(8.dp)
+                    Modifier
+                        .fillMaxSize(0.5f)
+                        .padding(8.dp)
                 }
 
                 if (lockEnabled) {
@@ -150,6 +156,7 @@ fun WallpaperPreviewAndScale(
                                     0 -> ScalingConstants.FILL
                                     1 -> ScalingConstants.FIT
                                     2 -> ScalingConstants.STRETCH
+                                    3 -> ScalingConstants.NONE
                                     else -> ScalingConstants.FILL
                                 }
                             ) },
@@ -164,6 +171,7 @@ fun WallpaperPreviewAndScale(
                                     0 -> painterResource(id = R.drawable.fill)
                                     1 -> painterResource(id = R.drawable.fit)
                                     2 -> painterResource(id = R.drawable.stretch)
+                                    3 -> painterResource(id = R.drawable.none)
                                     else -> painterResource(id = R.drawable.fill)
                                 },
                                 contentDescription = null,

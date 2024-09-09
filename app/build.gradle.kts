@@ -20,7 +20,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 31
-        versionName = "2.1.1"
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -113,6 +113,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.7.0")
     implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
     implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
+    implementation("com.google.ar.sceneform:filament-android:1.17.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
