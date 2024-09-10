@@ -1,7 +1,10 @@
 
 <div align="center">
     <img style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
-    <h1>Paperize</h1>
+    <h1>
+        Paperize
+        <p><img style="display: block; border-radius: 9999px;" src="https://img.shields.io/github/downloads/Anthonyy232/Paperize/total"></p>
+    </h1>
   <p align="center"></p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
 </div>
