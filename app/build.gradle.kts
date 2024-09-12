@@ -103,7 +103,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:2.0.0-beta01")
-    implementation("com.github.skydoves:landscapist-glide:2.3.6")
+    implementation("com.github.skydoves:landscapist-glide:2.3.8")
     implementation("androidx.work:work-runtime-ktx:2.10.0-alpha03")
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.5.2")
