@@ -25,7 +25,9 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
         try {
             val scheduler = WallpaperAlarmSchedulerImpl(context)
             val toggleChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
-            if (toggleChanger) {
+            val selectedAlbum = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
+
+            if (selectedAlbum.isNotEmpty()) {
                 val homeInterval = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
@@ -38,11 +40,14 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                     setLock = setLock,
                     setHome = setHome
                 )
-                alarmItem.let{scheduler.scheduleWallpaperAlarm(
-                    wallpaperAlarmItem = it,
-                    origin = null,
-                    changeImmediate = true,
-                    cancelImmediate = true)
+                alarmItem.let{
+                    scheduler.scheduleWallpaperAlarm(
+                        wallpaperAlarmItem = it,
+                        origin = null,
+                        changeImmediate = true,
+                        cancelImmediate = true,
+                        setAlarm = toggleChanger
+                    )
                 }
             }
         } catch (e: Exception) {

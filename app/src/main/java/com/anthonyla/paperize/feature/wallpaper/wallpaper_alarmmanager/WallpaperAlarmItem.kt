@@ -15,5 +15,5 @@ data class WallpaperAlarmItem(
     val lockInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
     val scheduleSeparately: Boolean = false,
     val setHome : Boolean = false,
-    val setLock : Boolean = false
+    val setLock : Boolean = false,
 )

@@ -24,7 +24,13 @@ class WallpaperAlarmSchedulerImpl (
     /**
      * Schedules the wallpaper alarm based on the origin and changeImmediate
      */
-    override fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int?, changeImmediate: Boolean, cancelImmediate: Boolean) {
+    override fun scheduleWallpaperAlarm(
+        wallpaperAlarmItem: WallpaperAlarmItem,
+        origin: Int?,
+        changeImmediate: Boolean,
+        cancelImmediate: Boolean,
+        setAlarm: Boolean,
+    ) {
         // Cancel previous alarms before setting new ones to prevent stale alarms
         if (cancelImmediate) cancelWallpaperAlarm()
         else {
@@ -44,25 +50,27 @@ class WallpaperAlarmSchedulerImpl (
             when (origin) {
                 Type.LOCK.ordinal -> {
                     if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.LOCK)
-                    scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, origin)
+                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, origin)
                 }
                 Type.HOME.ordinal -> {
                     if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
-                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin)
+                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin)
                 }
                 null -> {
                     if (changeImmediate) {
                         changeWallpaperImmediate(wallpaperAlarmItem, Type.LOCK)
                         changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
                     }
-                    scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, Type.LOCK.ordinal)
-                    scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal)
+                    if (setAlarm) {
+                        scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, Type.LOCK.ordinal)
+                        scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal)
+                    }
                 }
             }
         }
         else {
             if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.SINGLE)
-            scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE)
+            if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE)
         }
     }
 

@@ -8,7 +8,7 @@ interface WallpaperAlarmScheduler {
      * @param changeImmediate whether to change the wallpaper immediately or just schedule the alarm
      * @param cancelImmediate whether to cancel all alarms before scheduling the new one
      */
-    fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int? = null, changeImmediate: Boolean = false, cancelImmediate: Boolean = false)
+    fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int? = null, changeImmediate: Boolean = false, cancelImmediate: Boolean = false, setAlarm: Boolean = true)
 
     /**
      * Update the wallpaper alarm with new times without changing the wallpaper

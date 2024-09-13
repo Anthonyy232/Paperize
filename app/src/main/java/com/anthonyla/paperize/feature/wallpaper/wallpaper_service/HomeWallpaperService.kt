@@ -183,10 +183,9 @@ class HomeWallpaperService: Service() {
                 return
             }
             else {
-                val enableChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
                 val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false
                 val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false
-                if (!enableChanger || (!setHome && !setLock)) {
+                if (!setHome && !setLock) {
                     onDestroy()
                     return
                 }
