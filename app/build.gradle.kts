@@ -91,7 +91,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics:1.7.2")
     implementation("androidx.compose.ui:ui-tooling-preview:1.7.2")
     implementation("androidx.compose.material3:material3:1.3.0")
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("androidx.navigation:navigation-compose:2.8.1")
     implementation("androidx.compose.material:material:1.7.2")
     implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
