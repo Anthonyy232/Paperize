@@ -119,7 +119,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.2")
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.1")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.2")
     implementation("com.google.dagger:hilt-android:2.52")
     ksp("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.room:room-runtime:2.6.1")
