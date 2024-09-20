@@ -99,7 +99,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.compose.animation:animation:1.7.2")
     implementation("androidx.core:core-splashscreen:1.2.0-alpha02")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
     implementation("net.engawapg.lib:zoomable:2.0.0-beta01")
