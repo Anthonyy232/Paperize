@@ -126,7 +126,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.lazygeniouz:dfc:1.0.8")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:b6363490c3")
 }
 
