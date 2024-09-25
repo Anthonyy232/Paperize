@@ -60,6 +60,7 @@
             <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
         <activity
             android:name=".feature.wallpaper.tasker_shortcut.ActivityConfigBasicAction"
             android:exported="true"
@@ -67,6 +68,14 @@
             android:label="Change wallpaper">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".feature.wallpaper.tasker_shortcut.ActivityConfigBasicEvent"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Change wallpaper event">
+            <intent-filter>
+                <action android:name="net.dinglisch.android.tasker.ACTION_EDIT_EVENT" />
             </intent-filter>
         </activity>
     </application>

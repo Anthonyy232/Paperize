@@ -28,6 +28,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
+import com.anthonyla.paperize.feature.wallpaper.tasker_shortcut.triggerWallpaperTaskerEvent
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -578,6 +579,7 @@ class HomeWallpaperService: Service() {
                     image.recycle()
                 }
                 bitmap.recycle()
+                context.triggerWallpaperTaskerEvent()
                 return true
             }
             else return false
