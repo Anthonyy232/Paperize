@@ -97,7 +97,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.3")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.compose.animation:animation:1.7.2")
+    implementation("androidx.compose.animation:animation:1.7.3")
     implementation("androidx.core:core-splashscreen:1.2.0-alpha02")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("com.google.code.gson:gson:2.11.0")
