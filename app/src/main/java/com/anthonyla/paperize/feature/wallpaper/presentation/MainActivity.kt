@@ -18,7 +18,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.Surface
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
@@ -55,7 +54,6 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
     private val context = this
-    private var topInset = 0.dp
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,7 +167,7 @@ class MainActivity : ComponentActivity() {
 
             PaperizeTheme(settingsState.value.darkMode, settingsState.value.amoledTheme, settingsState.value.dynamicTheming) {
                 Surface(tonalElevation = 5.dp) {
-                    PaperizeApp(isFirstLaunch, scheduler, topInset)
+                    PaperizeApp(isFirstLaunch, scheduler)
                 }
             }
         }
@@ -186,12 +184,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.P)
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        topInset = window.decorView.rootWindowInsets.stableInsetTop.dp
     }
 
     private fun isPendingIntentSet(requestCode: Int): Boolean {

@@ -124,7 +124,7 @@ class LockWallpaperService: Service() {
                 val nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
                 val nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
                 val notification = createNotification(nextSetTime)
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                 notification?.let { notificationManager.notify(1, it) }
             }
             stopSelf()
@@ -403,7 +403,11 @@ class LockWallpaperService: Service() {
                 // Run notification
                 if (homeInterval != lockInterval || setLock && !setHome) {
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val homeNextSetTime = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
+                    val homeNextSetTime = try {
+                        LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
+                    } catch (_: Exception) {
+                        LocalDateTime.now()
+                    }
                     val lockNextSetTime: LocalDateTime?
                     val nextSetTime: LocalDateTime?
                     val currentTime = LocalDateTime.now()
@@ -418,7 +422,7 @@ class LockWallpaperService: Service() {
                         settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, lockNextSetTime.toString())
                     }
                     val notification = createNotification(nextSetTime)
-                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                     notification?.let { notificationManager.notify(1, it) }
                 }
             }
@@ -541,7 +545,7 @@ class LockWallpaperService: Service() {
                                     albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                                 }
                             }
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             DocumentFile.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
                                 if (!folderDirectory.isDirectory) {
                                     albumRepository.deleteFolder(folder)

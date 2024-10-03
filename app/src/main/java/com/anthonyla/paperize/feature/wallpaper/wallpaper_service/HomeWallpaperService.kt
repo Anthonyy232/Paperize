@@ -126,7 +126,7 @@ class HomeWallpaperService: Service() {
                 val nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
                 val nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
                 val notification = createNotification(nextSetTime)
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                 notification?.let { notificationManager.notify(1, it) }
             }
             stopSelf()
@@ -473,7 +473,11 @@ class HomeWallpaperService: Service() {
                 // Run notification
                 val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                 val homeNextSetTime: LocalDateTime?
-                var lockNextSetTime = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
+                var lockNextSetTime = try {
+                    LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
+                } catch (_: Exception) {
+                    LocalDateTime.now()
+                }
                 val nextSetTime: LocalDateTime?
                 val currentTime = LocalDateTime.now()
                 if (homeInterval == lockInterval) {
@@ -500,7 +504,7 @@ class HomeWallpaperService: Service() {
                     }
                 }
                 val notification = createNotification(nextSetTime)
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                 notification?.let { notificationManager.notify(1, it) }
             }
         } catch (e: Exception) {
@@ -535,6 +539,15 @@ class HomeWallpaperService: Service() {
                 val currentHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) ?: ""
                 val vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false
                 val homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0
+
+                //log every parameter
+                Log.d("PaperizeWallpaperChanger", "scaling: $scaling")
+                Log.d("PaperizeWallpaperChanger", "darken: $darken")
+                Log.d("PaperizeWallpaperChanger", "homeDarkenPercentage: $homeDarkenPercentage")
+                Log.d("PaperizeWallpaperChanger", "blur: $blur")
+                Log.d("PaperizeWallpaperChanger", "homeBlurPercentage: $homeBlurPercentage")
+                Log.d("PaperizeWallpaperChanger", "vignette: $vignette")
+                Log.d("PaperizeWallpaperChanger", "homeVignettePercentage: $homeVignettePercentage")
 
                 setWallpaper(
                     context = context,
@@ -619,7 +632,7 @@ class HomeWallpaperService: Service() {
                                     albumRepository.updateFolder(folder.copy(coverUri = folderCover, wallpapers = wallpapers))
                                 }
                             }
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             DocumentFile.fromTreeUri(context, folder.folderUri.toUri())?.let { folderDirectory ->
                                 if (!folderDirectory.isDirectory) {
                                     albumRepository.deleteFolder(folder)

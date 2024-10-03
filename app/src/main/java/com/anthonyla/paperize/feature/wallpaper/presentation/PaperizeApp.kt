@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.anthonyla.paperize.data.SendContactIntent
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumViewModel
@@ -65,7 +65,6 @@ import kotlinx.coroutines.withContext
 fun PaperizeApp(
     firstLaunch: Boolean,
     scheduler : WallpaperAlarmSchedulerImpl,
-    topInsets: Dp,
     albumsViewModel: AlbumsViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     wallpaperScreenViewModel: WallpaperScreenViewModel = hiltViewModel(),
@@ -91,7 +90,7 @@ fun PaperizeApp(
                     if (navController.currentDestination?.route == Home::class.simpleName) {
                         try {
                             navController.popBackStack<Home>(inclusive = false)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             navController.navigate(Home)
                         }
                     }
@@ -482,7 +481,7 @@ fun PaperizeApp(
                 },
                 onDarkCheck = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarken(it))
-                    if (settingsState.value.enableChanger && (it && settingsState.value.homeDarkenPercentage < 100)) {
+                    if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -671,7 +670,7 @@ fun PaperizeApp(
                 },
                 onBlurChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetBlur(it))
-                    if (settingsState.value.enableChanger && it) {
+                    if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -691,7 +690,7 @@ fun PaperizeApp(
                 },
                 onVignetteChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetVignette(it))
-                    if (settingsState.value.enableChanger && it) {
+                    if (settingsState.value.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
@@ -896,7 +895,6 @@ fun PaperizeApp(
         ) {
             SettingsScreen(
                 settingsState = settingsViewModel.state,
-                topInsets = topInsets,
                 onBackClick = { navController.navigateUp() },
                 onDarkModeClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
@@ -915,6 +913,9 @@ fun PaperizeApp(
                 },
                 onLicenseClick = {
                     navController.navigate(Licenses)
+                },
+                onContactClick = {
+                    SendContactIntent(context)
                 },
                 onResetClick = {
                     settingsViewModel.onEvent(SettingsEvent.Reset)
@@ -954,7 +955,6 @@ fun PaperizeApp(
             }
         ) {
             PrivacyScreen(
-                topInsets = topInsets,
                 onBackClick = { navController.navigateUp() },
             )
         }
@@ -982,8 +982,7 @@ fun PaperizeApp(
             }
         ) {
             LicensesScreen(
-                topInsets = topInsets,
-                onBackClick = { navController.navigateUp() },
+                onBackClick = { navController.navigateUp() }
             )
         }
     }

@@ -3,14 +3,12 @@ package com.anthonyla.paperize.data
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat.startActivity
 
 /**
  * Opens an email intent to contact the developer.
  */
-@Composable
-fun Contact(context: Context) {
+fun SendContactIntent(context: Context) {
     val authorEmail = "anthonyyla.dev@gmail.com"
     val cc = ""
     val subject = "[Support] Paperize"
