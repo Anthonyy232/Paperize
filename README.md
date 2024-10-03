@@ -1,9 +1,9 @@
 
 <div align="center">
-    <img style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28">
+    <img style="display: block; border-radius: 9999px;" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28" alt="">
     <h1>
         Paperize
-        <p><img style="display: block; border-radius: 9999px;" src="https://img.shields.io/github/downloads/Anthonyy232/Paperize/total"></p>
+        <p><img style="display: block; border-radius: 9999px;" src="https://img.shields.io/github/downloads/Anthonyy232/Paperize/total" alt=""></p>
     </h1>
   <p align="center"></p>
     <p>Paperize is a dynamic wallpaper changer application designed to keep your device's aesthetic fresh and exciting</p>
@@ -28,7 +28,7 @@
       <img src="https://github.com/Anthonyy232/Paperize/assets/60626873/4ce1b28d-f4b2-4048-a261-203156222263" width="30%" alt="album" />
       <img src="https://github.com/user-attachments/assets/d23f290d-bb2c-4b89-9321-b426e45864f9" width="30%" alt="settings" />
     <br/>
-    <video controls src="https://github.com/user-attachments/assets/ce7f5c7c-66a7-45fc-bb28-a53d8d9cf733" muted="true"></video>
+    <video controls src="https://github.com/user-attachments/assets/ce7f5c7c-66a7-45fc-bb28-a53d8d9cf733" muted="muted"></video>
 </div>
 
 
