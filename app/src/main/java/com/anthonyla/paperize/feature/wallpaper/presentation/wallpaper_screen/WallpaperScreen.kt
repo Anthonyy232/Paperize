@@ -38,6 +38,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.GrayscaleSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.IndividualSchedulingAndToggleRow
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.VignetteSwitchAndSlider
@@ -85,7 +86,12 @@ fun WallpaperScreen(
     lockVignettePercentage: Int,
     onVignettePercentageChange: (Int, Int) -> Unit,
     onVignetteChange: (Boolean) -> Unit,
-    vignette: Boolean
+    vignette: Boolean,
+    homeGrayscalePercentage: Int,
+    lockGrayscalePercentage: Int,
+    onGrayscalePercentageChange: (Int, Int) -> Unit,
+    onGrayscaleChange: (Boolean) -> Unit,
+    grayscale: Boolean,
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -208,7 +214,10 @@ fun WallpaperScreen(
                             lockBlurPercentage = lockBlurPercentage,
                             vignette = vignette,
                             homeVignettePercentage = homeVignettePercentage,
-                            lockVignettePercentage = lockVignettePercentage
+                            lockVignettePercentage = lockVignettePercentage,
+                            grayscale = grayscale,
+                            homeGrayscalePercentage = homeGrayscalePercentage,
+                            lockGrayscalePercentage = lockGrayscalePercentage
                         )
                         CurrentAndNextChange(lastSetTime, nextSetTime)
                         TimeSliders(
@@ -253,6 +262,15 @@ fun WallpaperScreen(
                             vignette = vignette,
                             homeVignettePercentage = homeVignettePercentage,
                             lockVignettePercentage = lockVignettePercentage,
+                            animate = animate,
+                            bothEnabled = homeEnabled && lockEnabled
+                        )
+                        GrayscaleSwitchAndSlider(
+                            onGrayscalePercentageChange = onGrayscalePercentageChange,
+                            onGrayscaleChange = onGrayscaleChange,
+                            grayscale = grayscale,
+                            homeGrayscalePercentage = homeGrayscalePercentage,
+                            lockGrayscalePercentage = lockGrayscalePercentage,
                             animate = animate,
                             bothEnabled = homeEnabled && lockEnabled
                         )

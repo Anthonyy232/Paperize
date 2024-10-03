@@ -227,6 +227,9 @@ fun PaperizeApp(
                 vignette = settingsState.value.vignette,
                 homeVignettePercentage = settingsState.value.homeVignettePercentage,
                 lockVignettePercentage = settingsState.value.lockVignettePercentage,
+                grayscale = settingsState.value.grayscale,
+                homeGrayscalePercentage = settingsState.value.homeGrayscalePercentage,
+                lockGrayscalePercentage = settingsState.value.lockGrayscalePercentage,
                 onSettingsClick = { navController.navigate(Settings) },
                 navigateToAddWallpaperScreen = {
                     navController.navigate(AddEdit(it))
@@ -701,6 +704,26 @@ fun PaperizeApp(
                 onVignettePercentageChange = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetVignettePercentage(home, lock))
                     if (settingsState.value.enableChanger && settingsState.value.vignette) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(3000)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                onGrayscaleChange = {
+                    settingsViewModel.onEvent(SettingsEvent.SetGrayscale(it))
+                    if (settingsState.value.enableChanger) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(1000)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                onGrayscalePercentageChange = { home, lock ->
+                    settingsViewModel.onEvent(SettingsEvent.SetGrayscalePercentage(home, lock))
+                    if (settingsState.value.enableChanger && settingsState.value.grayscale) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)

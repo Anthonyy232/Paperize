@@ -61,6 +61,9 @@ class SettingsViewModel @Inject constructor (
             val vignette = async { settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false }
             val homeVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0 }
             val lockVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0 }
+            val grayscale = async { settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false }
+            val homeGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0 }
+            val lockGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0 }
             val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
             val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
 
@@ -94,7 +97,10 @@ class SettingsViewModel @Inject constructor (
                     nextLockWallpaper = nextLockWallpaper.await(),
                     vignette = vignette.await(),
                     homeVignettePercentage = homeVignettePercentage.await(),
-                    lockVignettePercentage = lockVignettePercentage.await()
+                    lockVignettePercentage = lockVignettePercentage.await(),
+                    grayscale = grayscale.await(),
+                    homeGrayscalePercentage = homeGrayscalePercentage.await(),
+                    lockGrayscalePercentage = lockGrayscalePercentage.await()
                 )
             }
             setKeepOnScreenCondition = false
@@ -156,6 +162,9 @@ class SettingsViewModel @Inject constructor (
                     val vignette = async { settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false }
                     val homeVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0 }
                     val lockVignettePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0 }
+                    val grayscale = async { settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false }
+                    val homeGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0 }
+                    val lockGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0 }
 
                     _state.update {
                         it.copy(
@@ -186,7 +195,10 @@ class SettingsViewModel @Inject constructor (
                             nextLockWallpaper = nextLockWallpaper.await(),
                             vignette = vignette.await(),
                             homeVignettePercentage = homeVignettePercentage.await(),
-                            lockVignettePercentage = lockVignettePercentage.await()
+                            lockVignettePercentage = lockVignettePercentage.await(),
+                            grayscale = grayscale.await(),
+                            homeGrayscalePercentage = homeGrayscalePercentage.await(),
+                            lockGrayscalePercentage = lockGrayscalePercentage.await()
                         )
                     }
                 }
@@ -467,6 +479,34 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetGrayscale -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.GRAYSCALE, event.grayscale)
+                    _state.update {
+                        it.copy(
+                            grayscale = event.grayscale
+                        )
+                    }
+                }
+            }
+
+            is SettingsEvent.SetGrayscalePercentage -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    if (event.lockGrayscalePercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE, event.lockGrayscalePercentage)
+                    }
+                    if (event.homeGrayscalePercentage != null) {
+                        settingsDataStoreImpl.putInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE, event.homeGrayscalePercentage)
+                    }
+                    _state.update {
+                        it.copy(
+                            homeGrayscalePercentage = event.homeGrayscalePercentage ?: it.homeGrayscalePercentage,
+                            lockGrayscalePercentage = event.lockGrayscalePercentage ?: it.lockGrayscalePercentage
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.SetCurrentHomeWallpaper -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     if (event.currentHomeWallpaper != null) {
@@ -703,6 +743,9 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.VIGNETTE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.GRAYSCALE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE)
 
                     _state.update {
                         it.copy(
@@ -734,7 +777,10 @@ class SettingsViewModel @Inject constructor (
                             nextLockWallpaper = null,
                             vignette = false,
                             homeVignettePercentage = 0,
-                            lockVignettePercentage = 0
+                            lockVignettePercentage = 0,
+                            grayscale = false,
+                            homeGrayscalePercentage = 0,
+                            lockGrayscalePercentage = 0
                         )
                     }
                 }

@@ -198,6 +198,9 @@ class LockWallpaperService: Service() {
                 val vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false
                 val homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0
                 val lockVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0
+                val grayscale = settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false
+                val homeGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0
+                val lockGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0
                 val lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
                 val lockAlbum = selectedAlbum.find { it.album.initialAlbumName == lockAlbumName }
                 if (lockAlbum == null) {
@@ -226,7 +229,9 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = lockBlurPercentage,
                                     vignette = vignette,
-                                    vignettePercent = lockVignettePercentage
+                                    vignettePercent = lockVignettePercentage,
+                                    grayscale = grayscale,
+                                    grayscalePercent = lockGrayscalePercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
@@ -260,7 +265,9 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = lockBlurPercentage,
                                 vignette = vignette,
-                                vignettePercent = lockVignettePercentage
+                                vignettePercent = lockVignettePercentage,
+                                grayscale = grayscale,
+                                grayscalePercent = lockGrayscalePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
@@ -308,7 +315,9 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = lockBlurPercentage,
                                 vignette = vignette,
-                                vignettePercent = lockVignettePercentage
+                                vignettePercent = lockVignettePercentage,
+                                grayscale = grayscale,
+                                grayscalePercent = lockGrayscalePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
@@ -337,7 +346,9 @@ class LockWallpaperService: Service() {
                                     blur = blur,
                                     blurPercent = homeBlurPercentage,
                                     vignette = vignette,
-                                    vignettePercent = homeVignettePercentage
+                                    vignettePercent = homeVignettePercentage,
+                                    grayscale = grayscale,
+                                    grayscalePercent = homeGrayscalePercentage
                                 )
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
@@ -373,7 +384,9 @@ class LockWallpaperService: Service() {
                                 blur = blur,
                                 blurPercent = homeBlurPercentage,
                                 vignette = vignette,
-                                vignettePercent = homeVignettePercentage
+                                vignettePercent = homeVignettePercentage,
+                                grayscale = grayscale,
+                                grayscalePercent = homeGrayscalePercentage
                             )
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
@@ -460,6 +473,9 @@ class LockWallpaperService: Service() {
                 val vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false
                 val homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0
                 val lockVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0
+                val grayscale = settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false
+                val homeGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0
+                val lockGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0
                 val currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) ?: ""
 
                 setWallpaper(
@@ -471,7 +487,9 @@ class LockWallpaperService: Service() {
                     blur = blur,
                     blurPercent = if (!setHome) homeBlurPercentage else lockBlurPercentage,
                     vignette = vignette,
-                    vignettePercent = if (!setHome) homeVignettePercentage else lockVignettePercentage
+                    vignettePercent = if (!setHome) homeVignettePercentage else lockVignettePercentage,
+                    grayscale = grayscale,
+                    grayscalePercent = if (!setHome) homeGrayscalePercentage else lockGrayscalePercentage
                 )
             }
         } catch (e: Exception) {
@@ -491,7 +509,9 @@ class LockWallpaperService: Service() {
         blur: Boolean,
         blurPercent: Int,
         vignette: Boolean,
-        vignettePercent: Int
+        vignettePercent: Int,
+        grayscale: Boolean,
+        grayscalePercent: Int
     ): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         try {
@@ -499,7 +519,7 @@ class LockWallpaperService: Service() {
             val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
             if (bitmap == null) return false
             else if (wallpaperManager.isSetWallpaperAllowed) {
-                processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent)?.let { image ->
+                processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
                     wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
                     wallpaperManager.forgetLoadedWallpaper()
                     image.recycle()

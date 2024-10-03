@@ -39,4 +39,7 @@ object SettingsConstants {
     const val LOCK_NEXT_SET_TIME = "next_set_time_2"
     const val NEXT_HOME_WALLPAPER = "next_home_wallpaper"
     const val NEXT_LOCK_WALLPAPER = "next_lock_wallpaper"
+    const val GRAYSCALE = "grayscale"
+    const val HOME_GRAYSCALE_PERCENTAGE = "home_grayscale_percentage"
+    const val LOCK_GRAYSCALE_PERCENTAGE = "lock_grayscale_percentage"
 }

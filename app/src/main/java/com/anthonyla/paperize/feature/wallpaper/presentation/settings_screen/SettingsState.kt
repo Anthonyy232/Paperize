@@ -31,6 +31,9 @@ data class SettingsState(
     val vignette: Boolean = false,
     val homeVignettePercentage: Int = 0,
     val lockVignettePercentage: Int = 0,
+    val grayscale: Boolean = false,
+    val homeGrayscalePercentage: Int = 0,
+    val lockGrayscalePercentage: Int = 0,
     val wallpaperScaling: ScalingConstants = ScalingConstants.FILL,
     val nextHomeWallpaper: String? = null,
     val nextLockWallpaper: String? = null

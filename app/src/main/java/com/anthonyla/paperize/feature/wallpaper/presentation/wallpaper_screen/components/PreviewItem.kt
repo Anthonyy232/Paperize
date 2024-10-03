@@ -39,7 +39,9 @@ fun PreviewItem(
     blurPercentage: Int,
     scaling: ScalingConstants,
     vignette: Boolean,
-    vignettePercentage: Int
+    vignettePercentage: Int,
+    grayscale: Boolean,
+    grayscalePercentage: Int
 ) {
     val context = LocalContext.current
     val showUri by remember { mutableStateOf(isValidUri(context, wallpaperUri)) }
@@ -64,13 +66,23 @@ fun PreviewItem(
                         BlendMode.Darken
                     )
                 } else { null },
-                tag = vignette.toString() + vignettePercentage.toString(),
+                tag = vignette.toString() + vignettePercentage.toString() + grayscale.toString() + grayscalePercentage.toString(),
             ),
             requestOptions = {
-                if (vignette && vignettePercentage > 0) {
-                    RequestOptions.bitmapTransform(VignetteBitmapTransformation(vignettePercentage))
-                } else {
-                    RequestOptions()
+                when {
+                    grayscale && grayscalePercentage > 0 && vignette && vignettePercentage > 0 -> {
+                        RequestOptions().transform(
+                            VignetteBitmapTransformation(vignettePercentage),
+                            GrayscaleBitmapTransformation(grayscalePercentage)
+                        )
+                    }
+                    grayscale && grayscalePercentage > 0 -> {
+                        RequestOptions().transform(GrayscaleBitmapTransformation(grayscalePercentage))
+                    }
+                    vignette && vignettePercentage > 0 -> {
+                        RequestOptions().transform(VignetteBitmapTransformation(vignettePercentage))
+                    }
+                    else -> RequestOptions()
                 }
             },
             modifier = Modifier

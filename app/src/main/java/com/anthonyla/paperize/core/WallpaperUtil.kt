@@ -307,13 +307,49 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
 }
 
 /**
+ * Apply a grey filter to the bitmap based on a percentage
+ */
+fun grayBitmap(bitmap: Bitmap, percent: Int): Bitmap {
+    val factor = percent / 100f
+    val colorMatrix = ColorMatrix().apply {
+        setSaturation(1 - factor)
+    }
+    val paint = Paint().apply {
+        colorFilter = ColorMatrixColorFilter(colorMatrix)
+    }
+    val grayBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(grayBitmap)
+    canvas.drawBitmap(bitmap, 0f, 0f, paint)
+
+    return grayBitmap
+}
+
+/**
+ * Calculate the brightness of a bitmap (0-100)
+ * https://gist.github.com/httnn/b1d772caf76cdc0c11e2
+ */
+fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
+    var brightness = 0.0
+    val pixels = IntArray(bitmap.width * bitmap.height)
+    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+    for (i in pixels.indices step pixelSpacing.coerceAtLeast(1)) {
+        val color = pixels[i]
+        val R = Color.red(color)
+        val G = Color.green(color)
+        val B = Color.blue(color)
+        brightness += 0.299*R + 0.587*G + 0.114*B
+    }
+    return (brightness / (pixels.size / pixelSpacing)).toInt()
+}
+
+/**
  * Retrieve wallpaper URIs from a folder directory URI
  */
 fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
     return try {
         val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
         listFilesRecursive(folderDocumentFile, context)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
         listFilesRecursive(folderDocumentFile, context)
     }
@@ -364,7 +400,7 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
             if (file?.exists() == true) {
                 return wallpaper.wallpaperUri
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
             if (file?.exists() == true) {
                 return wallpaper.wallpaperUri
@@ -378,7 +414,7 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
                 if (file?.exists() == true) {
                     return wallpaper
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
                 if (file?.exists() == true) {
                     return wallpaper
@@ -395,7 +431,7 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
 fun getFolderNameFromUri(folderUri: String, context: Context): String? {
     return try {
         DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
     }
 }
@@ -411,25 +447,7 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
             inputStream?.close()
         }
         true
-    } catch (e: Exception) { false }
-}
-
-/**
- * Calculate the brightness of a bitmap (0-100)
- * https://gist.github.com/httnn/b1d772caf76cdc0c11e2
- */
-fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
-    var brightness = 0.0
-    val pixels = IntArray(bitmap.width * bitmap.height)
-    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-    for (i in pixels.indices step pixelSpacing.coerceAtLeast(1)) {
-        val color = pixels[i]
-        val R = Color.red(color)
-        val G = Color.green(color)
-        val B = Color.blue(color)
-        brightness += 0.299*R + 0.587*G + 0.114*B
-    }
-    return (brightness / (pixels.size / pixelSpacing)).toInt()
+    } catch (_: Exception) { false }
 }
 
 /**
@@ -446,7 +464,9 @@ fun processBitmap(
     blur: Boolean,
     blurPercent: Int,
     vignette: Boolean,
-    vignettePercent: Int
+    vignettePercent: Int,
+    grayscale: Boolean,
+    grayscalePercent: Int
 ): Bitmap? {
     try {
         var processedBitmap = source
@@ -472,6 +492,11 @@ fun processBitmap(
         // Apply vignette effect
         if (vignette && vignettePercent > 0) {
             processedBitmap = vignetteBitmap(processedBitmap, vignettePercent)
+        }
+
+        // Apply gray effect
+        if (grayscale && grayscalePercent > 0) {
+            processedBitmap = grayBitmap(processedBitmap, grayscalePercent)
         }
 
         return processedBitmap

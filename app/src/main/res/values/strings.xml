@@ -140,13 +140,13 @@
     <string name="fit">Fit</string>
     <string name="stretch">Stretch</string>
     <string name="wallpaper_scaling">Wallpaper Scaling</string>
-    <string name="change_brightness">Change Brightness</string>
+    <string name="change_brightness">Brightness</string>
     <string name="home_screen_btn">Home Screen</string>
     <string name="lock_screen_btn">Lock Screen</string>
     <string name="individual_scheduling">Individual Scheduling</string>
     <string name="show_interval_sliders">Show interval sliders</string>
     <string name="interval_text">Time Interval</string>
-    <string name="change_blur">Change Blur</string>
+    <string name="change_blur">Blur Effect</string>
     <string name="paperize_is_running">Paperize is running</string>
     <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
     <string name="delay_notice">Delay Notice</string>
@@ -162,6 +162,7 @@
     <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
     <string name="unselected_album">Unselected album</string>
     <string name="lock">Lock</string>
-    <string name="change_vignette">Change Vignette</string>
+    <string name="change_vignette">Vignette Effect</string>
     <string name="none">None</string>
+    <string name="gray_filter">Gray Filter</string>
 </resources>

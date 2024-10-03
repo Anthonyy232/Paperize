@@ -74,7 +74,12 @@ fun HomeScreen(
     lockVignettePercentage: Int,
     onVignettePercentageChange: (Int, Int) -> Unit,
     onVignetteChange: (Boolean) -> Unit,
-    vignette: Boolean
+    vignette: Boolean,
+    homeGrayscalePercentage: Int,
+    lockGrayscalePercentage: Int,
+    onGrayscalePercentageChange: (Int, Int) -> Unit,
+    onGrayscaleChange: (Boolean) -> Unit,
+    grayscale: Boolean
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -178,7 +183,12 @@ fun HomeScreen(
                         lockVignettePercentage = lockVignettePercentage,
                         onVignettePercentageChange = onVignettePercentageChange,
                         onVignetteChange = onVignetteChange,
-                        vignette = vignette
+                        vignette = vignette,
+                        homeGrayscalePercentage = homeGrayscalePercentage,
+                        lockGrayscalePercentage = lockGrayscalePercentage,
+                        onGrayscalePercentageChange = onGrayscalePercentageChange,
+                        onGrayscaleChange = onGrayscaleChange,
+                        grayscale = grayscale
                     )
                     else -> LibraryScreen(
                         albums = albums,
