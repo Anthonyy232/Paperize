@@ -3,7 +3,7 @@
   <string name="app_name">Paperize</string>
   <string name="SettingsIcon">पर्याय</string>
   <string name="dropdownmenu_settings">सेटिंग्ज</string>
-  <string name="home_screen">मुख्यपृष्ठ</string>
+  <string name="home_screen">घर</string>
   <string name="wallpaper_screen">वॉलपेपर</string>
   <string name="library_screen">लायब्ररी</string>
   <string name="settings_screen">सेटिंग्ज</string>
@@ -34,10 +34,10 @@
   <string name="stop_the_album">अल्बम थांबवा</string>
   <string name="more_options">अधिक पर्याय</string>
   <string name="startup">स्टार्टअप</string>
-  <string name="agree">सहमत</string>
+  <string name="agree">सहमत आहे</string>
   <string name="welcome">स्वागत आहे</string>
-  <string name="notifications">अधिसूचना</string>
-  <string name="continue_button">मी आतमध्ये आहे</string>
+  <string name="notifications">सूचना</string>
+  <string name="continue_button">मी आत आहे</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">या ॲपला योग्यरित्या कार्य करण्यासाठी सूचना परवानगी आवश्यक आहे</string>
   <string name="allow">परवानगी द्या</string>
   <string name="notification_info_message">जेव्हा ॲप बॅकग्राउंडमध्ये चालू असेल तेव्हा दर्शविण्यासाठी सूचना सक्षम केल्या जाऊ शकतात.</string>
@@ -52,17 +52,17 @@
   <string name="licenses_screen">परवाने स्क्रीन</string>
   <string name="contact">संपर्क करा</string>
   <string name="contact_the_author_by_email">लेखकाशी ईमेलद्वारे संपर्क साधा</string>
-  <string name="reset_to_default">मूळस्थिती कार्यान्वित करा</string>
+  <string name="reset_to_default">डीफॉल्टवर रीसेट करा</string>
   <string name="reset_all_data">सर्व डेटा रीसेट करा</string>
   <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">तुमची खात्री आहे की तुम्ही सर्व सेटिंग्ज आणि डेटा डीफॉल्टवर रीसेट करू इच्छिता?</string>
-  <string name="confirm">पुष्टी</string>
+  <string name="confirm">पुष्टी करा</string>
   <string name="spotlight_animation">स्पॉटलाइट ॲनिमेशन</string>
   <string name="circle_2_animation">मंडळ 2 ॲनिमेशन</string>
   <string name="circle_1_animation">मंडळ 1 ॲनिमेशन</string>
   <string name="circle_3_animation">मंडळ 3 ॲनिमेशन</string>
   <string name="wallpaper_changer_has_been_enabled">वॉलपेपर चेंजर सक्षम केले आहे.</string>
   <string name="wallpaper_changer_has_been_disabled">वॉलपेपर चेंजर अक्षम केले गेले आहे.</string>
-  <string name="dismiss">काढून टाकणे</string>
+  <string name="dismiss">डिसमिस करा</string>
   <string name="has_been_unselected">%1$s ची निवड रद्द केली गेली आहे.</string>
   <string name="interval_home">होम स्क्रीन | %1$s</string>
   <string name="interval_lock">लॉक स्क्रीन | %1$s</string>
@@ -117,7 +117,7 @@
   </plurals>
   <string name="privacy_intro_title">परिचय</string>
   <string name="privacy_intro_content">%1$sमध्ये आपले स्वागत आहे! तुम्ही आमचा मोबाइल ॲप्लिकेशन वापरता तेव्हा आम्ही तुमची वैयक्तिक माहिती कशी संकलित करतो, वापरतो आणि संरक्षित करतो हे ही गोपनीयता सूचना वर्णन करते. %1$sवापरून, तुम्ही या सूचनेमध्ये वर्णन केलेल्या अटींशी सहमत आहात.</string>
-  <string name="privacy_data_collection_title">माहिती मिळवणे</string>
+  <string name="privacy_data_collection_title">डेटा संकलन</string>
   <string name="privacy_data_collection_content">सूचना प्रवेश: %1$s तुम्हाला तुमच्या सूचनांवर आधारित वैयक्तिकृत वॉलपेपर शिफारसी प्रदान करण्यासाठी सूचना प्रवेशाची विनंती करते. आम्ही तुमच्या डिव्हाइसच्या बाहेर कोणतीही सूचना सामग्री किंवा वैयक्तिकरित्या ओळखण्यायोग्य माहिती (PII) संचयित करत नाही.\n\nस्थानिक फाइल्स: %1$s तुम्हाला वॉलपेपर म्हणून सेट करण्याची परवानगी देण्यासाठी तुमच्या डिव्हाइसवर स्टोअर केलेल्या फाइल्समध्ये प्रवेश करते. आम्ही या फायली कोणत्याही बाह्य सर्व्हरवर अपलोड किंवा हस्तांतरित करत नाही.</string>
   <string name="privacy_information_usage_title">माहितीचा वापर</string>
   <string name="privacy_information_usage_content">वैयक्तिक डेटा: आम्ही कोणताही वैयक्तिक डेटा जसे की नावे, ईमेल पत्ते किंवा फोन नंबर संकलित किंवा संग्रहित करत नाही.\n\nवापर विश्लेषण: %1$s तुमच्या वापराच्या वर्तनाचा मागोवा घेत नाही किंवा विश्लेषण डेटा संकलित करत नाही.</string>
@@ -139,15 +139,15 @@
   <string name="percentage">%1$s%%</string>
   <string name="fill">भरा</string>
   <string name="fit">फिट</string>
-  <string name="stretch">ताणून लांब करणे</string>
+  <string name="stretch">ताणणे</string>
   <string name="wallpaper_scaling">वॉलपेपर स्केलिंग</string>
-  <string name="change_brightness">ब्राइटनेस बदला</string>
+  <string name="change_brightness">चमक</string>
   <string name="home_screen_btn">होम स्क्रीन</string>
   <string name="lock_screen_btn">लॉक स्क्रीन</string>
   <string name="individual_scheduling">वैयक्तिक वेळापत्रक</string>
   <string name="show_interval_sliders">मध्यांतर स्लाइडर दर्शवा</string>
   <string name="interval_text">वेळ मध्यांतर</string>
-  <string name="change_blur">अस्पष्टता बदला</string>
+  <string name="change_blur">अस्पष्ट प्रभाव</string>
   <string name="paperize_is_running">पेपराइझ चालू आहे</string>
   <string name="next_wallpaper_change">पुढील वॉलपेपर बदल: %1$s</string>
   <string name="delay_notice">विलंब सूचना</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">वॉलपेपर चेंजर सक्षम करा</string>
   <string name="unselected_album">न निवडलेला अल्बम</string>
   <string name="lock">कुलूप</string>
-  <string name="change_vignette">विनेट बदला</string>
+  <string name="change_vignette">विनेट प्रभाव</string>
+  <string name="none">काहीही नाही</string>
+  <string name="gray_filter">राखाडी फिल्टर</string>
+  <string name="select_starting_time">प्रारंभ वेळ निवडा</string>
+  <string name="change_notification_settings">सूचना सेटिंग्ज बदला</string>
 </resources>

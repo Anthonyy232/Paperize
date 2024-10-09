@@ -7,12 +7,12 @@
   <string name="wallpaper_screen">Fons de pantalla</string>
   <string name="library_screen">Biblioteca</string>
   <string name="settings_screen">Configuració</string>
-  <string name="settings_back">esquena</string>
+  <string name="settings_back">Enrere</string>
   <string name="LibraryFloatingButton">Afegeix una biblioteca nova</string>
   <string name="set_wallpaper_description">Activa el fons de pantalla en viu</string>
   <string name="add_wallpaper">Afegeix fons de pantalla</string>
   <string name="add_images">Afegeix imatges</string>
-  <string name="add_folder">Afegir carpeta</string>
+  <string name="add_folder">Afegeix una carpeta</string>
   <string name="contact_button">Contacte</string>
   <string name="image_is_selected">La imatge està seleccionada</string>
   <string name="image_is_not_selected">La imatge no està seleccionada</string>
@@ -23,7 +23,7 @@
   <string name="add_wallpaper_screen">Afegeix una pantalla de fons de pantalla</string>
   <string name="enter_the_name_of_the_album">Introduïu el nom de l\'àlbum</string>
   <string name="album_name">Nom de l\'àlbum</string>
-  <string name="cancel">Cancel · lar</string>
+  <string name="cancel">Cancel·la</string>
   <string name="save">Desa</string>
   <string name="delete_album">Suprimeix</string>
   <string name="change_name">Edita el nom</string>
@@ -34,19 +34,19 @@
   <string name="stop_the_album">Atura l\'àlbum</string>
   <string name="more_options">Més opcions</string>
   <string name="startup">Posada en marxa</string>
-  <string name="agree">Acordar</string>
+  <string name="agree">D\'acord</string>
   <string name="welcome">Benvingut</string>
   <string name="notifications">Notificacions</string>
-  <string name="continue_button">M\'hi apunto</string>
+  <string name="continue_button">Estic dins</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">Cal un permís de notificació perquè aquesta aplicació funcioni correctament</string>
   <string name="allow">Permetre</string>
   <string name="notification_info_message">Les notificacions es poden activar per mostrar quan l\'aplicació s\'executa en segon pla.</string>
   <string name="set_as_lock_screen">Estableix com a pantalla de bloqueig</string>
   <string name="lock_screen">Pantalla de bloqueig</string>
-  <string name="home">Pantalla inicial</string>
+  <string name="home">Pantalla d\'inici</string>
   <string name="last_change">Últim canvi</string>
   <string name="next_change">Proper canvi</string>
-  <string name="privacy_policy">Política de privacitat</string>
+  <string name="privacy_policy">Política de privadesa</string>
   <string name="privacy_screen">Pantalla de privadesa</string>
   <string name="licenses">Llicències</string>
   <string name="licenses_screen">Pantalla de llicències</string>
@@ -88,7 +88,7 @@
   <string name="notification_bell_animation">Animació de campana de notificació</string>
   <string name="delete_these">Vols suprimir-los?</string>
   <string name="are_you_sure_you_want_to_delete_these_wallpapers">Esteu segur que voleu suprimir aquests fons de pantalla?</string>
-  <string name="are_you_sure_you_want_to_delete_this">Esteu segur que voleu suprimir-ho?</string>
+  <string name="are_you_sure_you_want_to_delete_this">Esteu segur que voleu suprimir això?</string>
   <string name="delete_album_question">Vols suprimir l\'àlbum?</string>
   <string name="animation">Animació</string>
   <string name="increase_visual_appeal">Augmentar l\'atractiu visual</string>
@@ -102,11 +102,11 @@
   <string name="click_here_to_view_the_licenses">Feu clic aquí per veure les llicències</string>
   <string name="click_here_to_view_our_privacy_policy">Feu clic aquí per veure la nostra política de privadesa</string>
   <string name="add_images_btn">Afegeix imatges</string>
-  <string name="add_folder_btn">Afegir carpeta</string>
+  <string name="add_folder_btn">Afegeix una carpeta</string>
   <string name="version">Versió: %1$s</string>
   <string name="appearance">Aparença</string>
   <string name="about">Sobre</string>
-  <string name="coming_soon">Pròximament</string>
+  <string name="coming_soon">Aviat</string>
   <string name="new_album">Nou àlbum</string>
   <string name="wallpapers">fons de pantalla</string>
   <string name="translation">Traducció</string>
@@ -117,7 +117,7 @@
   </plurals>
   <string name="privacy_intro_title">Introducció</string>
   <string name="privacy_intro_content">Benvingut a %1$s! Aquest avís de privadesa descriu com recopilem, utilitzem i protegim la vostra informació personal quan feu servir la nostra aplicació mòbil. En utilitzar %1$s, accepteu els termes descrits en aquest avís.</string>
-  <string name="privacy_data_collection_title">Recopilació de dades</string>
+  <string name="privacy_data_collection_title">Recollida de dades</string>
   <string name="privacy_data_collection_content">Accés a les notificacions: %1$s sol·licita accés a les notificacions per oferir-vos recomanacions de fons de pantalla personalitzades basades en les vostres notificacions. No emmagatzemem cap contingut de notificació ni informació d\'identificació personal (PII) fora del vostre dispositiu.\n\nFitxers locals: %1$s accedeix als fitxers emmagatzemats al dispositiu per permetre\'ls establir com a fons de pantalla. No carreguem ni transferim aquests fitxers a cap servidor extern.</string>
   <string name="privacy_information_usage_title">Ús de la informació</string>
   <string name="privacy_information_usage_content">Dades personals: no recollim ni emmagatzemem cap dada personal com ara noms, adreces de correu electrònic o números de telèfon.\n\nAnàlisi d\'ús: %1$s no fa un seguiment del vostre comportament d\'ús ni recull dades d\'anàlisi.</string>
@@ -141,13 +141,13 @@
   <string name="fit">Fit</string>
   <string name="stretch">Estirar</string>
   <string name="wallpaper_scaling">Escala de fons de pantalla</string>
-  <string name="change_brightness">Canvia la brillantor</string>
-  <string name="home_screen_btn">Pantalla inicial</string>
+  <string name="change_brightness">Brillantor</string>
+  <string name="home_screen_btn">Pantalla d\'inici</string>
   <string name="lock_screen_btn">Pantalla de bloqueig</string>
   <string name="individual_scheduling">Programació Individual</string>
   <string name="show_interval_sliders">Mostra els controls lliscants d\'interval</string>
   <string name="interval_text">Interval de temps</string>
-  <string name="change_blur">Canvia el desenfocament</string>
+  <string name="change_blur">Efecte de desenfocament</string>
   <string name="paperize_is_running">Paperize s\'està executant</string>
   <string name="next_wallpaper_change">Següent canvi de fons de pantalla: %1$s</string>
   <string name="delay_notice">Avís de retard</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">Activa el canvi de fons de pantalla</string>
   <string name="unselected_album">Àlbum no seleccionat</string>
   <string name="lock">Bloqueig</string>
-  <string name="change_vignette">Canviar vinyeta</string>
+  <string name="change_vignette">Efecte vinyeta</string>
+  <string name="none">Cap</string>
+  <string name="gray_filter">Filtre gris</string>
+  <string name="select_starting_time">Seleccioneu l\'hora d\'inici</string>
+  <string name="change_notification_settings">Canvia la configuració de notificacions</string>
 </resources>

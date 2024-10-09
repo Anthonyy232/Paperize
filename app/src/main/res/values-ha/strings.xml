@@ -116,7 +116,7 @@
     <item quantity="other">%d fuskar bangon waya</item>
   </plurals>
   <string name="privacy_intro_title">Gabatarwa</string>
-  <string name="privacy_intro_content">Barka da zuwa %1$s! Wannan bayanin sirri yana bayyana yadda muke tattarawa, amfani, da kare keɓaɓɓen keɓaɓɓen bayanin ku lokacin da kuke amfani da aikace-aikacen hannu. Ta amfani da %1$s, kun yarda da sharuɗɗan da aka bayyana a cikin wannan sanarwar.</string>
+  <string name="privacy_intro_content">Barka da zuwa %1$s! Wannan bayanin sirri yana fayyace yadda muke tattarawa, amfani, da kare keɓaɓɓen bayanin ku lokacin da kuke amfani da aikace-aikacen wayar hannu. Ta amfani da %1$s, kun yarda da sharuɗɗan da aka bayyana a cikin wannan sanarwar.</string>
   <string name="privacy_data_collection_title">Tarin Bayanai</string>
   <string name="privacy_data_collection_content">Samun Faɗakarwa: %1$s yana buƙatar samun damar sanarwa don samar muku da keɓaɓɓen shawarwarin fuskar bangon waya dangane da sanarwarku. Ba mu adana duk wani abun ciki na sanarwa ko bayanan sirri (PII) a wajen na\'urarka.\n\nFayilolin gida: %1$s yana shiga fayilolin da aka adana akan na\'urarka don baka damar saita su azaman fuskar bangon waya. Ba mu loda ko canja wurin waɗannan fayiloli zuwa kowane sabar na waje.</string>
   <string name="privacy_information_usage_title">Amfanin Bayani</string>
@@ -124,9 +124,9 @@
   <string name="privacy_data_security_title">Tsaron Bayanai</string>
   <string name="privacy_data_security_content">Ajiye Kan Na\'urar: Duk bayanan da %1$s ke amfani da su suna kan na\'urarka. Ba mu aika ko adana kowane bayanai a waje.</string>
   <string name="privacy_third_party_services_title">Sabis na ɓangare na uku</string>
-  <string name="privacy_third_party_services_content">Talla: %1$s baya nuna tallace-tallace na ɓangare na uku.\n\nHaɗin kai na waje: app ɗin mu na iya ƙunsar hanyoyin haɗin yanar gizo na waje. Lura cewa ba mu da alhakin ayyukan sirri na waɗannan rukunin yanar gizon.</string>
+  <string name="privacy_third_party_services_content">Talla: %1$s baya nuna tallace-tallace na ɓangare na uku.\n\nHaɗin kai na waje: app ɗin mu na iya ƙunshi hanyoyin haɗin yanar gizo na waje. Lura cewa ba mu da alhakin ayyukan sirri na waɗannan rukunin yanar gizon.</string>
   <string name="privacy_children_privacy_title">Sirrin Yara</string>
-  <string name="privacy_children_privacy_content">%1$s ba a yi niyya ga yara \'yan ƙasa da shekara 13. Ba mu da masaniya game da tattara wani bayani daga yara.</string>
+  <string name="privacy_children_privacy_content">%1$s ba a yi niyya ga yara \'yan ƙasa da shekara 13. Ba mu da masaniya game da tattara bayanai daga yara.</string>
   <string name="privacy_changes_notice_title">Canje-canje ga wannan sanarwar</string>
   <string name="privacy_changes_notice_content">Za mu iya sabunta wannan bayanin sirri lokaci zuwa lokaci. Duk wani canje-canje za a bayyana a cikin app da kuma a kan gidan yanar gizon mu.</string>
   <string name="privacy_contact_us_title">Tuntube Mu</string>
@@ -141,18 +141,18 @@
   <string name="fit">Fit</string>
   <string name="stretch">Mikewa</string>
   <string name="wallpaper_scaling">Ƙimar fuskar bangon waya</string>
-  <string name="change_brightness">Canza Haske</string>
+  <string name="change_brightness">Haske</string>
   <string name="home_screen_btn">Allon Gida</string>
   <string name="lock_screen_btn">Allon Kulle</string>
   <string name="individual_scheduling">Jadawalin Mutum</string>
   <string name="show_interval_sliders">Nuna faifan tazara</string>
-  <string name="interval_text">Tsakanin Lokaci</string>
-  <string name="change_blur">Canja blur</string>
+  <string name="interval_text">Tazarar Lokaci</string>
+  <string name="change_blur">Tasirin blur</string>
   <string name="paperize_is_running">Paperize yana gudana</string>
   <string name="next_wallpaper_change">Canjin fuskar bangon waya na gaba: %1$s</string>
   <string name="delay_notice">Sanarwa Jinkiri</string>
   <string name="delay_notice_dialog">Sanarwa Jinkiri</string>
-  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Don rage amfani da baturi, canza fuskar bangon waya na iya samun ɗan jinkiri da zarar an tsara shi. Lokacin da na\'urar ke barci, fuskar bangon waya na iya ɗaukar lokaci mai tsawo kafin a shafa.</string>
+  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">Don rage amfani da baturi, canza fuskar bangon waya na iya samun ɗan jinkiri sau ɗaya an tsara shi. Lokacin da na\'urar ke barci, fuskar bangon waya na iya ɗaukar lokaci mai tsawo kafin a shafa.</string>
   <string name="change_wallpaper">Canja fuskar bangon waya</string>
   <string name="theme">Jigo</string>
   <string name="amoled_mode">Yanayin AMOLED</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">Kunna Canjin Fuskar bangon waya</string>
   <string name="unselected_album">Kundin da ba a zaɓa ba</string>
   <string name="lock">Kulle</string>
-  <string name="change_vignette">Canza Vignette</string>
+  <string name="change_vignette">Tasirin Vignette</string>
+  <string name="none">Babu</string>
+  <string name="gray_filter">Tace launin toka</string>
+  <string name="select_starting_time">Zaɓi lokacin farawa</string>
+  <string name="change_notification_settings">Canja saitunan sanarwa</string>
 </resources>

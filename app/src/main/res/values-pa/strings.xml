@@ -7,7 +7,7 @@
   <string name="wallpaper_screen">ਵਾਲਪੇਪਰ</string>
   <string name="library_screen">ਲਾਇਬ੍ਰੇਰੀ</string>
   <string name="settings_screen">ਸੈਟਿੰਗਾਂ</string>
-  <string name="settings_back">ਵਾਪਸ</string>
+  <string name="settings_back">ਪਿੱਛੇ</string>
   <string name="LibraryFloatingButton">ਇੱਕ ਨਵੀਂ ਲਾਇਬ੍ਰੇਰੀ ਸ਼ਾਮਲ ਕਰੋ</string>
   <string name="set_wallpaper_description">ਲਾਈਵ ਵਾਲਪੇਪਰ ਚਾਲੂ ਕਰੋ</string>
   <string name="add_wallpaper">ਵਾਲਪੇਪਰ ਸ਼ਾਮਲ ਕਰੋ</string>
@@ -37,12 +37,12 @@
   <string name="agree">ਸਹਿਮਤ ਹੋ</string>
   <string name="welcome">ਸੁਆਗਤ ਹੈ</string>
   <string name="notifications">ਸੂਚਨਾਵਾਂ</string>
-  <string name="continue_button">ਮੈਂ ਵਿਚ ਹਾਂ</string>
+  <string name="continue_button">ਮੈਂ ਅੰਦਰ ਹਾਂ</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">ਇਸ ਐਪ ਨੂੰ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਕਰਨ ਲਈ ਸੂਚਨਾ ਅਨੁਮਤੀ ਦੀ ਲੋੜ ਹੈ</string>
-  <string name="allow">ਦੀ ਇਜਾਜ਼ਤ</string>
+  <string name="allow">ਇਜਾਜ਼ਤ ਦਿਓ</string>
   <string name="notification_info_message">ਜਦੋਂ ਐਪ ਬੈਕਗ੍ਰਾਉਂਡ ਵਿੱਚ ਚੱਲ ਰਿਹਾ ਹੋਵੇ ਤਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣ ਲਈ ਸਮਰੱਥ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।</string>
   <string name="set_as_lock_screen">ਲੌਕ ਸਕ੍ਰੀਨ ਵਜੋਂ ਸੈੱਟ ਕਰੋ</string>
-  <string name="lock_screen">ਬੰਦ ਸਕ੍ਰੀਨ</string>
+  <string name="lock_screen">ਲਾਕ ਸਕ੍ਰੀਨ</string>
   <string name="home">ਹੋਮ ਸਕ੍ਰੀਨ</string>
   <string name="last_change">ਆਖਰੀ ਤਬਦੀਲੀ</string>
   <string name="next_change">ਅਗਲੀ ਤਬਦੀਲੀ</string>
@@ -117,7 +117,7 @@
   </plurals>
   <string name="privacy_intro_title">ਜਾਣ-ਪਛਾਣ</string>
   <string name="privacy_intro_content">%1$sਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ! ਇਹ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਇਹ ਦੱਸਦਾ ਹੈ ਕਿ ਜਦੋਂ ਤੁਸੀਂ ਸਾਡੀ ਮੋਬਾਈਲ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ ਤਾਂ ਅਸੀਂ ਤੁਹਾਡੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਨੂੰ ਕਿਵੇਂ ਇਕੱਤਰ ਕਰਦੇ ਹਾਂ, ਵਰਤਦੇ ਹਾਂ ਅਤੇ ਸੁਰੱਖਿਅਤ ਕਰਦੇ ਹਾਂ। %1$sਦੀ ਵਰਤੋਂ ਕਰਕੇ, ਤੁਸੀਂ ਇਸ ਨੋਟਿਸ ਵਿੱਚ ਵਰਣਨ ਕੀਤੀਆਂ ਸ਼ਰਤਾਂ ਨਾਲ ਸਹਿਮਤ ਹੁੰਦੇ ਹੋ।</string>
-  <string name="privacy_data_collection_title">ਡਾਟਾ ਇਕੱਠਾ ਕਰਨ</string>
+  <string name="privacy_data_collection_title">ਡਾਟਾ ਸੰਗ੍ਰਹਿ</string>
   <string name="privacy_data_collection_content">ਸੂਚਨਾ ਪਹੁੰਚ: %1$s ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਤੁਹਾਨੂੰ ਵਿਅਕਤੀਗਤ ਵਾਲਪੇਪਰ ਸਿਫ਼ਾਰਸ਼ਾਂ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਸੂਚਨਾ ਪਹੁੰਚ ਦੀ ਬੇਨਤੀ ਕਰਦਾ ਹੈ। ਅਸੀਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੇ ਬਾਹਰ ਕੋਈ ਵੀ ਸੂਚਨਾ ਸਮੱਗਰੀ ਜਾਂ ਨਿੱਜੀ ਤੌਰ \'ਤੇ ਪਛਾਣਨ ਯੋਗ ਜਾਣਕਾਰੀ (PII) ਸਟੋਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।\n\nਸਥਾਨਕ ਫ਼ਾਈਲਾਂ: %1$s ਤੁਹਾਡੀ ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੀਆਂ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਦਾ ਹੈ ਤਾਂ ਜੋ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਵਾਲਪੇਪਰਾਂ ਵਜੋਂ ਸੈੱਟ ਕਰ ਸਕੋ। ਅਸੀਂ ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਕਿਸੇ ਬਾਹਰੀ ਸਰਵਰ \'ਤੇ ਅੱਪਲੋਡ ਜਾਂ ਟ੍ਰਾਂਸਫ਼ਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।</string>
   <string name="privacy_information_usage_title">ਜਾਣਕਾਰੀ ਦੀ ਵਰਤੋਂ</string>
   <string name="privacy_information_usage_content">ਨਿੱਜੀ ਡੇਟਾ: ਅਸੀਂ ਕੋਈ ਵੀ ਨਿੱਜੀ ਡੇਟਾ ਜਿਵੇਂ ਕਿ ਨਾਮ, ਈਮੇਲ ਪਤੇ, ਜਾਂ ਫ਼ੋਨ ਨੰਬਰ ਇਕੱਤਰ ਜਾਂ ਸਟੋਰ ਨਹੀਂ ਕਰਦੇ ਹਾਂ।\n\nਉਪਯੋਗਤਾ ਵਿਸ਼ਲੇਸ਼ਣ: %1$s ਤੁਹਾਡੇ ਵਰਤੋਂ ਵਿਵਹਾਰ ਨੂੰ ਟਰੈਕ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਵਿਸ਼ਲੇਸ਼ਣ ਡੇਟਾ ਇਕੱਠਾ ਨਹੀਂ ਕਰਦਾ।</string>
@@ -131,7 +131,7 @@
   <string name="privacy_changes_notice_content">ਅਸੀਂ ਸਮੇਂ-ਸਮੇਂ \'ਤੇ ਇਸ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦੇ ਹਾਂ। ਕੋਈ ਵੀ ਬਦਲਾਅ ਐਪ ਅਤੇ ਸਾਡੀ ਵੈੱਬਸਾਈਟ \'ਤੇ ਪ੍ਰਤੀਬਿੰਬਿਤ ਹੋਣਗੇ।</string>
   <string name="privacy_contact_us_title">ਸਾਡੇ ਨਾਲ ਸੰਪਰਕ ਕਰੋ</string>
   <string name="privacy_contact_us_content">ਜੇਕਰ ਇਸ ਗੋਪਨੀਯਤਾ ਨੋਟਿਸ ਬਾਰੇ ਤੁਹਾਡੇ ਕੋਈ ਸਵਾਲ ਜਾਂ ਚਿੰਤਾਵਾਂ ਹਨ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਮੇਰੇ ਨਾਲ %1$s\'ਤੇ ਸੰਪਰਕ ਕਰੋ।</string>
-  <string name="no_albums_found">ਕੋਈ ਐਲਬਮ ਨਹੀਂ ਮਿਲੀ</string>
+  <string name="no_albums_found">ਕੋਈ ਐਲਬਮਾਂ ਨਹੀਂ ਲੱਭੀਆਂ</string>
   <string name="disable_live_wallpaper">ਲਾਈਵ ਵਾਲਪੇਪਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ</string>
   <string name="live_wallpaper_detected">ਲਾਈਵ ਵਾਲਪੇਪਰ ਖੋਜਿਆ ਗਿਆ</string>
   <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">ਕਿਰਪਾ ਕਰਕੇ ਵਾਲਪੇਪਰ ਚੇਂਜਰ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਆਪਣੇ ਲਾਈਵ ਵਾਲਪੇਪਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ।</string>
@@ -141,13 +141,13 @@
   <string name="fit">ਫਿੱਟ</string>
   <string name="stretch">ਖਿੱਚੋ</string>
   <string name="wallpaper_scaling">ਵਾਲਪੇਪਰ ਸਕੇਲਿੰਗ</string>
-  <string name="change_brightness">ਚਮਕ ਬਦਲੋ</string>
+  <string name="change_brightness">ਚਮਕ</string>
   <string name="home_screen_btn">ਹੋਮ ਸਕ੍ਰੀਨ</string>
-  <string name="lock_screen_btn">ਬੰਦ ਸਕ੍ਰੀਨ</string>
+  <string name="lock_screen_btn">ਲਾਕ ਸਕ੍ਰੀਨ</string>
   <string name="individual_scheduling">ਵਿਅਕਤੀਗਤ ਸਮਾਂ-ਸਾਰਣੀ</string>
   <string name="show_interval_sliders">ਅੰਤਰਾਲ ਸਲਾਈਡਰ ਦਿਖਾਓ</string>
   <string name="interval_text">ਸਮਾਂ ਅੰਤਰਾਲ</string>
-  <string name="change_blur">ਬਲਰ ਬਦਲੋ</string>
+  <string name="change_blur">ਬਲਰ ਪ੍ਰਭਾਵ</string>
   <string name="paperize_is_running">ਪੇਪਰਾਈਜ਼ ਚੱਲ ਰਿਹਾ ਹੈ</string>
   <string name="next_wallpaper_change">ਅਗਲੀ ਵਾਲਪੇਪਰ ਤਬਦੀਲੀ: %1$s</string>
   <string name="delay_notice">ਦੇਰੀ ਨੋਟਿਸ</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">ਵਾਲਪੇਪਰ ਚੇਂਜਰ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ</string>
   <string name="unselected_album">ਅਣਚੁਣਿਆ ਐਲਬਮ</string>
   <string name="lock">ਤਾਲਾ</string>
-  <string name="change_vignette">ਵਿਗਨੇਟ ਬਦਲੋ</string>
+  <string name="change_vignette">ਵਿਗਨੇਟ ਪ੍ਰਭਾਵ</string>
+  <string name="none">ਕੋਈ ਨਹੀਂ</string>
+  <string name="gray_filter">ਸਲੇਟੀ ਫਿਲਟਰ</string>
+  <string name="select_starting_time">ਸ਼ੁਰੂਆਤੀ ਸਮਾਂ ਚੁਣੋ</string>
+  <string name="change_notification_settings">ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ ਬਦਲੋ</string>
 </resources>

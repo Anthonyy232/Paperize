@@ -157,13 +157,13 @@
   <string name="fit">قَيِّفها</string>
   <string name="stretch">مِدَّها</string>
   <string name="wallpaper_scaling">حجم الخلفية</string>
-  <string name="change_brightness">غَيَّر السطوع</string>
+  <string name="change_brightness">Brightness</string>
   <string name="home_screen_btn">الشاشة الرئيسية</string>
   <string name="lock_screen_btn">شاشة القفل</string>
   <string name="individual_scheduling">جدولة فردية</string>
   <string name="show_interval_sliders">بَيِّن شريط الفترات</string>
   <string name="interval_text">فترة زمنية</string>
-  <string name="change_blur">غَيَّر التغييم</string>
+  <string name="change_blur">Blur Effect</string>
   <string name="paperize_is_running">توريق شغال</string>
   <string name="next_wallpaper_change">تغيير الخلفية الجاى: %1$s</string>
   <string name="delay_notice">إشعار التأخير</string>
@@ -179,5 +179,9 @@
   <string name="enable_wallpaper_changer">تمكين محول الخلفية</string>
   <string name="unselected_album">ألبوم غير محدد</string>
   <string name="lock">قفل</string>
-  <string name="change_vignette">Change Vignette</string>
+  <string name="change_vignette">Vignette Effect</string>
+  <string name="none">None</string>
+  <string name="gray_filter">Gray Filter</string>
+  <string name="select_starting_time">Select starting time</string>
+  <string name="change_notification_settings">Change notification settings</string>
 </resources>

@@ -5,7 +5,7 @@
   <string name="dropdownmenu_settings">సెట్టింగ్‌లు</string>
   <string name="home_screen">హోమ్</string>
   <string name="wallpaper_screen">వాల్‌పేపర్</string>
-  <string name="library_screen">గ్రంధాలయం</string>
+  <string name="library_screen">లైబ్రరీ</string>
   <string name="settings_screen">సెట్టింగ్‌లు</string>
   <string name="settings_back">వెనుకకు</string>
   <string name="LibraryFloatingButton">కొత్త లైబ్రరీని జోడించండి</string>
@@ -23,7 +23,7 @@
   <string name="add_wallpaper_screen">వాల్‌పేపర్ స్క్రీన్‌ను జోడించండి</string>
   <string name="enter_the_name_of_the_album">ఆల్బమ్ పేరును నమోదు చేయండి</string>
   <string name="album_name">ఆల్బమ్ పేరు</string>
-  <string name="cancel">రద్దు చేయండి</string>
+  <string name="cancel">రద్దు చేయి</string>
   <string name="save">సేవ్ చేయండి</string>
   <string name="delete_album">తొలగించు</string>
   <string name="change_name">పేరును సవరించండి</string>
@@ -33,7 +33,7 @@
   <string name="currently_selected_album">ప్రస్తుతం ఎంపిక చేసిన ఆల్బమ్</string>
   <string name="stop_the_album">ఆల్బమ్‌ని ఆపు</string>
   <string name="more_options">మరిన్ని ఎంపికలు</string>
-  <string name="startup">మొదలుపెట్టు</string>
+  <string name="startup">స్టార్టప్</string>
   <string name="agree">అంగీకరిస్తున్నారు</string>
   <string name="welcome">స్వాగతం</string>
   <string name="notifications">నోటిఫికేషన్‌లు</string>
@@ -52,7 +52,7 @@
   <string name="licenses_screen">లైసెన్సుల స్క్రీన్</string>
   <string name="contact">సంప్రదించండి</string>
   <string name="contact_the_author_by_email">ఇమెయిల్ ద్వారా రచయితను సంప్రదించండి</string>
-  <string name="reset_to_default">డిఫాల్ట్ రీసెట్</string>
+  <string name="reset_to_default">డిఫాల్ట్‌కి రీసెట్ చేయండి</string>
   <string name="reset_all_data">మొత్తం డేటాను రీసెట్ చేయండి</string>
   <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">మీరు ఖచ్చితంగా అన్ని సెట్టింగ్‌లు మరియు డేటాను డిఫాల్ట్‌గా రీసెట్ చేయాలనుకుంటున్నారా?</string>
   <string name="confirm">నిర్ధారించండి</string>
@@ -62,7 +62,7 @@
   <string name="circle_3_animation">సర్కిల్ 3 యానిమేషన్</string>
   <string name="wallpaper_changer_has_been_enabled">వాల్‌పేపర్ మారకం ప్రారంభించబడింది.</string>
   <string name="wallpaper_changer_has_been_disabled">వాల్‌పేపర్ ఛేంజర్ నిలిపివేయబడింది.</string>
-  <string name="dismiss">రద్దుచేసే</string>
+  <string name="dismiss">తొలగించు</string>
   <string name="has_been_unselected">%1$s ఎంపిక తీసివేయబడింది.</string>
   <string name="interval_home">హోమ్ స్క్రీన్ | %1$s</string>
   <string name="interval_lock">లాక్ స్క్రీన్ | %1$s</string>
@@ -106,7 +106,7 @@
   <string name="version">వెర్షన్: %1$s</string>
   <string name="appearance">స్వరూపం</string>
   <string name="about">గురించి</string>
-  <string name="coming_soon">త్వరలో</string>
+  <string name="coming_soon">త్వరలో వస్తుంది</string>
   <string name="new_album">కొత్త ఆల్బమ్</string>
   <string name="wallpapers">వాల్ పేపర్లు</string>
   <string name="translation">అనువాదం</string>
@@ -116,8 +116,8 @@
     <item quantity="other">%d వాల్‌పేపర్‌లు</item>
   </plurals>
   <string name="privacy_intro_title">పరిచయం</string>
-  <string name="privacy_intro_content">%1$sకి స్వాగతం! మీరు మా మొబైల్ అప్లికేషన్‌ను ఉపయోగించినప్పుడు మేము మీ వ్యక్తిగత సమాచారాన్ని ఎలా సేకరిస్తాము, ఉపయోగిస్తాము మరియు సంరక్షిస్తామో ఈ గోప్యతా నోటీసు వివరిస్తుంది. %1$sని ఉపయోగించడం ద్వారా, మీరు ఈ నోటీసులో వివరించిన నిబంధనలకు అంగీకరిస్తున్నారు.</string>
-  <string name="privacy_data_collection_title">వివరాల సేకరణ</string>
+  <string name="privacy_intro_content">%1$sకి స్వాగతం! మీరు మా మొబైల్ అప్లికేషన్‌ను ఉపయోగించినప్పుడు మేము మీ వ్యక్తిగత సమాచారాన్ని ఎలా సేకరిస్తాము, ఉపయోగిస్తాము మరియు రక్షించుకుంటాము అని ఈ గోప్యతా నోటీసు వివరిస్తుంది. %1$sని ఉపయోగించడం ద్వారా, మీరు ఈ నోటీసులో వివరించిన నిబంధనలకు అంగీకరిస్తున్నారు.</string>
+  <string name="privacy_data_collection_title">డేటా సేకరణ</string>
   <string name="privacy_data_collection_content">నోటిఫికేషన్ యాక్సెస్: %1$s మీ నోటిఫికేషన్‌ల ఆధారంగా వ్యక్తిగతీకరించిన వాల్‌పేపర్ సిఫార్సులను మీకు అందించడానికి నోటిఫికేషన్ యాక్సెస్‌ను అభ్యర్థిస్తుంది. మేము మీ పరికరం వెలుపల ఎటువంటి నోటిఫికేషన్ కంటెంట్‌ను లేదా వ్యక్తిగతంగా గుర్తించదగిన సమాచారాన్ని (PII) నిల్వ చేయము.\n\nస్థానిక ఫైల్‌లు: %1$s మీ పరికరంలో నిల్వ చేయబడిన ఫైల్‌లను వాల్‌పేపర్‌లుగా సెట్ చేయడానికి మిమ్మల్ని అనుమతిస్తుంది. మేము ఈ ఫైల్‌లను ఏ బాహ్య సర్వర్‌లకు అప్‌లోడ్ చేయము లేదా బదిలీ చేయము.</string>
   <string name="privacy_information_usage_title">సమాచార వినియోగం</string>
   <string name="privacy_information_usage_content">వ్యక్తిగత డేటా: మేము పేర్లు, ఇమెయిల్ చిరునామాలు లేదా ఫోన్ నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించము లేదా నిల్వ చేయము.\n\nవినియోగ విశ్లేషణలు: %1$s మీ వినియోగ ప్రవర్తనను ట్రాక్ చేయదు లేదా విశ్లేషణల డేటాను సేకరించదు.</string>
@@ -135,24 +135,24 @@
   <string name="disable_live_wallpaper">ప్రత్యక్ష వాల్‌పేపర్‌ని నిలిపివేయండి</string>
   <string name="live_wallpaper_detected">ప్రత్యక్ష వాల్‌పేపర్ కనుగొనబడింది</string>
   <string name="please_disable_your_live_wallpaper_to_use_the_wallpaper_changer">వాల్‌పేపర్ ఛేంజర్‌ని ఉపయోగించడానికి దయచేసి మీ లైవ్ వాల్‌పేపర్‌ను నిలిపివేయండి.</string>
-  <string name="ok">అలాగే</string>
+  <string name="ok">సరే</string>
   <string name="percentage">%1$s%%</string>
   <string name="fill">పూరించండి</string>
   <string name="fit">ఫిట్</string>
   <string name="stretch">సాగదీయండి</string>
   <string name="wallpaper_scaling">వాల్‌పేపర్ స్కేలింగ్</string>
-  <string name="change_brightness">ప్రకాశాన్ని మార్చండి</string>
+  <string name="change_brightness">ప్రకాశం</string>
   <string name="home_screen_btn">హోమ్ స్క్రీన్</string>
   <string name="lock_screen_btn">లాక్ స్క్రీన్</string>
   <string name="individual_scheduling">వ్యక్తిగత షెడ్యూలింగ్</string>
   <string name="show_interval_sliders">విరామ స్లయిడర్‌లను చూపించు</string>
   <string name="interval_text">సమయ విరామం</string>
-  <string name="change_blur">బ్లర్ మార్చండి</string>
+  <string name="change_blur">బ్లర్ ఎఫెక్ట్</string>
   <string name="paperize_is_running">పేపర్‌రైజ్ నడుస్తోంది</string>
   <string name="next_wallpaper_change">తదుపరి వాల్‌పేపర్ మార్పు: %1$s</string>
   <string name="delay_notice">ఆలస్యం నోటీసు</string>
   <string name="delay_notice_dialog">ఆలస్యం నోటీసు</string>
-  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">బ్యాటరీ వినియోగాన్ని తగ్గించడానికి, వాల్‌పేపర్‌లను మార్చడం ఒకసారి షెడ్యూల్ చేసిన తర్వాత కొంత ఆలస్యం కావచ్చు. పరికరం నిద్రలో ఉన్నప్పుడు, వాల్‌పేపర్ వర్తించడానికి ఎక్కువ సమయం పట్టవచ్చు.</string>
+  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">బ్యాటరీ వినియోగాన్ని తగ్గించడానికి, షెడ్యూల్ చేసిన తర్వాత వాల్‌పేపర్‌లను మార్చడం వలన కొంత ఆలస్యం కావచ్చు. పరికరం నిద్రలో ఉన్నప్పుడు, వాల్‌పేపర్ వర్తించడానికి ఎక్కువ సమయం పట్టవచ్చు.</string>
   <string name="change_wallpaper">వాల్‌పేపర్‌ని మార్చండి</string>
   <string name="theme">థీమ్</string>
   <string name="amoled_mode">AMOLED మోడ్</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">వాల్‌పేపర్ ఛేంజర్‌ని ప్రారంభించండి</string>
   <string name="unselected_album">ఎంపిక చేయని ఆల్బమ్</string>
   <string name="lock">తాళం వేయండి</string>
-  <string name="change_vignette">విగ్నేట్ మార్చండి</string>
+  <string name="change_vignette">విగ్నేట్ ప్రభావం</string>
+  <string name="none">ఏదీ లేదు</string>
+  <string name="gray_filter">గ్రే ఫిల్టర్</string>
+  <string name="select_starting_time">ప్రారంభ సమయాన్ని ఎంచుకోండి</string>
+  <string name="change_notification_settings">నోటిఫికేషన్ సెట్టింగ్‌లను మార్చండి</string>
 </resources>

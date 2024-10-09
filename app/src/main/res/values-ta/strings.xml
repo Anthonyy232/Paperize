@@ -25,7 +25,7 @@
   <string name="album_name">ஆல்பத்தின் பெயர்</string>
   <string name="cancel">ரத்து செய்</string>
   <string name="save">சேமிக்கவும்</string>
-  <string name="delete_album">அழி</string>
+  <string name="delete_album">நீக்கு</string>
   <string name="change_name">பெயரைத் திருத்தவும்</string>
   <string name="click_to_select_a_different_album">வேறு ஆல்பத்தைத் தேர்ந்தெடுக்க கிளிக் செய்யவும்</string>
   <string name="no_icon">ஐகான் இல்லை</string>
@@ -35,9 +35,9 @@
   <string name="more_options">மேலும் விருப்பங்கள்</string>
   <string name="startup">தொடக்கம்</string>
   <string name="agree">ஒப்புக்கொள்கிறேன்</string>
-  <string name="welcome">வரவேற்பு</string>
+  <string name="welcome">வரவேற்கிறோம்</string>
   <string name="notifications">அறிவிப்புகள்</string>
-  <string name="continue_button">நான் இருக்கிறேன்</string>
+  <string name="continue_button">நான் உள்ளே இருக்கிறேன்</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">இந்த ஆப்ஸ் சரியாக வேலை செய்ய, அறிவிப்பு அனுமதி தேவை</string>
   <string name="allow">அனுமதி</string>
   <string name="notification_info_message">ஆப்ஸ் பின்னணியில் இயங்கும் போது அறிவிப்புகளை இயக்கலாம்.</string>
@@ -90,7 +90,7 @@
   <string name="are_you_sure_you_want_to_delete_these_wallpapers">இந்த வால்பேப்பர்களை நிச்சயமாக நீக்க விரும்புகிறீர்களா?</string>
   <string name="are_you_sure_you_want_to_delete_this">இதை நிச்சயமாக நீக்க வேண்டுமா?</string>
   <string name="delete_album_question">ஆல்பத்தை நீக்கவா?</string>
-  <string name="animation">இயங்குபடம்</string>
+  <string name="animation">அனிமேஷன்</string>
   <string name="increase_visual_appeal">காட்சி முறையீட்டை அதிகரிக்கவும்</string>
   <string name="dark_mode">இருண்ட பயன்முறை</string>
   <string name="automatic_device_mode">தானியங்கி சாதன முறை</string>
@@ -118,7 +118,7 @@
   <string name="privacy_intro_title">அறிமுகம்</string>
   <string name="privacy_intro_content">%1$sக்கு வரவேற்கிறோம்! இந்த தனியுரிமை அறிவிப்பு, எங்கள் மொபைல் பயன்பாட்டை நீங்கள் பயன்படுத்தும் போது, உங்கள் தனிப்பட்ட தகவலை நாங்கள் எவ்வாறு சேகரிக்கிறோம், பயன்படுத்துகிறோம் மற்றும் பாதுகாக்கிறோம் என்பதை கோடிட்டுக் காட்டுகிறது. %1$sஐப் பயன்படுத்துவதன் மூலம், இந்த அறிவிப்பில் விவரிக்கப்பட்டுள்ள விதிமுறைகளை ஏற்கிறீர்கள்.</string>
   <string name="privacy_data_collection_title">தரவு சேகரிப்பு</string>
-  <string name="privacy_data_collection_content">அறிவிப்பு அணுகல்: உங்கள் அறிவிப்புகளின் அடிப்படையில் தனிப்பயனாக்கப்பட்ட வால்பேப்பர் பரிந்துரைகளை உங்களுக்கு வழங்க %1$s அறிவிப்பு அணுகலைக் கோருகிறது. உங்கள் சாதனத்திற்கு வெளியே எந்த அறிவிப்பு உள்ளடக்கத்தையும் அல்லது தனிப்பட்ட முறையில் அடையாளம் காணக்கூடிய தகவலையும் (PII) நாங்கள் சேமிப்பதில்லை.\n\nஉள்ளூர் கோப்புகள்: %1$s உங்கள் சாதனத்தில் சேமிக்கப்பட்ட கோப்புகளை வால்பேப்பர்களாக அமைக்க அனுமதிக்கும். இந்த கோப்புகளை நாங்கள் எந்த வெளிப்புற சேவையகத்திற்கும் பதிவேற்றவோ அல்லது மாற்றவோ மாட்டோம்.</string>
+  <string name="privacy_data_collection_content">அறிவிப்பு அணுகல்: உங்கள் அறிவிப்புகளின் அடிப்படையில் தனிப்பயனாக்கப்பட்ட வால்பேப்பர் பரிந்துரைகளை உங்களுக்கு வழங்க %1$s அறிவிப்பு அணுகலைக் கோருகிறது. உங்கள் சாதனத்திற்கு வெளியே எந்த அறிவிப்பு உள்ளடக்கத்தையும் அல்லது தனிப்பட்ட முறையில் அடையாளம் காணக்கூடிய தகவலையும் (PII) நாங்கள் சேமிப்பதில்லை.\n\nஉள்ளூர் கோப்புகள்: %1$s உங்கள் சாதனத்தில் சேமிக்கப்பட்ட கோப்புகளை வால்பேப்பர்களாக அமைக்க அனுமதிக்கும். இந்த கோப்புகளை நாங்கள் எந்த வெளிப்புற சேவையகங்களுக்கும் பதிவேற்றவோ அல்லது மாற்றவோ மாட்டோம்.</string>
   <string name="privacy_information_usage_title">தகவல் பயன்பாடு</string>
   <string name="privacy_information_usage_content">தனிப்பட்ட தரவு: பெயர்கள், மின்னஞ்சல் முகவரிகள் அல்லது தொலைபேசி எண்கள் போன்ற எந்தவொரு தனிப்பட்ட தரவையும் நாங்கள் சேகரிக்கவோ அல்லது சேமிக்கவோ மாட்டோம்.\n\nபயன்பாட்டு பகுப்பாய்வு: %1$s உங்கள் பயன்பாட்டு நடத்தையைக் கண்காணிக்காது அல்லது பகுப்பாய்வுத் தரவைச் சேகரிக்காது.</string>
   <string name="privacy_data_security_title">தரவு பாதுகாப்பு</string>
@@ -129,7 +129,7 @@
   <string name="privacy_children_privacy_content">%1$s என்பது 13 வயதுக்குட்பட்ட குழந்தைகளுக்கானது அல்ல. நாங்கள் தெரிந்தே குழந்தைகளிடமிருந்து எந்த தகவலையும் சேகரிப்பதில்லை.</string>
   <string name="privacy_changes_notice_title">இந்த அறிவிப்பில் மாற்றங்கள்</string>
   <string name="privacy_changes_notice_content">இந்த தனியுரிமை அறிவிப்பை நாங்கள் அவ்வப்போது புதுப்பிக்கலாம். எந்த மாற்றமும் ஆப்ஸ் மற்றும் எங்கள் இணையதளத்தில் பிரதிபலிக்கும்.</string>
-  <string name="privacy_contact_us_title">எங்களை தொடர்பு கொள்ள</string>
+  <string name="privacy_contact_us_title">எங்களை தொடர்பு கொள்ளவும்</string>
   <string name="privacy_contact_us_content">இந்த தனியுரிமை அறிவிப்பைப் பற்றி உங்களுக்கு ஏதேனும் கேள்விகள் அல்லது கவலைகள் இருந்தால், தயவுசெய்து என்னை %1$sஇல் தொடர்பு கொள்ளவும்.</string>
   <string name="no_albums_found">ஆல்பங்கள் எதுவும் இல்லை</string>
   <string name="disable_live_wallpaper">நேரடி வால்பேப்பரை முடக்கு</string>
@@ -141,18 +141,18 @@
   <string name="fit">பொருத்தம்</string>
   <string name="stretch">நீட்டவும்</string>
   <string name="wallpaper_scaling">வால்பேப்பர் அளவிடுதல்</string>
-  <string name="change_brightness">பிரகாசத்தை மாற்றவும்</string>
+  <string name="change_brightness">பிரகாசம்</string>
   <string name="home_screen_btn">முகப்புத் திரை</string>
   <string name="lock_screen_btn">பூட்டு திரை</string>
   <string name="individual_scheduling">தனிப்பட்ட திட்டமிடல்</string>
   <string name="show_interval_sliders">இடைவெளி ஸ்லைடர்களைக் காட்டு</string>
-  <string name="interval_text">நேர இடைவேளை</string>
-  <string name="change_blur">மங்கலை மாற்றவும்</string>
-  <string name="paperize_is_running">Paperize இயங்குகிறது</string>
+  <string name="interval_text">நேர இடைவெளி</string>
+  <string name="change_blur">மங்கலான விளைவு</string>
+  <string name="paperize_is_running">பேப்பரைஸ் இயங்குகிறது</string>
   <string name="next_wallpaper_change">அடுத்த வால்பேப்பர் மாற்றம்: %1$s</string>
   <string name="delay_notice">தாமத அறிவிப்பு</string>
   <string name="delay_notice_dialog">தாமத அறிவிப்பு</string>
-  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">பேட்டரி பயன்பாட்டைக் குறைக்க, வால்பேப்பர்களை மாற்றுவதற்கு திட்டமிடப்பட்டவுடன் சில தாமதங்கள் ஏற்படலாம். சாதனம் தூங்கும்போது, வால்பேப்பரைப் பயன்படுத்த அதிக நேரம் ஆகலாம்.</string>
+  <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">பேட்டரி பயன்பாட்டைக் குறைக்க, வால்பேப்பர்களை மாற்றுவது திட்டமிடப்பட்டவுடன் சில தாமதங்களைச் சந்திக்கலாம். சாதனம் தூங்கும்போது, வால்பேப்பரைப் பயன்படுத்த அதிக நேரம் ஆகலாம்.</string>
   <string name="change_wallpaper">வால்பேப்பரை மாற்றவும்</string>
   <string name="theme">தீம்</string>
   <string name="amoled_mode">AMOLED பயன்முறை</string>
@@ -163,5 +163,9 @@
   <string name="enable_wallpaper_changer">வால்பேப்பர் சேஞ்சரை இயக்கவும்</string>
   <string name="unselected_album">தேர்ந்தெடுக்கப்படாத ஆல்பம்</string>
   <string name="lock">பூட்டு</string>
-  <string name="change_vignette">விக்னெட்டை மாற்றவும்</string>
+  <string name="change_vignette">விக்னெட் விளைவு</string>
+  <string name="none">இல்லை</string>
+  <string name="gray_filter">சாம்பல் வடிகட்டி</string>
+  <string name="select_starting_time">தொடங்கும் நேரத்தைத் தேர்ந்தெடுக்கவும்</string>
+  <string name="change_notification_settings">அறிவிப்பு அமைப்புகளை மாற்றவும்</string>
 </resources>

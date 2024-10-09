@@ -4,7 +4,7 @@
   <string name="SettingsIcon">Možnosti</string>
   <string name="dropdownmenu_settings">Nastavení</string>
   <string name="home_screen">Domov</string>
-  <string name="wallpaper_screen">Tapeta na zeď</string>
+  <string name="wallpaper_screen">Tapeta</string>
   <string name="library_screen">Knihovna</string>
   <string name="settings_screen">Nastavení</string>
   <string name="settings_back">Zadní</string>
@@ -23,7 +23,7 @@
   <string name="add_wallpaper_screen">Přidat obrazovku tapety</string>
   <string name="enter_the_name_of_the_album">Zadejte název alba</string>
   <string name="album_name">Název alba</string>
-  <string name="cancel">zrušení</string>
+  <string name="cancel">Zrušit</string>
   <string name="save">Uložit</string>
   <string name="delete_album">Vymazat</string>
   <string name="change_name">Upravit jméno</string>
@@ -34,12 +34,12 @@
   <string name="stop_the_album">Zastavte album</string>
   <string name="more_options">Více možností</string>
   <string name="startup">Spuštění</string>
-  <string name="agree">Souhlasit</string>
+  <string name="agree">souhlas</string>
   <string name="welcome">Vítejte</string>
   <string name="notifications">Oznámení</string>
-  <string name="continue_button">Jdu do toho</string>
+  <string name="continue_button">Jsem In</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">Aby tato aplikace správně fungovala, je vyžadováno oprávnění k oznámení</string>
-  <string name="allow">Dovolit</string>
+  <string name="allow">Povolit</string>
   <string name="notification_info_message">Oznámení lze povolit, aby se zobrazovala, když aplikace běží na pozadí.</string>
   <string name="set_as_lock_screen">Nastavit jako zamykací obrazovku</string>
   <string name="lock_screen">Uzamknout obrazovku</string>
@@ -52,7 +52,7 @@
   <string name="licenses_screen">Obrazovka licencí</string>
   <string name="contact">Kontakt</string>
   <string name="contact_the_author_by_email">Kontaktujte autora emailem</string>
-  <string name="reset_to_default">Obnovit do základního nastavení</string>
+  <string name="reset_to_default">Obnovit výchozí</string>
   <string name="reset_all_data">Resetujte všechna data</string>
   <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">Opravdu chcete obnovit všechna nastavení a data na výchozí?</string>
   <string name="confirm">Potvrdit</string>
@@ -62,7 +62,7 @@
   <string name="circle_3_animation">Animace kruhu 3</string>
   <string name="wallpaper_changer_has_been_enabled">Měnič tapety byl povolen.</string>
   <string name="wallpaper_changer_has_been_disabled">Měnič tapet byl deaktivován.</string>
-  <string name="dismiss">Zavrhnout</string>
+  <string name="dismiss">Propustit</string>
   <string name="has_been_unselected">Výběr %1$s byl zrušen.</string>
   <string name="interval_home">Úvodní obrazovka | %1$s</string>
   <string name="interval_lock">Uzamknout obrazovku | %1$s</string>
@@ -88,7 +88,7 @@
   <string name="selected_count">%1$s vybráno</string>
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Chcete-li aplikaci používat, přečtěte si a odsouhlaste následující oznámení o ochraně osobních údajů.</string>
   <string name="privacy_notice">Oznámení o ochraně osobních údajů</string>
-  <string name="please_read_and_agree_to_the_privacy_notice">Přečtěte si prosím upozornění na ochranu osobních údajů a potvrďte souhlas.</string>
+  <string name="please_read_and_agree_to_the_privacy_notice">Přečtěte si prosím oznámení o ochraně osobních údajů a potvrďte souhlas.</string>
   <string name="view">Pohled</string>
   <string name="welcome_animation">Uvítací animace</string>
   <string name="notification_bell_animation">Animace zvonku upozornění</string>
@@ -123,13 +123,13 @@
     <item quantity="many">%d tapety</item>
     <item quantity="other">%d tapety</item>
   </plurals>
-  <string name="privacy_intro_title">Úvod</string>
+  <string name="privacy_intro_title">Zavedení</string>
   <string name="privacy_intro_content">Vítejte v %1$s! Toto oznámení o ochraně osobních údajů popisuje, jak shromažďujeme, používáme a chráníme vaše osobní údaje, když používáte naši mobilní aplikaci. Používáním %1$ssouhlasíte s podmínkami popsanými v tomto oznámení.</string>
   <string name="privacy_data_collection_title">Sběr dat</string>
-  <string name="privacy_data_collection_content">Přístup k oznámení: %1$s požaduje přístup k oznámení, aby vám mohl poskytnout přizpůsobená doporučení tapet na základě vašich oznámení. Mimo vaše zařízení neukládáme žádný obsah oznámení ani osobní údaje (PII).\n\nMístní soubory: %1$s přistupuje k souborům uloženým ve vašem zařízení a umožňuje vám je nastavit jako tapety. Tyto soubory nenahráváme ani nepřenášíme na žádné externí servery.</string>
+  <string name="privacy_data_collection_content">Přístup k oznámením: %1$s požaduje přístup k oznámení, aby vám na základě vašich oznámení poskytl přizpůsobená doporučení tapet. Mimo vaše zařízení neukládáme žádný obsah oznámení ani osobní údaje (PII).\n\nMístní soubory: %1$s přistupuje k souborům uloženým ve vašem zařízení a umožňuje vám je nastavit jako tapety. Tyto soubory nenahráváme ani nepřenášíme na žádné externí servery.</string>
   <string name="privacy_information_usage_title">Využití informací</string>
   <string name="privacy_information_usage_content">Osobní údaje: Neshromažďujeme ani neukládáme žádné osobní údaje, jako jsou jména, e-mailové adresy nebo telefonní čísla.\n\nAnalýza využití: %1$s nesleduje vaše chování při používání ani neshromažďuje analytická data.</string>
-  <string name="privacy_data_security_title">Bezpečnost dat</string>
+  <string name="privacy_data_security_title">Zabezpečení dat</string>
   <string name="privacy_data_security_content">Úložiště v zařízení: Všechna data používaná %1$s zůstávají ve vašem zařízení. Nepřenášíme ani neukládáme žádná data externě.</string>
   <string name="privacy_third_party_services_title">Služby třetích stran</string>
   <string name="privacy_third_party_services_content">Reklamy: %1$s nezobrazuje reklamy třetích stran.\n\nExterní odkazy: Naše aplikace může obsahovat odkazy na externí webové stránky. Vezměte prosím na vědomí, že nejsme zodpovědní za postupy ochrany osobních údajů na těchto stránkách.</string>
@@ -146,16 +146,16 @@
   <string name="ok">OK</string>
   <string name="percentage">%1$s%%</string>
   <string name="fill">Vyplnit</string>
-  <string name="fit">Vejít se</string>
-  <string name="stretch">Protáhnout se</string>
+  <string name="fit">Fit</string>
+  <string name="stretch">Úsek</string>
   <string name="wallpaper_scaling">Měřítko tapety</string>
-  <string name="change_brightness">Změna jasu</string>
+  <string name="change_brightness">Jas</string>
   <string name="home_screen_btn">Domovská obrazovka</string>
   <string name="lock_screen_btn">Uzamknout obrazovku</string>
   <string name="individual_scheduling">Individuální plánování</string>
   <string name="show_interval_sliders">Zobrazit posuvníky intervalů</string>
   <string name="interval_text">Časový interval</string>
-  <string name="change_blur">Změnit rozostření</string>
+  <string name="change_blur">Efekt rozostření</string>
   <string name="paperize_is_running">Paperize běží</string>
   <string name="next_wallpaper_change">Další změna tapety: %1$s</string>
   <string name="delay_notice">Upozornění na zpoždění</string>
@@ -168,8 +168,12 @@
   <string name="change_next_short">Změnit tapetu</string>
   <string name="change_next_long">Změnit na další tapetu v albu</string>
   <string name="cannot_change_wallpaper">Nelze změnit tapetu</string>
-  <string name="enable_wallpaper_changer">Povolit změnu tapety</string>
+  <string name="enable_wallpaper_changer">Povolit měnič tapety</string>
   <string name="unselected_album">Nevybrané album</string>
-  <string name="lock">Zamknout</string>
-  <string name="change_vignette">Change Vignette</string>
+  <string name="lock">Zámek</string>
+  <string name="change_vignette">Efekt viněty</string>
+  <string name="none">Žádný</string>
+  <string name="gray_filter">Šedý filtr</string>
+  <string name="select_starting_time">Vyberte počáteční čas</string>
+  <string name="change_notification_settings">Změnit nastavení oznámení</string>
 </resources>

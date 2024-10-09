@@ -38,7 +38,7 @@
   <string name="welcome">Sugeng rawuh</string>
   <string name="notifications">Kabar</string>
   <string name="continue_button">Aku ing</string>
-  <string name="notification_permission_is_required_for_this_app_to_work_properly">Ijin notifikasi dibutuhake supaya aplikasi iki bisa digunakake kanthi bener</string>
+  <string name="notification_permission_is_required_for_this_app_to_work_properly">Ijin kabar dibutuhake supaya aplikasi iki bisa digunakake kanthi bener</string>
   <string name="allow">ngidini</string>
   <string name="notification_info_message">Kabar bisa diaktifake kanggo nuduhake nalika app lagi mlaku ing latar mburi.</string>
   <string name="set_as_lock_screen">Setel minangka layar kunci</string>
@@ -62,7 +62,7 @@
   <string name="circle_3_animation">Animasi Lingkaran 3</string>
   <string name="wallpaper_changer_has_been_enabled">Pangowahan wallpaper wis diaktifake.</string>
   <string name="wallpaper_changer_has_been_disabled">Pangowahan wallpaper wis dipateni.</string>
-  <string name="dismiss">Mbucal</string>
+  <string name="dismiss">Ngilangi</string>
   <string name="has_been_unselected">%1$s wis ora dipilih.</string>
   <string name="interval_home">Layar Ngarep | %1$s</string>
   <string name="interval_lock">Layar Kunci | %1$s</string>
@@ -106,7 +106,7 @@
   <string name="coming_soon">Rawuh</string>
   <string name="new_album">Album anyar</string>
   <string name="wallpapers">wallpaper</string>
-  <string name="translation">Ngartekne</string>
+  <string name="translation">Terjemahan</string>
   <string name="help_translate_the_app_on_crowdin">Bantuan nerjemahake app ing Crowdin!</string>
   <plurals name="wallpaper_count">
     <item quantity="other">%d wallpaper</item>
@@ -122,7 +122,7 @@
   <string name="privacy_third_party_services_title">Layanan Pihak Katelu</string>
   <string name="privacy_third_party_services_content">Iklan: %1$s ora nampilake iklan pihak katelu.\n\nLink Eksternal: Aplikasi kita bisa uga ngemot pranala menyang situs web eksternal. Elinga yen kita ora tanggung jawab kanggo praktik privasi situs kasebut.</string>
   <string name="privacy_children_privacy_title">Privasi Anak</string>
-  <string name="privacy_children_privacy_content">%1$s ora dimaksudaké kanggo bocah-bocah ing sangisoré 13 taun. Kita ora sengaja ngumpulake informasi saka bocah-bocah.</string>
+  <string name="privacy_children_privacy_content">%1$s ora kanggo bocah-bocah ing sangisore 13 taun. Kita ora sengaja ngumpulake informasi saka bocah-bocah.</string>
   <string name="privacy_changes_notice_title">Owah-owahan ing kabar iki</string>
   <string name="privacy_changes_notice_content">Kita bisa nganyari kabar privasi iki saka wektu kanggo wektu. Sembarang owah-owahan bakal dibayangke ing app lan ing situs web kita.</string>
   <string name="privacy_contact_us_title">Hubungi Kita</string>
@@ -134,16 +134,16 @@
   <string name="ok">OK</string>
   <string name="percentage">%1$s%%</string>
   <string name="fill">Isi</string>
-  <string name="fit">Pas</string>
+  <string name="fit">Fit</string>
   <string name="stretch">Stretch</string>
   <string name="wallpaper_scaling">Skala Wallpaper</string>
-  <string name="change_brightness">Ganti Padhang</string>
+  <string name="change_brightness">padhang</string>
   <string name="home_screen_btn">Layar Ngarep</string>
   <string name="lock_screen_btn">Layar Kunci</string>
   <string name="individual_scheduling">Jadwal individu</string>
   <string name="show_interval_sliders">Tampilake panggeser interval</string>
   <string name="interval_text">Interval Wektu</string>
-  <string name="change_blur">Ganti Blur</string>
+  <string name="change_blur">Efek Blur</string>
   <string name="paperize_is_running">Paperize mlaku</string>
   <string name="next_wallpaper_change">Ganti wallpaper sabanjure: %1$s</string>
   <string name="delay_notice">Kabar Tundha</string>
@@ -158,6 +158,10 @@
   <string name="cannot_change_wallpaper">Ora bisa ngganti wallpaper</string>
   <string name="enable_wallpaper_changer">Aktifake Wallpaper Changer</string>
   <string name="unselected_album">Album sing ora dipilih</string>
-  <string name="lock">Ngunci</string>
-  <string name="change_vignette">Ngganti Vignette</string>
+  <string name="lock">Kunci</string>
+  <string name="change_vignette">Efek Vignette</string>
+  <string name="none">ora ana</string>
+  <string name="gray_filter">Filter werna abu-abu</string>
+  <string name="select_starting_time">Pilih wektu wiwitan</string>
+  <string name="change_notification_settings">Ngganti setelan kabar</string>
 </resources>
