@@ -60,7 +60,6 @@ class LockWallpaperService: Service() {
 
     enum class Actions {
         START,
-        REQUEUE,
         UPDATE,
         REFRESH
     }
@@ -85,12 +84,6 @@ class LockWallpaperService: Service() {
                     type = intent.getIntExtra("type", Type.SINGLE.ordinal)
                     workerTaskStart()
                 }
-                Actions.REQUEUE.toString() -> {
-                    homeInterval = intent.getIntExtra("homeInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                    lockInterval = intent.getIntExtra("lockInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
-                    scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
-                    workerTaskRequeue()
-                }
                 Actions.UPDATE.toString() -> {
                     workerTaskUpdate()
                 }
@@ -112,20 +105,6 @@ class LockWallpaperService: Service() {
         workerHandler.post {
             CoroutineScope(Dispatchers.IO).launch {
                 changeWallpaper(this@LockWallpaperService)
-            }
-            stopSelf()
-        }
-    }
-
-    private fun workerTaskRequeue() {
-        workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
-                val nextSetTime1 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
-                val nextSetTime2 = LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
-                val nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)
-                val notification = createNotification(nextSetTime)
-                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-                notification?.let { notificationManager.notify(1, it) }
             }
             stopSelf()
         }

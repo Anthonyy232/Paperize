@@ -30,6 +30,7 @@ class WallpaperAlarmSchedulerImpl (
         changeImmediate: Boolean,
         cancelImmediate: Boolean,
         setAlarm: Boolean,
+        firstLaunch: Boolean
     ) {
         // Cancel previous alarms before setting new ones to prevent stale alarms
         if (cancelImmediate) cancelWallpaperAlarm()
@@ -50,11 +51,11 @@ class WallpaperAlarmSchedulerImpl (
             when (origin) {
                 Type.LOCK.ordinal -> {
                     if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.LOCK)
-                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, origin)
+                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, origin, firstLaunch)
                 }
                 Type.HOME.ordinal -> {
                     if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
-                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin)
+                    if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.HOME, origin, firstLaunch)
                 }
                 null -> {
                     if (changeImmediate) {
@@ -62,29 +63,29 @@ class WallpaperAlarmSchedulerImpl (
                         changeWallpaperImmediate(wallpaperAlarmItem, Type.HOME)
                     }
                     if (setAlarm) {
-                        scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, Type.LOCK.ordinal)
-                        scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal)
+                        scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, Type.LOCK.ordinal, firstLaunch)
+                        scheduleWallpaper(wallpaperAlarmItem, Type.HOME, Type.HOME.ordinal, firstLaunch)
                     }
                 }
             }
         }
         else {
             if (changeImmediate) changeWallpaperImmediate(wallpaperAlarmItem, Type.SINGLE)
-            if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE)
+            if (setAlarm) scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE, null, firstLaunch)
         }
     }
 
     /**
      * Update the alarms
      */
-    override fun updateWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem) {
+    override fun updateWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, firstLaunch: Boolean) {
         cancelWallpaperAlarm()
         if (wallpaperAlarmItem.scheduleSeparately) {
-            scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, null, true)
-            scheduleWallpaper(wallpaperAlarmItem, Type.HOME, null, true)
+            scheduleWallpaper(wallpaperAlarmItem, Type.LOCK, null, firstLaunch)
+            scheduleWallpaper(wallpaperAlarmItem, Type.HOME, null, firstLaunch)
         }
         else {
-            scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE, null, true)
+            scheduleWallpaper(wallpaperAlarmItem, Type.SINGLE, null, firstLaunch)
         }
     }
 
@@ -116,11 +117,21 @@ class WallpaperAlarmSchedulerImpl (
     /**
      * Schedules the wallpaper alarm based on type and time
      */
-    private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, update: Boolean = false) {
-        val nextTime = when (type) {
-            Type.LOCK -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
-            Type.HOME -> if (wallpaperAlarmItem.scheduleSeparately) LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10) else LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
-            else -> LocalDateTime.now().plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
+    private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, firstLaunch: Boolean = false) {
+        val startTime = if (wallpaperAlarmItem.changeStartTime && firstLaunch) {
+            var calculatedStartTime = LocalDateTime.now().withHour(wallpaperAlarmItem.startTime.first).withMinute(wallpaperAlarmItem.startTime.second)
+            if (calculatedStartTime.isBefore(LocalDateTime.now())) {
+                calculatedStartTime = calculatedStartTime.plusDays(1)
+            }
+            calculatedStartTime
+        } else {
+            LocalDateTime.now()
+        }
+        val nextTime = when {
+            wallpaperAlarmItem.changeStartTime && firstLaunch -> startTime
+            type == Type.LOCK -> startTime.plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
+            type == Type.HOME && wallpaperAlarmItem.scheduleSeparately -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10)
+            else -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
         }
         val intent = Intent(context, WallpaperReceiver::class.java).apply {
             putExtra("homeInterval", wallpaperAlarmItem.homeInterval)
@@ -129,6 +140,8 @@ class WallpaperAlarmSchedulerImpl (
             putExtra("type", type.ordinal)
             putExtra("setHome", wallpaperAlarmItem.setHome)
             putExtra("setLock", wallpaperAlarmItem.setLock)
+            putExtra("changeStartTime", wallpaperAlarmItem.changeStartTime)
+            putExtra("startTime", wallpaperAlarmItem.startTime)
             putExtra("origin", origin)
         }
 
@@ -161,20 +174,6 @@ class WallpaperAlarmSchedulerImpl (
                 )
             )
         }
-        if (update) {
-            when (type.ordinal) {
-                Type.SINGLE.ordinal -> {
-                    if (wallpaperAlarmItem.setLock) startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
-                    if (wallpaperAlarmItem.setHome) startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.SINGLE.ordinal)
-                }
-                Type.HOME.ordinal -> {
-                    startService(context, HomeWallpaperService::class.java, HomeWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.HOME.ordinal)
-                }
-                Type.LOCK.ordinal -> {
-                    startService(context, LockWallpaperService::class.java, LockWallpaperService.Actions.REQUEUE.toString(), wallpaperAlarmItem.homeInterval, wallpaperAlarmItem.lockInterval, wallpaperAlarmItem.scheduleSeparately, Type.LOCK.ordinal)
-                }
-            }
-        }
     }
 
     /**
@@ -191,7 +190,7 @@ class WallpaperAlarmSchedulerImpl (
                 cancelWallpaperAlarm()
             }
             else {
-                alarmManager.setExact(
+                alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
                     PendingIntent.getBroadcast(
@@ -204,7 +203,7 @@ class WallpaperAlarmSchedulerImpl (
             }
         }
         else {
-            alarmManager.setExact(
+            alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
                 PendingIntent.getBroadcast(

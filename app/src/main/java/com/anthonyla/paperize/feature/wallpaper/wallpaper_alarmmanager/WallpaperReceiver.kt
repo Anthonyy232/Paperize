@@ -30,6 +30,8 @@ class WallpaperReceiver: BroadcastReceiver() {
                 val type = intent?.getIntExtra("type", Type.SINGLE.ordinal) ?: Type.SINGLE.ordinal
                 val setHome = intent?.getBooleanExtra("setHome", false) ?: false
                 val setLock = intent?.getBooleanExtra("setLock", false) ?: false
+                val changeStartTime = intent?.getBooleanExtra("changeStartTime", false) ?: false
+                val startTime = intent?.getIntArrayExtra("startTime") ?: intArrayOf(0, 0)
 
                 when (type) {
                     Type.SINGLE.ordinal -> {
@@ -52,7 +54,9 @@ class WallpaperReceiver: BroadcastReceiver() {
                         lockInterval = lockInterval,
                         scheduleSeparately = scheduleSeparately,
                         setHome = setHome,
-                        setLock = setLock
+                        setLock = setLock,
+                        changeStartTime = changeStartTime,
+                        startTime = Pair(startTime[0], startTime[1]),
                     ),
                     origin
                 )

@@ -42,4 +42,7 @@ object SettingsConstants {
     const val GRAYSCALE = "grayscale"
     const val HOME_GRAYSCALE_PERCENTAGE = "home_grayscale_percentage"
     const val LOCK_GRAYSCALE_PERCENTAGE = "lock_grayscale_percentage"
+    const val CHANGE_START_TIME = "change_start_time"
+    const val START_HOUR = "start_hour"
+    const val START_MINUTE = "start_minute"
 }

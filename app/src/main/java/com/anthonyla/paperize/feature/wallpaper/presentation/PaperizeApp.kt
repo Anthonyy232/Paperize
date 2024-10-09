@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +62,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaperizeApp(
     firstLaunch: Boolean,
@@ -230,6 +232,8 @@ fun PaperizeApp(
                 grayscale = settingsState.value.grayscale,
                 homeGrayscalePercentage = settingsState.value.homeGrayscalePercentage,
                 lockGrayscalePercentage = settingsState.value.lockGrayscalePercentage,
+                changeStartTime = settingsState.value.changeStartTime,
+                startingTime = settingsState.value.startTime,
                 onSettingsClick = { navController.navigate(Settings) },
                 navigateToAddWallpaperScreen = {
                     navController.navigate(AddEdit(it))
@@ -248,13 +252,16 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = settingsState.value.scheduleSeparately,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
                                 origin = null,
                                 changeImmediate = true,
-                                cancelImmediate = true
+                                cancelImmediate = true,
+                                firstLaunch = true
                             ) }
                             scheduler.scheduleRefresh()
                         }
@@ -271,13 +278,14 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = settingsState.value.scheduleSeparately,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                             scheduler.scheduleRefresh()
                         }
                     }
-
                 },
                 onLockTimeChange = { timeInMinutes ->
                     settingsViewModel.onEvent(SettingsEvent.SetLockWallpaperInterval(timeInMinutes))
@@ -290,7 +298,9 @@ fun PaperizeApp(
                                 lockInterval = timeInMinutes,
                                 scheduleSeparately = settingsState.value.scheduleSeparately,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                             scheduler.scheduleRefresh()
@@ -330,13 +340,16 @@ fun PaperizeApp(
                                     lockInterval = settingsState.value.lockInterval,
                                     scheduleSeparately = settingsState.value.scheduleSeparately,
                                     setHome = settingsState.value.setHomeWallpaper,
-                                    setLock = settingsState.value.setLockWallpaper
+                                    setLock = settingsState.value.setLockWallpaper,
+                                    changeStartTime = settingsState.value.changeStartTime,
+                                    startTime = settingsState.value.startTime
                                 )
                                 alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                     wallpaperAlarmItem = it,
                                     origin = null,
                                     changeImmediate = true,
-                                    cancelImmediate = true
+                                    cancelImmediate = true,
+                                    firstLaunch = true
                                 ) }
                                 scheduler.scheduleRefresh()
                             }
@@ -458,14 +471,17 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = settingsState.value.scheduleSeparately,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let {
                                 scheduler.scheduleWallpaperAlarm(
                                     wallpaperAlarmItem = it,
                                     origin = null,
                                     changeImmediate = true,
-                                    cancelImmediate = true
+                                    cancelImmediate = true,
+                                    firstLaunch = true
                                 )
                             }
                             scheduler.scheduleRefresh()
@@ -508,7 +524,6 @@ fun PaperizeApp(
                 onHomeCheckedChange = { setHome -> settingsViewModel.onEvent(SettingsEvent.SetHome(setHome))
                     if (!selectedState.value.selectedAlbum.isNullOrEmpty() && !setHome && !settingsState.value.setLockWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
-                        settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper("", ""))
                         selectedState.value.selectedAlbum?.let { wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset()) }
                         scheduler.cancelWallpaperAlarm()
                     }
@@ -536,13 +551,16 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = false,
                                 setHome = setHome,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
                                 origin = null,
                                 changeImmediate = false,
                                 cancelImmediate = true,
+                                firstLaunch = true
                             ) }
                             scheduler.scheduleRefresh()
                         }
@@ -567,7 +585,6 @@ fun PaperizeApp(
                 onLockCheckedChange = { setLock -> settingsViewModel.onEvent(SettingsEvent.SetLock(setLock))
                     if (selectedState.value.selectedAlbum!= null && !setLock && !settingsState.value.setHomeWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
-                        settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper("", ""))
                         selectedState.value.selectedAlbum?.let {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset())
                         }
@@ -584,13 +601,16 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = false,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = setLock
+                                setLock = setLock,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
-                            alarmItem.let{scheduler.scheduleWallpaperAlarm(
+                            alarmItem.let{ scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
                                 origin = null,
                                 changeImmediate = false,
-                                cancelImmediate = true
+                                cancelImmediate = true,
+                                firstLaunch = true
                             ) }
                             scheduler.scheduleRefresh()
                         }
@@ -659,14 +679,17 @@ fun PaperizeApp(
                                 lockInterval = settingsState.value.lockInterval,
                                 scheduleSeparately = changeSeparately,
                                 setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = settingsState.value.changeStartTime,
+                                startTime = settingsState.value.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
                                 origin = null,
                                 changeImmediate = true,
-                                cancelImmediate = true)
-                            }
+                                cancelImmediate = true,
+                                firstLaunch = true
+                            ) }
                             scheduler.scheduleRefresh()
                         }
                     }
@@ -728,6 +751,46 @@ fun PaperizeApp(
                         job = scope.launch {
                             delay(3000)
                             scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                        }
+                    }
+                },
+                onStartTimeChange = { time ->
+                    settingsViewModel.onEvent(SettingsEvent.SetStartTime(time.hour, time.minute))
+                    if (settingsState.value.enableChanger) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(1000)
+                            val alarmItem = WallpaperAlarmItem(
+                                homeInterval = settingsState.value.homeInterval,
+                                lockInterval = settingsState.value.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSeparately,
+                                setHome = settingsState.value.setHomeWallpaper,
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = true,
+                                startTime = Pair(time.hour, time.minute)
+                            )
+                            alarmItem.let{scheduler.updateWallpaperAlarm(it, true)}
+                            scheduler.scheduleRefresh()
+                        }
+                    }
+                },
+                onChangeStartTimeToggle = { changeStartTime ->
+                    settingsViewModel.onEvent(SettingsEvent.SetChangeStartTime(changeStartTime))
+                    if (settingsState.value.enableChanger) {
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(1000)
+                            val alarmItem = WallpaperAlarmItem(
+                                homeInterval = settingsState.value.homeInterval,
+                                lockInterval = settingsState.value.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSeparately,
+                                setHome = settingsState.value.setHomeWallpaper,
+                                setLock = settingsState.value.setLockWallpaper,
+                                changeStartTime = changeStartTime,
+                                startTime = settingsState.value.startTime
+                            )
+                            alarmItem.let{scheduler.updateWallpaperAlarm(it, true)}
+                            scheduler.scheduleRefresh()
                         }
                     }
                 },

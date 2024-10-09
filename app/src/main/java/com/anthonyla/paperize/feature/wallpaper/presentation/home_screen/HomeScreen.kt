@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -12,6 +13,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +32,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.compone
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -79,7 +82,11 @@ fun HomeScreen(
     lockGrayscalePercentage: Int,
     onGrayscalePercentageChange: (Int, Int) -> Unit,
     onGrayscaleChange: (Boolean) -> Unit,
-    grayscale: Boolean
+    grayscale: Boolean,
+    changeStartTime: Boolean,
+    onChangeStartTimeToggle: (Boolean) -> Unit,
+    onStartTimeChange: (TimePickerState) -> Unit,
+    startingTime: Pair<Int, Int>
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -188,7 +195,11 @@ fun HomeScreen(
                         lockGrayscalePercentage = lockGrayscalePercentage,
                         onGrayscalePercentageChange = onGrayscalePercentageChange,
                         onGrayscaleChange = onGrayscaleChange,
-                        grayscale = grayscale
+                        grayscale = grayscale,
+                        changeStartTime = changeStartTime,
+                        onChangeStartTimeToggle = onChangeStartTimeToggle,
+                        onStartTimeChange = onStartTimeChange,
+                        startingTime = startingTime
                     )
                     else -> LibraryScreen(
                         albums = albums,

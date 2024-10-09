@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
 
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.com
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.DynamicThemingListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.LicenseListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ListSectionTitle
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.NotificationListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.PaperizeListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.PrivacyPolicyListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ResetListItem
@@ -154,6 +156,16 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 ListSectionTitle(stringResource(R.string.about))
+                Spacer(modifier = Modifier.height(16.dp))
+                NotificationListItem(
+                    onClick = {
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        }
+                        context.startActivity(intent)
+                    }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 TranslateListItem(
                     onClick = {

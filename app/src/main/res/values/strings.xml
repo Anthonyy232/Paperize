@@ -165,4 +165,6 @@
     <string name="change_vignette">Vignette Effect</string>
     <string name="none">None</string>
     <string name="gray_filter">Gray Filter</string>
+    <string name="select_starting_time">Select starting time</string>
+    <string name="change_notification_settings">Change notification settings</string>
 </resources>

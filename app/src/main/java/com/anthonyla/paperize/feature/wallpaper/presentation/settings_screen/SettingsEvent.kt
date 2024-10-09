@@ -18,6 +18,7 @@ sealed class SettingsEvent {
     data class SetGrayscale(val grayscale: Boolean): SettingsEvent()
     data class SetLock(val lock: Boolean): SettingsEvent()
     data class SetHome(val home: Boolean): SettingsEvent()
+    data class SetChangeStartTime(val changeStartTime: Boolean): SettingsEvent()
     data class SetCurrentHomeWallpaper(val currentHomeWallpaper: String?): SettingsEvent()
     data class SetCurrentLockWallpaper(val currentLockWallpaper: String?): SettingsEvent()
     data class SetCurrentWallpaper(val currentHomeWallpaper: String?, val currentLockWallpaper: String?): SettingsEvent()
@@ -36,5 +37,6 @@ sealed class SettingsEvent {
     data class SetNextHomeWallpaper(val nextHomeWallpaper: String?): SettingsEvent()
     data class SetNextLockWallpaper(val nextLockWallpaper: String?): SettingsEvent()
     data class SetNextWallpaper(val nextHomeWallpaper: String?, val nextLockWallpaper: String?): SettingsEvent()
+    data class SetStartTime(val hour: Int, val minute: Int): SettingsEvent()
     data object RefreshNextWallpaper: SettingsEvent()
 }

@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +47,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -92,6 +95,10 @@ fun WallpaperScreen(
     onGrayscalePercentageChange: (Int, Int) -> Unit,
     onGrayscaleChange: (Boolean) -> Unit,
     grayscale: Boolean,
+    changeStartTime: Boolean,
+    onChangeStartTimeToggle: (Boolean) -> Unit,
+    onStartTimeChange: (TimePickerState) -> Unit,
+    startingTime: Pair<Int, Int>
 ) {
     val shouldShowScreen = homeEnabled || lockEnabled
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -236,7 +243,11 @@ fun WallpaperScreen(
                             onShowIntervalChange = { showInterval.value = it },
                             scheduleSeparately = scheduleSeparately,
                             lockEnabled = lockEnabled,
-                            homeEnabled = homeEnabled
+                            homeEnabled = homeEnabled,
+                            onStartTimeChange = onStartTimeChange,
+                            changeStartTime = changeStartTime,
+                            startingTime = startingTime,
+                            onChangeStartTimeToggle = onChangeStartTimeToggle
                         )
                         DarkenSwitchAndSlider(
                             onDarkCheck = onDarkCheck,

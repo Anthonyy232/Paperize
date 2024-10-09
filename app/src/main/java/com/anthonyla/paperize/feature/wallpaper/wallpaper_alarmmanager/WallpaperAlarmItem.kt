@@ -16,4 +16,6 @@ data class WallpaperAlarmItem(
     val scheduleSeparately: Boolean = false,
     val setHome : Boolean = false,
     val setLock : Boolean = false,
+    val changeStartTime: Boolean = false,
+    val startTime: Pair<Int, Int> = Pair(0, 0),
 )

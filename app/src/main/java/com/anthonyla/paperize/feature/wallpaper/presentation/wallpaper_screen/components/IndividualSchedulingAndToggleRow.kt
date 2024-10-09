@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
@@ -62,18 +64,22 @@ fun IndividualSchedulingAndToggleRow(
             modifier = columnModifier
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.individual_scheduling),
-                    modifier = Modifier.padding(16.dp),
-                    fontWeight = FontWeight.W500
+                    fontWeight = FontWeight.W500,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
+                Spacer(modifier = Modifier.padding(8.dp))
                 Switch(
                     checked = scheduleSeparately,
-                    onCheckedChange = onScheduleSeparatelyChange
+                    onCheckedChange = onScheduleSeparatelyChange,
                 )
             }
             if (animate) {
@@ -88,14 +94,18 @@ fun IndividualSchedulingAndToggleRow(
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 2.dp)
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = stringResource(R.string.enable_wallpaper_changer),
                             modifier = Modifier.padding(16.dp),
-                            fontWeight = FontWeight.W500
+                            fontWeight = FontWeight.W500,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
                         )
                         Switch(
                             checked = enableChanger,

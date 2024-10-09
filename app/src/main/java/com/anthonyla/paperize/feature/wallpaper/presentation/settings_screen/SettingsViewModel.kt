@@ -66,6 +66,8 @@ class SettingsViewModel @Inject constructor (
             val lockGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0 }
             val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME) }
             val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME) }
+            val changeStartTime = async { settingsDataStoreImpl.getBoolean(SettingsConstants.CHANGE_START_TIME) ?: false }
+            val startTime = async { Pair(settingsDataStoreImpl.getInt(SettingsConstants.START_HOUR) ?: 0, settingsDataStoreImpl.getInt(SettingsConstants.START_MINUTE) ?: 0) }
 
             _state.update {
                 it.copy(
@@ -100,7 +102,9 @@ class SettingsViewModel @Inject constructor (
                     lockVignettePercentage = lockVignettePercentage.await(),
                     grayscale = grayscale.await(),
                     homeGrayscalePercentage = homeGrayscalePercentage.await(),
-                    lockGrayscalePercentage = lockGrayscalePercentage.await()
+                    lockGrayscalePercentage = lockGrayscalePercentage.await(),
+                    changeStartTime = changeStartTime.await(),
+                    startTime = startTime.await()
                 )
             }
             setKeepOnScreenCondition = false
@@ -125,8 +129,9 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, event.toggle)
                     _state.update {
                         it.copy(
-                            enableChanger = event.toggle
-
+                            enableChanger = event.toggle,
+                            currentHomeWallpaper = if (!event.toggle) null else it.currentHomeWallpaper,
+                            currentLockWallpaper = if (!event.toggle) null else it.currentLockWallpaper
                         )
                     }
                 }
@@ -165,6 +170,8 @@ class SettingsViewModel @Inject constructor (
                     val grayscale = async { settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false }
                     val homeGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0 }
                     val lockGrayscalePercentage = async { settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0 }
+                    val changeStartTime = async { settingsDataStoreImpl.getBoolean(SettingsConstants.CHANGE_START_TIME) ?: false }
+                    val startTime = async { Pair(settingsDataStoreImpl.getInt(SettingsConstants.START_HOUR) ?: 0, settingsDataStoreImpl.getInt(SettingsConstants.START_MINUTE) ?: 0) }
 
                     _state.update {
                         it.copy(
@@ -198,7 +205,9 @@ class SettingsViewModel @Inject constructor (
                             lockVignettePercentage = lockVignettePercentage.await(),
                             grayscale = grayscale.await(),
                             homeGrayscalePercentage = homeGrayscalePercentage.await(),
-                            lockGrayscalePercentage = lockGrayscalePercentage.await()
+                            lockGrayscalePercentage = lockGrayscalePercentage.await(),
+                            changeStartTime = changeStartTime.await(),
+                            startTime = startTime.await()
                         )
                     }
                 }
@@ -264,7 +273,11 @@ class SettingsViewModel @Inject constructor (
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL, event.interval)
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val currentTime = LocalDateTime.now()
+                    val currentTime = if (_state.value.changeStartTime) {
+                        LocalDateTime.now().withHour(_state.value.startTime.first).withMinute(_state.value.startTime.second)
+                    } else {
+                        LocalDateTime.now()
+                    }
                     val nextSetTime: String?
                     settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
                     if (_state.value.scheduleSeparately) {
@@ -295,7 +308,11 @@ class SettingsViewModel @Inject constructor (
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.putInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL, event.interval)
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val currentTime = LocalDateTime.now()
+                    val currentTime = if (_state.value.changeStartTime) {
+                        LocalDateTime.now().withHour(_state.value.startTime.first).withMinute(_state.value.startTime.second)
+                    } else {
+                        LocalDateTime.now()
+                    }
                     val nextSetTime: String?
                     settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
                     if (_state.value.scheduleSeparately) {
@@ -325,29 +342,42 @@ class SettingsViewModel @Inject constructor (
             is SettingsEvent.RefreshNextSetTime -> {
                 viewModelScope.launch {
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-                    val currentTime = LocalDateTime.now()
-                    val nextSetTime: String?
-                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                    if (_state.value.scheduleSeparately) {
-                        val nextSetTime1 = currentTime.plusMinutes(_state.value.homeInterval.toLong())
-                        val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
-                        nextSetTime = (if (nextSetTime1!!.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2)!!.format(formatter)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, nextSetTime1.toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, nextSetTime2.toString())
+                    val currentTime = if (_state.value.changeStartTime) {
+                        var calculatedTime = LocalDateTime.now().withHour(_state.value.startTime.first).withMinute(_state.value.startTime.second)
+                        if (calculatedTime.isBefore(LocalDateTime.now())) {
+                            calculatedTime = calculatedTime.plusDays(1)
+                        }
+                        calculatedTime
+                    } else {
+                        LocalDateTime.now()
                     }
-                    else {
-                        nextSetTime = currentTime.plusMinutes(_state.value.homeInterval.toLong()).format(formatter)
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
-                        settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.homeInterval.toLong()).toString())
-                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.lockInterval.toLong()).toString())
-                    }
+                    val nextSetTime = when {
+                        _state.value.changeStartTime -> {
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.toString())
+                            currentTime
+                        }
+                        _state.value.scheduleSeparately -> {
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.homeInterval.toLong()).toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.lockInterval.toLong()).toString())
+                            val nextSetTime1 = currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                            val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                            if (nextSetTime1.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
+                        }
+                        else -> {
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.homeInterval.toLong()).toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(_state.value.lockInterval.toLong()).toString())
+                            currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                        }
+                    }.format(formatter)
                     _state.update {
                         it.copy(
-                            lastSetTime = currentTime.format(formatter),
-                            nextSetTime = nextSetTime
+                            lastSetTime = LocalDateTime.now().format(formatter),
+                            nextSetTime = nextSetTime,
                         )
                     }
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, LocalDateTime.now().format(formatter))
+                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
                 }
             }
 
@@ -709,6 +739,73 @@ class SettingsViewModel @Inject constructor (
                 }
             }
 
+            is SettingsEvent.SetChangeStartTime -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = if (event.changeStartTime) {
+                        LocalDateTime.now().withHour(_state.value.startTime.first).withMinute(_state.value.startTime.second).let {
+                            if (it.isBefore(LocalDateTime.now())) it.plusDays(1) else it
+                        }
+                    } else {
+                        LocalDateTime.now()
+                    }
+                    val nextSetTime = when {
+                        event.changeStartTime -> {
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.toString())
+                            currentTime.format(formatter)
+                        }
+                        _state.value.scheduleSeparately -> {
+                            val nextSetTime1 = currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                            val nextSetTime2 = currentTime.plusMinutes(_state.value.lockInterval.toLong())
+                            val nextSetTime = if (nextSetTime1.isBefore(nextSetTime2)) nextSetTime1 else nextSetTime2
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, nextSetTime1.toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, nextSetTime2.toString())
+                            nextSetTime.format(formatter)
+                        }
+                        else -> {
+                            val nextSetTime = currentTime.plusMinutes(_state.value.homeInterval.toLong())
+                            settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, nextSetTime.toString())
+                            settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, nextSetTime.toString())
+                            nextSetTime.format(formatter)
+                        }
+                    }
+                    _state.update {
+                        it.copy(
+                            changeStartTime = event.changeStartTime,
+                            nextSetTime = nextSetTime
+                        )
+                    }
+                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.CHANGE_START_TIME, event.changeStartTime)
+                }
+            }
+
+            is SettingsEvent.SetStartTime -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now().withHour(event.hour).withMinute(event.minute).let {
+                        if (it.isBefore(LocalDateTime.now())) it.plusDays(1) else it
+                    }
+                    val nextSetTime = currentTime.format(formatter)
+                    _state.update {
+                        it.copy(
+                            startTime = Pair(event.hour, event.minute),
+                            changeStartTime = true,
+                            nextSetTime = nextSetTime
+                        )
+                    }
+                    settingsDataStoreImpl.run {
+                        putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.toString())
+                        putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.toString())
+                        putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
+                        putInt(SettingsConstants.START_HOUR, event.hour)
+                        putInt(SettingsConstants.START_MINUTE, event.minute)
+                        putBoolean(SettingsConstants.CHANGE_START_TIME, true)
+                    }
+                }
+            }
+
             is SettingsEvent.Reset -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE)
@@ -746,6 +843,9 @@ class SettingsViewModel @Inject constructor (
                     settingsDataStoreImpl.deleteBoolean(SettingsConstants.GRAYSCALE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE)
                     settingsDataStoreImpl.deleteInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE)
+                    settingsDataStoreImpl.deleteBoolean(SettingsConstants.CHANGE_START_TIME)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.START_HOUR)
+                    settingsDataStoreImpl.deleteInt(SettingsConstants.START_MINUTE)
 
                     _state.update {
                         it.copy(
@@ -780,7 +880,9 @@ class SettingsViewModel @Inject constructor (
                             lockVignettePercentage = 0,
                             grayscale = false,
                             homeGrayscalePercentage = 0,
-                            lockGrayscalePercentage = 0
+                            lockGrayscalePercentage = 0,
+                            changeStartTime = false,
+                            startTime = Pair(0, 0)
                         )
                     }
                 }

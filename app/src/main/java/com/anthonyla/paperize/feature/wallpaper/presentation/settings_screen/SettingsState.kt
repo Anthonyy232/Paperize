@@ -36,5 +36,7 @@ data class SettingsState(
     val lockGrayscalePercentage: Int = 0,
     val wallpaperScaling: ScalingConstants = ScalingConstants.FILL,
     val nextHomeWallpaper: String? = null,
-    val nextLockWallpaper: String? = null
+    val nextLockWallpaper: String? = null,
+    val changeStartTime: Boolean = false,
+    val startTime: Pair<Int, Int> = Pair(0, 0)
 )
