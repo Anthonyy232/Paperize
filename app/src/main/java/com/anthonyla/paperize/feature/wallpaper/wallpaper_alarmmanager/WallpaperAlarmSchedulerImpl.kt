@@ -129,7 +129,7 @@ class WallpaperAlarmSchedulerImpl (
         }
         val nextTime = when {
             wallpaperAlarmItem.changeStartTime && firstLaunch -> startTime
-            type == Type.LOCK -> startTime.plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
+            type == Type.LOCK && wallpaperAlarmItem.scheduleSeparately -> startTime.plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
             type == Type.HOME && wallpaperAlarmItem.scheduleSeparately -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10)
             else -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
         }
@@ -185,35 +185,16 @@ class WallpaperAlarmSchedulerImpl (
             putExtra("refresh", true)
         }
         val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                cancelWallpaperAlarm()
-            }
-            else {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-                    PendingIntent.getBroadcast(
-                        context,
-                        Type.REFRESH.ordinal,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                    )
-                )
-            }
-        }
-        else {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-                PendingIntent.getBroadcast(
-                    context,
-                    Type.REFRESH.ordinal,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+            PendingIntent.getBroadcast(
+                context,
+                Type.REFRESH.ordinal,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
-        }
+        )
     }
 
     /**

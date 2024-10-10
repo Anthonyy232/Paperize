@@ -115,11 +115,17 @@ class MainActivity : ComponentActivity() {
                                         lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
                                         setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false,
                                         setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false,
-                                        scheduleSeparately = shouldScheduleSeparately
+                                        scheduleSeparately = shouldScheduleSeparately,
+                                        changeStartTime = settingsDataStoreImpl.getBoolean(SettingsConstants.CHANGE_START_TIME) ?: false,
+                                        startTime = Pair(
+                                            settingsDataStoreImpl.getInt(SettingsConstants.START_HOUR) ?: 0,
+                                            settingsDataStoreImpl.getInt(SettingsConstants.START_MINUTE) ?: 0
+                                        ),
                                     ),
                                     origin = null,
                                     changeImmediate = true,
-                                    cancelImmediate = true
+                                    cancelImmediate = true,
+                                    firstLaunch = true
                                 )
                                 settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                                 val selectedState = wallpaperScreenViewModel.state.value
