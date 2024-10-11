@@ -1,5 +1,3 @@
-import com.android.build.api.variant.FilterConfiguration
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -76,7 +74,6 @@ android {
     androidComponents {
         onVariants { variant ->
             variant.outputs.forEach { output ->
-                val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
                 val apkName = "paperize-v${output.versionName}"
                 output.versionName.set(apkName)
             }
