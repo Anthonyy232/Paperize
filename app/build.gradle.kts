@@ -1,13 +1,16 @@
+import com.android.build.api.variant.FilterConfiguration
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
-    id("com.mikepenz.aboutlibraries.plugin")
-    id("org.jetbrains.kotlin.plugin.serialization")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("androidx.baselineprofile")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinCompose)
+    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.baselineProfile)
 }
+
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
@@ -31,6 +34,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -39,12 +43,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -53,16 +57,13 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
-    }
-
+    @Suppress("UnstableApiUsage")
     androidResources {
         generateLocaleConfig = true
     }
 
-    ndkVersion = "26.3.11579264"
-    buildToolsVersion = "34.0.0"
+    ndkVersion = "28.0.12433566"
+    buildToolsVersion = "35.0.0"
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -70,6 +71,16 @@ android {
 
     aboutLibraries {
         excludeFields = arrayOf("generated")
+    }
+
+    androidComponents {
+        onVariants { variant ->
+            variant.outputs.forEach { output ->
+                val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+                val apkName = "paperize-v${output.versionName}-${abi ?: "universal"}.apk"
+                output.versionName.set(apkName)
+            }
+        }
     }
 }
 
@@ -80,52 +91,52 @@ androidComponents {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.2")
-    implementation(platform("androidx.compose:compose-bom:2024.09.03"))
-    implementation("androidx.compose.ui:ui:1.7.3")
-    implementation("androidx.compose.ui:ui-graphics:1.7.3")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.7.3")
-    implementation("androidx.compose.material3:material3:1.3.0")
-    implementation("androidx.navigation:navigation-compose:2.8.2")
-    implementation("androidx.compose.material:material:1.7.3")
-    implementation("androidx.datastore:datastore:1.1.1")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.compose.material:material-icons-extended:1.7.3")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.compose.animation:animation:1.7.3")
-    implementation("androidx.core:core-splashscreen:1.2.0-alpha02")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
-    implementation("com.google.code.gson:gson:2.11.0")
-    implementation("androidx.documentfile:documentfile:1.1.0-alpha01")
-    implementation("net.engawapg.lib:zoomable:2.0.0-beta01")
-    implementation("com.github.skydoves:landscapist-glide:2.4.0")
-    implementation("androidx.work:work-runtime-ktx:2.10.0-beta01")
-    implementation("androidx.hilt:hilt-work:1.2.0")
-    implementation("com.airbnb.android:lottie-compose:6.5.2")
-    implementation("com.google.accompanist:accompanist-permissions:0.36.0")
-    implementation("com.mikepenz:aboutlibraries-core:11.2.3")
-    implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.3")
-    implementation("androidx.compose.foundation:foundation:1.7.3")
-    implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
-    implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
-    implementation("com.google.ar.sceneform:filament-android:1.17.1")
-    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.3")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.gson)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.zoomable)
+    implementation(libs.landscapist.glide)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.lottie.compose)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+    implementation(libs.androidx.foundation)
+    implementation(libs.lazycolumnscrollbar)
+    implementation(libs.taskerpluginlibrary)
+    implementation(libs.filament.android)
+    implementation(libs.androidx.profileinstaller)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     "baselineProfile"(project(":baselineprofile"))
-    debugImplementation("androidx.compose.ui:ui-tooling:1.7.3")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.3")
-    implementation("com.google.dagger:hilt-android:2.52")
-    ksp("com.google.dagger:hilt-android-compiler:2.52")
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    implementation("com.lazygeniouz:dfc:1.0.8")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:b6363490c3")
-    implementation("me.onebone:toolbar-compose:2.3.5")
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.dfc)
+    implementation (libs.kotlinx.serialization.json)
+    implementation(libs.renderscript.intrinsics.replacement.toolkit)
+    implementation(libs.toolbar.compose)
 }
