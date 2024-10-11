@@ -77,7 +77,7 @@ android {
         onVariants { variant ->
             variant.outputs.forEach { output ->
                 val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
-                val apkName = "paperize-v${output.versionName}-${abi ?: "universal"}.apk"
+                val apkName = "paperize-v${output.versionName}"
                 output.versionName.set(apkName)
             }
         }
