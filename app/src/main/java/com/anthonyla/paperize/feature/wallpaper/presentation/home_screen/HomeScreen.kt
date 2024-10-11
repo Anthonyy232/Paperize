@@ -21,7 +21,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
@@ -32,7 +36,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.compone
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -105,6 +109,9 @@ fun HomeScreen(
     }
 
     Scaffold (
+        modifier = Modifier.semantics {
+            testTagsAsResourceId = true
+        },
         topBar = {
             HomeTopBar(
                 showSelectionModeAppBar = false,
@@ -141,7 +148,8 @@ fun HomeScreen(
                                 imageVector = if (index == tabIndex) item.filledIcon else item.unfilledIcon,
                                 contentDescription = item.title
                             )
-                        }
+                        },
+                        modifier = Modifier.testTag("paperize:${item.title}_button"),
                     )
                 }
             }

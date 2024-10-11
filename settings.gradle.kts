@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "Paperize"
 include(":app")
 
+include(":baselineprofile")

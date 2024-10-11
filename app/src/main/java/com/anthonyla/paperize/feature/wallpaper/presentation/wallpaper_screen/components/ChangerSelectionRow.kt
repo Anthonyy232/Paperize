@@ -9,6 +9,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
@@ -28,14 +29,16 @@ fun ChangerSelectionRow(
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
             onCheckedChange = onLockCheckedChange,
-            checked = lockEnabled
+            checked = lockEnabled,
+            modifier = Modifier.testTag("paperize:lock_button"),
         ) {
             Text(stringResource(R.string.lock_screen_btn))
         }
         SegmentedButton(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
             onCheckedChange = onHomeCheckedChange,
-            checked = homeEnabled
+            checked = homeEnabled,
+            modifier = Modifier.testTag("paperize:home_button"),
         ) {
             Text(text = stringResource(R.string.home_screen_btn))
         }

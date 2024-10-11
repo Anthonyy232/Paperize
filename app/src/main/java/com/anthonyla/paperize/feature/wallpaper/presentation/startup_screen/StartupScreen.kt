@@ -34,11 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -50,6 +53,7 @@ import com.anthonyla.paperize.R
 import kotlinx.coroutines.launch
 
 // Inspired by https://github.com/Ashinch/ReadYou
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartupScreen(
     onAgree: () -> Unit
@@ -71,13 +75,20 @@ fun StartupScreen(
     }
 
     Scaffold(
+        modifier = Modifier.semantics {
+            testTagsAsResourceId = true
+        },
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        modifier = Modifier.padding(PaddingValues(horizontal = 8.dp)),
+                        modifier = Modifier
+                            .padding(PaddingValues(horizontal = 8.dp))
+                            .semantics {
+                                testTagsAsResourceId = true
+                            },
                         shape = RoundedCornerShape(24.dp)
                     )
                 }
@@ -118,7 +129,9 @@ fun StartupScreen(
                                 snackbarHostState.currentSnackbarData?.dismiss()
                                 showToS = true
                             } },
-                        modifier = Modifier.padding(PaddingValues(vertical = 16.dp)),
+                        modifier = Modifier
+                            .padding(PaddingValues(vertical = 16.dp))
+                            .testTag("paperize:privacy_notice_button"),
                     ) {
                         Text(text = stringResource(R.string.privacy_notice), textAlign = TextAlign.Start)
                     }
@@ -127,7 +140,9 @@ fun StartupScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .testTag("paperize:floating_agree_button"),
                 onClick = {
                     if (seenToS) {
                         onAgree()
@@ -161,7 +176,11 @@ fun StartupScreen(
     if (showToS) {
         seenToS = true
         AlertDialog(
-            modifier = Modifier.fillMaxHeight(0.7f),
+            modifier = Modifier
+                .fillMaxHeight(0.7f)
+                .semantics {
+                    testTagsAsResourceId = true
+                },
             onDismissRequest = { showToS = false },
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -176,6 +195,7 @@ fun StartupScreen(
             confirmButton = {
                 Button(
                     onClick = { showToS = false },
+                    modifier = Modifier.testTag("paperize:dismiss_button"),
                 ) {
                     Text(stringResource(R.string.dismiss))
                 }

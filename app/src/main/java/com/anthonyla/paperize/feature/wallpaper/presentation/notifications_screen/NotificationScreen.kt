@@ -25,11 +25,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.airbnb.lottie.compose.LottieAnimation
@@ -39,6 +42,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.anthonyla.paperize.R
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotificationScreen(
     onAgree: () -> Unit
@@ -74,6 +78,9 @@ fun NotificationScreen(
     }
 
     Scaffold(
+        modifier = Modifier.semantics {
+            testTagsAsResourceId = true
+        },
         content = { it
             Column (modifier = Modifier.padding(32.dp)) {
                 Spacer(modifier = Modifier.height(120.dp))
@@ -102,7 +109,9 @@ fun NotificationScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .testTag("paperize:floating_notification_button"),
                 onClick = { askPermission.value = true },
                 icon = {
                     Icon(

@@ -6,6 +6,7 @@ plugins {
     id("com.mikepenz.aboutlibraries.plugin")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("androidx.baselineprofile")
 }
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -110,10 +111,12 @@ dependencies {
     implementation("com.github.nanihadesuka:LazyColumnScrollbar:2.2.0")
     implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
     implementation("com.google.ar.sceneform:filament-android:1.17.1")
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.3")
+    "baselineProfile"(project(":baselineprofile"))
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.3")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.3")
     implementation("com.google.dagger:hilt-android:2.52")

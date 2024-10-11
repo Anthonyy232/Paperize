@@ -27,9 +27,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
@@ -52,7 +56,7 @@ import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen(
     settingsState: StateFlow<SettingsState>,
@@ -88,7 +92,9 @@ fun SettingsScreen(
     val dynamicPaddingStart = lerp(firstPaddingInterpolation, secondPaddingInterpolation, collapseFraction)
     val textSize = (titleFontScaleEnd + (titleFontScaleStart - titleFontScaleEnd) * collapseFraction).sp
 
-    Scaffold {
+    Scaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
+    ) {
         CollapsingToolbarScaffold(
             state = topBarState,
             modifier = Modifier.fillMaxSize().padding(it),
@@ -106,6 +112,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .padding(16.dp)
                         .size(24.dp)
+                        .testTag("paperize:settings_to_home_button"),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -129,7 +136,8 @@ fun SettingsScreen(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 24.dp)
+                    .testTag("paperize:settings_column"),
             ) {
                 ListSectionTitle(stringResource(R.string.appearance))
                 Spacer(modifier = Modifier.height(16.dp))

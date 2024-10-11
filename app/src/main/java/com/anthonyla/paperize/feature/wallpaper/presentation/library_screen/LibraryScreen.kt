@@ -15,13 +15,18 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.AlbumItem
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LibraryScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -30,12 +35,17 @@ fun LibraryScreen(
 ) {
     val lazyListState = rememberLazyGridState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         floatingActionButton = {
             LargeFloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 onClick = onAddNewAlbumClick,
+                modifier = Modifier.testTag("paperize:library_floating_button")
             ) {
                 Icon(
                     Icons.Filled.Add,

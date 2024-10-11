@@ -26,8 +26,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.anthonyla.paperize.R
@@ -47,7 +50,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -123,7 +126,9 @@ fun WallpaperScreen(
                     )
                 }
             ) },
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTagsAsResourceId = true },
         content = { padding ->
             Column(
                 modifier = Modifier
