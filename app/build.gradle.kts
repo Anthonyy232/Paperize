@@ -71,13 +71,13 @@ android {
         excludeFields = arrayOf("generated")
     }
 
-    androidComponents {
-        onVariants { variant ->
-            variant.outputs.forEach { output ->
-                val apkName = "paperize-v${output.versionName}"
-                output.versionName.set(apkName)
+    applicationVariants.all {
+        this.outputs
+            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+            .forEach { output ->
+                val apkName = "paperize-v${this.versionName}.apk"
+                output.outputFileName = apkName
             }
-        }
     }
 }
 
