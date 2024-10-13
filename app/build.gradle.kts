@@ -60,7 +60,7 @@ android {
         generateLocaleConfig = true
     }
 
-    ndkVersion = "27.1.12297006"
+    ndkVersion = "26.3.11579264"
     buildToolsVersion = "35.0.0"
     dependenciesInfo {
         includeInApk = false
