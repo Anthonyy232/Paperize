@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.kotlinSerialization)
-    //alias(libs.plugins.baselineProfile)
 }
 
 ksp {
@@ -124,7 +123,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    //"baselineProfile"(project(":baselineprofile"))
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.hilt.android)
