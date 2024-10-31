@@ -38,7 +38,7 @@ roomRuntime = "2.6.1"
 roomCompiler = "2.6.1"
 taskerpluginlibrary = "0.4.10"
 toolbarCompose = "2.3.5"
-ui = "1.7.4"
+ui = "1.7.5"
 workRuntimeKtx = "2.10.0-rc01"
 zoomable = "2.0.0-beta01"
 
