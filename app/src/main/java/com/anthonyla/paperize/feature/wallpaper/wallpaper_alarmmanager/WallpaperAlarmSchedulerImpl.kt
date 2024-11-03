@@ -5,11 +5,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * This class is responsible for scheduling wallpaper alarms.
@@ -118,17 +120,15 @@ class WallpaperAlarmSchedulerImpl (
      * Schedules the wallpaper alarm based on type and time
      */
     private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, firstLaunch: Boolean = false) {
-        val startTime = if (wallpaperAlarmItem.changeStartTime && firstLaunch) {
-            var calculatedStartTime = LocalDateTime.now().withHour(wallpaperAlarmItem.startTime.first).withMinute(wallpaperAlarmItem.startTime.second)
-            if (calculatedStartTime.isBefore(LocalDateTime.now())) {
-                calculatedStartTime = calculatedStartTime.plusDays(1)
-            }
-            calculatedStartTime
-        } else {
-            LocalDateTime.now()
-        }
+        val startTime = LocalDateTime.now()
         val nextTime = when {
-            wallpaperAlarmItem.changeStartTime && firstLaunch -> startTime
+            wallpaperAlarmItem.changeStartTime && firstLaunch -> {
+                var calculatedStartTime = LocalDateTime.now().withHour(wallpaperAlarmItem.startTime.first).withMinute(wallpaperAlarmItem.startTime.second)
+                if (calculatedStartTime.isBefore(LocalDateTime.now())) {
+                    calculatedStartTime = calculatedStartTime.plusDays(1)
+                }
+                calculatedStartTime
+            }
             type == Type.LOCK && wallpaperAlarmItem.scheduleSeparately -> startTime.plusMinutes(wallpaperAlarmItem.lockInterval.toLong())
             type == Type.HOME && wallpaperAlarmItem.scheduleSeparately -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong()).plusSeconds(10)
             else -> startTime.plusMinutes(wallpaperAlarmItem.homeInterval.toLong())
