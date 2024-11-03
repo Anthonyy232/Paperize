@@ -5,13 +5,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * This class is responsible for scheduling wallpaper alarms.
