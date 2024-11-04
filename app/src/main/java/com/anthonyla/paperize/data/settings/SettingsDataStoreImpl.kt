@@ -5,10 +5,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.anthonyla.paperize.core.SettingsConstants.SETTINGS_DATASTORE
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = SETTINGS_DATASTORE)
 
@@ -28,9 +33,9 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
     }
 
     override suspend fun putInt(key: String, value: Int) {
-        val preferencesKey = stringPreferencesKey(key)
+        val preferencesKey = intPreferencesKey(key)
         context.dataStore.edit {
-            it[preferencesKey] = value.toString()
+            it[preferencesKey] = value
         }
     }
 
@@ -54,13 +59,40 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
     override suspend fun getInt(key: String): Int? {
         return try {
             val head = context.dataStore.data.first()
-            val preferencesKey = stringPreferencesKey(key)
+            val preferencesKey = intPreferencesKey(key)
             head[preferencesKey]?.toInt()
         } catch (exception: Exception) {
             exception.printStackTrace()
             null
         }
     }
+
+    override fun getBooleanFlow(key: String): Flow<Boolean?> = context.dataStore.data
+        .catch { exception ->
+            exception.printStackTrace()
+            emit(emptyPreferences())
+        }
+        .map { preferences ->
+            preferences[booleanPreferencesKey(key)]
+        }
+
+    override fun getStringFlow(key: String): Flow<String?> = context.dataStore.data
+        .catch { exception ->
+            exception.printStackTrace()
+            emit(emptyPreferences())
+        }
+        .map { preferences ->
+            preferences[stringPreferencesKey(key)]
+        }
+
+    override fun getIntFlow(key: String): Flow<Int?> = context.dataStore.data
+        .catch { exception ->
+            exception.printStackTrace()
+            emit(emptyPreferences())
+        }
+        .map { preferences ->
+            preferences[intPreferencesKey(key)]
+        }
 
     override suspend fun deleteBoolean(key: String) {
         val preferencesKey = booleanPreferencesKey(key)
@@ -81,7 +113,7 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
     }
 
     override suspend fun deleteInt(key: String) {
-        val preferencesKey = stringPreferencesKey(key)
+        val preferencesKey = intPreferencesKey(key)
         context.dataStore.edit {
             if (it.contains(preferencesKey)) {
                 it.remove(preferencesKey)
@@ -103,6 +135,9 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
                 }
                 else if (preferences.contains(stringPreferencesKey(key))) {
                     preferences.remove(stringPreferencesKey(key))
+                }
+                else if (preferences.contains(intPreferencesKey(key))) {
+                    preferences.remove(intPreferencesKey(key))
                 }
             }
         }

@@ -68,7 +68,6 @@ fun WallpaperScreen(
     onLockCheckedChange: (Boolean) -> Unit,
     onScalingChange: (ScalingConstants) -> Unit,
     onScheduleSeparatelyChange: (Boolean) -> Unit,
-    onScheduleWallpaperChanger: () -> Unit,
     onSelectAlbum: (AlbumWithWallpaperAndFolder, Boolean, Boolean) -> Unit,
     onHomeTimeChange: (Int) -> Unit,
     onLockTimeChange: (Int) -> Unit,
@@ -288,12 +287,10 @@ fun WallpaperScreen(
                             }
                             else {
                                 onSelectAlbum(album, lockEnabled.value, homeEnabled.value)
-                                onScheduleWallpaperChanger()
                             }
                         }
                         else {
                             onSelectAlbum(album, lockEnabled.value, homeEnabled.value)
-                            onScheduleWallpaperChanger()
                         }
                     },
                     onDismiss = { openBottomSheet = false },

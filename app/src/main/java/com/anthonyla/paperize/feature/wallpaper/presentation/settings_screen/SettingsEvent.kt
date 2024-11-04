@@ -4,7 +4,6 @@ import com.anthonyla.paperize.core.ScalingConstants
 
 
 sealed class SettingsEvent {
-    data object Refresh: SettingsEvent()
     data object Reset: SettingsEvent()
     data object SetFirstLaunch: SettingsEvent()
     data object RefreshNextSetTime: SettingsEvent()
@@ -19,8 +18,6 @@ sealed class SettingsEvent {
     data class SetLock(val lock: Boolean): SettingsEvent()
     data class SetHome(val home: Boolean): SettingsEvent()
     data class SetChangeStartTime(val changeStartTime: Boolean): SettingsEvent()
-    data class SetCurrentHomeWallpaper(val currentHomeWallpaper: String?): SettingsEvent()
-    data class SetCurrentLockWallpaper(val currentLockWallpaper: String?): SettingsEvent()
     data class SetCurrentWallpaper(val currentHomeWallpaper: String?, val currentLockWallpaper: String?): SettingsEvent()
     data class SetAlbumName(val homeAlbumName: String? = null, val lockAlbumName: String? = null): SettingsEvent()
     data class RemoveSelectedAlbumAsType(val removeLock: Boolean = false, val removeHome: Boolean = false): SettingsEvent()
@@ -34,9 +31,5 @@ sealed class SettingsEvent {
     data class SetGrayscalePercentage(val homeGrayscalePercentage: Int?, val lockGrayscalePercentage: Int?): SettingsEvent()
     data class SetChangerToggle(val toggle: Boolean): SettingsEvent()
     data class SetWallpaperScaling(val scaling: ScalingConstants): SettingsEvent()
-    data class SetNextHomeWallpaper(val nextHomeWallpaper: String?): SettingsEvent()
-    data class SetNextLockWallpaper(val nextLockWallpaper: String?): SettingsEvent()
-    data class SetNextWallpaper(val nextHomeWallpaper: String?, val nextLockWallpaper: String?): SettingsEvent()
     data class SetStartTime(val hour: Int, val minute: Int): SettingsEvent()
-    data object RefreshNextWallpaper: SettingsEvent()
 }

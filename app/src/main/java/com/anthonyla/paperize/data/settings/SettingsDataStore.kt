@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.data.settings
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Interface for the data store that handles the settings for application
  */
@@ -10,6 +12,9 @@ interface SettingsDataStore {
     suspend fun getBoolean(key: String): Boolean?
     suspend fun getString(key: String): String?
     suspend fun getInt(key: String): Int?
+    fun getBooleanFlow(key: String): Flow<Boolean?>
+    fun getStringFlow(key: String): Flow<String?>
+    fun getIntFlow(key: String): Flow<Int?>
     suspend fun deleteBoolean(key: String)
     suspend fun deleteString(key: String)
     suspend fun deleteInt(key: String)

@@ -11,9 +11,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.WallpaperSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -25,209 +23,181 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor (
+class SettingsViewModel @Inject constructor(
     private val settingsDataStoreImpl: SettingsDataStore
-): ViewModel() {
+) : ViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state = _state.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5000), SettingsState()
+        SharingStarted.WhileSubscribed(5000),
+        SettingsState()
     )
-
-    private var currentGetJob: Job? = null
     var setKeepOnScreenCondition: Boolean = true
 
     init {
-        currentGetJob = viewModelScope.launch(Dispatchers.IO) {
-            val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
-            val themeSettings = async { loadThemeSettings() }
-            val wallpaperSettings = async { loadWallpaperSettings() }
-            val scheduleSettings = async { loadScheduleSettings() }
-            val effectSettings = async { loadEffectSettings() }
-            _state.update {
-                it.copy(
-                    firstLaunch = firstLaunch.await(),
-                    themeSettings = themeSettings.await(),
-                    wallpaperSettings = wallpaperSettings.await(),
-                    scheduleSettings = scheduleSettings.await(),
-                    effectSettings = effectSettings.await()
-                )
-            }
-            setKeepOnScreenCondition = false
+        viewModelScope.launch {
+            combine(
+                settingsDataStoreImpl.getBooleanFlow(SettingsConstants.FIRST_LAUNCH),
+                loadThemeSettingsFlow(),
+                loadWallpaperSettingsFlow(),
+                loadScheduleSettingsFlow(),
+                loadEffectSettingsFlow()
+            ) { firstLaunch, themeSettings, wallpaperSettings, scheduleSettings, effectSettings ->
+                    _state.update {
+                    it.copy(
+                        firstLaunch = firstLaunch ?: true,
+                        themeSettings = themeSettings,
+                        wallpaperSettings = wallpaperSettings,
+                        scheduleSettings = scheduleSettings,
+                        effectSettings = effectSettings
+                    )
+                }
+                setKeepOnScreenCondition = false
+            }.collect()
         }
     }
-    
-    private suspend fun loadThemeSettings(): ThemeSettings {
-        return ThemeSettings(
-            darkMode = settingsDataStoreImpl.getBoolean(SettingsConstants.DARK_MODE_TYPE),
-            amoledTheme = settingsDataStoreImpl.getBoolean(SettingsConstants.AMOLED_THEME_TYPE) ?: false,
-            dynamicTheming = settingsDataStoreImpl.getBoolean(SettingsConstants.DYNAMIC_THEME_TYPE) ?: false,
-            animate = settingsDataStoreImpl.getBoolean(SettingsConstants.ANIMATE_TYPE) ?: true
+
+    private fun loadThemeSettingsFlow(): Flow<ThemeSettings> = combine(
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.DARK_MODE_TYPE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.AMOLED_THEME_TYPE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.DYNAMIC_THEME_TYPE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.ANIMATE_TYPE)
+    ) { darkMode, amoledTheme, dynamicTheming, animate ->
+        ThemeSettings(
+            darkMode = darkMode,
+            amoledTheme = amoledTheme ?: false,
+            dynamicTheming = dynamicTheming ?: false,
+            animate = animate ?: true
         )
     }
-    
-    private suspend fun loadWallpaperSettings(): WallpaperSettings {
-        return WallpaperSettings(
-            enableChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false,
-            setHomeWallpaper = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false,
-            setLockWallpaper = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false,
-            currentHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER),
-            currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER),
-            nextHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME),
-            nextLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME),
-            homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME),
-            lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME),
-            wallpaperScaling = ScalingConstants.valueOf(
-                settingsDataStoreImpl.getString(SettingsConstants.WALLPAPER_SCALING) 
-                ?: ScalingConstants.FILL.name
-            )
+
+    private fun loadWallpaperSettingsFlow(): Flow<WallpaperSettings> = combine(
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.ENABLE_CHANGER),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.ENABLE_HOME_WALLPAPER),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.ENABLE_LOCK_WALLPAPER),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.CURRENT_HOME_WALLPAPER),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.CURRENT_LOCK_WALLPAPER),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.NEXT_HOME_WALLPAPER),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.NEXT_LOCK_WALLPAPER),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.HOME_ALBUM_NAME),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.LOCK_ALBUM_NAME),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.WALLPAPER_SCALING)
+    ) { flows ->
+        WallpaperSettings(
+            enableChanger = flows[0] as Boolean? ?: false,
+            setHomeWallpaper = flows[1] as Boolean? ?: false,
+            setLockWallpaper = flows[2] as Boolean? ?: false,
+            currentHomeWallpaper = flows[3] as String?,
+            currentLockWallpaper = flows[4] as String?,
+            nextHomeWallpaper = flows[5] as String?,
+            nextLockWallpaper = flows[6] as String?,
+            homeAlbumName = flows[7] as String?,
+            lockAlbumName = flows[8] as String?,
+            wallpaperScaling = ScalingConstants.valueOf((flows[9] as String?) ?: ScalingConstants.FILL.name)
         )
     }
-    
-    private suspend fun loadScheduleSettings(): ScheduleSettings {
-        return ScheduleSettings(
-            scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false,
-            homeInterval = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-            lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-            lastSetTime = settingsDataStoreImpl.getString(SettingsConstants.LAST_SET_TIME),
-            nextSetTime = settingsDataStoreImpl.getString(SettingsConstants.NEXT_SET_TIME),
-            changeStartTime = settingsDataStoreImpl.getBoolean(SettingsConstants.CHANGE_START_TIME) ?: false,
-            startTime = Pair(
-                settingsDataStoreImpl.getInt(SettingsConstants.START_HOUR) ?: 0,
-                settingsDataStoreImpl.getInt(SettingsConstants.START_MINUTE) ?: 0
-            )
+
+    private fun loadScheduleSettingsFlow(): Flow<ScheduleSettings> = combine(
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SCHEDULE_SEPARATELY),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.LAST_SET_TIME),
+        settingsDataStoreImpl.getStringFlow(SettingsConstants.NEXT_SET_TIME),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.CHANGE_START_TIME),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.START_HOUR),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.START_MINUTE)
+    ) { flows ->
+        ScheduleSettings(
+            scheduleSeparately = flows[0] as Boolean? ?: false,
+            homeInterval = flows[1] as Int? ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+            lockInterval = flows[2] as Int? ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+            lastSetTime = flows[3] as String?,
+            nextSetTime = flows[4] as String?,
+            changeStartTime = flows[5] as Boolean? ?: false,
+            startTime = Pair(flows[6] as Int? ?: 0, flows[7] as Int? ?: 0)
         )
     }
-    
-    private suspend fun loadEffectSettings(): EffectSettings {
-        return EffectSettings(
-            darken = settingsDataStoreImpl.getBoolean(SettingsConstants.DARKEN) ?: false,
-            homeDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_DARKEN_PERCENTAGE) ?: 100,
-            lockDarkenPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE) ?: 100,
-            blur = settingsDataStoreImpl.getBoolean(SettingsConstants.BLUR) ?: false,
-            homeBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_BLUR_PERCENTAGE) ?: 0,
-            lockBlurPercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_BLUR_PERCENTAGE) ?: 0,
-            vignette = settingsDataStoreImpl.getBoolean(SettingsConstants.VIGNETTE) ?: false,
-            homeVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE) ?: 0,
-            lockVignettePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE) ?: 0,
-            grayscale = settingsDataStoreImpl.getBoolean(SettingsConstants.GRAYSCALE) ?: false,
-            homeGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE) ?: 0,
-            lockGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0
+
+    private fun loadEffectSettingsFlow(): Flow<EffectSettings> = combine(
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.DARKEN),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.HOME_DARKEN_PERCENTAGE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.LOCK_DARKEN_PERCENTAGE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.BLUR),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.HOME_BLUR_PERCENTAGE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.LOCK_BLUR_PERCENTAGE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.VIGNETTE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.HOME_VIGNETTE_PERCENTAGE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.GRAYSCALE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE),
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE)
+    ) { flows ->
+        EffectSettings(
+            darken = flows[0] as Boolean? ?: false,
+            homeDarkenPercentage = flows[1] as Int? ?: 100,
+            lockDarkenPercentage = flows[2] as Int? ?: 100,
+            blur = flows[3] as Boolean? ?: false,
+            homeBlurPercentage = flows[4] as Int? ?: 0,
+            lockBlurPercentage = flows[5] as Int? ?: 0,
+            vignette = flows[6] as Boolean? ?: false,
+            homeVignettePercentage = flows[7] as Int? ?: 0,
+            lockVignettePercentage = flows[8] as Int? ?: 0,
+            grayscale = flows[9] as Boolean? ?: false,
+            homeGrayscalePercentage = flows[10] as Int? ?: 0,
+            lockGrayscalePercentage = flows[11] as Int? ?: 0
         )
     }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.SetFirstLaunch -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.FIRST_LAUNCH, false)
-                    _state.update {
-                        it.copy(firstLaunch = false)
-                    }
                 }
             }
 
             is SettingsEvent.SetChangerToggle -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, event.toggle)
-                    _state.update { currentState ->
-                        currentState.copy(
-                            wallpaperSettings = currentState.wallpaperSettings.copy(
-                                enableChanger = event.toggle,
-                                currentHomeWallpaper = if (!event.toggle) null else currentState.wallpaperSettings.currentHomeWallpaper,
-                                currentLockWallpaper = if (!event.toggle) null else currentState.wallpaperSettings.currentLockWallpaper
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.Refresh -> {
-                currentGetJob = viewModelScope.launch(Dispatchers.IO) {
-                    val themeSettings = async { loadThemeSettings() }
-                    val wallpaperSettings = async { loadWallpaperSettings() }
-                    val scheduleSettings = async { loadScheduleSettings() }
-                    val effectSettings = async { loadEffectSettings() }
-                    val firstLaunch = async { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) ?: true }
-
-                    _state.update {
-                        it.copy(
-                            firstLaunch = firstLaunch.await(),
-                            themeSettings = themeSettings.await(),
-                            wallpaperSettings = wallpaperSettings.await(),
-                            scheduleSettings = scheduleSettings.await(),
-                            effectSettings = effectSettings.await()
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetDarkMode -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     when (event.darkMode) {
                         true -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, true) }
                         false -> { settingsDataStoreImpl.putBoolean(SettingsConstants.DARK_MODE_TYPE, false) }
                         null -> { settingsDataStoreImpl.deleteBoolean(SettingsConstants.DARK_MODE_TYPE) }
                     }
-                    _state.update {
-                        it.copy(
-                            themeSettings = it.themeSettings.copy(
-                                darkMode = event.darkMode
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetAmoledTheme -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.AMOLED_THEME_TYPE, event.amoledTheme)
                     if (event.amoledTheme) {
                         settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, false)
-                    }
-                    _state.update {
-                        it.copy(
-                            themeSettings = it.themeSettings.copy(
-                                amoledTheme = event.amoledTheme,
-                                dynamicTheming = if (event.amoledTheme) false else it.themeSettings.dynamicTheming
-                            )
-                        )
                     }
                 }
             }
 
             is SettingsEvent.SetDynamicTheming -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.DYNAMIC_THEME_TYPE, event.dynamicTheming)
                     if (event.dynamicTheming) {
                         settingsDataStoreImpl.putBoolean(SettingsConstants.AMOLED_THEME_TYPE, false)
-                    }
-                    _state.update {
-                        it.copy(
-                            themeSettings = it.themeSettings.copy(
-                                amoledTheme = if (event.dynamicTheming) false else it.themeSettings.amoledTheme,
-                                dynamicTheming = event.dynamicTheming
-                            )
-                        )
                     }
                 }
             }
 
             is SettingsEvent.SetAnimate -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ANIMATE_TYPE, event.animate)
-                    _state.update {
-                        it.copy(
-                            themeSettings = it.themeSettings.copy(
-                                animate = event.animate
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetHomeWallpaperInterval -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL, event.interval)
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val currentTime = if (_state.value.scheduleSettings.changeStartTime) {
@@ -252,20 +222,11 @@ class SettingsViewModel @Inject constructor (
                         settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
                         settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
                     }
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                homeInterval = event.interval,
-                                lastSetTime = currentTime.format(formatter),
-                                nextSetTime = nextSetTime
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetLockWallpaperInterval -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL, event.interval)
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val currentTime = if (_state.value.scheduleSettings.changeStartTime) {
@@ -289,15 +250,6 @@ class SettingsViewModel @Inject constructor (
                         settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
                         settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
                         settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.plusMinutes(event.interval.toLong()).toString())
-                    }
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                lockInterval = event.interval,
-                                lastSetTime = currentTime.format(formatter),
-                                nextSetTime = nextSetTime
-                            )
-                        )
                     }
                 }
             }
@@ -339,231 +291,105 @@ class SettingsViewModel @Inject constructor (
                             currentTime.plusMinutes(_state.value.scheduleSettings.homeInterval.toLong())
                         }
                     }.format(formatter)
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                lastSetTime = LocalDateTime.now().format(formatter),
-                                nextSetTime = nextSetTime
-                            )
-                        )
-                    }
                     settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, LocalDateTime.now().format(formatter))
                     settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
                 }
             }
 
             is SettingsEvent.SetHome -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER, event.home)
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                setHomeWallpaper = event.home
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetLock -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER, event.lock)
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                setLockWallpaper = event.lock
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetDarken -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.DARKEN, event.darken)
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                darken = event.darken
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetWallpaperScaling -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putString(SettingsConstants.WALLPAPER_SCALING, event.scaling.name)
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                wallpaperScaling = event.scaling
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetScheduleSeparately -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.SCHEDULE_SEPARATELY, event.scheduleSeparately)
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                scheduleSeparately = event.scheduleSeparately
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetBlur -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.BLUR, event.blur)
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                blur = event.blur
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetDarkenPercentage -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.lockDarkenPercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.LOCK_DARKEN_PERCENTAGE, event.lockDarkenPercentage)
                     }
                     if (event.homeDarkenPercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.HOME_DARKEN_PERCENTAGE, event.homeDarkenPercentage)
                     }
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                homeDarkenPercentage = event.homeDarkenPercentage ?: it.effectSettings.homeDarkenPercentage,
-                                lockDarkenPercentage = event.lockDarkenPercentage ?: it.effectSettings.lockDarkenPercentage
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetBlurPercentage -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.lockBlurPercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.LOCK_BLUR_PERCENTAGE, event.lockBlurPercentage)
                     }
                     if (event.homeBlurPercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.HOME_BLUR_PERCENTAGE, event.homeBlurPercentage)
                     }
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                homeBlurPercentage = event.homeBlurPercentage ?: it.effectSettings.homeBlurPercentage,
-                                lockBlurPercentage = event.lockBlurPercentage ?: it.effectSettings.lockBlurPercentage
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetVignette -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.VIGNETTE, event.vignette)
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                vignette = event.vignette
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetVignettePercentage -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.lockVignettePercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.LOCK_VIGNETTE_PERCENTAGE, event.lockVignettePercentage)
                     }
                     if (event.homeVignettePercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.HOME_VIGNETTE_PERCENTAGE, event.homeVignettePercentage)
                     }
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                homeVignettePercentage = event.homeVignettePercentage ?: it.effectSettings.homeVignettePercentage,
-                                lockVignettePercentage = event.lockVignettePercentage ?: it.effectSettings.lockVignettePercentage
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetGrayscale -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     settingsDataStoreImpl.putBoolean(SettingsConstants.GRAYSCALE, event.grayscale)
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                grayscale = event.grayscale
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetGrayscalePercentage -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.lockGrayscalePercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE, event.lockGrayscalePercentage)
                     }
                     if (event.homeGrayscalePercentage != null) {
                         settingsDataStoreImpl.putInt(SettingsConstants.HOME_GRAYSCALE_PERCENTAGE, event.homeGrayscalePercentage)
                     }
-                    _state.update {
-                        it.copy(
-                            effectSettings = it.effectSettings.copy(
-                                homeGrayscalePercentage = event.homeGrayscalePercentage ?: it.effectSettings.homeGrayscalePercentage,
-                                lockGrayscalePercentage = event.lockGrayscalePercentage ?: it.effectSettings.lockGrayscalePercentage
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.SetCurrentHomeWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    if (event.currentHomeWallpaper != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, event.currentHomeWallpaper)
-                    }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                currentHomeWallpaper = event.currentHomeWallpaper
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.SetCurrentLockWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    if (event.currentLockWallpaper != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, event.currentLockWallpaper)
-                    }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                currentLockWallpaper = event.currentLockWallpaper
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetCurrentWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.currentLockWallpaper != null) {
                         settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, event.currentLockWallpaper)
                     }
@@ -582,7 +408,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.SetAlbumName -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.homeAlbumName != null) {
                         settingsDataStoreImpl.putString(SettingsConstants.HOME_ALBUM_NAME, event.homeAlbumName)
                     }
@@ -596,20 +422,11 @@ class SettingsViewModel @Inject constructor (
                         else -> { false }
                     }
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, enableChanger)
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                homeAlbumName = event.homeAlbumName ?: it.wallpaperSettings.homeAlbumName,
-                                lockAlbumName = event.lockAlbumName ?: it.wallpaperSettings.lockAlbumName,
-                                enableChanger = enableChanger
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.RemoveSelectedAlbumAsType -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (_state.value.wallpaperSettings.setLockWallpaper && _state.value.wallpaperSettings.setHomeWallpaper) {
                         if (event.removeLock) {
                             settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_ALBUM_NAME)
@@ -621,23 +438,6 @@ class SettingsViewModel @Inject constructor (
                         settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_HOME_WALLPAPER)
                         settingsDataStoreImpl.deleteString(SettingsConstants.LAST_SET_TIME)
                         settingsDataStoreImpl.deleteString(SettingsConstants.NEXT_SET_TIME)
-                        _state.update {
-                            it.copy(
-                                wallpaperSettings = it.wallpaperSettings.copy(
-                                    homeAlbumName = if (event.removeHome) null else it.wallpaperSettings.homeAlbumName,
-                                    lockAlbumName = if (event.removeLock) null else it.wallpaperSettings.lockAlbumName,
-                                    currentHomeWallpaper = null,
-                                    currentLockWallpaper = null,
-                                    nextHomeWallpaper = null,
-                                    nextLockWallpaper = null,
-                                    enableChanger = false
-                                ),
-                                scheduleSettings = it.scheduleSettings.copy(
-                                    lastSetTime = null,
-                                    nextSetTime = null
-                                )
-                            )
-                        }
                     }
                     else {
                         if (event.removeLock) {
@@ -648,23 +448,12 @@ class SettingsViewModel @Inject constructor (
                             settingsDataStoreImpl.deleteString(SettingsConstants.HOME_ALBUM_NAME)
                             settingsDataStoreImpl.deleteString(SettingsConstants.CURRENT_HOME_WALLPAPER)
                         }
-                        _state.update {
-                            it.copy(
-                                wallpaperSettings = it.wallpaperSettings.copy(
-                                    homeAlbumName = if (event.removeHome) null else it.wallpaperSettings.homeAlbumName,
-                                    lockAlbumName = if (event.removeLock) null else it.wallpaperSettings.lockAlbumName,
-                                    currentHomeWallpaper = if (event.removeHome) null else it.wallpaperSettings.currentHomeWallpaper,
-                                    currentLockWallpaper = if (event.removeLock) null else it.wallpaperSettings.currentLockWallpaper,
-                                    enableChanger = false
-                                )
-                            )
-                        }
                     }
                 }
             }
 
             is SettingsEvent.RemoveSelectedAlbumAsName -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     var enableChanger = _state.value.wallpaperSettings.enableChanger
                     if (event.albumName == _state.value.wallpaperSettings.lockAlbumName) {
                         settingsDataStoreImpl.deleteString(SettingsConstants.LOCK_ALBUM_NAME)
@@ -677,89 +466,11 @@ class SettingsViewModel @Inject constructor (
                         enableChanger = false
                     }
                     settingsDataStoreImpl.putBoolean(SettingsConstants.ENABLE_CHANGER, enableChanger)
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                homeAlbumName = if (event.albumName == _state.value.wallpaperSettings.homeAlbumName) null else it.wallpaperSettings.homeAlbumName,
-                                lockAlbumName = if (event.albumName == _state.value.wallpaperSettings.lockAlbumName) null else it.wallpaperSettings.lockAlbumName,
-                                currentHomeWallpaper = if (event.albumName == _state.value.wallpaperSettings.homeAlbumName) null else it.wallpaperSettings.currentHomeWallpaper,
-                                currentLockWallpaper = if (event.albumName == _state.value.wallpaperSettings.lockAlbumName) null else it.wallpaperSettings.currentLockWallpaper,
-                                enableChanger = enableChanger
-                            )
-                        )
-
-                    }
-                }
-            }
-
-            is SettingsEvent.SetNextHomeWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    event.nextHomeWallpaper?.let {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, it)
-                    }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                nextHomeWallpaper = event.nextHomeWallpaper
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.SetNextLockWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    event.nextLockWallpaper?.let {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, it)
-                    }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                nextLockWallpaper = event.nextLockWallpaper
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.SetNextWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    if (event.nextHomeWallpaper != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, event.nextHomeWallpaper)
-                    }
-                    if (event.nextLockWallpaper != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, event.nextLockWallpaper)
-                    }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                nextHomeWallpaper = event.nextHomeWallpaper ?: it.wallpaperSettings.nextHomeWallpaper,
-                                nextLockWallpaper = event.nextLockWallpaper ?: it.wallpaperSettings.nextLockWallpaper
-                            )
-                        )
-                    }
-                }
-            }
-
-            is SettingsEvent.RefreshNextWallpaper -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    val nextHomeWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_HOME_WALLPAPER) }
-                    val nextLockWallpaper = async { settingsDataStoreImpl.getString(SettingsConstants.NEXT_LOCK_WALLPAPER) }
-                    _state.update {
-                        it.copy(
-                            wallpaperSettings = it.wallpaperSettings.copy(
-                                nextHomeWallpaper = nextHomeWallpaper.await(),
-                                nextLockWallpaper = nextLockWallpaper.await(),
-                                currentHomeWallpaper = nextHomeWallpaper.await(),
-                                currentLockWallpaper = nextLockWallpaper.await()
-                            )
-                        )
-                    }
                 }
             }
 
             is SettingsEvent.SetChangeStartTime -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val currentTime = if (event.changeStartTime) {
                         LocalDateTime.now()
@@ -792,35 +503,18 @@ class SettingsViewModel @Inject constructor (
                             nextSetTime.format(formatter)
                         }
                     }
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                changeStartTime = event.changeStartTime,
-                                nextSetTime = nextSetTime
-                            )
-                        )
-                    }
                     settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, nextSetTime)
                     settingsDataStoreImpl.putBoolean(SettingsConstants.CHANGE_START_TIME, event.changeStartTime)
                 }
             }
 
             is SettingsEvent.SetStartTime -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                     val currentTime = LocalDateTime.now().withHour(event.hour).withMinute(event.minute).let {
                         if (it.isBefore(LocalDateTime.now())) it.plusDays(1) else it
                     }
                     val nextSetTime = currentTime.format(formatter)
-                    _state.update {
-                        it.copy(
-                            scheduleSettings = it.scheduleSettings.copy(
-                                startTime = Pair(event.hour, event.minute),
-                                changeStartTime = true,
-                                nextSetTime = nextSetTime
-                            )
-                        )
-                    }
                     settingsDataStoreImpl.run {
                         putString(SettingsConstants.HOME_NEXT_SET_TIME, currentTime.toString())
                         putString(SettingsConstants.LOCK_NEXT_SET_TIME, currentTime.toString())
@@ -833,7 +527,7 @@ class SettingsViewModel @Inject constructor (
             }
 
             is SettingsEvent.Reset -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     val keysToDelete = listOf(
                         SettingsConstants.DARK_MODE_TYPE,
                         SettingsConstants.AMOLED_THEME_TYPE,
@@ -875,15 +569,6 @@ class SettingsViewModel @Inject constructor (
                         SettingsConstants.START_MINUTE
                     )
                     settingsDataStoreImpl.clear(keysToDelete)
-                    _state.update {
-                        it.copy(
-                            firstLaunch = true,
-                            themeSettings = ThemeSettings(),
-                            scheduleSettings = ScheduleSettings(),
-                            wallpaperSettings = WallpaperSettings(),
-                            effectSettings = EffectSettings()
-                        )
-                    }
                 }
             }
         }
