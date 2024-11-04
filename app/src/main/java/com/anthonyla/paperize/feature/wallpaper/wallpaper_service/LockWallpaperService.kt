@@ -38,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -104,28 +105,34 @@ class LockWallpaperService: Service() {
 
     private fun workerTaskStart() {
         workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.Default).launch {
                 changeWallpaper(this@LockWallpaperService)
+                withContext(Dispatchers.Main) {
+                    stopSelf()
+                }
             }
-            stopSelf()
         }
     }
 
     private fun workerTaskUpdate() {
         workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.Default).launch {
                 updateCurrentWallpaper(this@LockWallpaperService)
+                withContext(Dispatchers.Main) {
+                    stopSelf()
+                }
             }
-            stopSelf()
         }
     }
 
     private fun workerTaskRefresh() {
         workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.Default).launch {
                 refreshAlbum(this@LockWallpaperService)
+                withContext(Dispatchers.Main) {
+                    stopSelf()
+                }
             }
-            stopSelf()
         }
     }
 

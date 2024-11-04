@@ -38,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -104,30 +105,30 @@ class HomeWallpaperService: Service() {
     }
 
     private fun workerTaskStart() {
-        workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
-                delay(20) // To ensure lock screen wallpaper is set first
-                changeWallpaper(this@HomeWallpaperService)
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(20)
+            changeWallpaper(this@HomeWallpaperService)
+            withContext(Dispatchers.Main) {
+                stopSelf()
             }
-            stopSelf()
         }
     }
 
     private fun workerTaskUpdate() {
-        workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
-                updateCurrentWallpaper(this@HomeWallpaperService)
+        CoroutineScope(Dispatchers.Default).launch {
+            updateCurrentWallpaper(this@HomeWallpaperService)
+            withContext(Dispatchers.Main) {
+                stopSelf()
             }
-            stopSelf()
         }
     }
 
     private fun workerTaskRefresh() {
-        workerHandler.post {
-            CoroutineScope(Dispatchers.IO).launch {
-                refreshAlbum(this@HomeWallpaperService)
+        CoroutineScope(Dispatchers.Default).launch {
+            refreshAlbum(this@HomeWallpaperService)
+            withContext(Dispatchers.Main) {
+                stopSelf()
             }
-            stopSelf()
         }
     }
 
