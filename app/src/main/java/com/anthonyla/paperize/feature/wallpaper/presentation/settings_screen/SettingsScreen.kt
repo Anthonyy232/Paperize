@@ -30,15 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.AmoledListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.AnimationListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ContactListItem
@@ -51,15 +48,40 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.com
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.PrivacyPolicyListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ResetListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.TranslateListItem
-import kotlinx.coroutines.flow.StateFlow
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
+private object Links {
+    const val TRANSLATE = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
+    const val GITHUB = "https://github.com/Anthonyy232/Paperize"
+    const val FDROID = "https://f-droid.org/en/packages/com.anthonyla.paperize/"
+    const val IZZY = "https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize"
+}
+
+private object ToolbarConfig {
+    @OptIn(ExperimentalMaterial3Api::class)
+    val LargeTopAppBarHeight = TopAppBarDefaults.LargeAppBarExpandedHeight
+    val StartPadding = 64.dp
+    val EndPadding = 16.dp
+    const val START = 30
+    const val END = 21
+    val TitleExtraStartPadding = 32.dp
+}
+
+@Composable
+private fun calculateToolbarValues(collapseFraction: Float) = with(ToolbarConfig) {
+    val firstPaddingInterpolation = lerp((EndPadding * 5 / 4), EndPadding, collapseFraction) + TitleExtraStartPadding
+    val secondPaddingInterpolation = lerp(StartPadding, (EndPadding * 5 / 4), collapseFraction)
+    val dynamicPaddingStart = lerp(firstPaddingInterpolation, secondPaddingInterpolation, collapseFraction)
+    val textSize = (END + (START - END) * collapseFraction).sp
+    Pair(dynamicPaddingStart, textSize)
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen(
-    settingsState: StateFlow<SettingsState>,
+    themeSettings: ThemeSettings,
     onBackClick: () -> Unit,
     onDarkModeClick: (Boolean?) -> Unit,
     onAmoledClick: (Boolean) -> Unit,
@@ -70,31 +92,11 @@ fun SettingsScreen(
     onResetClick: () -> Unit,
     onContactClick: () -> Unit
 ) {
-    val topBarState = rememberCollapsingToolbarScaffoldState()
-    val state = settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val topBarState = rememberCollapsingToolbarScaffoldState()
+    val (dynamicPaddingStart, textSize) = calculateToolbarValues(topBarState.toolbarState.progress)
 
-    val translateLink = "https://crowdin.com/project/paperize/invite?h=d8d7a7513d2beb0c96ba9b2a5f85473e2084922"
-    val githubLink = "https://github.com/Anthonyy232/Paperize"
-    val fdroidLink = "https://f-droid.org/en/packages/com.anthonyla.paperize/"
-    val izzyOnDroidLink = "https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize"
-
-    // Collapsing top bar
-    val largeTopAppBarHeight = TopAppBarDefaults.LargeAppBarExpandedHeight
-    val startPadding = 64.dp
-    val endPadding = 16.dp
-    val titleFontScaleStart = 30
-    val titleFontScaleEnd = 21
-    val titleExtraStartPadding = 32.dp
-    val collapseFraction = topBarState.toolbarState.progress
-    val firstPaddingInterpolation = lerp((endPadding * 5 / 4), endPadding, collapseFraction) + titleExtraStartPadding
-    val secondPaddingInterpolation = lerp(startPadding, (endPadding * 5 / 4), collapseFraction)
-    val dynamicPaddingStart = lerp(firstPaddingInterpolation, secondPaddingInterpolation, collapseFraction)
-    val textSize = (titleFontScaleEnd + (titleFontScaleStart - titleFontScaleEnd) * collapseFraction).sp
-
-    Scaffold(
-        modifier = Modifier.semantics { testTagsAsResourceId = true },
-    ) {
+    Scaffold {
         CollapsingToolbarScaffold(
             state = topBarState,
             modifier = Modifier.fillMaxSize().padding(it),
@@ -103,7 +105,7 @@ fun SettingsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(largeTopAppBarHeight)
+                        .height(ToolbarConfig.LargeTopAppBarHeight)
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp))
                         .pin()
                 )
@@ -112,7 +114,6 @@ fun SettingsScreen(
                     modifier = Modifier
                         .padding(16.dp)
                         .size(24.dp)
-                        .testTag("paperize:settings_to_home_button"),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -130,86 +131,116 @@ fun SettingsScreen(
                 )
             }
         ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .testTag("paperize:settings_column"),
-            ) {
-                ListSectionTitle(stringResource(R.string.appearance))
-                Spacer(modifier = Modifier.height(16.dp))
-                DarkModeListItem(
-                    darkMode = state.value.darkMode,
-                    onDarkModeClick = { onDarkModeClick(it) }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                if (state.value.darkMode == null || state.value.darkMode == true) {
-                    AmoledListItem(
-                        amoledMode = state.value.amoledTheme,
-                        onAmoledClick = { onAmoledClick(it) }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                DynamicThemingListItem(
-                    dynamicTheming = state.value.dynamicTheming,
-                    onDynamicThemingClick = { onDynamicThemingClick(it) }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                AnimationListItem(
-                    animate = state.value.animate,
-                    onAnimateClick = { onAnimateClick(it) }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                ListSectionTitle(stringResource(R.string.about))
-                Spacer(modifier = Modifier.height(16.dp))
-                NotificationListItem(
-                    onClick = {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        }
-                        context.startActivity(intent)
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TranslateListItem(
-                    onClick = {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(translateLink)
-                        context.startActivity(openURL)
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                PrivacyPolicyListItem (onPrivacyPolicyClick = onPrivacyClick)
-                Spacer(modifier = Modifier.height(16.dp))
-                LicenseListItem(onLicenseClick = onLicenseClick)
-                Spacer(modifier = Modifier.height(16.dp))
-                ContactListItem(onContactClick = onContactClick)
-                Spacer(modifier = Modifier.height(16.dp))
-                PaperizeListItem(
-                    onGitHubClick = {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(githubLink)
-                        context.startActivity(openURL)
-                    },
-                    onFdroidClick = {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(fdroidLink)
-                        context.startActivity(openURL)
-                    },
-                    onIzzyOnDroidClick = {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(izzyOnDroidLink)
-                        context.startActivity(openURL)
-                    },
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                ResetListItem(onResetClick = onResetClick)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            SettingsContent(
+                themeSettings = themeSettings,
+                onDarkModeClick = onDarkModeClick,
+                onAmoledClick = onAmoledClick,
+                onDynamicThemingClick = onDynamicThemingClick,
+                onAnimateClick = onAnimateClick,
+                onPrivacyClick = onPrivacyClick,
+                onLicenseClick = onLicenseClick,
+                onResetClick = onResetClick,
+                onContactClick = onContactClick,
+                context = context
+            )
         }
     }
+}
+
+@Composable
+private fun SettingsContent(
+    themeSettings: ThemeSettings,
+    onDarkModeClick: (Boolean?) -> Unit,
+    onAmoledClick: (Boolean) -> Unit,
+    onDynamicThemingClick: (Boolean) -> Unit,
+    onAnimateClick: (Boolean) -> Unit,
+    onPrivacyClick: () -> Unit,
+    onLicenseClick: () -> Unit,
+    onResetClick: () -> Unit,
+    onContactClick: () -> Unit,
+    context: android.content.Context
+) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+    ) {
+        AppearanceSection(themeSettings, onDarkModeClick, onAmoledClick, onDynamicThemingClick, onAnimateClick)
+        AboutSection(context, onPrivacyClick, onLicenseClick, onContactClick, onResetClick)
+    }
+}
+
+@Composable
+private fun AppearanceSection(
+    themeSettings: ThemeSettings,
+    onDarkModeClick: (Boolean?) -> Unit,
+    onAmoledClick: (Boolean) -> Unit,
+    onDynamicThemingClick: (Boolean) -> Unit,
+    onAnimateClick: (Boolean) -> Unit
+) {
+    ListSectionTitle(stringResource(R.string.appearance))
+    Spacer(modifier = Modifier.height(16.dp))
+    DarkModeListItem(
+        darkMode = themeSettings.darkMode,
+        onDarkModeClick = onDarkModeClick
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    if (themeSettings.darkMode == null || themeSettings.darkMode == true) {
+        AmoledListItem(
+            amoledMode = themeSettings.amoledTheme,
+            onAmoledClick = onAmoledClick
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+    DynamicThemingListItem(
+        dynamicTheming = themeSettings.dynamicTheming,
+        onDynamicThemingClick = onDynamicThemingClick
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    AnimationListItem(
+        animate = themeSettings.animate,
+        onAnimateClick = onAnimateClick
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun AboutSection(
+    context: android.content.Context,
+    onPrivacyClick: () -> Unit,
+    onLicenseClick: () -> Unit,
+    onContactClick: () -> Unit,
+    onResetClick: () -> Unit
+) {
+    ListSectionTitle(stringResource(R.string.about))
+    Spacer(modifier = Modifier.height(16.dp))
+    NotificationListItem {
+        val intent = Intent().apply {
+            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+        context.startActivity(intent)
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+    TranslateListItem {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Links.TRANSLATE)))
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+    PrivacyPolicyListItem(onPrivacyClick)
+    Spacer(modifier = Modifier.height(16.dp))
+    LicenseListItem(onLicenseClick)
+    Spacer(modifier = Modifier.height(16.dp))
+    ContactListItem(onContactClick)
+    Spacer(modifier = Modifier.height(16.dp))
+    PaperizeListItem(
+        onGitHubClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Links.GITHUB))) },
+        onFdroidClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Links.FDROID))) },
+        onIzzyOnDroidClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Links.IZZY))) }
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    ResetListItem(onResetClick)
+    Spacer(modifier = Modifier.height(16.dp))
 }

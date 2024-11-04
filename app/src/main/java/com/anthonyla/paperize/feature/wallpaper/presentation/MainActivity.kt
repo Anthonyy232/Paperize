@@ -35,6 +35,7 @@ import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
@@ -79,101 +80,143 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { settingsViewModel.setKeepOnScreenCondition }
 
         setContent {
-            val scheduler = WallpaperAlarmSchedulerImpl(context)
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
+            val scheduler = WallpaperAlarmSchedulerImpl(context)
             if (isFirstLaunch) {
-                scheduler.cancelWallpaperAlarm()
-                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset())
-                settingsViewModel.onEvent(SettingsEvent.Reset)
-                albumsViewModel.onEvent(AlbumsEvent.Reset)
-                val contentResolver = context.contentResolver
-                val persistedUris = contentResolver.persistedUriPermissions
-                for (permission in persistedUris) {
-                    contentResolver.releasePersistableUriPermission(permission.uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                }
+                handleFirstLaunch(scheduler)
             }
+
             LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
                 lifecycleScope.launch {
-                    if (settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) == true) {
-                        val homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME)
-                        val lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME)
-                        if (homeAlbumName.isNullOrEmpty() || lockAlbumName.isNullOrEmpty()) {
-                            settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
-                        }
-                        else {
-                            val shouldScheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
-                            val shouldScheduleAlarm = if (shouldScheduleSeparately) {
-                                !(isPendingIntentSet(Type.HOME.ordinal) && isPendingIntentSet(Type.LOCK.ordinal))
-                            } else {
-                                !isPendingIntentSet(Type.SINGLE.ordinal)
-                            }
-                            if (shouldScheduleAlarm) {
-                                scheduler.scheduleWallpaperAlarm(
-                                    WallpaperAlarmItem(
-                                        homeInterval = settingsDataStoreImpl.getInt(SettingsConstants.HOME_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-                                        lockInterval = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_WALLPAPER_CHANGE_INTERVAL) ?: SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-                                        setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false,
-                                        setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false,
-                                        scheduleSeparately = shouldScheduleSeparately,
-                                        changeStartTime = settingsDataStoreImpl.getBoolean(SettingsConstants.CHANGE_START_TIME) ?: false,
-                                        startTime = Pair(
-                                            settingsDataStoreImpl.getInt(SettingsConstants.START_HOUR) ?: 0,
-                                            settingsDataStoreImpl.getInt(SettingsConstants.START_MINUTE) ?: 0
-                                        ),
-                                    ),
-                                    origin = null,
-                                    changeImmediate = true,
-                                    cancelImmediate = true,
-                                    firstLaunch = true
-                                )
-                                settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
-                                val selectedState = wallpaperScreenViewModel.state.value
-                                val currentHomeAlbum = selectedState.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
-                                val currentLockAlbum = selectedState.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName }
-                                when {
-                                    settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
-                                        if (currentHomeAlbum != null && currentLockAlbum != null) {
-                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
-                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
-                                                currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
-                                            ))
-                                        }
-                                    }
-                                    !settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
-                                        if (currentHomeAlbum != null && currentLockAlbum != null) {
-                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
-                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
-                                                currentLockWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
-                                            ))
-                                        }
-                                    }
-                                    settingsState.value.setHomeWallpaper -> {
-                                        if (currentHomeAlbum != null) {
-                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
-                                                currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
-                                                currentLockWallpaper = if (settingsState.value.scheduleSeparately) null else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
-                                            ))
-                                        }
-                                    }
-                                    settingsState.value.setLockWallpaper -> {
-                                        if (currentLockAlbum != null) {
-                                            settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
-                                                currentHomeWallpaper = if (settingsState.value.scheduleSeparately) null else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri,
-                                                currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
-                                            ))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    handleWallpaperScheduling(settingsState.value, scheduler)
                 }
             }
 
-            PaperizeTheme(settingsState.value.darkMode, settingsState.value.amoledTheme, settingsState.value.dynamicTheming) {
+            PaperizeTheme(
+                darkMode = settingsState.value.themeSettings.darkMode,
+                amoledMode = settingsState.value.themeSettings.amoledTheme,
+                dynamicTheming = settingsState.value.themeSettings.dynamicTheming
+            ) {
                 Surface(tonalElevation = 5.dp) {
                     PaperizeApp(isFirstLaunch, scheduler)
+                }
+            }
+        }
+    }
+
+    private fun handleFirstLaunch(scheduler: WallpaperAlarmSchedulerImpl) {
+        scheduler.cancelWallpaperAlarm()
+        wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset())
+        settingsViewModel.onEvent(SettingsEvent.Reset)
+        albumsViewModel.onEvent(AlbumsEvent.Reset)
+        clearPersistedUriPermissions()
+    }
+
+    private fun clearPersistedUriPermissions() {
+        val contentResolver = context.contentResolver
+        val persistedUris = contentResolver.persistedUriPermissions
+        for (permission in persistedUris) {
+            contentResolver.releasePersistableUriPermission(
+                permission.uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        }
+    }
+
+    private fun handleWallpaperScheduling(
+        settings: SettingsState,
+        scheduler: WallpaperAlarmSchedulerImpl
+    ) {
+        val wallpaperSettings = settings.wallpaperSettings
+        val scheduleSettings = settings.scheduleSettings
+
+        if (!wallpaperSettings.enableChanger) return
+        if (wallpaperSettings.homeAlbumName.isNullOrEmpty() || wallpaperSettings.lockAlbumName.isNullOrEmpty()) {
+            settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
+            return
+        }
+
+        val shouldScheduleAlarm = if (scheduleSettings.scheduleSeparately) {
+            !(isPendingIntentSet(Type.HOME.ordinal) && isPendingIntentSet(Type.LOCK.ordinal))
+        } else {
+            !isPendingIntentSet(Type.SINGLE.ordinal)
+        }
+
+        if (shouldScheduleAlarm) {
+            scheduleWallpaperAlarm(settings, scheduler)
+            updateCurrentWallpapers(settings)
+        }
+    }
+
+    private fun scheduleWallpaperAlarm(
+        settings: SettingsState,
+        scheduler: WallpaperAlarmSchedulerImpl
+    ) {
+        val scheduleSettings = settings.scheduleSettings
+        val wallpaperSettings = settings.wallpaperSettings
+
+        scheduler.scheduleWallpaperAlarm(
+            WallpaperAlarmItem(
+                homeInterval = scheduleSettings.homeInterval,
+                lockInterval = scheduleSettings.lockInterval,
+                setLock = wallpaperSettings.setLockWallpaper,
+                setHome = wallpaperSettings.setHomeWallpaper,
+                scheduleSeparately = scheduleSettings.scheduleSeparately,
+                changeStartTime = scheduleSettings.changeStartTime,
+                startTime = scheduleSettings.startTime
+            ),
+            origin = null,
+            changeImmediate = true,
+            cancelImmediate = true,
+            firstLaunch = true
+        )
+        settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
+    }
+
+    private fun updateCurrentWallpapers(settings: SettingsState) {
+        val selectedState = wallpaperScreenViewModel.state.value
+        val currentHomeAlbum = selectedState.selectedAlbum?.find { 
+            it.album.initialAlbumName == settings.wallpaperSettings.homeAlbumName 
+        }
+        val currentLockAlbum = selectedState.selectedAlbum?.find { 
+            it.album.initialAlbumName == settings.wallpaperSettings.lockAlbumName 
+        }
+
+        val wallpaperSettings = settings.wallpaperSettings
+        val scheduleSettings = settings.scheduleSettings
+
+        when {
+            scheduleSettings.scheduleSeparately && wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper -> {
+                if (currentHomeAlbum != null && currentLockAlbum != null) {
+                    settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                        currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                        currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                    ))
+                }
+            }
+            !scheduleSettings.scheduleSeparately && wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper -> {
+                if (currentHomeAlbum != null && currentLockAlbum != null) {
+                    settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                        currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                        currentLockWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                    ))
+                }
+            }
+            wallpaperSettings.setHomeWallpaper -> {
+                if (currentHomeAlbum != null) {
+                    settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                        currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                        currentLockWallpaper = if (scheduleSettings.scheduleSeparately) null else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                    ))
+                }
+            }
+            wallpaperSettings.setLockWallpaper -> {
+                if (currentLockAlbum != null) {
+                    settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
+                        currentHomeWallpaper = if (scheduleSettings.scheduleSeparately) null else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri,
+                        currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull() ?: currentLockAlbum.wallpapers.firstOrNull()?.wallpaperUri
+                    ))
                 }
             }
         }

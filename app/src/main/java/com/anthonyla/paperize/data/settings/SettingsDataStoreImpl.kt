@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.anthonyla.paperize.core.SettingsConstants.SETTINGS_DATASTORE
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = SETTINGS_DATASTORE)
 
@@ -93,6 +92,19 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
     override suspend fun clearPreferences() {
         context.dataStore.edit {
             it.clear()
+        }
+    }
+
+    override suspend fun clear(keys: List<String>) {
+        context.dataStore.edit { preferences ->
+            keys.forEach { key ->
+                if (preferences.contains(booleanPreferencesKey(key))) {
+                    preferences.remove(booleanPreferencesKey(key))
+                }
+                else if (preferences.contains(stringPreferencesKey(key))) {
+                    preferences.remove(stringPreferencesKey(key))
+                }
+            }
         }
     }
 }

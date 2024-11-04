@@ -13,5 +13,6 @@ interface SettingsDataStore {
     suspend fun deleteBoolean(key: String)
     suspend fun deleteString(key: String)
     suspend fun deleteInt(key: String)
+    suspend fun clear(keys: List<String>)
     suspend fun clearPreferences()
 }

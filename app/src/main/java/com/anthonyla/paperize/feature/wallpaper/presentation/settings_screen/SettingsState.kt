@@ -1,42 +1,57 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen
+
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 
 data class SettingsState(
     val firstLaunch: Boolean = true,
-    // App settings
-    val darkMode: Boolean? = null,
-    val amoledTheme: Boolean = false,
-    val dynamicTheming: Boolean = false,
-    val animate: Boolean = true,
-    // Wallpaper settings
-    val enableChanger: Boolean = false,
-    val setHomeWallpaper: Boolean = false,
-    val setLockWallpaper: Boolean = false,
-    val currentHomeWallpaper: String? = null,
-    val currentLockWallpaper: String? = null,
-    val homeAlbumName: String? = null,
-    val lockAlbumName: String? = null,
-    val scheduleSeparately: Boolean = false,
-    val homeInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-    val lockInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
-    val lastSetTime: String? = null,
-    val nextSetTime: String? = null,
-    val homeDarkenPercentage: Int = 100,
-    val lockDarkenPercentage: Int = 100,
-    val darken: Boolean = false,
-    val blur: Boolean = false,
-    val homeBlurPercentage: Int = 0,
-    val lockBlurPercentage: Int = 0,
-    val vignette: Boolean = false,
-    val homeVignettePercentage: Int = 0,
-    val lockVignettePercentage: Int = 0,
-    val grayscale: Boolean = false,
-    val homeGrayscalePercentage: Int = 0,
-    val lockGrayscalePercentage: Int = 0,
-    val wallpaperScaling: ScalingConstants = ScalingConstants.FILL,
-    val nextHomeWallpaper: String? = null,
-    val nextLockWallpaper: String? = null,
-    val changeStartTime: Boolean = false,
-    val startTime: Pair<Int, Int> = Pair(0, 0)
-)
+    val themeSettings: ThemeSettings = ThemeSettings(),
+    val wallpaperSettings: WallpaperSettings = WallpaperSettings(),
+    val scheduleSettings: ScheduleSettings = ScheduleSettings(),
+    val effectSettings: EffectSettings = EffectSettings()
+) {
+    data class ThemeSettings(
+        val darkMode: Boolean? = null,
+        val amoledTheme: Boolean = false,
+        val dynamicTheming: Boolean = false,
+        val animate: Boolean = true
+    )
+
+    data class WallpaperSettings(
+        val enableChanger: Boolean = false,
+        val setHomeWallpaper: Boolean = false,
+        val setLockWallpaper: Boolean = false,
+        val currentHomeWallpaper: String? = null,
+        val currentLockWallpaper: String? = null,
+        val nextHomeWallpaper: String? = null,
+        val nextLockWallpaper: String? = null,
+        val homeAlbumName: String? = null,
+        val lockAlbumName: String? = null,
+        val wallpaperScaling: ScalingConstants = ScalingConstants.FILL
+    )
+
+    data class ScheduleSettings(
+        val scheduleSeparately: Boolean = false,
+        val homeInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+        val lockInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
+        val lastSetTime: String? = null,
+        val nextSetTime: String? = null,
+        val changeStartTime: Boolean = false,
+        val startTime: Pair<Int, Int> = Pair(0, 0)
+    )
+
+    data class EffectSettings(
+        val darken: Boolean = false,
+        val homeDarkenPercentage: Int = 100,
+        val lockDarkenPercentage: Int = 100,
+        val blur: Boolean = false,
+        val homeBlurPercentage: Int = 0,
+        val lockBlurPercentage: Int = 0,
+        val vignette: Boolean = false,
+        val homeVignettePercentage: Int = 0,
+        val lockVignettePercentage: Int = 0,
+        val grayscale: Boolean = false,
+        val homeGrayscalePercentage: Int = 0,
+        val lockGrayscalePercentage: Int = 0
+    )
+}

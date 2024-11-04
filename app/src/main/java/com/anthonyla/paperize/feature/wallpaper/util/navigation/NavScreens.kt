@@ -49,7 +49,7 @@ data class AlbumView(val initialAlbumName: String)
  * Data class for AddEdit screen
  */
 @Serializable
-data class AddEdit(val wallpaper: String)
+data class AddAlbum(val wallpaper: String)
 
 /**
  * Data class for WallpaperView screen

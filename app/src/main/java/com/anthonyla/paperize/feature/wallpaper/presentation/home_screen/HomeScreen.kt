@@ -23,9 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
@@ -34,24 +31,23 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.getTabItems
 import com.anthonyla.paperize.feature.wallpaper.presentation.library_screen.LibraryScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.EffectSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ScheduleSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.WallpaperSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
-    animate : Boolean,
-    darken: Boolean,
-    homeDarkenPercentage: Int,
-    lockDarkenPercentage: Int,
-    enableChanger: Boolean,
-    homeEnabled : Boolean,
-    homeInterval: Int,
-    lockInterval: Int,
-    lastSetTime: String?,
-    lockEnabled : Boolean,
-    navigateToAddWallpaperScreen: (String) -> Unit,
-    nextSetTime: String?,
+    homeSelectedAlbum: SelectedAlbum?,
+    lockSelectedAlbum: SelectedAlbum?,
+    themeSettings: ThemeSettings,
+    wallpaperSettings: WallpaperSettings,
+    scheduleSettings: ScheduleSettings,
+    effectSettings: EffectSettings,
+    onNavigateAddWallpaper: (String) -> Unit,
     onViewAlbum: (String) -> Unit,
     onDarkCheck: (Boolean) -> Unit,
     onDarkenPercentage: (Int, Int) -> Unit,
@@ -66,31 +62,14 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
     onStop: (Boolean, Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
-    scaling: ScalingConstants,
-    scheduleSeparately: Boolean,
-    blur: Boolean,
     onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    homeBlurPercentage: Int,
-    lockBlurPercentage: Int,
-    currentHomeWallpaper: String?,
-    currentLockWallpaper: String?,
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
-    homeVignettePercentage: Int,
-    lockVignettePercentage: Int,
     onVignettePercentageChange: (Int, Int) -> Unit,
     onVignetteChange: (Boolean) -> Unit,
-    vignette: Boolean,
-    homeGrayscalePercentage: Int,
-    lockGrayscalePercentage: Int,
     onGrayscalePercentageChange: (Int, Int) -> Unit,
     onGrayscaleChange: (Boolean) -> Unit,
-    grayscale: Boolean,
-    changeStartTime: Boolean,
     onChangeStartTimeToggle: (Boolean) -> Unit,
-    onStartTimeChange: (TimePickerState) -> Unit,
-    startingTime: Pair<Int, Int>
+    onStartTimeChange: (TimePickerState) -> Unit
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -98,7 +77,7 @@ fun HomeScreen(
     var addAlbumDialog by rememberSaveable { mutableStateOf(false) }
     if (addAlbumDialog) AddAlbumDialog(
         onDismissRequest = { addAlbumDialog = false },
-        onConfirmation = { navigateToAddWallpaperScreen(it) }
+        onConfirmation = { onNavigateAddWallpaper(it) }
     )
 
     LaunchedEffect(tabIndex) {
@@ -109,9 +88,6 @@ fun HomeScreen(
     }
 
     Scaffold (
-        modifier = Modifier.semantics {
-            testTagsAsResourceId = true
-        },
         topBar = {
             HomeTopBar(
                 showSelectionModeAppBar = false,
@@ -148,8 +124,7 @@ fun HomeScreen(
                                 imageVector = if (index == tabIndex) item.filledIcon else item.unfilledIcon,
                                 contentDescription = item.title
                             )
-                        },
-                        modifier = Modifier.testTag("paperize:${item.title}_button"),
+                        }
                     )
                 }
             }
@@ -160,54 +135,32 @@ fun HomeScreen(
                 when (index.coerceIn(tabItems.indices)) {
                     0 -> WallpaperScreen(
                         albums = albums,
-                        animate = animate,
-                        darken = darken,
-                        homeDarkenPercentage = homeDarkenPercentage,
-                        lockDarkenPercentage = lockDarkenPercentage,
-                        enableChanger = enableChanger,
-                        homeEnabled = homeEnabled,
-                        homeInterval = homeInterval,
-                        lockInterval = lockInterval,
-                        lastSetTime = lastSetTime,
-                        lockEnabled = lockEnabled,
-                        nextSetTime = nextSetTime,
+                        homeSelectedAlbum = homeSelectedAlbum,
+                        lockSelectedAlbum = lockSelectedAlbum,
+                        themeSettings = themeSettings,
+                        wallpaperSettings = wallpaperSettings,
+                        scheduleSettings = scheduleSettings,
+                        effectSettings = effectSettings,
                         onDarkCheck = onDarkCheck,
                         onDarkenPercentage = onDarkenPercentage,
                         onHomeCheckedChange = onHomeCheckedChange,
                         onLockCheckedChange = onLockCheckedChange,
-                        scheduleSeparately = scheduleSeparately,
+                        onScalingChange = onScalingChange,
                         onScheduleSeparatelyChange = onScheduleSeparatelyChange,
                         onScheduleWallpaperChanger = onScheduleWallpaperChanger,
-                        onScalingChange = onScalingChange,
                         onSelectAlbum = onSelectAlbum,
                         onHomeTimeChange = onHomeTimeChange,
                         onLockTimeChange = onLockTimeChange,
                         onStop = onStop,
                         onToggleChanger = onToggleChanger,
-                        scaling = scaling,
-                        homeSelectedAlbum = homeSelectedAlbum,
-                        lockSelectedAlbum = lockSelectedAlbum,
-                        blur = blur,
                         onBlurPercentageChange = onBlurPercentageChange,
                         onBlurChange = onBlurChange,
-                        homeBlurPercentage = homeBlurPercentage,
-                        lockBlurPercentage = lockBlurPercentage,
-                        currentHomeWallpaper = currentHomeWallpaper,
-                        currentLockWallpaper = currentLockWallpaper,
-                        homeVignettePercentage = homeVignettePercentage,
-                        lockVignettePercentage = lockVignettePercentage,
                         onVignettePercentageChange = onVignettePercentageChange,
                         onVignetteChange = onVignetteChange,
-                        vignette = vignette,
-                        homeGrayscalePercentage = homeGrayscalePercentage,
-                        lockGrayscalePercentage = lockGrayscalePercentage,
                         onGrayscalePercentageChange = onGrayscalePercentageChange,
                         onGrayscaleChange = onGrayscaleChange,
-                        grayscale = grayscale,
-                        changeStartTime = changeStartTime,
                         onChangeStartTimeToggle = onChangeStartTimeToggle,
-                        onStartTimeChange = onStartTimeChange,
-                        startingTime = startingTime
+                        onStartTimeChange = onStartTimeChange
                     )
                     else -> LibraryScreen(
                         albums = albums,

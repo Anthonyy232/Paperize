@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.data.SendContactIntent
@@ -41,19 +40,17 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.startup_screen.Star
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_view_screen.WallpaperViewScreen
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddEdit
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddAlbum
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.AlbumView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.FolderView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Home
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Licenses
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.NavConstants.INITIAL_OFFSET
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Notification
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Privacy
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Settings
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Startup
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.WallpaperView
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionIn
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.sharedXTransitionOut
+import com.anthonyla.paperize.feature.wallpaper.util.navigation.animatedScreen
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import kotlinx.coroutines.Dispatchers
@@ -84,32 +81,42 @@ fun PaperizeApp(
     // React to albumState changes and change selectedAlbum's details to keep it from being stale
     LaunchedEffect(albumState.value) {
         withContext(Dispatchers.IO) {
-            albumState.value.albumsWithWallpapers.asSequence().forEach { albumWithWallpapers ->
-                if (!albumWithWallpapers.album.initialized && (albumWithWallpapers.wallpapers.isNotEmpty() || albumWithWallpapers.folders.isNotEmpty())) {
-                    albumsViewModel.onEvent(AlbumsEvent.InitializeAlbum(albumWithWallpapers))
+            // Process albums that need initialization or deletion
+            albumState.value.albumsWithWallpapers.asSequence()
+                .filter { album ->
+                    (!album.album.initialized && (album.wallpapers.isNotEmpty() || album.folders.isNotEmpty())) ||
+                            (album.wallpapers.isEmpty() && album.folders.isEmpty() && album.album.initialized)
                 }
-                else if (albumWithWallpapers.wallpapers.isEmpty() && albumWithWallpapers.folders.isEmpty() && albumWithWallpapers.album.initialized) {
-                    if (navController.currentDestination?.route == Home::class.simpleName) {
-                        try {
-                            navController.popBackStack<Home>(inclusive = false)
-                        } catch (_: Exception) {
-                            navController.navigate(Home)
+                .forEach { album ->
+                    when {
+                        !album.album.initialized -> {
+                            albumsViewModel.onEvent(AlbumsEvent.InitializeAlbum(album))
+                        }
+                        else -> {
+                            if (navController.currentDestination?.route == Home::class.simpleName) {
+                                try {
+                                    navController.popBackStack<Home>(inclusive = false)
+                                } catch (_: Exception) {
+                                    navController.navigate(Home)
+                                }
+                            }
+                            albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(album))
                         }
                     }
-                    albumsViewModel.onEvent(AlbumsEvent.DeleteAlbumWithWallpapers(albumWithWallpapers))
                 }
-            }
+            // Update or reset selected albums
             selectedState.value.selectedAlbum?.forEach { selectedAlbum ->
-                val album = albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
-                if (album != null) {
-                    if (selectedAlbum.album.displayedAlbumName != album.album.displayedAlbumName ||
-                        selectedAlbum.album.coverUri != album.album.coverUri ||
-                        selectedAlbum.wallpapers.size != album.wallpapers.size + album.folders.sumOf { it.wallpapers.size })
-                    {
+                val matchingAlbum = albumState.value.albumsWithWallpapers
+                    .find { it.album.initialAlbumName == selectedAlbum.album.initialAlbumName }
+                matchingAlbum?.let { album ->
+                    val needsUpdate = selectedAlbum.album.displayedAlbumName != album.album.displayedAlbumName ||
+                            selectedAlbum.album.coverUri != album.album.coverUri ||
+                            selectedAlbum.wallpapers.size != album.wallpapers.size + album.folders.sumOf { it.wallpapers.size }
+
+                    if (needsUpdate) {
                         wallpaperScreenViewModel.onEvent(WallpaperEvent.AddSelectedAlbum(album, selectedAlbum.album.initialAlbumName))
                     }
-                }
-                else {
+                } ?: run {
                     wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedAlbum))
                     settingsViewModel.onEvent(SettingsEvent.RemoveSelectedAlbumAsName(selectedAlbum.album.initialAlbumName))
                     scheduler.cancelWallpaperAlarm()
@@ -121,31 +128,10 @@ fun PaperizeApp(
     NavHost(
         navController = navController,
         startDestination = if (firstLaunch) Startup else Home,
-        modifier = Modifier.navigationBarsPadding()
+        modifier = Modifier.navigationBarsPadding(),
     ) {
         // Navigate to the startup screen to show the privacy policy and notification screen
-        composable<Startup> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Startup>(animate = settingsState.value.themeSettings.animate) {
             StartupScreen(
                 onAgree = {
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
@@ -155,106 +141,41 @@ fun PaperizeApp(
                 }
             )
         }
+
         // Navigate to the notification screen to ask for notification permission
-        composable<Notification> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Notification>(animate = settingsState.value.themeSettings.animate) {
             NotificationScreen(
                 onAgree = { settingsViewModel.onEvent(SettingsEvent.SetFirstLaunch) }
             )
         }
+
         // Navigate to the home screen to view all albums and wallpapers
-        composable<Home> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Home>(animate = settingsState.value.themeSettings.animate) {
             HomeScreen(
                 albums = albumState.value.albumsWithWallpapers,
-                animate = settingsState.value.animate,
-                homeInterval = settingsState.value.homeInterval,
-                lockInterval = settingsState.value.lockInterval,
-                lastSetTime = settingsState.value.lastSetTime,
-                nextSetTime = settingsState.value.nextSetTime,
-                homeSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName },
-                lockSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName },
-                enableChanger = settingsState.value.enableChanger,
-                homeDarkenPercentage = settingsState.value.homeDarkenPercentage,
-                lockDarkenPercentage = settingsState.value.lockDarkenPercentage,
-                darken = settingsState.value.darken,
-                homeEnabled = settingsState.value.setHomeWallpaper,
-                lockEnabled = settingsState.value.setLockWallpaper,
-                scheduleSeparately = settingsState.value.scheduleSeparately,
-                blur = settingsState.value.blur,
-                homeBlurPercentage = settingsState.value.homeBlurPercentage,
-                lockBlurPercentage = settingsState.value.lockBlurPercentage,
-                currentHomeWallpaper = settingsState.value.currentHomeWallpaper,
-                currentLockWallpaper = settingsState.value.currentLockWallpaper,
-                vignette = settingsState.value.vignette,
-                homeVignettePercentage = settingsState.value.homeVignettePercentage,
-                lockVignettePercentage = settingsState.value.lockVignettePercentage,
-                grayscale = settingsState.value.grayscale,
-                homeGrayscalePercentage = settingsState.value.homeGrayscalePercentage,
-                lockGrayscalePercentage = settingsState.value.lockGrayscalePercentage,
-                changeStartTime = settingsState.value.changeStartTime,
-                startingTime = settingsState.value.startTime,
+                homeSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName },
+                lockSelectedAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.lockAlbumName },
+                themeSettings = settingsState.value.themeSettings,
+                wallpaperSettings = settingsState.value.wallpaperSettings,
+                scheduleSettings = settingsState.value.scheduleSettings,
+                effectSettings = settingsState.value.effectSettings,
                 onSettingsClick = { navController.navigate(Settings) },
-                navigateToAddWallpaperScreen = {
-                    navController.navigate(AddEdit(it))
-                },
-                onViewAlbum = {
-                    navController.navigate(AlbumView(it))
-                },
+                onNavigateAddWallpaper = { navController.navigate(AddAlbum(it)) },
+                onViewAlbum = { navController.navigate(AlbumView(it)) },
                 onScheduleWallpaperChanger = {
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
@@ -269,18 +190,18 @@ fun PaperizeApp(
                 },
                 onHomeTimeChange = { timeInMinutes ->
                     settingsViewModel.onEvent(SettingsEvent.SetHomeWallpaperInterval(timeInMinutes))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
                             val alarmItem = WallpaperAlarmItem(
                                 homeInterval = timeInMinutes,
-                                lockInterval = settingsState.value.lockInterval,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                             scheduler.scheduleRefresh()
@@ -289,18 +210,18 @@ fun PaperizeApp(
                 },
                 onLockTimeChange = { timeInMinutes ->
                     settingsViewModel.onEvent(SettingsEvent.SetLockWallpaperInterval(timeInMinutes))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
                                 lockInterval = timeInMinutes,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it)}
                             scheduler.scheduleRefresh()
@@ -310,16 +231,16 @@ fun PaperizeApp(
                 },
                 onStop = { lock, home ->
                     if (!selectedState.value.selectedAlbum.isNullOrEmpty()) {
-                        val notSameAlbum = settingsState.value.homeAlbumName != settingsState.value.lockAlbumName
+                        val notSameAlbum = settingsState.value.wallpaperSettings.homeAlbumName != settingsState.value.wallpaperSettings.lockAlbumName
                         when {
                             lock && home -> {
-                                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.homeAlbumName}))
+                                wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName}))
                             }
                             lock -> {
-                                if (notSameAlbum) wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.lockAlbumName}))
+                                if (notSameAlbum) wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.lockAlbumName}))
                             }
                             home -> {
-                                if (notSameAlbum) wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.homeAlbumName}))
+                                if (notSameAlbum) wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset(selectedState.value.selectedAlbum!!.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName}))
                             }
                         }
                         settingsViewModel.onEvent(SettingsEvent.RemoveSelectedAlbumAsType(lock, home))
@@ -327,7 +248,7 @@ fun PaperizeApp(
                     }
                 },
                 onToggleChanger = { enableWallpaperChanger ->
-                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && !settingsState.value.homeAlbumName.isNullOrEmpty() && !settingsState.value.lockAlbumName.isNullOrEmpty()) {
+                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && !settingsState.value.wallpaperSettings.homeAlbumName.isNullOrEmpty() && !settingsState.value.wallpaperSettings.lockAlbumName.isNullOrEmpty()) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(enableWallpaperChanger))
                         if (enableWallpaperChanger) {
                             job?.cancel()
@@ -336,13 +257,13 @@ fun PaperizeApp(
                                 settingsViewModel.onEvent(SettingsEvent.RefreshNextWallpaper)
                                 delay(1000)
                                 val alarmItem = WallpaperAlarmItem(
-                                    homeInterval = settingsState.value.homeInterval,
-                                    lockInterval = settingsState.value.lockInterval,
-                                    scheduleSeparately = settingsState.value.scheduleSeparately,
-                                    setHome = settingsState.value.setHomeWallpaper,
-                                    setLock = settingsState.value.setLockWallpaper,
-                                    changeStartTime = settingsState.value.changeStartTime,
-                                    startTime = settingsState.value.startTime
+                                    homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                    lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                    scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                    setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                    setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                    changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                    startTime = settingsState.value.scheduleSettings.startTime
                                 )
                                 alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                     wallpaperAlarmItem = it,
@@ -358,7 +279,7 @@ fun PaperizeApp(
                     }
                 },
                 onSelectAlbum = {album, lock, home ->
-                    val notSameAlbum = settingsState.value.homeAlbumName != settingsState.value.lockAlbumName
+                    val notSameAlbum = settingsState.value.wallpaperSettings.homeAlbumName != settingsState.value.wallpaperSettings.lockAlbumName
                     when {
                         lock && home -> {
                             settingsViewModel.onEvent(SettingsEvent.SetAlbumName(
@@ -367,7 +288,7 @@ fun PaperizeApp(
                             ))
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.AddSelectedAlbum(
                                 album = album,
-                                deleteAlbumName = if (notSameAlbum) settingsState.value.lockAlbumName else null)
+                                deleteAlbumName = if (notSameAlbum) settingsState.value.wallpaperSettings.lockAlbumName else null)
                             )
                         }
                         lock -> {
@@ -377,7 +298,7 @@ fun PaperizeApp(
                             ))
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.AddSelectedAlbum(
                                 album = album,
-                                deleteAlbumName = if (notSameAlbum) settingsState.value.lockAlbumName else null)
+                                deleteAlbumName = if (notSameAlbum) settingsState.value.wallpaperSettings.lockAlbumName else null)
                             )
                         }
                         home -> {
@@ -387,18 +308,18 @@ fun PaperizeApp(
                             ))
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.AddSelectedAlbum(
                                 album = album,
-                                deleteAlbumName = if (notSameAlbum) settingsState.value.homeAlbumName else null)
+                                deleteAlbumName = if (notSameAlbum) settingsState.value.wallpaperSettings.homeAlbumName else null)
                             )
                         }
                     }
                     scope.launch {
                         settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
                         delay(1000) // Delay for enableChanger to refresh
-                        if (settingsState.value.enableChanger) {
-                            val currentHomeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
-                            val currentLockAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName }
+                        if (settingsState.value.wallpaperSettings.enableChanger) {
+                            val currentHomeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName }
+                            val currentLockAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.lockAlbumName }
                             when {
-                                settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                                settingsState.value.scheduleSettings.scheduleSeparately && settingsState.value.wallpaperSettings.setHomeWallpaper && settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                     if (currentHomeAlbum != null && currentLockAlbum != null) {
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetCurrentWallpaper(
@@ -415,7 +336,7 @@ fun PaperizeApp(
                                     }
                                 }
 
-                                !settingsState.value.scheduleSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                                !settingsState.value.scheduleSettings.scheduleSeparately && settingsState.value.wallpaperSettings.setHomeWallpaper && settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                     if (currentHomeAlbum != null && currentLockAlbum != null) {
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetCurrentWallpaper(
@@ -432,34 +353,34 @@ fun PaperizeApp(
                                     }
                                 }
 
-                                settingsState.value.setHomeWallpaper -> {
+                                settingsState.value.wallpaperSettings.setHomeWallpaper -> {
                                     if (currentHomeAlbum != null) {
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetCurrentWallpaper(
                                                 currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull(),
-                                                currentLockWallpaper = if (settingsState.value.scheduleSeparately) null else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull()
+                                                currentLockWallpaper = if (settingsState.value.scheduleSettings.scheduleSeparately) null else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull()
                                             )
                                         )
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetNextWallpaper(
                                                 nextHomeWallpaper = if (currentHomeAlbum.album.homeWallpapersInQueue.size > 1) currentHomeAlbum.album.homeWallpapersInQueue[1] else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull(),
-                                                nextLockWallpaper = if (settingsState.value.scheduleSeparately) null else if (currentHomeAlbum.album.homeWallpapersInQueue.size > 1) currentHomeAlbum.album.homeWallpapersInQueue[1] else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull()
+                                                nextLockWallpaper = if (settingsState.value.scheduleSettings.scheduleSeparately) null else if (currentHomeAlbum.album.homeWallpapersInQueue.size > 1) currentHomeAlbum.album.homeWallpapersInQueue[1] else currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull()
                                             )
                                         )
                                     }
                                 }
 
-                                settingsState.value.setLockWallpaper -> {
+                                settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                     if (currentLockAlbum != null) {
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetCurrentWallpaper(
-                                                currentHomeWallpaper = if (settingsState.value.scheduleSeparately) null else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull(),
+                                                currentHomeWallpaper = if (settingsState.value.scheduleSettings.scheduleSeparately) null else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull(),
                                                 currentLockWallpaper = currentLockAlbum.album.lockWallpapersInQueue.firstOrNull()
                                             )
                                         )
                                         settingsViewModel.onEvent(
                                             SettingsEvent.SetNextWallpaper(
-                                                nextHomeWallpaper = if (settingsState.value.scheduleSeparately) null else if (currentLockAlbum.album.lockWallpapersInQueue.size > 1) currentLockAlbum.album.lockWallpapersInQueue[1] else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull(),
+                                                nextHomeWallpaper = if (settingsState.value.scheduleSettings.scheduleSeparately) null else if (currentLockAlbum.album.lockWallpapersInQueue.size > 1) currentLockAlbum.album.lockWallpapersInQueue[1] else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull(),
                                                 nextLockWallpaper = if (currentLockAlbum.album.lockWallpapersInQueue.size > 1) currentLockAlbum.album.lockWallpapersInQueue[1] else currentLockAlbum.album.lockWallpapersInQueue.firstOrNull()
                                             )
                                         )
@@ -467,13 +388,13 @@ fun PaperizeApp(
                                 }
                             }
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let {
                                 scheduler.scheduleWallpaperAlarm(
@@ -490,49 +411,48 @@ fun PaperizeApp(
                 },
                 onDarkenPercentage = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetDarkenPercentage(home, lock))
-                    if (settingsState.value.enableChanger && settingsState.value.darken) {
+                    if (settingsState.value.wallpaperSettings.enableChanger && settingsState.value.effectSettings.darken) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onDarkCheck = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarken(it))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
-                scaling = settingsState.value.wallpaperScaling,
                 onScalingChange = {
-                    if (settingsState.value.wallpaperScaling != it) {
+                    if (settingsState.value.wallpaperSettings.wallpaperScaling != it) {
                         settingsViewModel.onEvent(SettingsEvent.SetWallpaperScaling(it))
-                        if (settingsState.value.enableChanger) {
+                        if (settingsState.value.wallpaperSettings.enableChanger) {
                             job?.cancel()
                             job = scope.launch {
                                 delay(1000)
-                                scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                                scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                             }
                         }
                     }
                 },
                 onHomeCheckedChange = { setHome -> settingsViewModel.onEvent(SettingsEvent.SetHome(setHome))
-                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && !setHome && !settingsState.value.setLockWallpaper) {
+                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && !setHome && !settingsState.value.wallpaperSettings.setLockWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
                         selectedState.value.selectedAlbum?.let { wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset()) }
                         scheduler.cancelWallpaperAlarm()
                     }
-                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && (setHome && !settingsState.value.setLockWallpaper) || (!setHome && settingsState.value.setLockWallpaper)) {
+                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && (setHome && !settingsState.value.wallpaperSettings.setLockWallpaper) || (!setHome && settingsState.value.wallpaperSettings.setLockWallpaper)) {
                         settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(false))
                         job?.cancel()
                         job = scope.launch {
-                            if (!setHome && settingsState.value.setLockWallpaper) {
-                                val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
+                            if (!setHome && settingsState.value.wallpaperSettings.setLockWallpaper) {
+                                val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName }
                                 if (homeAlbum != null) {
                                     wallpaperScreenViewModel.onEvent(WallpaperEvent.UpdateSelectedAlbum(
                                         album = homeAlbum.copy(
@@ -545,15 +465,15 @@ fun PaperizeApp(
                                 }
                             }
                             delay(1000)
-                            scheduler.updateWallpaper(false, setHome, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(false, setHome, settingsState.value.wallpaperSettings.setLockWallpaper)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
                                 scheduleSeparately = false,
                                 setHome = setHome,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
@@ -565,10 +485,10 @@ fun PaperizeApp(
                             scheduler.scheduleRefresh()
                         }
                     }
-                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.enableChanger) {
+                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
+                            val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName }
                             if (homeAlbum != null) {
                                 settingsViewModel.onEvent(
                                     SettingsEvent.SetNextWallpaper(
@@ -578,32 +498,32 @@ fun PaperizeApp(
                                 )
                             }
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onLockCheckedChange = { setLock -> settingsViewModel.onEvent(SettingsEvent.SetLock(setLock))
-                    if (selectedState.value.selectedAlbum!= null && !setLock && !settingsState.value.setHomeWallpaper) {
+                    if (selectedState.value.selectedAlbum!= null && !setLock && !settingsState.value.wallpaperSettings.setHomeWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
                         selectedState.value.selectedAlbum?.let {
                             wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset())
                         }
                         scheduler.cancelWallpaperAlarm()
                     }
-                    else if (selectedState.value.selectedAlbum!= null && (setLock && !settingsState.value.setHomeWallpaper) || (!setLock && settingsState.value.setHomeWallpaper)) {
+                    else if (selectedState.value.selectedAlbum!= null && (setLock && !settingsState.value.wallpaperSettings.setHomeWallpaper) || (!setLock && settingsState.value.wallpaperSettings.setHomeWallpaper)) {
                         settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(false))
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, setLock)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, setLock)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
                                 scheduleSeparately = false,
-                                setHome = settingsState.value.setHomeWallpaper,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
                                 setLock = setLock,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{ scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
@@ -615,10 +535,10 @@ fun PaperizeApp(
                             scheduler.scheduleRefresh()
                         }
                     }
-                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.enableChanger) {
+                    else if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
-                            val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
+                            val homeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName }
                             if (homeAlbum != null) {
                                 settingsViewModel.onEvent(
                                     SettingsEvent.SetNextWallpaper(
@@ -628,17 +548,17 @@ fun PaperizeApp(
                                 )
                             }
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onScheduleSeparatelyChange = { changeSeparately ->
                     settingsViewModel.onEvent(SettingsEvent.SetScheduleSeparately(changeSeparately))
-                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.enableChanger) {
-                        val currentHomeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.homeAlbumName }
-                        val currentLockAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.lockAlbumName }
+                    if (!selectedState.value.selectedAlbum.isNullOrEmpty() && settingsState.value.wallpaperSettings.enableChanger) {
+                        val currentHomeAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.homeAlbumName }
+                        val currentLockAlbum = selectedState.value.selectedAlbum?.find { it.album.initialAlbumName == settingsState.value.wallpaperSettings.lockAlbumName }
                         when {
-                            changeSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                            changeSeparately && settingsState.value.wallpaperSettings.setHomeWallpaper && settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                 if (currentHomeAlbum != null && currentLockAlbum != null) {
                                     settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
                                         currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
@@ -646,7 +566,7 @@ fun PaperizeApp(
                                     ))
                                 }
                             }
-                            !changeSeparately && settingsState.value.setHomeWallpaper && settingsState.value.setLockWallpaper -> {
+                            !changeSeparately && settingsState.value.wallpaperSettings.setHomeWallpaper && settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                 if (currentHomeAlbum != null && currentLockAlbum != null) {
                                     settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
                                         currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
@@ -654,7 +574,7 @@ fun PaperizeApp(
                                     ))
                                 }
                             }
-                            settingsState.value.setHomeWallpaper -> {
+                            settingsState.value.wallpaperSettings.setHomeWallpaper -> {
                                 if (currentHomeAlbum != null) {
                                     settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
                                         currentHomeWallpaper = currentHomeAlbum.album.homeWallpapersInQueue.firstOrNull() ?: currentHomeAlbum.wallpapers.firstOrNull()?.wallpaperUri,
@@ -662,7 +582,7 @@ fun PaperizeApp(
                                     ))
                                 }
                             }
-                            settingsState.value.setLockWallpaper -> {
+                            settingsState.value.wallpaperSettings.setLockWallpaper -> {
                                 if (currentLockAlbum != null) {
                                     settingsViewModel.onEvent(SettingsEvent.SetCurrentWallpaper(
                                         currentHomeWallpaper = null,
@@ -675,13 +595,13 @@ fun PaperizeApp(
                         job = scope.launch {
                             delay(1000)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
                                 scheduleSeparately = changeSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
-                                changeStartTime = settingsState.value.changeStartTime,
-                                startTime = settingsState.value.startTime
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
+                                changeStartTime = settingsState.value.scheduleSettings.changeStartTime,
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.scheduleWallpaperAlarm(
                                 wallpaperAlarmItem = it,
@@ -696,76 +616,76 @@ fun PaperizeApp(
                 },
                 onBlurChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetBlur(it))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onBlurPercentageChange = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetBlurPercentage(home, lock))
-                    if (settingsState.value.enableChanger && settingsState.value.blur) {
+                    if (settingsState.value.wallpaperSettings.enableChanger && settingsState.value.effectSettings.blur) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onVignetteChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetVignette(it))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onVignettePercentageChange = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetVignettePercentage(home, lock))
-                    if (settingsState.value.enableChanger && settingsState.value.vignette) {
+                    if (settingsState.value.wallpaperSettings.enableChanger && settingsState.value.effectSettings.vignette) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onGrayscaleChange = {
                     settingsViewModel.onEvent(SettingsEvent.SetGrayscale(it))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onGrayscalePercentageChange = { home, lock ->
                     settingsViewModel.onEvent(SettingsEvent.SetGrayscalePercentage(home, lock))
-                    if (settingsState.value.enableChanger && settingsState.value.grayscale) {
+                    if (settingsState.value.wallpaperSettings.enableChanger && settingsState.value.effectSettings.grayscale) {
                         job?.cancel()
                         job = scope.launch {
                             delay(3000)
-                            scheduler.updateWallpaper(settingsState.value.scheduleSeparately, settingsState.value.setHomeWallpaper, settingsState.value.setLockWallpaper)
+                            scheduler.updateWallpaper(settingsState.value.scheduleSettings.scheduleSeparately, settingsState.value.wallpaperSettings.setHomeWallpaper, settingsState.value.wallpaperSettings.setLockWallpaper)
                         }
                     }
                 },
                 onStartTimeChange = { time ->
                     settingsViewModel.onEvent(SettingsEvent.SetStartTime(time.hour, time.minute))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
                                 changeStartTime = true,
                                 startTime = Pair(time.hour, time.minute)
                             )
@@ -776,18 +696,18 @@ fun PaperizeApp(
                 },
                 onChangeStartTimeToggle = { changeStartTime ->
                     settingsViewModel.onEvent(SettingsEvent.SetChangeStartTime(changeStartTime))
-                    if (settingsState.value.enableChanger) {
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
                         job?.cancel()
                         job = scope.launch {
                             delay(1000)
                             val alarmItem = WallpaperAlarmItem(
-                                homeInterval = settingsState.value.homeInterval,
-                                lockInterval = settingsState.value.lockInterval,
-                                scheduleSeparately = settingsState.value.scheduleSeparately,
-                                setHome = settingsState.value.setHomeWallpaper,
-                                setLock = settingsState.value.setLockWallpaper,
+                                homeInterval = settingsState.value.scheduleSettings.homeInterval,
+                                lockInterval = settingsState.value.scheduleSettings.lockInterval,
+                                scheduleSeparately = settingsState.value.scheduleSettings.scheduleSeparately,
+                                setHome = settingsState.value.wallpaperSettings.setHomeWallpaper,
+                                setLock = settingsState.value.wallpaperSettings.setLockWallpaper,
                                 changeStartTime = changeStartTime,
-                                startTime = settingsState.value.startTime
+                                startTime = settingsState.value.scheduleSettings.startTime
                             )
                             alarmItem.let{scheduler.updateWallpaperAlarm(it, true)}
                             scheduler.scheduleRefresh()
@@ -796,32 +716,12 @@ fun PaperizeApp(
                 },
             )
         }
+
         // Navigate to the add album screen to create a new album and add wallpapers to it
-        composable<AddEdit>(
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) { backStackEntry ->
-            val addEdit: AddEdit = backStackEntry.toRoute()
+        animatedScreen<AddAlbum>(animate = settingsState.value.themeSettings.animate) { backStackEntry ->
+            val addAlbum: AddAlbum = backStackEntry.toRoute()
             AddAlbumScreen(
-                initialAlbumName = addEdit.wallpaper,
+                initialAlbumName = addAlbum.wallpaper,
                 onBackClick = { navController.navigateUp() },
                 onConfirmation = { navController.navigateUp() },
                 onShowWallpaperView = {
@@ -832,61 +732,22 @@ fun PaperizeApp(
                     folderViewModel.wallpapers.value = wallpapers
                     navController.navigate(FolderView)
                 },
-                animate = settingsState.value.animate
+                animate = settingsState.value.themeSettings.animate
             )
         }
+
         // Navigate to wallpaper view screen to view individual wallpapers in full screen
-        composable<WallpaperView> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) { backStackEntry ->
+        animatedScreen<WallpaperView>(animate = settingsState.value.themeSettings.animate) { backStackEntry ->
             val wallpaperView: WallpaperView = backStackEntry.toRoute()
             WallpaperViewScreen(
                 wallpaperUri = wallpaperView.wallpaper,
                 onBackClick = { navController.navigateUp() },
-                animate = settingsState.value.animate
+                animate = settingsState.value.themeSettings.animate
             )
         }
-        composable<FolderView>(
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+
+        // Navigate to the folder view screen to view wallpapers in a folder
+        animatedScreen<FolderView>(animate = settingsState.value.themeSettings.animate) { backStackEntry ->
             val folderName = folderViewModel.folderName.value
             val wallpapers = folderViewModel.wallpapers.value
             if (wallpapers != null) {
@@ -898,42 +759,22 @@ fun PaperizeApp(
                         onShowWallpaperView = {
                             navController.navigate(WallpaperView(it))
                         },
-                        animate = settingsState.value.animate
+                        animate = settingsState.value.themeSettings.animate
                     )
                 } else {
                     navController.navigateUp()
                 }
             }
         }
+
         // Navigate to the album view screen to view folders and wallpapers in an album
-        composable<AlbumView> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) { backStackEntry ->
+        animatedScreen<AlbumView>(animate = settingsState.value.themeSettings.animate) { backStackEntry ->
             val albumView: AlbumView = backStackEntry.toRoute()
             val albumWithWallpaper = albumState.value.albumsWithWallpapers.find { it.album.initialAlbumName == albumView.initialAlbumName }
             if (albumWithWallpaper != null) {
                 AlbumViewScreen(
                     album = albumWithWallpaper,
-                    animate = settingsState.value.animate,
+                    animate = settingsState.value.themeSettings.animate,
                     onBackClick = { navController.navigateUp() },
                     onShowWallpaperView = {
                         navController.navigate(WallpaperView(it))
@@ -956,31 +797,11 @@ fun PaperizeApp(
                 )
             } else { navController.navigateUp() }
         }
+
         // Navigate to the settings screen to change app settings
-        composable<Settings> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Settings>(animate = settingsState.value.themeSettings.animate) {
             SettingsScreen(
-                settingsState = settingsViewModel.state,
+                themeSettings = settingsState.value.themeSettings,
                 onBackClick = { navController.navigateUp() },
                 onDarkModeClick = {
                     settingsViewModel.onEvent(SettingsEvent.SetDarkMode(it))
@@ -1017,56 +838,16 @@ fun PaperizeApp(
                 }
             )
         }
+
         // Navigate to the privacy screen to view the privacy policy
-        composable<Privacy> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Privacy>(animate = settingsState.value.themeSettings.animate) {
             PrivacyScreen(
                 onBackClick = { navController.navigateUp() },
             )
         }
+
         // Navigate to the licenses screen to view the licenses of the libraries used
-        composable<Licenses> (
-            enterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { (it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            exitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popEnterTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionIn(initial = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            },
-            popExitTransition = {
-                if (settingsState.value.animate) {
-                    sharedXTransitionOut(target = { -(it * INITIAL_OFFSET).toInt() })
-                } else { null }
-            }
-        ) {
+        animatedScreen<Licenses>(animate = settingsState.value.themeSettings.animate) {
             LicensesScreen(
                 onBackClick = { navController.navigateUp() }
             )

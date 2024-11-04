@@ -29,14 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.EffectSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ScheduleSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
+import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.WallpaperSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.BlurSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ChangerSelectionRow
@@ -54,56 +56,34 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
-    animate: Boolean,
-    darken: Boolean,
-    homeDarkenPercentage: Int,
-    lockDarkenPercentage: Int,
-    enableChanger: Boolean,
-    homeEnabled: Boolean,
-    homeInterval: Int,
-    lockInterval: Int,
-    lastSetTime: String?,
-    lockEnabled: Boolean,
-    nextSetTime: String?,
-    currentHomeWallpaper: String?,
-    currentLockWallpaper: String?,
+    homeSelectedAlbum: SelectedAlbum?,
+    lockSelectedAlbum: SelectedAlbum?,
+    wallpaperSettings: WallpaperSettings,
+    scheduleSettings: ScheduleSettings,
+    themeSettings: ThemeSettings,
+    effectSettings: EffectSettings,
     onDarkCheck: (Boolean) -> Unit,
     onDarkenPercentage: (Int, Int) -> Unit,
     onHomeCheckedChange: (Boolean) -> Unit,
     onLockCheckedChange: (Boolean) -> Unit,
-    scheduleSeparately: Boolean,
+    onScalingChange: (ScalingConstants) -> Unit,
     onScheduleSeparatelyChange: (Boolean) -> Unit,
     onScheduleWallpaperChanger: () -> Unit,
-    onScalingChange: (ScalingConstants) -> Unit,
     onSelectAlbum: (AlbumWithWallpaperAndFolder, Boolean, Boolean) -> Unit,
     onHomeTimeChange: (Int) -> Unit,
     onLockTimeChange: (Int) -> Unit,
     onStop: (Boolean, Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
-    scaling: ScalingConstants,
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
-    blur: Boolean,
     onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
-    homeBlurPercentage: Int,
-    lockBlurPercentage: Int,
-    homeVignettePercentage: Int,
-    lockVignettePercentage: Int,
     onVignettePercentageChange: (Int, Int) -> Unit,
     onVignetteChange: (Boolean) -> Unit,
-    vignette: Boolean,
-    homeGrayscalePercentage: Int,
-    lockGrayscalePercentage: Int,
     onGrayscalePercentageChange: (Int, Int) -> Unit,
     onGrayscaleChange: (Boolean) -> Unit,
-    grayscale: Boolean,
-    changeStartTime: Boolean,
     onChangeStartTimeToggle: (Boolean) -> Unit,
-    onStartTimeChange: (TimePickerState) -> Unit,
-    startingTime: Pair<Int, Int>
+    onStartTimeChange: (TimePickerState) -> Unit
 ) {
-    val shouldShowScreen = homeEnabled || lockEnabled
+    val shouldShowScreen = wallpaperSettings.setHomeWallpaper || wallpaperSettings.setLockWallpaper
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -111,8 +91,8 @@ fun WallpaperScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val showInterval = rememberSaveable { mutableStateOf(false) }
-    val lock = rememberSaveable { mutableStateOf(false) }
-    val home = rememberSaveable { mutableStateOf(false) }
+    val lockEnabled = rememberSaveable { mutableStateOf(false) }
+    val homeEnabled = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -126,9 +106,7 @@ fun WallpaperScreen(
                     )
                 }
             ) },
-        modifier = Modifier
-            .fillMaxSize()
-            .semantics { testTagsAsResourceId = true },
+        modifier = Modifier.fillMaxSize(),
         content = { padding ->
             Column(
                 modifier = Modifier
@@ -138,27 +116,24 @@ fun WallpaperScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ChangerSelectionRow(
-                    homeEnabled = homeEnabled,
-                    lockEnabled = lockEnabled,
                     onHomeCheckedChange = onHomeCheckedChange,
-                    onLockCheckedChange = onLockCheckedChange
+                    onLockCheckedChange = onLockCheckedChange,
+                    homeEnabled = wallpaperSettings.setHomeWallpaper,
+                    lockEnabled = wallpaperSettings.setLockWallpaper
                 )
-                if (homeEnabled && lockEnabled) {
+                if (wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper) {
                     IndividualSchedulingAndToggleRow(
-                        animate = animate,
-                        scheduleSeparately = scheduleSeparately,
-                        enableChanger = enableChanger,
                         onToggleChanger = onToggleChanger,
-                        onScheduleSeparatelyChange = onScheduleSeparatelyChange
+                        onScheduleSeparatelyChange = onScheduleSeparatelyChange,
+                        scheduleSeparately = scheduleSettings.scheduleSeparately,
+                        enableChanger = wallpaperSettings.enableChanger,
+                        animate = themeSettings.animate
                     )
                 }
-                if (homeEnabled || lockEnabled) {
+                if (wallpaperSettings.setHomeWallpaper || wallpaperSettings.setLockWallpaper) {
                     CurrentSelectedAlbum(
                         homeSelectedAlbum = homeSelectedAlbum,
                         lockSelectedAlbum = lockSelectedAlbum,
-                        scheduleSeparately = scheduleSeparately,
-                        animate = animate,
-                        enableChanger = enableChanger,
                         onToggleChanger = {
                             scope.launch {
                                 snackbarHostState.currentSnackbarData?.dismiss()
@@ -175,8 +150,8 @@ fun WallpaperScreen(
                         onOpenBottomSheet = { changeLock, changeHome ->
                             if (albums.firstOrNull() != null) {
                                 openBottomSheet = true
-                                lock.value = changeLock
-                                home.value = changeHome
+                                lockEnabled.value = changeLock
+                                homeEnabled.value = changeHome
                             } else {
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
@@ -208,33 +183,37 @@ fun WallpaperScreen(
                                 }
                                 onStop(lock, home)
                             }
-                        }
+                        },
+                        scheduleSeparately = scheduleSettings.scheduleSeparately,
+                        enableChanger = wallpaperSettings.enableChanger,
+                        animate = themeSettings.animate
                     )
                     if (shouldShowSettings) {
                         WallpaperPreviewAndScale(
-                            currentHomeWallpaper = currentHomeWallpaper,
-                            currentLockWallpaper = currentLockWallpaper,
-                            darken = darken,
-                            homeDarkenPercentage = homeDarkenPercentage,
-                            lockDarkenPercentage = lockDarkenPercentage,
-                            scaling = scaling,
+                            currentHomeWallpaper = wallpaperSettings.currentHomeWallpaper,
+                            currentLockWallpaper = wallpaperSettings.currentLockWallpaper,
+                            scaling = wallpaperSettings.wallpaperScaling,
                             onScalingChange = onScalingChange,
-                            homeEnabled = homeEnabled,
-                            lockEnabled = lockEnabled,
-                            blur = blur,
-                            homeBlurPercentage = homeBlurPercentage,
-                            lockBlurPercentage = lockBlurPercentage,
-                            vignette = vignette,
-                            homeVignettePercentage = homeVignettePercentage,
-                            lockVignettePercentage = lockVignettePercentage,
-                            grayscale = grayscale,
-                            homeGrayscalePercentage = homeGrayscalePercentage,
-                            lockGrayscalePercentage = lockGrayscalePercentage
+                            homeBlurPercentage = effectSettings.homeBlurPercentage,
+                            lockBlurPercentage = effectSettings.lockBlurPercentage,
+                            homeDarkenPercentage = effectSettings.homeDarkenPercentage,
+                            lockDarkenPercentage = effectSettings.lockDarkenPercentage,
+                            homeVignettePercentage = effectSettings.homeVignettePercentage,
+                            lockVignettePercentage = effectSettings.lockVignettePercentage,
+                            homeGrayscalePercentage = effectSettings.homeGrayscalePercentage,
+                            lockGrayscalePercentage = effectSettings.lockGrayscalePercentage,
+                            homeEnabled = wallpaperSettings.setHomeWallpaper,
+                            lockEnabled = wallpaperSettings.setLockWallpaper,
+                            darken = effectSettings.darken,
+                            blur = effectSettings.blur,
+                            vignette = effectSettings.vignette,
+                            grayscale = effectSettings.grayscale
                         )
-                        CurrentAndNextChange(lastSetTime, nextSetTime)
+                        CurrentAndNextChange(scheduleSettings.lastSetTime, scheduleSettings.nextSetTime)
                         TimeSliders(
-                            homeInterval = homeInterval,
-                            lockInterval = lockInterval,
+                            homeInterval = scheduleSettings.homeInterval,
+                            lockInterval = scheduleSettings.lockInterval,
+                            startingTime = scheduleSettings.startTime,
                             onHomeIntervalChange = { days, hours, minutes ->
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                 onHomeTimeChange(totalMinutes)
@@ -243,52 +222,51 @@ fun WallpaperScreen(
                                 val totalMinutes = 24 * days * 60 + hours * 60 + minutes
                                 onLockTimeChange(totalMinutes)
                             },
-                            showInterval = showInterval.value,
-                            animate = animate,
-                            onShowIntervalChange = { showInterval.value = it },
-                            scheduleSeparately = scheduleSeparately,
-                            lockEnabled = lockEnabled,
-                            homeEnabled = homeEnabled,
                             onStartTimeChange = onStartTimeChange,
-                            changeStartTime = changeStartTime,
-                            startingTime = startingTime,
-                            onChangeStartTimeToggle = onChangeStartTimeToggle
+                            onShowIntervalChange = { showInterval.value = it },
+                            onChangeStartTimeToggle = onChangeStartTimeToggle,
+                            homeEnabled = wallpaperSettings.setHomeWallpaper,
+                            lockEnabled = wallpaperSettings.setLockWallpaper,
+                            showInterval = showInterval.value,
+                            scheduleSeparately = scheduleSettings.scheduleSeparately,
+                            changeStartTime = scheduleSettings.changeStartTime,
+                            animate = themeSettings.animate
                         )
                         DarkenSwitchAndSlider(
+                            homeDarkenPercentage = effectSettings.homeDarkenPercentage,
+                            lockDarkenPercentage = effectSettings.lockDarkenPercentage,
                             onDarkCheck = onDarkCheck,
-                            darken = darken,
                             onDarkenChange = onDarkenPercentage,
-                            homeDarkenPercentage = homeDarkenPercentage,
-                            lockDarkenPercentage = lockDarkenPercentage,
-                            animate = animate,
-                            bothEnabled = homeEnabled && lockEnabled
+                            darken = effectSettings.darken,
+                            animate = themeSettings.animate,
+                            bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
                         )
                         BlurSwitchAndSlider(
+                            homeBlurPercentage = effectSettings.homeBlurPercentage,
+                            lockBlurPercentage = effectSettings.lockBlurPercentage,
                             onBlurPercentageChange = onBlurPercentageChange,
                             onBlurChange = onBlurChange,
-                            blur = blur,
-                            homeBlurPercentage = homeBlurPercentage,
-                            lockBlurPercentage = lockBlurPercentage,
-                            animate = animate,
-                            bothEnabled = homeEnabled && lockEnabled
+                            blur = effectSettings.blur,
+                            animate = themeSettings.animate,
+                            bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
                         )
                         VignetteSwitchAndSlider(
+                            homeVignettePercentage = effectSettings.homeVignettePercentage,
+                            lockVignettePercentage = effectSettings.lockVignettePercentage,
                             onVignettePercentageChange = onVignettePercentageChange,
                             onVignetteChange = onVignetteChange,
-                            vignette = vignette,
-                            homeVignettePercentage = homeVignettePercentage,
-                            lockVignettePercentage = lockVignettePercentage,
-                            animate = animate,
-                            bothEnabled = homeEnabled && lockEnabled
+                            vignette = effectSettings.vignette,
+                            animate = themeSettings.animate,
+                            bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
                         )
                         GrayscaleSwitchAndSlider(
+                            homeGrayscalePercentage = effectSettings.homeGrayscalePercentage,
+                            lockGrayscalePercentage = effectSettings.lockGrayscalePercentage,
                             onGrayscalePercentageChange = onGrayscalePercentageChange,
                             onGrayscaleChange = onGrayscaleChange,
-                            grayscale = grayscale,
-                            homeGrayscalePercentage = homeGrayscalePercentage,
-                            lockGrayscalePercentage = lockGrayscalePercentage,
-                            animate = animate,
-                            bothEnabled = homeEnabled && lockEnabled
+                            grayscale = effectSettings.grayscale,
+                            animate = themeSettings.animate,
+                            bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
                         )
                     }
                 }
@@ -298,7 +276,6 @@ fun WallpaperScreen(
                     albums = albums,
                     homeSelectedAlbum = homeSelectedAlbum,
                     lockSelectedAlbum = lockSelectedAlbum,
-                    onDismiss = { openBottomSheet = false },
                     onSelect = { album ->
                         openBottomSheet = false
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -310,16 +287,17 @@ fun WallpaperScreen(
                                 }
                             }
                             else {
-                                onSelectAlbum(album, lock.value, home.value)
+                                onSelectAlbum(album, lockEnabled.value, homeEnabled.value)
                                 onScheduleWallpaperChanger()
                             }
                         }
                         else {
-                            onSelectAlbum(album, lock.value, home.value)
+                            onSelectAlbum(album, lockEnabled.value, homeEnabled.value)
                             onScheduleWallpaperChanger()
                         }
                     },
-                    animate = animate
+                    onDismiss = { openBottomSheet = false },
+                    animate = themeSettings.animate
                 )
             }
         },
