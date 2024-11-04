@@ -21,6 +21,7 @@ import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.core.getDeviceScreenSize
 import com.anthonyla.paperize.core.getWallpaperFromFolder
+import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.core.processBitmap
 import com.anthonyla.paperize.core.retrieveBitmap
 import com.anthonyla.paperize.data.settings.SettingsDataStore
@@ -199,23 +200,24 @@ class LockWallpaperService: Service() {
                                 return
                             }
                             else {
-                                val success = setWallpaper(
-                                    context = context,
-                                    wallpaper = wallpaper.toUri(),
-                                    darken = darken,
-                                    darkenPercent = lockDarkenPercentage,
-                                    scaling = scaling,
-                                    blur = blur,
-                                    blurPercent = lockBlurPercentage,
-                                    vignette = vignette,
-                                    vignettePercent = lockVignettePercentage,
-                                    grayscale = grayscale,
-                                    grayscalePercent = lockGrayscalePercentage
-                                )
+                                val success = isValidUri(context, wallpaper)
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
+                                    setWallpaper(
+                                        context = context,
+                                        wallpaper = wallpaper.toUri(),
+                                        darken = darken,
+                                        darkenPercent = lockDarkenPercentage,
+                                        scaling = scaling,
+                                        blur = blur,
+                                        blurPercent = lockBlurPercentage,
+                                        vignette = vignette,
+                                        vignettePercent = lockVignettePercentage,
+                                        grayscale = grayscale,
+                                        grayscalePercent = lockGrayscalePercentage
+                                    )
                                 }
                                 else {
                                     val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -235,23 +237,24 @@ class LockWallpaperService: Service() {
                             }
                         }
                         else {
-                            val success = setWallpaper(
-                                context = context,
-                                wallpaper = wallpaper.toUri(),
-                                darken = darken,
-                                darkenPercent = lockDarkenPercentage,
-                                scaling = scaling,
-                                blur = blur,
-                                blurPercent = lockBlurPercentage,
-                                vignette = vignette,
-                                vignettePercent = lockVignettePercentage,
-                                grayscale = grayscale,
-                                grayscalePercent = lockGrayscalePercentage
-                            )
+                            val success = isValidUri(context, wallpaper)
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
+                                setWallpaper(
+                                    context = context,
+                                    wallpaper = wallpaper.toUri(),
+                                    darken = darken,
+                                    darkenPercent = lockDarkenPercentage,
+                                    scaling = scaling,
+                                    blur = blur,
+                                    blurPercent = lockBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = lockVignettePercentage,
+                                    grayscale = grayscale,
+                                    grayscalePercent = lockGrayscalePercentage
+                                )
                             }
                             else {
                                 val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -285,22 +288,23 @@ class LockWallpaperService: Service() {
                         }
                         val wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                         if (wallpaper != null) {
-                            val success = setWallpaper(
-                                context = context,
-                                wallpaper = wallpaper.toUri(),
-                                darken = darken,
-                                darkenPercent = lockDarkenPercentage,
-                                scaling = scaling,
-                                blur = blur,
-                                blurPercent = lockBlurPercentage,
-                                vignette = vignette,
-                                vignettePercent = lockVignettePercentage,
-                                grayscale = grayscale,
-                                grayscalePercent = lockGrayscalePercentage
-                            )
+                            val success = isValidUri(context, wallpaper)
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (homeAlbum.album.homeWallpapersInQueue.size > 1) homeAlbum.album.homeWallpapersInQueue[1] else homeAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
+                                setWallpaper(
+                                    context = context,
+                                    wallpaper = wallpaper.toUri(),
+                                    darken = darken,
+                                    darkenPercent = lockDarkenPercentage,
+                                    scaling = scaling,
+                                    blur = blur,
+                                    blurPercent = lockBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = lockVignettePercentage,
+                                    grayscale = grayscale,
+                                    grayscalePercent = lockGrayscalePercentage
+                                )
                             }
                         }
                     }
@@ -316,25 +320,26 @@ class LockWallpaperService: Service() {
                                 return
                             }
                             else {
-                                val success = setWallpaper(
-                                    context = context,
-                                    wallpaper = wallpaper.toUri(),
-                                    darken = darken,
-                                    darkenPercent = homeDarkenPercentage,
-                                    scaling = scaling,
-                                    blur = blur,
-                                    blurPercent = homeBlurPercentage,
-                                    vignette = vignette,
-                                    vignettePercent = homeVignettePercentage,
-                                    grayscale = grayscale,
-                                    grayscalePercent = homeGrayscalePercentage
-                                )
+                                val success = isValidUri(context, wallpaper)
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (newWallpapers.size > 1) newWallpapers[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                                 if (success) {
                                     selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = newWallpapers.drop(1))))
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
                                     settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
+                                    setWallpaper(
+                                        context = context,
+                                        wallpaper = wallpaper.toUri(),
+                                        darken = darken,
+                                        darkenPercent = homeDarkenPercentage,
+                                        scaling = scaling,
+                                        blur = blur,
+                                        blurPercent = homeBlurPercentage,
+                                        vignette = vignette,
+                                        vignettePercent = homeVignettePercentage,
+                                        grayscale = grayscale,
+                                        grayscalePercent = homeGrayscalePercentage
+                                    )
                                 }
                                 else {
                                     val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -354,25 +359,26 @@ class LockWallpaperService: Service() {
                             }
                         }
                         else {
-                            val success = setWallpaper(
-                                context = context,
-                                wallpaper = wallpaper.toUri(),
-                                darken = darken,
-                                darkenPercent = homeDarkenPercentage,
-                                scaling = scaling,
-                                blur = blur,
-                                blurPercent = homeBlurPercentage,
-                                vignette = vignette,
-                                vignettePercent = homeVignettePercentage,
-                                grayscale = grayscale,
-                                grayscalePercent = homeGrayscalePercentage
-                            )
+                            val success = isValidUri(context, wallpaper)
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_LOCK_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             settingsDataStoreImpl.putString(SettingsConstants.NEXT_HOME_WALLPAPER, if (lockAlbum.album.lockWallpapersInQueue.size > 1) lockAlbum.album.lockWallpapersInQueue[1] else lockAlbum.wallpapers.firstOrNull()?.wallpaperUri ?: "")
                             if (success) {
                                 selectedRepository.upsertSelectedAlbum(lockAlbum.copy(album = lockAlbum.album.copy(lockWallpapersInQueue = lockAlbum.album.lockWallpapersInQueue.drop(1))))
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_LOCK_WALLPAPER, wallpaper.toString())
                                 settingsDataStoreImpl.putString(SettingsConstants.CURRENT_HOME_WALLPAPER, wallpaper.toString())
+                                setWallpaper(
+                                    context = context,
+                                    wallpaper = wallpaper.toUri(),
+                                    darken = darken,
+                                    darkenPercent = homeDarkenPercentage,
+                                    scaling = scaling,
+                                    blur = blur,
+                                    blurPercent = homeBlurPercentage,
+                                    vignette = vignette,
+                                    vignettePercent = homeVignettePercentage,
+                                    grayscale = grayscale,
+                                    grayscalePercent = homeGrayscalePercentage
+                                )
                             }
                             else {
                                 val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
