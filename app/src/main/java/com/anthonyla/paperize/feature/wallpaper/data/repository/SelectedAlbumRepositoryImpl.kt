@@ -4,33 +4,47 @@ import com.anthonyla.paperize.feature.wallpaper.data.data_source.SelectedAlbumDa
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class SelectedAlbumRepositoryImpl(
-    private val dao: SelectedAlbumDao
+    private val dao: SelectedAlbumDao,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): SelectedAlbumRepository {
     override fun getSelectedAlbum(): Flow<List<SelectedAlbum>> {
         return dao.getSelectedAlbum()
     }
 
     override suspend fun upsertSelectedAlbum(selectedAlbum: SelectedAlbum) {
-        dao.upsertSelectedAlbum(selectedAlbum)
+        withContext(dispatcher) {
+            dao.upsertSelectedAlbum(selectedAlbum)
+        }
     }
 
     override suspend fun deleteAlbum(initialAlbumName: String) {
-        dao.deleteAlbum(initialAlbumName)
+        withContext(dispatcher) {
+            dao.deleteAlbum(initialAlbumName)
+        }
     }
 
     override suspend fun deleteWallpaper(wallpaper: Wallpaper) {
-        dao.deleteWallpaper(wallpaper)
+        withContext(dispatcher) {
+            dao.deleteWallpaper(wallpaper)
+        }
     }
 
     override suspend fun cascadeDeleteAlbum(initialAlbumName: String) {
-        dao.deleteAlbum(initialAlbumName)
-        dao.cascadeDeleteWallpaper(initialAlbumName)
+        withContext(dispatcher) {
+            dao.deleteAlbum(initialAlbumName)
+            dao.cascadeDeleteWallpaper(initialAlbumName)
+        }
     }
 
     override suspend fun deleteAll() {
-        dao.deleteAll()
+        withContext(dispatcher) {
+            dao.deleteAll()
+        }
     }
 }

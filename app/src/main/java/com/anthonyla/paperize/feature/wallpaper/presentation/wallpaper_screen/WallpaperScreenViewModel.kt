@@ -1,52 +1,46 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WallpaperScreenViewModel @Inject constructor (
-    application: Application,
+class WallpaperScreenViewModel @Inject constructor(
     private val repository: SelectedAlbumRepository,
-) : AndroidViewModel(application) {
-    private var _state = MutableStateFlow(WallpaperState())
-    val state = _state.stateIn(
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(WallpaperState())
+    val state = combine(
+        loadSelectedAlbumFlow(),
+        _state
+    ) { selectedAlbum, currentState ->
+        currentState.copy(
+            selectedAlbum = selectedAlbum,
+            isDataLoaded = true
+        )
+    }.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5000), WallpaperState()
+        SharingStarted.WhileSubscribed(5000),
+        WallpaperState()
     )
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getSelectedAlbum().collect { selectedAlbum ->
-                _state.update {
-                    it.copy(
-                        selectedAlbum = selectedAlbum,
-                        isDataLoaded = true
-                    )
-                }
-            }
-        }
-    }
+    private fun loadSelectedAlbumFlow(): Flow<List<SelectedAlbum>?> =
+        repository.getSelectedAlbum()
 
     fun onEvent(event: WallpaperEvent) {
         when (event) {
             is WallpaperEvent.AddSelectedAlbum -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    val deleted = event.deleteAlbumName?.let {
+                viewModelScope.launch {
+                    event.deleteAlbumName?.let {
                         repository.cascadeDeleteAlbum(it)
-                        true
-                    } ?: false
+                    }
+                    
                     val wallpapers = event.album.wallpapers + event.album.folders.flatMap { folder ->
                         folder.wallpapers.map { wallpaper ->
                             Wallpaper(
@@ -56,6 +50,7 @@ class WallpaperScreenViewModel @Inject constructor (
                             )
                         }
                     }
+
                     val newSelectedAlbum = SelectedAlbum(
                         album = event.album.album.copy(
                             lockWallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled(),
@@ -64,64 +59,23 @@ class WallpaperScreenViewModel @Inject constructor (
                         wallpapers = wallpapers
                     )
                     repository.upsertSelectedAlbum(newSelectedAlbum)
-                    _state.update {
-                        it.copy(
-                            selectedAlbum = it.selectedAlbum?.let { selectedAlbums ->
-                                selectedAlbums.filterNot { selectedAlbum -> deleted && selectedAlbum.album.initialAlbumName == event.deleteAlbumName } + newSelectedAlbum
-                            }
-                        )
-                    }
                 }
             }
+
             is WallpaperEvent.UpdateSelectedAlbum -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     repository.upsertSelectedAlbum(event.album)
-                    _state.update {
-                        it.copy(
-                            selectedAlbum = it.selectedAlbum?.map { selectedAlbum ->
-                                if (selectedAlbum.album.initialAlbumName == event.album.album.initialAlbumName) {
-                                    event.album
-                                } else {
-                                    selectedAlbum
-                                }
-                            }
-                        )
-                    }
                 }
             }
-            is WallpaperEvent.Refresh -> {
-                refreshAlbums()
-            }
+
             is WallpaperEvent.Reset -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (event.album == null) {
                         repository.deleteAll()
-                        _state.update {
-                            it.copy(
-                                selectedAlbum = null
-                            )
-                        }
-                    }
-                    else {
+                    } else {
                         repository.cascadeDeleteAlbum(event.album.album.initialAlbumName)
-                        _state.update {
-                            it.copy(
-                                selectedAlbum = it.selectedAlbum?.filter { selectedAlbum -> selectedAlbum.album.initialAlbumName != event.album.album.initialAlbumName }
-                            )
-                        }
                     }
                 }
-            }
-        }
-    }
-
-    // Retrieve album from database into viewModel
-    private fun refreshAlbums() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getSelectedAlbum().collect { selectedAlbum ->
-                _state.update { it.copy(
-                    selectedAlbum = selectedAlbum,
-                ) }
             }
         }
     }

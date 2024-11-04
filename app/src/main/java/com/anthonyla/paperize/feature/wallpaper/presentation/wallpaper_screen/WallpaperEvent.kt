@@ -7,5 +7,4 @@ sealed class WallpaperEvent {
     data class AddSelectedAlbum(val album: AlbumWithWallpaperAndFolder, val deleteAlbumName: String? = null): WallpaperEvent()
     data class UpdateSelectedAlbum(val album: SelectedAlbum): WallpaperEvent()
     data class Reset(val album: SelectedAlbum? = null) : WallpaperEvent()
-    data object Refresh : WallpaperEvent()
 }
