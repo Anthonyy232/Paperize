@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.components.FolderViewTopBar
 import my.nanihadesuka.compose.LazyVerticalGridScrollbar
@@ -24,8 +26,7 @@ import my.nanihadesuka.compose.ScrollbarSettings
 
 @Composable
 fun FolderViewScreen(
-    folderName: String?,
-    wallpapers: List<String>,
+    folder: Folder,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
     animate: Boolean
@@ -36,7 +37,7 @@ fun FolderViewScreen(
     Scaffold(
         topBar = {
             FolderViewTopBar(
-                title = folderName ?: "",
+                title = folder.folderName ?: "",
                 onBackClick = onBackClick
             )
         },
@@ -60,44 +61,29 @@ fun FolderViewScreen(
                     contentPadding = PaddingValues(4.dp, 4.dp),
                     horizontalArrangement = Arrangement.Start,
                 ) {
-                    items(count = wallpapers.size, key = { index -> wallpapers[index] }) { index ->
-                        if (animate) {
-                            WallpaperItem(
-                                wallpaperUri = wallpapers[index],
-                                itemSelected = false,
-                                selectionMode = false,
-                                allowHapticFeedback = false,
-                                onItemSelection = {},
-                                onWallpaperViewClick = {
-                                    onShowWallpaperView(wallpapers[index])
-                                },
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(150.dp, 350.dp)
-                                    .animateItem(
+                    items(items = folder.wallpapers, key = { wallpaper -> wallpaper.wallpaperUri }) { wallpaper ->
+                        WallpaperItem(
+                            wallpaperUri = wallpaper.wallpaperUri,
+                            itemSelected = false,
+                            selectionMode = false,
+                            allowHapticFeedback = false,
+                            onItemSelection = {},
+                            onWallpaperViewClick = {
+                                onShowWallpaperView(wallpaper.wallpaperUri)
+                            },
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(150.dp, 350.dp)
+                                .then(
+                                    if (animate) Modifier.animateItem(
                                         placementSpec = tween(
                                             durationMillis = 800,
                                             delayMillis = 0,
                                             easing = FastOutSlowInEasing
-                                        ),
-                                    )
-                            )
-                        }
-                        else {
-                            WallpaperItem(
-                                wallpaperUri = wallpapers[index],
-                                itemSelected = false,
-                                selectionMode = false,
-                                allowHapticFeedback = false,
-                                onItemSelection = {},
-                                onWallpaperViewClick = {
-                                    onShowWallpaperView(wallpapers[index])
-                                },
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(150.dp, 350.dp)
-                            )
-                        }
+                                        )
+                                    ) else Modifier
+                                )
+                        )
                     }
                 }
             }

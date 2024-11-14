@@ -91,8 +91,7 @@ fun HomeTopBar (
                 }
             } else {
                 IconButton(
-                    onClick = { onSettingsClick() },
-                    modifier  = Modifier.testTag("paperize:home_to_settings_button"),
+                    onClick = { onSettingsClick() }
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,

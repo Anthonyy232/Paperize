@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.sort_view_screen
 
+import android.R.attr.onClick
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedContent
@@ -159,6 +160,12 @@ fun SortViewScreen(
                                                 },
                                                 interactionSource = interactionSource,
                                             ),
+                                        colors = CardColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        ),
                                         onClick = { expandedFolderId.value = folder.folderUri }
                                     ) {
                                         Row(
@@ -236,7 +243,13 @@ fun SortViewScreen(
                                                 },
                                                 interactionSource = interactionSource,
                                             ),
-                                        onClick = {}
+                                        onClick = {},
+                                        colors = CardColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        ),
                                     ) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
@@ -336,7 +349,13 @@ fun SortViewScreen(
                                                     },
                                                     interactionSource = interactionSource,
                                                 ),
-                                            onClick = {}
+                                            onClick = {},
+                                            colors = CardColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            ),
                                         ) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,

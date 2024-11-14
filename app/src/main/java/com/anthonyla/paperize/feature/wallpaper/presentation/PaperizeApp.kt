@@ -28,6 +28,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.Ad
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.AlbumViewScreen
+import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
@@ -82,6 +83,7 @@ fun PaperizeApp(
     val selectedState = wallpaperScreenViewModel.state.collectAsStateWithLifecycle()
     val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
     val sortState = sortViewModel.state.collectAsStateWithLifecycle()
+    val folderState = folderViewModel.state.collectAsStateWithLifecycle()
     var job by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -573,8 +575,7 @@ fun PaperizeApp(
                 },
                 onShowFolderView = { folder ->
                     if (folder.wallpapers.isNotEmpty()) {
-                        folderViewModel.folderName.value = folder.folderName ?: ""
-                        folderViewModel.wallpapers.value = folder.wallpapers.map { it.wallpaperUri }
+                        folderViewModel.onEvent(FolderEvent.LoadFolderView(folder))
                         navController.navigate(FolderView)
                     }
                 },
@@ -600,17 +601,19 @@ fun PaperizeApp(
 
         // Navigate to the folder view screen to view wallpapers in a folder
         animatedScreen<FolderView>(animate = settingsState.value.themeSettings.animate) {
-            val folderName = folderViewModel.folderName.value
-            val wallpapers = folderViewModel.wallpapers.value
-            FolderViewScreen(
-                folderName = folderName,
-                wallpapers = wallpapers,
-                onBackClick = { navController.navigateUp() },
-                onShowWallpaperView = {
-                    navController.navigate(WallpaperView(it))
-                },
-                animate = settingsState.value.themeSettings.animate
-            )
+            if (folderState.value.folder == null || folderState.value.folder!!.wallpapers.isEmpty()) {
+                navController.navigateUp()
+            }
+            else {
+                FolderViewScreen(
+                    folder = folderState.value.folder!!,
+                    onBackClick = { navController.navigateUp() },
+                    onShowWallpaperView = {
+                        navController.navigate(WallpaperView(it))
+                    },
+                    animate = settingsState.value.themeSettings.animate
+                )
+            }
         }
 
         // Navigate to sort view screen to sort wallpapers and folders
@@ -652,8 +655,7 @@ fun PaperizeApp(
                     },
                     onShowFolderView = { folder ->
                         if (folder.wallpapers.isNotEmpty()) {
-                            folderViewModel.folderName.value = folder.folderName ?: ""
-                            folderViewModel.wallpapers.value = folder.wallpapers.map { it.wallpaperUri }
+                            folderViewModel.onEvent(FolderEvent.LoadFolderView(folder))
                             navController.navigate(FolderView)
                         }
                     },

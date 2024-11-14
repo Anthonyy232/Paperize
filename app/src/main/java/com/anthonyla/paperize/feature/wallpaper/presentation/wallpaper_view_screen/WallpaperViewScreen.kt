@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.isValidUri
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -44,17 +45,6 @@ fun WallpaperViewScreen(
     onBackClick: () -> Unit,
     animate : Boolean
 ) {
-    fun isValidUri(context: Context, uriString: String?): Boolean {
-        val uri = uriString?.toUri()
-        return try {
-            uri?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                inputStream?.close()
-            }
-            true
-        } catch (e: Exception) { false }
-    }
-
     val showUri = isValidUri(LocalContext.current, wallpaperUri)
     val zoomState = rememberZoomState()
     BackHandler { onBackClick() }
