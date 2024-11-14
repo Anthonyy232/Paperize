@@ -18,10 +18,19 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface AlbumDao {
-
     @Transaction
     @Query("SELECT * FROM album")
     fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>>
+
+    @Transaction
+    @Query("SELECT * FROM album WHERE selected = 1")
+    fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>>
+
+    @Query("UPDATE album SET selected = :selected WHERE initialAlbumName = :albumName")
+    suspend fun updateAlbumSelection(albumName: String, selected: Boolean)
+
+    @Query("UPDATE album SET selected = 0")
+    suspend fun deselectAllAlbums()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAlbum(album: Album)

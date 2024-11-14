@@ -13,6 +13,21 @@ interface AlbumRepository {
     fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>>
 
     /**
+     * Get all selected albums with wallpaper and folder
+     */
+    fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>>
+
+    /**
+     * Update album selection
+     */
+    suspend fun updateAlbumSelection(albumName: String, selected: Boolean)
+
+    /**
+     * Deselect all albums
+     */
+    suspend fun deselectAllAlbums()
+
+    /**
      * Insert or update album with wallpaper and folder
      */
     suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder)

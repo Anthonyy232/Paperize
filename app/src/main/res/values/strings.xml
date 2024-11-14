@@ -167,4 +167,10 @@
     <string name="gray_filter">Gray Filter</string>
     <string name="select_starting_time">Select starting time</string>
     <string name="change_notification_settings">Change notification settings</string>
+    <string name="sort_items">Sort items</string>
+    <string name="folders">Folders</string>
+    <string name="expand_folder">Expand folder</string>
+    <string name="wallpapers_sort">Wallpapers</string>
+    <string name="close">Close</string>
+    <string name="expand">Expand</string>
 </resources>

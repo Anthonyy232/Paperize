@@ -48,7 +48,6 @@ fun WallpaperItem(
     selectionMode: Boolean,
     modifier: Modifier = Modifier,
     allowHapticFeedback: Boolean = true,
-    onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
     onWallpaperViewClick: () -> Unit,
 ) {
@@ -90,7 +89,6 @@ fun WallpaperItem(
             onLongClick = {
                 if (!selectionMode) {
                     if (allowHapticFeedback) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onActivateSelectionMode(true)
                     onItemSelection()
                 }
             }

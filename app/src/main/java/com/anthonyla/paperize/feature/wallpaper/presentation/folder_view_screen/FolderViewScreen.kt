@@ -67,7 +67,6 @@ fun FolderViewScreen(
                                 itemSelected = false,
                                 selectionMode = false,
                                 allowHapticFeedback = false,
-                                onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {
                                     onShowWallpaperView(wallpapers[index])
@@ -90,7 +89,6 @@ fun FolderViewScreen(
                                 itemSelected = false,
                                 selectionMode = false,
                                 allowHapticFeedback = false,
-                                onActivateSelectionMode = {},
                                 onItemSelection = {},
                                 onWallpaperViewClick = {
                                     onShowWallpaperView(wallpapers[index])

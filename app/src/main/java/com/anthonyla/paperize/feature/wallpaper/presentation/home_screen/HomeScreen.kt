@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.HomeTopBar
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.components.getTabItems
@@ -41,8 +40,8 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.Wa
 @Composable
 fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: AlbumWithWallpaperAndFolder?,
+    lockSelectedAlbum: AlbumWithWallpaperAndFolder?,
     themeSettings: ThemeSettings,
     wallpaperSettings: WallpaperSettings,
     scheduleSettings: ScheduleSettings,

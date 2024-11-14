@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 
+import android.R.attr.order
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
@@ -170,6 +171,9 @@ class AlbumViewScreenViewModel @Inject constructor(
                             initialAlbumName = event.album.album.initialAlbumName,
                             wallpaperUri = uri,
                             key = uri.hashCode() + event.album.album.initialAlbumName.hashCode(),
+                            fileName = "",
+                            order = 0,
+                            dateModified = 0
                         )
                     }
                     repository.upsertWallpaperList(wallpapers)
@@ -188,7 +192,7 @@ class AlbumViewScreenViewModel @Inject constructor(
             is AlbumViewEvent.AddFolder -> {
                 viewModelScope.launch {
                     if (event.directoryUri !in event.album.folders.map { it.folderUri }) {
-                        val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
+                        val wallpapers: List<Wallpaper> = getWallpaperFromFolder(event.directoryUri, context)
                         if (wallpapers.isEmpty()) { return@launch }
                         val folderName = getFolderNameFromUri(event.directoryUri, context)
                         repository.upsertFolder(
@@ -197,8 +201,10 @@ class AlbumViewScreenViewModel @Inject constructor(
                                 folderName = folderName,
                                 initialAlbumName = event.album.album.initialAlbumName,
                                 key = event.directoryUri.hashCode() + event.album.album.initialAlbumName.hashCode(),
-                                coverUri = wallpapers.randomOrNull(),
-                                wallpapers = wallpapers
+                                coverUri = wallpapers.randomOrNull()?.wallpaperUri ?: "",
+                                wallpapers = wallpapers,
+                                order = 0,
+                                dateModified = 0
                             )
                         )
                         _state.update {

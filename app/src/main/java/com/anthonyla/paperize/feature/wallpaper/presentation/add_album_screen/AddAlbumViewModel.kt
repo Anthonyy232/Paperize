@@ -1,11 +1,14 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
 
+import android.R.attr.order
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.getFolderLastModified
 import com.anthonyla.paperize.core.getFolderNameFromUri
+import com.anthonyla.paperize.core.getImageMetadata
 import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
@@ -38,211 +41,235 @@ class AddAlbumViewModel @Inject constructor(
             is AddAlbumEvent.SaveAlbum -> {
                 viewModelScope.launch {
                     if (_state.value.wallpapers.isEmpty() && _state.value.folders.isEmpty()) { return@launch }
-                    val albumCoverUri = when (_state.value.isEmpty) {
-                        true -> ""
-                        false -> {
-                            if (_state.value.wallpapers.isNotEmpty())
-                                _state.value.wallpapers.random().wallpaperUri
-                            else {
-                                _state.value.folders.random().coverUri
-                            }
-                        }
+                    val wallpapers = _state.value.wallpapers.map {
+                        it.copy(
+                            initialAlbumName = event.initialAlbumName,
+                            key = event.initialAlbumName.hashCode() + it.wallpaperUri.hashCode()
+                        )
                     }
+                    val folders = _state.value.folders.map { folder ->
+                        folder.copy(
+                            initialAlbumName = event.initialAlbumName,
+                            key = event.initialAlbumName.hashCode() + folder.hashCode(),
+                            wallpapers = folder.wallpapers.map {
+                                it.copy(
+                                    initialAlbumName = event.initialAlbumName,
+                                    key = event.initialAlbumName.hashCode() + folder.folderUri.hashCode() + it.wallpaperUri.hashCode()
+                                )
+                            }
+                        )
+                    }
+                    val totalWallpapers: List<Wallpaper> = folders.flatMap { it.wallpapers } + wallpapers
                     val albumWithWallpaperAndFolder = AlbumWithWallpaperAndFolder(
                         album = Album(
-                            initialAlbumName = _state.value.initialAlbumName,
-                            displayedAlbumName = _state.value.displayedAlbumName,
-                            coverUri = albumCoverUri,
+                            initialAlbumName = event.initialAlbumName,
+                            displayedAlbumName = event.initialAlbumName,
+                            coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: folders.firstOrNull()?.coverUri,
+                            homeWallpapersInQueue = emptyList(),
+                            lockWallpapersInQueue = emptyList(),
                             initialized = false,
+                            selected = false
                         ),
-                        wallpapers = _state.value.wallpapers,
-                        folders = _state.value.folders,
+                        wallpapers = wallpapers,
+                        folders = folders,
+                        totalWallpapers = totalWallpapers
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
                     _state.update { AddAlbumState() }
                 }
             }
+
             is AddAlbumEvent.DeleteSelected -> {
                 viewModelScope.launch {
+                    val selectedWallpaperUris = _state.value.selectionState.selectedWallpapers.toSet()
+                    val selectedFolderUris = _state.value.selectionState.selectedFolders.toSet()
+                    val wallpapersRemoved = _state.value.wallpapers.filter { wallpaper ->
+                        wallpaper.wallpaperUri !in selectedWallpaperUris
+                    }
+                    val foldersRemoved = _state.value.folders.filter { folder ->
+                        folder.folderUri !in selectedFolderUris
+                    }
                     _state.update {
-                        val wallpapersRemoved = it.wallpapers.filterNot { it.wallpaperUri in _state.value.selectedWallpapers }
-                        val foldersRemoved = it.folders.filterNot { it.folderUri in _state.value.selectedFolders }
                         it.copy(
                             wallpapers = wallpapersRemoved,
                             folders = foldersRemoved,
-                            isEmpty = wallpapersRemoved.isEmpty() && foldersRemoved.isEmpty()
-                        ) }
-                }
-            }
-            is AddAlbumEvent.SetAlbumName -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(
-                        initialAlbumName = event.initialAlbumName,
-                        displayedAlbumName = event.initialAlbumName,
-                    ) }
+                            isEmpty = wallpapersRemoved.isEmpty() && foldersRemoved.isEmpty(),
+                            selectionState = SelectionState()
+                        )
+                    }
                 }
             }
 
-            is AddAlbumEvent.ReflectAlbumName -> {
-                if (event.newAlbumName != _state.value.initialAlbumName) {
-                    viewModelScope.launch {
-                        _state.update {
-                            val wallpapers = it.wallpapers.map { wallpaper ->
-                                wallpaper.copy(initialAlbumName = event.newAlbumName)
-                            }
-                            val folders = it.folders.map { folder ->
-                                folder.copy(initialAlbumName = event.newAlbumName)
-                            }
-                            it.copy(
-                                initialAlbumName = event.newAlbumName,
-                                displayedAlbumName = event.newAlbumName,
-                                coverUri = it.coverUri,
-                                wallpapers = wallpapers,
-                                folders = folders,
-                                isEmpty = wallpapers.isEmpty() && folders.isEmpty()
-                            ) }
-                    }
-                }
-            }
             is AddAlbumEvent.AddWallpapers -> {
                 viewModelScope.launch {
-                    val newWallpaperUris = event.wallpaperUris.filterNot { it in _state.value.wallpapers.map { wallpaper -> wallpaper.wallpaperUri } }
-                    val newWallpapers = newWallpaperUris.map { uri ->
-                        Wallpaper(
-                            initialAlbumName = _state.value.initialAlbumName,
-                            wallpaperUri = uri,
-                            key = uri.hashCode() + _state.value.initialAlbumName.hashCode() + System.currentTimeMillis().toInt()
-                        )
+                    val existingWallpapers = _state.value.wallpapers.map { it.wallpaperUri }.toSet()
+                    val newWallpapers = event.wallpaperUris.filter { wallpaperUri ->
+                        wallpaperUri !in existingWallpapers
                     }
                     _state.update {
                         it.copy(
-                            selectedFolders = emptyList(),
-                            selectedWallpapers = emptyList(),
-                            allSelected = false,
-                            selectedCount = 0,
-                            wallpapers = it.wallpapers.plus(newWallpapers),
-                            isEmpty = false
+                            wallpapers = it.wallpapers.plus(
+                                newWallpapers.mapIndexed { index, wallpaperUri ->
+                                    val metadata = getImageMetadata(context, wallpaperUri)
+                                    Wallpaper(
+                                        initialAlbumName = "",
+                                        wallpaperUri = wallpaperUri,
+                                        fileName = metadata.filename,
+                                        dateModified = metadata.lastModified,
+                                        order = index + it.wallpapers.size,
+                                        key = 0
+                                    )
+                                }
+                            ),
+                            isEmpty = event.wallpaperUris.isEmpty(),
+                            selectionState = SelectionState(),
+                            isLoading = false
                         )
                     }
                 }
             }
+
             is AddAlbumEvent.AddFolder -> {
                 viewModelScope.launch {
-                    if (event.directoryUri !in _state.value.folders.map { it.folderUri }) {
-                        val wallpapers: List<String> = getWallpaperFromFolder(event.directoryUri, context)
-                        if (wallpapers.isEmpty()) { return@launch }
-                        val folderName = getFolderNameFromUri(event.directoryUri, context)
+                    if (event.directoryUri in _state.value.folders.map { it.folderUri }) { return@launch }
+                    _state.update { it.copy(isLoading = true) }
+                    val wallpapers = getWallpaperFromFolder(event.directoryUri, context)
+                    val folderName = getFolderNameFromUri(event.directoryUri, context)
+                    val lastModified = getFolderLastModified(event.directoryUri, context)
+                    val folder = Folder(
+                        initialAlbumName = "",
+                        folderName = folderName,
+                        folderUri = event.directoryUri,
+                        wallpapers = wallpapers,
+                        coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: "",
+                        dateModified = lastModified,
+                        order = _state.value.folders.size + 1,
+                        key = 0
+                    )
+                    _state.update {
+                        it.copy(
+                            folders = it.folders.plus(folder),
+                            isEmpty = false,
+                            selectionState = SelectionState(),
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+
+            is AddAlbumEvent.SelectAll -> {
+                viewModelScope.launch {
+                    if (!_state.value.selectionState.allSelected) {
                         _state.update {
                             it.copy(
-                                selectedFolders = emptyList(),
-                                selectedWallpapers = emptyList(),
-                                allSelected = false,
-                                selectedCount = 0,
-                                isEmpty = false,
-                                folders = it.folders.plus(
-                                    Folder(
-                                        initialAlbumName = it.initialAlbumName,
-                                        folderName = folderName,
-                                        folderUri = event.directoryUri,
-                                        coverUri = wallpapers.randomOrNull(),
-                                        wallpapers = wallpapers,
-                                        key = event.directoryUri.hashCode() + it.initialAlbumName.hashCode() + System.currentTimeMillis().toInt()
-                                    )
+                                selectionState = SelectionState(
+                                    selectedFolders = it.folders.map { it.folderUri },
+                                    selectedWallpapers = it.wallpapers.map { it.wallpaperUri },
+                                    allSelected = true,
+                                    selectedCount = it.folders.size + it.wallpapers.size
                                 )
                             )
                         }
                     }
                 }
             }
-            is AddAlbumEvent.SelectAll -> {
-                viewModelScope.launch {
-                    if (!_state.value.allSelected) {
-                        _state.update { it.copy(
-                            selectedFolders = _state.value.folders.map { folder -> folder.folderUri },
-                            selectedWallpapers = _state.value.wallpapers.map { wallpaper -> wallpaper.wallpaperUri },
-                            selectedCount = it.folders.size + it.wallpapers.size,
-                            allSelected = true
-                        ) }
-                    }
-                }
-            }
             is AddAlbumEvent.DeselectAll-> {
                 viewModelScope.launch {
-                    _state.update { it.copy(
-                        selectedFolders = emptyList(),
-                        selectedWallpapers = emptyList(),
-                        selectedCount = 0,
-                        allSelected = false
-                    ) }
+                    _state.update { it.copy(selectionState = SelectionState()) }
                 }
             }
+
             is AddAlbumEvent.SelectFolder -> {
                 viewModelScope.launch {
-                    if (!_state.value.selectedFolders.any { it == event.directoryUri }) {
-                        _state.update {
-                            val folders = it.selectedFolders.plus(event.directoryUri)
-                            it.copy(
-                                selectedFolders = folders,
-                                selectedCount = it.selectedCount + 1,
-                                allSelected = folders.size + it.selectedWallpapers.size >= it.wallpapers.size + it.folders.size
-                            ) }
+                    val folderUri = (_state.value.folders.find { it.folderUri == event.directoryUri } ?: return@launch).folderUri
+                    _state.update {
+                        val newSelectedFolders = it.selectionState.selectedFolders.plus(folderUri)
+                        it.copy(
+                            selectionState = it.selectionState.copy(
+                                selectedFolders = newSelectedFolders,
+                                selectedCount = newSelectedFolders.size + it.selectionState.selectedWallpapers.size,
+                                allSelected = newSelectedFolders.size + it.selectionState.selectedWallpapers.size >=
+                                        it.wallpapers.size + it.folders.size
+                            )
+                        )
                     }
                 }
             }
+
             is AddAlbumEvent.SelectWallpaper -> {
                 viewModelScope.launch {
-                    if (!_state.value.selectedWallpapers.any { it == event.wallpaperUri }) {
+                    if (!_state.value.selectionState.selectedWallpapers.contains(event.wallpaperUri)) {
                         _state.update {
-                            val wallpapers = it.selectedWallpapers.plus(event.wallpaperUri)
+                            val newSelectedWallpapers = it.selectionState.selectedWallpapers.plus(event.wallpaperUri)
                             it.copy(
-                                selectedWallpapers = wallpapers,
-                                selectedCount = it.selectedCount + 1,
-                                allSelected = it.selectedFolders.size + wallpapers.size >= it.wallpapers.size + it.folders.size
-                            ) }
+                                selectionState = it.selectionState.copy(
+                                    selectedWallpapers = newSelectedWallpapers,
+                                    selectedCount = newSelectedWallpapers.size + it.selectionState.selectedFolders.size,
+                                    allSelected = it.selectionState.selectedFolders.size + newSelectedWallpapers.size >=
+                                        it.wallpapers.size + it.folders.size
+                                )
+                            )
+                        }
                     }
                 }
             }
-            is AddAlbumEvent.RemoveFolderFromSelection -> {
-                viewModelScope.launch {
-                    if (_state.value.selectedFolders.find { it == event.directoryUri } != null ) {
-                        _state.update {
-                            val folders = it.selectedFolders.minus(event.directoryUri)
-                            it.copy(
-                                selectedFolders = folders,
-                                selectedCount = it.selectedCount - 1,
-                                allSelected = folders.size + it.selectedWallpapers.size >= it.wallpapers.size + it.folders.size
 
-                            ) }
-                    }
-                }
-            }
-            is AddAlbumEvent.RemoveWallpaperFromSelection -> {
+            is AddAlbumEvent.DeselectFolder -> {
                 viewModelScope.launch {
-                    if (_state.value.selectedWallpapers.find { it == event.wallpaperUri } != null ) {
-                        _state.update {
-                            val wallpapers = it.selectedWallpapers.minus(event.wallpaperUri)
-                            it.copy(
-                                selectedWallpapers = wallpapers,
-                                selectedCount = it.selectedCount - 1,
-                                allSelected = it.selectedFolders.size + wallpapers.size >= it.wallpapers.size + it.folders.size
-                            ) }
+                    val folderUri = (_state.value.folders.find { it.folderUri == event.directoryUri } ?: return@launch).folderUri
+                    _state.update {
+                        val newSelectedFolders = it.selectionState.selectedFolders.minus(folderUri)
+                        it.copy(
+                            selectionState = it.selectionState.copy(
+                                selectedFolders = newSelectedFolders,
+                                selectedCount = newSelectedFolders.size + it.selectionState.selectedWallpapers.size,
+                                allSelected = false
+                            )
+                        )
                     }
                 }
             }
+
+            is AddAlbumEvent.DeselectWallpaper -> {
+                viewModelScope.launch {
+                    if (_state.value.selectionState.selectedWallpapers.contains(event.wallpaperUri)) {
+                        _state.update {
+                            val newSelectedWallpapers = it.selectionState.selectedWallpapers.minus(event.wallpaperUri)
+                            it.copy(
+                                selectionState = it.selectionState.copy(
+                                    selectedWallpapers = newSelectedWallpapers,
+                                    selectedCount = newSelectedWallpapers.size + it.selectionState.selectedFolders.size,
+                                    allSelected = false
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            is AddAlbumEvent.LoadFoldersAndWallpapers -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            folders = event.folders,
+                            wallpapers = event.wallpapers,
+                            isEmpty = event.folders.isEmpty() && event.wallpapers.isEmpty(),
+                            selectionState = SelectionState(),
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+
+            is AddAlbumEvent.SetLoading -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = event.isLoading) }
+                }
+            }
+
             is AddAlbumEvent.Reset -> {
                 viewModelScope.launch {
-                    _state.update { it.copy(
-                        initialAlbumName = "",
-                        displayedAlbumName = "",
-                        coverUri = "",
-                        wallpapers = emptyList(),
-                        folders = emptyList(),
-                        selectedFolders = emptyList(),
-                        selectedWallpapers = emptyList(),
-                        isEmpty = false,
-                        allSelected = false,
-                        selectedCount = 0,
-                    ) }
+                    _state.update { AddAlbumState() }
                 }
             }
         }

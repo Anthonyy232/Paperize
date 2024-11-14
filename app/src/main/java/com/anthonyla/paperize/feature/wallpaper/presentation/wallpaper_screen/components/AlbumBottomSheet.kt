@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
@@ -49,8 +48,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun AlbumBottomSheet(
     onDismiss: () -> Unit,
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: AlbumWithWallpaperAndFolder?,
+    lockSelectedAlbum: AlbumWithWallpaperAndFolder?,
     albums: List<AlbumWithWallpaperAndFolder>,
     onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
     animate: Boolean

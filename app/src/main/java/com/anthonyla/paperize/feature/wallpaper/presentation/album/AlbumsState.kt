@@ -4,4 +4,4 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperA
 
 data class AlbumsState (
     val albumsWithWallpapers: List<AlbumWithWallpaperAndFolder> = emptyList()
-    )
+)

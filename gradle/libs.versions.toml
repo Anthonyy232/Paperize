@@ -25,7 +25,7 @@ hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlinxSerializationJson = "1.7.3"
-landscapistGlide = "2.4.1"
+landscapistGlide = "2.4.2"
 lazycolumnscrollbar = "2.2.0"
 lifecycleRuntimeKtx = "2.8.7"
 lottieCompose = "6.6.0"
@@ -41,6 +41,7 @@ toolbarCompose = "2.3.5"
 ui = "1.7.5"
 workRuntimeKtx = "2.10.0"
 zoomable = "2.0.0-beta01"
+reorderable = "2.4.0"
 
 [libraries]
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibrariesCore" }
@@ -90,6 +91,7 @@ renderscript-intrinsics-replacement-toolkit = { module = "com.github.android:ren
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version.ref = "toolbarCompose" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }

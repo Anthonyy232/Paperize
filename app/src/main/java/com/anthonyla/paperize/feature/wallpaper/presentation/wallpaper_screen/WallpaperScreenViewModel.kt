@@ -2,9 +2,8 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
-import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
+import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -12,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WallpaperScreenViewModel @Inject constructor(
-    private val repository: SelectedAlbumRepository,
+    private val repository: AlbumRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WallpaperState())
@@ -30,51 +29,29 @@ class WallpaperScreenViewModel @Inject constructor(
         WallpaperState()
     )
 
-    private fun loadSelectedAlbumFlow(): Flow<List<SelectedAlbum>?> =
-        repository.getSelectedAlbum()
+    private fun loadSelectedAlbumFlow(): Flow<List<AlbumWithWallpaperAndFolder>?> =
+        repository.getSelectedAlbums()
 
     fun onEvent(event: WallpaperEvent) {
         when (event) {
             is WallpaperEvent.AddSelectedAlbum -> {
                 viewModelScope.launch {
-                    event.deleteAlbumName?.let {
-                        repository.cascadeDeleteAlbum(it)
+                    event.deselectAlbumName?.let {
+                        repository.updateAlbumSelection(it, false)
                     }
-                    
-                    val wallpapers = event.album.wallpapers + event.album.folders.flatMap { folder ->
-                        folder.wallpapers.map { wallpaper ->
-                            Wallpaper(
-                                initialAlbumName = event.album.album.initialAlbumName,
-                                wallpaperUri = wallpaper,
-                                key = wallpaper.hashCode() + event.album.album.initialAlbumName.hashCode() + System.currentTimeMillis().toInt(),
-                            )
-                        }
-                    }
-
-                    val newSelectedAlbum = SelectedAlbum(
-                        album = event.album.album.copy(
-                            lockWallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled(),
-                            homeWallpapersInQueue = wallpapers.map { it.wallpaperUri }.shuffled()
-                        ),
-                        wallpapers = wallpapers
-                    )
-                    repository.upsertSelectedAlbum(newSelectedAlbum)
+                    repository.updateAlbumSelection(event.album.album.initialAlbumName, true)
                 }
             }
 
-            is WallpaperEvent.UpdateSelectedAlbum -> {
+            is WallpaperEvent.RemoveSelectedAlbum -> {
                 viewModelScope.launch {
-                    repository.upsertSelectedAlbum(event.album)
+                    repository.updateAlbumSelection(event.deselectAlbumName, false)
                 }
             }
 
             is WallpaperEvent.Reset -> {
                 viewModelScope.launch {
-                    if (event.album == null) {
-                        repository.deleteAll()
-                    } else {
-                        repository.cascadeDeleteAlbum(event.album.album.initialAlbumName)
-                    }
+                    repository.deselectAllAlbums()
                 }
             }
         }

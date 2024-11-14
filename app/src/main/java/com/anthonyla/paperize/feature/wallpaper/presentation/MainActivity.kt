@@ -18,7 +18,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
@@ -57,15 +59,14 @@ class MainActivity : ComponentActivity() {
     private val context = this
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
-        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        super.onCreate(savedInstanceState)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
+        }
         val splashScreen = installSplashScreen()
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
@@ -98,7 +99,10 @@ class MainActivity : ComponentActivity() {
                 amoledMode = settingsState.value.themeSettings.amoledTheme,
                 dynamicTheming = settingsState.value.themeSettings.dynamicTheming
             ) {
-                Surface(tonalElevation = 5.dp) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    tonalElevation = 5.dp
+                ) {
                     PaperizeApp(isFirstLaunch, scheduler)
                 }
             }
@@ -107,7 +111,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleFirstLaunch(scheduler: WallpaperAlarmSchedulerImpl) {
         scheduler.cancelWallpaperAlarm()
-        wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset())
+        wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
         settingsViewModel.onEvent(SettingsEvent.Reset)
         albumsViewModel.onEvent(AlbumsEvent.Reset)
         clearPersistedUriPermissions()

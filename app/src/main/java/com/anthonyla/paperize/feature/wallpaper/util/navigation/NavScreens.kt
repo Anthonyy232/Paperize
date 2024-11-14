@@ -49,7 +49,7 @@ data class AlbumView(val initialAlbumName: String)
  * Data class for AddEdit screen
  */
 @Serializable
-data class AddAlbum(val wallpaper: String)
+data class AddAlbum(val initialAlbumName: String)
 
 /**
  * Data class for WallpaperView screen
@@ -62,3 +62,10 @@ data class WallpaperView(val wallpaper: String)
  */
 @Serializable
 object FolderView
+
+/**
+ * Object for SortView screen
+ */
+@Serializable
+object SortView
+

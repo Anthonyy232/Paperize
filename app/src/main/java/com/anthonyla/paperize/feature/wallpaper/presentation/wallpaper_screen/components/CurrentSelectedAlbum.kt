@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
@@ -48,8 +48,8 @@ import com.skydoves.landscapist.glide.GlideImage
  */
 @Composable
 fun CurrentSelectedAlbum(
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: AlbumWithWallpaperAndFolder?,
+    lockSelectedAlbum: AlbumWithWallpaperAndFolder?,
     scheduleSeparately: Boolean,
     enableChanger: Boolean,
     animate: Boolean,

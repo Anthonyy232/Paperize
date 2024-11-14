@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.skydoves.landscapist.ImageOptions
@@ -39,7 +44,7 @@ fun AlbumItem(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val showCoverUri by remember { mutableStateOf(album.coverUri != null && isValidUri(context, album.coverUri)) }
+    val showCoverUri by remember { mutableStateOf(!album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri)) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),

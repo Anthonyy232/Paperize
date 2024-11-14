@@ -34,7 +34,6 @@ import androidx.core.content.ContextCompat
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
-import com.anthonyla.paperize.feature.wallpaper.domain.model.SelectedAlbum
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.EffectSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ScheduleSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
@@ -56,8 +55,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
-    homeSelectedAlbum: SelectedAlbum?,
-    lockSelectedAlbum: SelectedAlbum?,
+    homeSelectedAlbum: AlbumWithWallpaperAndFolder?,
+    lockSelectedAlbum: AlbumWithWallpaperAndFolder?,
     wallpaperSettings: WallpaperSettings,
     scheduleSettings: ScheduleSettings,
     themeSettings: ThemeSettings,

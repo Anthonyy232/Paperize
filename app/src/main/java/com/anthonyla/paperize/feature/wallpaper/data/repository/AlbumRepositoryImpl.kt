@@ -6,88 +6,161 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperA
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 class AlbumRepositoryImpl(
-    private val dao: AlbumDao
+    private val dao: AlbumDao,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): AlbumRepository {
     override fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>> {
-        return dao.getAlbumsWithWallpaperAndFolder()
+        return dao.getAlbumsWithWallpaperAndFolder().map { albumWithWallpaperAndFolderList ->
+            albumWithWallpaperAndFolderList.map {
+                it.copy(
+                    wallpapers = it.sortedWallpapers,
+                    folders = it.sortedFolders,
+                    totalWallpapers = it.sortedTotalWallpapers
+                )
+            }
+        }
     }
 
     override suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder) {
-        dao.upsertAlbum(albumWithWallpaperAndFolder.album)
-        dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
-        dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
+        withContext(dispatcher) {
+            dao.upsertAlbum(albumWithWallpaperAndFolder.album)
+            dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
+            dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
+        }
+    }
+
+    override fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>> {
+        return dao.getSelectedAlbums().map { albumWithWallpaperAndFolderList ->
+            albumWithWallpaperAndFolderList.map {
+                it.copy(
+                    wallpapers = it.sortedWallpapers,
+                    folders = it.sortedFolders,
+                    totalWallpapers = it.sortedTotalWallpapers
+                )
+            }
+        }
+    }
+
+    override suspend fun updateAlbumSelection(albumName: String, selected: Boolean) {
+        withContext(dispatcher) {
+            dao.updateAlbumSelection(albumName, selected)
+        }
+    }
+
+    override suspend fun deselectAllAlbums() {
+        withContext(dispatcher) {
+            dao.deselectAllAlbums()
+        }
     }
 
     override suspend fun upsertAlbum(album: Album) {
-        dao.upsertAlbum(album)
+        withContext(dispatcher) {
+            dao.upsertAlbum(album)
+        }
     }
 
     override suspend fun upsertWallpaper(wallpaper: Wallpaper) {
-        dao.upsertWallpaper(wallpaper)
+        withContext(dispatcher) {
+            dao.upsertWallpaper(wallpaper)
+        }
     }
 
     override suspend fun upsertFolder(folder: Folder) {
-        dao.upsertFolder(folder)
+        withContext(dispatcher) {
+            dao.upsertFolder(folder)
+        }
     }
 
     override suspend fun upsertFolderList(folders: List<Folder>) {
-        dao.upsertFolderList(folders)
+        withContext(dispatcher) {
+            dao.upsertFolderList(folders)
+        }
     }
 
     override suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>) {
-        dao.upsertWallpaperList(wallpapers)
+        withContext(dispatcher) {
+            dao.upsertWallpaperList(wallpapers)
+        }
     }
 
     override suspend fun deleteAlbum(album: Album) {
-        dao.deleteAlbum(album)
+        withContext(dispatcher) {
+            dao.deleteAlbum(album)
+        }
     }
 
     override suspend fun deleteWallpaper(wallpaper: Wallpaper) {
-        dao.deleteWallpaper(wallpaper)
+        withContext(dispatcher) {
+            dao.deleteWallpaper(wallpaper)
+        }
     }
 
     override suspend fun deleteFolder(folder: Folder) {
-        dao.deleteFolder(folder)
+        withContext(dispatcher) {
+            dao.deleteFolder(folder)
+        }
     }
 
     override suspend fun updateAlbum(album: Album) {
-        dao.updateAlbum(album)
+        withContext(dispatcher) {
+            dao.updateAlbum(album)
+        }
     }
 
     override suspend fun updateFolder(folder: Folder) {
-        dao.updateFolder(folder)
+        withContext(dispatcher) {
+            dao.updateFolder(folder)
+        }
     }
 
     override suspend fun updateWallpaper(wallpaper: Wallpaper) {
-        dao.updateWallpaper(wallpaper)
+        withContext(dispatcher) {
+            dao.updateWallpaper(wallpaper)
+        }
     }
 
     override suspend fun cascadeDeleteAlbum(album: Album) {
-        dao.deleteAlbum(album)
-        dao.cascadeDeleteWallpaper(album.initialAlbumName)
-        dao.cascadeDeleteFolder(album.initialAlbumName)
+        withContext(dispatcher) {
+            dao.deleteAlbum(album)
+            dao.cascadeDeleteWallpaper(album.initialAlbumName)
+            dao.cascadeDeleteFolder(album.initialAlbumName)
+        }
     }
 
     override suspend fun cascadeDeleteFolder(initialAlbumName: String) {
-        dao.cascadeDeleteFolder(initialAlbumName)
+        withContext(dispatcher) {
+            dao.cascadeDeleteFolder(initialAlbumName)
+        }
     }
 
     override suspend fun cascadeDeleteWallpaper(initialAlbumName: String) {
-        dao.cascadeDeleteWallpaper(initialAlbumName)
+        withContext(dispatcher) {
+            dao.cascadeDeleteWallpaper(initialAlbumName)
+        }
     }
 
     override suspend fun deleteFolderList(folders: List<Folder>) {
-        dao.deleteFolderList(folders)
+        withContext(dispatcher) {
+            dao.deleteFolderList(folders)
+        }
     }
 
     override suspend fun deleteWallpaperList(wallpapers: List<Wallpaper>) {
-        dao.deleteWallpaperList(wallpapers)
+        withContext(dispatcher) {
+            dao.deleteWallpaperList(wallpapers)
+        }
     }
 
     override suspend fun deleteAllData() {
-        dao.deleteAllData()
+        withContext(dispatcher) {
+            dao.deleteAllData()
+        }
     }
 }

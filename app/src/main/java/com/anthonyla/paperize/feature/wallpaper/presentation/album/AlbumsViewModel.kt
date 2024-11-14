@@ -8,15 +8,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.findFirstValidUri
 import com.anthonyla.paperize.core.getWallpaperFromFolder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,109 +27,76 @@ class AlbumsViewModel @Inject constructor (
 ) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<Application>().applicationContext
-    private val _state = MutableStateFlow(AlbumsState())
-    val state = _state.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000), AlbumsState()
+    
+    private val _state = MutableStateFlow<AlbumsState>(AlbumsState())
+    val state = combine(
+        loadAlbumsFlow(),
+        _state
+    ) { albums: List<AlbumWithWallpaperAndFolder>, currentState: AlbumsState ->
+        currentState.copy(
+            albumsWithWallpapers = albums
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AlbumsState()
     )
+
+    private fun loadAlbumsFlow() = repository.getAlbumsWithWallpaperAndFolder()
 
     init {
         updateAlbums()
-        refreshAlbums()
     }
-
 
     fun onEvent(event: AlbumsEvent) {
         when (event) {
             is AlbumsEvent.DeleteAlbumWithWallpapers -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     repository.cascadeDeleteAlbum(event.albumWithWallpaperAndFolder.album)
-                    _state.update {
-                        it.copy(
-                            albumsWithWallpapers = it.albumsWithWallpapers.filterNot { albumWithWallpaper ->
-                                albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album
-                            }
-                        )
-                    }
                 }
             }
+            
             is AlbumsEvent.ChangeAlbumName -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     if (!(_state.value.albumsWithWallpapers.any { it.album.displayedAlbumName == event.title })) {
                         repository.updateAlbum(
                             event.albumWithWallpaperAndFolder.album.copy(displayedAlbumName = event.title)
                         )
-                        _state.update {
-                            it.copy(
-                                albumsWithWallpapers = it.albumsWithWallpapers.map { albumWithWallpaper ->
-                                    if (albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album) {
-                                        albumWithWallpaper.copy(
-                                            album = albumWithWallpaper.album.copy(displayedAlbumName = event.title)
-                                        )
-                                    } else {
-                                        albumWithWallpaper
-                                    }
-                                }
-                            )
-                        }
                     }
                 }
             }
+
             is AlbumsEvent.InitializeAlbum -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     repository.updateAlbum(
-                        event.albumWithWallpaperAndFolder.album.copy(
-                            initialized = true
-                        )
+                        event.albumWithWallpaperAndFolder.album.copy(initialized = true)
                     )
-                    _state.update {
-                        it.copy(
-                            albumsWithWallpapers = it.albumsWithWallpapers.map { albumWithWallpaper ->
-                                if (albumWithWallpaper.album == event.albumWithWallpaperAndFolder.album) {
-                                    albumWithWallpaper.copy(
-                                        album = albumWithWallpaper.album.copy(
-                                            initialized = true
-                                        )
-                                    )
-                                } else {
-                                    albumWithWallpaper
-                                }
-                            }
-                        )
-                    }
                 }
             }
+
             is AlbumsEvent.RefreshAlbums -> {
                 updateAlbums()
-                refreshAlbums()
             }
+
             is AlbumsEvent.Reset -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     repository.deleteAllData()
-                    _state.update { AlbumsState() }
                 }
             }
         }
     }
 
-    /**
-     * Verify and remove stale data in Room database
-     */
     private fun updateAlbums() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             var albumWithWallpapers = repository.getAlbumsWithWallpaperAndFolder().first()
             albumWithWallpapers.forEach { albumWithWallpaper ->
-                // Delete wallpaper if the URI is invalid
+                // Delete invalid wallpapers
                 val invalidWallpapers = albumWithWallpaper.wallpapers.filterNot { wallpaper ->
                     try {
-                        val file = DocumentFileCompat.fromSingleUri(
-                            context,
-                            wallpaper.wallpaperUri.toUri()
-                        )
+                        val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                         file?.exists() == true
                     } catch (e: Exception) {
-                        val file =
-                            DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
+                        val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                         file?.exists() == true
                     }
                 }
@@ -145,17 +112,13 @@ class AlbumsViewModel @Inject constructor (
                                 if (!folderDirectory.isDirectory()) {
                                     repository.deleteFolder(folder)
                                 } else {
-                                    val wallpapers =
-                                        getWallpaperFromFolder(folder.folderUri, context)
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
                                     val folderCoverFile = folder.coverUri?.let {
-                                        DocumentFileCompat.fromSingleUri(
-                                            context,
-                                            it.toUri()
-                                        )
+                                        DocumentFileCompat.fromSingleUri(context, it.toUri())
                                     }
                                     val folderCover =
                                         folderCoverFile?.takeIf { it.exists() }?.uri?.toString()
-                                            ?: wallpapers.randomOrNull()
+                                            ?: (wallpapers.randomOrNull()?.wallpaperUri ?: "")
                                     repository.updateFolder(
                                         folder.copy(
                                             coverUri = folderCover,
@@ -170,34 +133,27 @@ class AlbumsViewModel @Inject constructor (
                                 if (!folderDirectory.isDirectory) {
                                     repository.deleteFolder(folder)
                                 } else {
-                                    val wallpapers =
-                                        getWallpaperFromFolder(folder.folderUri, context)
+                                    val wallpapers = getWallpaperFromFolder(folder.folderUri, context)
                                     try {
                                         val folderCoverFile = folder.coverUri?.let {
-                                            DocumentFileCompat.fromSingleUri(
-                                                context,
-                                                it.toUri()
-                                            )
+                                            DocumentFileCompat.fromSingleUri(context, it.toUri())
                                         }
                                         val folderCover =
                                             folderCoverFile?.takeIf { it.exists() }?.uri?.toString()
-                                                ?: wallpapers.randomOrNull()
+                                                ?: (wallpapers.randomOrNull()?.wallpaperUri ?: "")
                                         repository.updateFolder(
                                             folder.copy(
                                                 coverUri = folderCover,
                                                 wallpapers = wallpapers
                                             )
                                         )
-                                    } catch (e: Exception) {
+                                    } catch (_: Exception) {
                                         val folderCoverFile = folder.coverUri?.let {
-                                            DocumentFile.fromSingleUri(
-                                                context,
-                                                it.toUri()
-                                            )
+                                            DocumentFile.fromSingleUri(context, it.toUri())
                                         }
                                         val folderCover =
                                             folderCoverFile?.takeIf { it.exists() }?.uri?.toString()
-                                                ?: wallpapers.randomOrNull()
+                                                ?: (wallpapers.randomOrNull()?.wallpaperUri ?: "")
                                         repository.updateFolder(
                                             folder.copy(
                                                 coverUri = folderCover,
@@ -209,9 +165,9 @@ class AlbumsViewModel @Inject constructor (
                             }
                     }
                 }
+                // Delete empty albums
                 albumWithWallpapers = repository.getAlbumsWithWallpaperAndFolder().first()
                 albumWithWallpapers.forEach { album ->
-                    // Delete empty albums
                     if (album.wallpapers.isEmpty() && album.folders.all { it.wallpapers.isEmpty() }) {
                         repository.deleteAlbum(album.album)
                     } else {
@@ -235,19 +191,6 @@ class AlbumsViewModel @Inject constructor (
                         }
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Retrieve albums from database into viewModel
-     */
-    private fun refreshAlbums() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getAlbumsWithWallpaperAndFolder().collect { albumWithWallpapers ->
-                _state.update { it.copy(
-                    albumsWithWallpapers = albumWithWallpapers
-                ) }
             }
         }
     }

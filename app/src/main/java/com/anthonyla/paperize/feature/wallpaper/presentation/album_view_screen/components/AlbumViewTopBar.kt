@@ -138,7 +138,8 @@ fun AlbumViewTopBar(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false },
                             offset = DpOffset(0.dp, 5.dp),
-                            modifier = Modifier.padding(8.dp)
+                            modifier = Modifier.padding(8.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.delete_album)) },

@@ -12,6 +12,7 @@ import androidx.room.PrimaryKey
  * @param initialized Whether the album has been initialized
  * @param homeWallpapersInQueue The list of home wallpapers in the queue
  * @param lockWallpapersInQueue The list of lock wallpapers in the queue
+ * @param selected Whether the album is selected
  */
 @Entity
 data class Album(
@@ -21,4 +22,5 @@ data class Album(
     val initialized: Boolean = false,
     val homeWallpapersInQueue: List<String> = emptyList(),
     val lockWallpapersInQueue: List<String> = emptyList(),
+    val selected : Boolean = false
 )

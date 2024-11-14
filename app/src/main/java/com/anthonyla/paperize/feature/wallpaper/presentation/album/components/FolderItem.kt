@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.sharp.Block
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -56,7 +58,6 @@ fun FolderItem(
     folder: Folder,
     itemSelected: Boolean,
     selectionMode: Boolean,
-    onActivateSelectionMode: (Boolean) -> Unit,
     onItemSelection: () -> Unit,
     onFolderViewClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -73,7 +74,7 @@ fun FolderItem(
         if (selected) 24.dp else 16.dp
     }
 
-    val showCoverUri by remember { mutableStateOf(folder.coverUri != null && isValidUri(context, folder.coverUri)) }
+    val showCoverUri by remember { mutableStateOf(!folder.coverUri.isNullOrEmpty() && isValidUri(context, folder.coverUri)) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -92,7 +93,6 @@ fun FolderItem(
                 onLongClick = {
                     if (!selectionMode) {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onActivateSelectionMode(true)
                         onItemSelection()
                     }
                 }
@@ -102,9 +102,7 @@ fun FolderItem(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box (
-                modifier = Modifier.fillMaxHeight(0.8f)
-            ) {
+            Box (modifier = Modifier.fillMaxHeight(0.8f)) {
                 if (showCoverUri) {
                     GlideImage(
                         imageModel = { folder.coverUri?.toUri() },
@@ -117,6 +115,15 @@ fun FolderItem(
                             .fillMaxSize()
                             .clip(RoundedCornerShape(16.dp))
                     )
+                }
+                else {
+                    Box (modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            imageVector = Icons.Rounded.Block,
+                            contentDescription = stringResource(R.string.image_is_not_selected),
+                            modifier = Modifier.fillMaxSize().padding(16.dp),
+                        )
+                    }
                 }
                 if (selectionMode) {
                     if (itemSelected) {

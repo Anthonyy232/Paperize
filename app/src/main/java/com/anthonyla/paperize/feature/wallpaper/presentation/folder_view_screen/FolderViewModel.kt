@@ -8,6 +8,6 @@ import javax.inject.Inject
  * ViewModel for the folder view screen to hold the folder name and the list of wallpapers
  */
 class FolderViewModel @Inject constructor (): ViewModel() {
-    var folderName = mutableStateOf<String?>(null)
-    var wallpapers = mutableStateOf<List<String>?>(null)
+    var folderName = mutableStateOf<String>("")
+    var wallpapers = mutableStateOf<List<String>>(emptyList())
 }

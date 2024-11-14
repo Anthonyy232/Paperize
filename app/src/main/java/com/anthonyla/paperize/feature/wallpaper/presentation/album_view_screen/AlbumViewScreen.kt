@@ -2,12 +2,12 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.FolderItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.album.components.WallpaperItem
@@ -43,7 +45,7 @@ fun AlbumViewScreen(
     animate: Boolean,
     onBackClick: () -> Unit,
     onShowWallpaperView: (String) -> Unit,
-    onShowFolderView: (String?, List<String>) -> Unit,
+    onShowFolderView: (Folder) -> Unit,
     onDeleteAlbum: () -> Unit,
     onAlbumNameChange: (String, AlbumWithWallpaperAndFolder) -> Unit,
     onSelectionDeleted: () -> Unit,
@@ -119,6 +121,8 @@ fun AlbumViewScreen(
         },
         floatingActionButton = {
             AddAlbumAnimatedFab(
+                isLoading = false,
+                animate = animate,
                 onImageClick = {
                     selectionMode = false
                     imagePickerLauncher.launch(arrayOf("image/*"))
@@ -150,67 +154,33 @@ fun AlbumViewScreen(
                     horizontalArrangement = Arrangement.Start,
                 ) {
                     items(count = album.folders.size, key = { index -> album.folders[index].folderUri }) { index ->
-                        if (animate) {
-                            FolderItem(
-                                folder = album.folders[index],
-                                itemSelected = albumState.value.selectedFolders.contains(album.folders[index].folderUri),
-                                selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
-                                onItemSelection = {
-                                    albumViewScreenViewModel.onEvent(
-                                        if (!albumState.value.selectedFolders.contains(album.folders[index].folderUri))
-                                            AlbumViewEvent.SelectFolder(album.folders[index].folderUri)
-                                        else {
-                                            AlbumViewEvent.RemoveFolderFromSelection(album.folders[index].folderUri)
-                                        }
-                                    )
-                                },
-                                onFolderViewClick = {
-                                    if (album.folders[index].wallpapers.isNotEmpty()) onShowFolderView(album.folders[index].folderName, album.folders[index].wallpapers)
-                                },
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(150.dp, 350.dp)
-                                    .animateItem(
-                                        placementSpec = tween(
-                                            durationMillis = 800,
-                                            delayMillis = 0,
-                                            easing = FastOutSlowInEasing
-                                        ),
-                                    )
-                            )
-                        }
-                        else {
-                            FolderItem(
-                                folder = album.folders[index],
-                                itemSelected = albumState.value.selectedFolders.contains(album.folders[index].folderUri),
-                                selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
-                                onItemSelection = {
-                                    albumViewScreenViewModel.onEvent(
-                                        if (!albumState.value.selectedFolders.contains(album.folders[index].folderUri))
-                                            AlbumViewEvent.SelectFolder(album.folders[index].folderUri)
-                                        else {
-                                            AlbumViewEvent.RemoveFolderFromSelection(album.folders[index].folderUri)
-                                        }
-                                    )
-                                },
-                                onFolderViewClick = {
-                                    if (album.folders[index].wallpapers.isNotEmpty()) onShowFolderView(album.folders[index].folderName, album.folders[index].wallpapers)
-                                },
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(150.dp, 350.dp)
-                            )
-                        }
+                        FolderItem(
+                            folder = album.folders[index],
+                            itemSelected = albumState.value.selectedFolders.contains(album.folders[index].folderUri),
+                            selectionMode = selectionMode,
+                            onItemSelection = {
+                                albumViewScreenViewModel.onEvent(
+                                    if (!albumState.value.selectedFolders.contains(album.folders[index].folderUri))
+                                        AlbumViewEvent.SelectFolder(album.folders[index].folderUri)
+                                    else {
+                                        AlbumViewEvent.RemoveFolderFromSelection(album.folders[index].folderUri)
+                                    }
+                                )
+                            },
+                            onFolderViewClick = {
+                                onShowFolderView(album.folders[index])
+                            },
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(150.dp, 350.dp)
+                        )
                     }
                     items(count = album.wallpapers.size, key = { index -> album.wallpapers[index].wallpaperUri }) { index ->
-                        if (animate) {
+                        Column {
                             WallpaperItem(
                                 wallpaperUri = album.wallpapers[index].wallpaperUri,
                                 itemSelected = albumState.value.selectedWallpapers.contains(album.wallpapers[index].wallpaperUri),
                                 selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
                                 onItemSelection = {
                                     albumViewScreenViewModel.onEvent(
                                         if (!albumState.value.selectedWallpapers.contains(album.wallpapers[index].wallpaperUri))
@@ -226,36 +196,10 @@ fun AlbumViewScreen(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .size(150.dp, 350.dp)
-                                    .animateItem(
-                                        placementSpec = tween(
-                                            durationMillis = 800,
-                                            delayMillis = 0,
-                                            easing = FastOutSlowInEasing
-                                        )
-                                    )
                             )
-                        }
-                        else {
-                            WallpaperItem(
-                                wallpaperUri = album.wallpapers[index].wallpaperUri,
-                                itemSelected = albumState.value.selectedWallpapers.contains(album.wallpapers[index].wallpaperUri),
-                                selectionMode = selectionMode,
-                                onActivateSelectionMode = { selectionMode = it },
-                                onItemSelection = {
-                                    albumViewScreenViewModel.onEvent(
-                                        if (!albumState.value.selectedWallpapers.contains(album.wallpapers[index].wallpaperUri))
-                                            AlbumViewEvent.SelectWallpaper(album.wallpapers[index].wallpaperUri)
-                                        else {
-                                            AlbumViewEvent.RemoveWallpaperFromSelection(album.wallpapers[index].wallpaperUri)
-                                        }
-                                    )
-                                },
-                                onWallpaperViewClick = {
-                                    onShowWallpaperView(album.wallpapers[index].wallpaperUri)
-                                },
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(150.dp, 350.dp)
+                            Text(
+                                text = album.wallpapers[index].fileName,
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                     }

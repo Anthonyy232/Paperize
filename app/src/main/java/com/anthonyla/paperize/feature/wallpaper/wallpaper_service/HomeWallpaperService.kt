@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.app.WallpaperManager
@@ -13,30 +12,22 @@ import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.core.getDeviceScreenSize
-import com.anthonyla.paperize.core.getWallpaperFromFolder
-import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.core.processBitmap
 import com.anthonyla.paperize.core.retrieveBitmap
 import com.anthonyla.paperize.data.settings.SettingsDataStore
-import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
-import com.anthonyla.paperize.feature.wallpaper.domain.repository.SelectedAlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
 import com.anthonyla.paperize.feature.wallpaper.tasker_shortcut.triggerWallpaperTaskerEvent
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
-import com.lazygeniouz.dfc.file.DocumentFileCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -53,7 +44,6 @@ import javax.inject.Inject
 class HomeWallpaperService: Service() {
     private val handleThread = HandlerThread("HomeThread")
     private lateinit var workerHandler: Handler
-    @Inject lateinit var selectedRepository: SelectedAlbumRepository
     @Inject lateinit var albumRepository: AlbumRepository
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     private var scheduleSeparately: Boolean = false
@@ -158,7 +148,7 @@ class HomeWallpaperService: Service() {
      * If none left, reshuffle the wallpapers and pick the first one
      */
     private suspend fun changeWallpaper(context: Context) {
-        try {
+        /*try {
             var selectedAlbum = selectedRepository.getSelectedAlbum().first()
             if (selectedAlbum.isEmpty()) {
                 onDestroy()
@@ -510,14 +500,14 @@ class HomeWallpaperService: Service() {
             }
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in changing wallpaper", e)
-        }
+        }*/
     }
 
     /**
      * Updates the current wallpaper with current settings
      */
     private suspend fun updateCurrentWallpaper(context: Context) {
-        try {
+        /*try {
             val selectedAlbum = selectedRepository.getSelectedAlbum().first()
             if (selectedAlbum.isEmpty()) {
                 onDestroy()
@@ -559,7 +549,7 @@ class HomeWallpaperService: Service() {
             }
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in updating", e)
-        }
+        }*/
     }
 
     /**
@@ -604,7 +594,7 @@ class HomeWallpaperService: Service() {
      * Refreshes the album by deleting invalid wallpapers and updating folder cover uri and wallpapers uri-
      */
     private fun refreshAlbum(context: Context) {
-        CoroutineScope(Dispatchers.IO).launch {
+        /*CoroutineScope(Dispatchers.IO).launch {
             try {
                 var albumWithWallpapers = albumRepository.getAlbumsWithWallpaperAndFolder().first()
                 albumWithWallpapers.forEach { albumWithWallpaper ->
@@ -678,6 +668,6 @@ class HomeWallpaperService: Service() {
             } catch (e: Exception) {
                 Log.e("PaperizeWallpaperChanger", "Error refreshing album", e)
             }
-        }
+        }*/
     }
 }

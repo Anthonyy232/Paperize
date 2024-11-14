@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.core
+import android.R.attr.order
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -16,6 +17,7 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
+import android.provider.DocumentsContract
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -28,9 +30,12 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScreenMetricsCompat.getScreenSize
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
+import com.anthonyla.paperize.feature.wallpaper.domain.model.Metadata
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
@@ -343,50 +348,112 @@ fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
 }
 
 /**
- * Retrieve wallpaper URIs from a folder directory URI
+ * Get all wallpapers from a folder URI
  */
-fun getWallpaperFromFolder(folderUri: String, context: Context): List<String> {
-    return try {
-        val folderDocumentFile = DocumentFileCompat.fromTreeUri(context, folderUri.toUri())
-        listFilesRecursive(folderDocumentFile, context)
-    } catch (_: Exception) {
-        val folderDocumentFile = DocumentFile.fromTreeUri(context, folderUri.toUri())
-        listFilesRecursive(folderDocumentFile, context)
+suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wallpaper> = withContext(Dispatchers.IO) {
+    val allowedExtensions = setOf("jpg", "jpeg", "png", "heif", "webp")
+    val contentResolver = context.contentResolver
+    val wallpapers = mutableListOf<Wallpaper>()
+
+    val foldersToVisit = ArrayDeque<Uri>()
+    val visitedFolders = mutableSetOf<Uri>()
+    if (folderUri.isEmpty()) {
+        return@withContext emptyList<Wallpaper>()
     }
+    foldersToVisit.add(folderUri.toUri())
+    val projection = arrayOf(
+        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        DocumentsContract.Document.COLUMN_MIME_TYPE,
+        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+    )
+
+    try {
+        while (foldersToVisit.isNotEmpty()) {
+            val currentFolderUri = foldersToVisit.removeFirst()
+            if (currentFolderUri.toString().isEmpty()) { continue }
+            visitedFolders.add(currentFolderUri)
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+                folderUri.toUri(),
+                DocumentsContract.getTreeDocumentId(currentFolderUri)
+            )
+            val cursor = contentResolver.query(childrenUri, projection, null, null, null)
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val documentId = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
+                    val displayName = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME))
+                    val mimeType = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE))
+                    val dateModified = it.getLong(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
+                    val documentUri = DocumentsContract.buildDocumentUriUsingTree(folderUri.toUri(), documentId)
+                    if (DocumentsContract.Document.MIME_TYPE_DIR == mimeType) {
+                        if (documentUri !in visitedFolders) {
+                            foldersToVisit.add(DocumentsContract.buildTreeDocumentUri(currentFolderUri.authority, documentId))
+                        }
+                    } else {
+                        val extension = displayName.substringAfterLast('.', "").lowercase()
+                        if (extension in allowedExtensions) {
+                            wallpapers.add(
+                                Wallpaper(
+                                    initialAlbumName = "",
+                                    wallpaperUri = documentUri.toString(),
+                                    fileName = displayName.substringBeforeLast('.', displayName),
+                                    dateModified = dateModified,
+                                    order = wallpapers.size + 1,
+                                    key = 0
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    } catch (_: SecurityException) {
+        return@withContext emptyList<Wallpaper>()
+    }
+    return@withContext wallpapers
 }
 
 /**
- * Helper function to recursively list files in a directory for DocumentFileCompat
+ * Get the last modified date of a folder
+ * @param folderUri URI of the folder
+ * @param context Android context
  */
-fun listFilesRecursive(parent: DocumentFileCompat?, context: Context): List<String> {
-    val files = mutableListOf<String>()
-    parent?.listFiles()?.forEach { file ->
-        if (file.isDirectory()) {
-            files.addAll(listFilesRecursive(file, context))
-        } else {
-            val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
-            if (file.extension in allowedExtensions) {
-                files.add(file.uri.toString())
-            }
+suspend fun getFolderLastModified(folderUri: String, context: Context): Long = withContext(Dispatchers.IO) {
+    val contentResolver = context.contentResolver
+    val projection = arrayOf(
+        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+    )
+    val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+        folderUri.toUri(),
+        DocumentsContract.getTreeDocumentId(folderUri.toUri())
+    )
+    val cursor = contentResolver.query(childrenUri, projection, null, null, null)
+    cursor?.use {
+        if (it.moveToFirst()) {
+            return@use it.getLong(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
         }
     }
-    return files
+    return@withContext 0
 }
 
-/** Overloaded version of the function for DocumentFile */
-fun listFilesRecursive(parent: DocumentFile?, context: Context): List<String> {
-    val files = mutableListOf<String>()
-    parent?.listFiles()?.forEach { file ->
-        if (file.isDirectory) {
-            files.addAll(listFilesRecursive(file, context))
-        } else {
-            val allowedExtensions = listOf("jpg", "jpeg", "png", "heif", "webp", "JPG", "JPEG", "PNG", "HEIF", "WEBP")
-            if ((file.name?.substringAfterLast(".") ?: "") in allowedExtensions) {
-                files.add(file.uri.toString())
-            }
+/**
+ * Get filename and last modified date from an image URI
+ * @param context Android context
+ * @param uriString URI string of the image
+ */
+suspend fun getImageMetadata(context: Context, uriString: String): Metadata = withContext(Dispatchers.IO) {
+    return@withContext try {
+        val uri = uriString.toUri()
+        try {
+            val file = DocumentFileCompat.fromSingleUri(context, uri)
+            return@withContext Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
+        } catch (_: Exception) {
+            val file = DocumentFile.fromSingleUri(context, uri)
+            return@withContext Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
         }
+    } catch (_: Exception) {
+        return@withContext Metadata("", 0)
     }
-    return files
 }
 
 /**
@@ -410,14 +477,14 @@ fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: Li
     folders.forEach { folder ->
         folder.wallpapers.forEach { wallpaper ->
             try {
-                val file = DocumentFileCompat.fromSingleUri(context, wallpaper.toUri())
+                val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                 if (file?.exists() == true) {
-                    return wallpaper
+                    return wallpaper.wallpaperUri
                 }
             } catch (_: Exception) {
-                val file = DocumentFile.fromSingleUri(context, wallpaper.toUri())
+                val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
                 if (file?.exists() == true) {
-                    return wallpaper
+                    return wallpaper.wallpaperUri
                 }
             }
         }

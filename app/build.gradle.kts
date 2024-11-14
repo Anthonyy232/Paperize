@@ -119,6 +119,7 @@ dependencies {
     implementation(libs.taskerpluginlibrary)
     implementation(libs.filament.android)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.reorderable)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
