@@ -3,6 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen.
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -10,7 +11,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Delete
@@ -47,16 +50,18 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumViewTopBar(
-    albumState: StateFlow<AlbumViewState>,
     title: String,
-    onBackClick: () -> Unit,
+    allSelected: Boolean,
+    selectedCount: Int,
     selectionMode: Boolean,
+    isLoad: Boolean,
+    onBackClick: () -> Unit,
+    onSortClick: () -> Unit,
     onSelectAllClick: () -> Unit,
     onDeleteAlbum: () -> Unit,
     onDeleteSelected: () -> Unit,
     onTitleChange: (String) -> Unit,
 ) {
-    val state = albumState.collectAsStateWithLifecycle()
     var showDeleteAlertDialog by rememberSaveable { mutableStateOf(false) }
     var showNameChangeDialog by rememberSaveable { mutableStateOf(false) }
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -75,38 +80,34 @@ fun AlbumViewTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.home_screen),
+                        contentDescription = stringResource(id = R.string.home_screen)
                     )
                 }
-            }
-            else {
-                Row (
+            } else {
+                Row(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onSelectAllClick
-                    ) {
-                        val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
-                        if (state.value.allSelected) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = stringResource(R.string.all_images_selected_for_deletion),
-                                modifier = Modifier
+                    val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
+                    IconButton(onClick = onSelectAllClick) {
+                        Icon(
+                            imageVector = if (allSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                            contentDescription = stringResource(
+                                if (allSelected) R.string.all_images_selected_for_deletion
+                                else R.string.select_all_images_for_deletion
+                            ),
+                            modifier = if (allSelected) {
+                                Modifier
                                     .padding(4.dp)
                                     .border(2.dp, bgColor, CircleShape)
                                     .clip(CircleShape)
                                     .background(bgColor)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.RadioButtonUnchecked,
-                                contentDescription = stringResource(R.string.select_all_images_for_deletion),
-                                modifier = Modifier.padding(6.dp)
-                            )
-                        }
+                            } else {
+                                Modifier.padding(6.dp)
+                            }
+                        )
                     }
-                    Text(stringResource(R.string.selected_count, state.value.selectedCount))
+                    Text(stringResource(R.string.selected, selectedCount))
                 }
             }
         },
@@ -116,17 +117,32 @@ fun AlbumViewTopBar(
                     onDismissRequest = { showDeleteAlertDialog = false },
                     onConfirmation = {
                         showDeleteAlertDialog = false
-                        onDeleteAlbum()
+                        if (!isLoad) { onDeleteAlbum() }
                     }
                 )
                 if (showNameChangeDialog) AlbumNameDialog (
                     onDismissRequest = { showNameChangeDialog = false },
                     onConfirmation = {
                         showNameChangeDialog = false
-                        onTitleChange(it)
+                        if (!isLoad) { onTitleChange(it) }
                     }
                 )
-                IconButton(onClick = { menuExpanded = true }) {
+                Row {
+                    Box {
+                        IconButton(
+                            onClick = { if (!isLoad) { onSortClick() } }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.Sort,
+                                contentDescription = stringResource(R.string.sort_items),
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                    }
+                }
+                IconButton(onClick = {
+                    if (!isLoad) { menuExpanded = true }
+                }) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
                         contentDescription = stringResource(R.string.more_options),
@@ -144,14 +160,18 @@ fun AlbumViewTopBar(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.delete_album)) },
                                 onClick = {
-                                    showDeleteAlertDialog = true
-                                    menuExpanded = false
+                                    if (!isLoad) {
+                                        showDeleteAlertDialog = true
+                                    }
+                                        menuExpanded = false
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.change_name)) },
                                 onClick = {
-                                    showNameChangeDialog = true
+                                    if (!isLoad) {
+                                        showNameChangeDialog = true
+                                    }
                                     menuExpanded = false
                                 }
                             )
@@ -163,14 +183,16 @@ fun AlbumViewTopBar(
                     onDismissRequest = { showSelectionDeleteDialog = false },
                     onConfirmation = {
                         showSelectionDeleteDialog = false
-                        onDeleteSelected()
+                        if (!isLoad) {
+                            onDeleteSelected()
+                        }
                     }
                 )
                 IconButton(
                     onClick = { showSelectionDeleteDialog = true }
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Delete,
+                        imageVector = if (showSelectionDeleteDialog) Icons.Filled.Delete else Icons.Outlined.Delete,
                         contentDescription = stringResource(R.string.select_all_images_for_deletion),
                         modifier = Modifier.padding(6.dp)
                     )

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.skydoves.landscapist.ImageOptions
@@ -47,77 +48,84 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumBottomSheet(
-    onDismiss: () -> Unit,
     homeSelectedAlbum: AlbumWithWallpaperAndFolder?,
     lockSelectedAlbum: AlbumWithWallpaperAndFolder?,
     albums: List<AlbumWithWallpaperAndFolder>,
+    animate: Boolean,
     onSelect: (AlbumWithWallpaperAndFolder) -> Unit,
-    animate: Boolean
+    onDismiss: () -> Unit,
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    
+    val navigationBarPadding = WindowInsets.navigationBars
+        .asPaddingValues()
+        .calculateBottomPadding()
+        
+    val sheetModifier = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        Modifier
+            .fillMaxSize()
+            .padding(bottom = navigationBarPadding)
+    } else {
+        Modifier.padding(bottom = navigationBarPadding)
+    }
+
     ModalBottomSheet(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = onDismiss,
         sheetState = modalBottomSheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
         containerColor = MaterialTheme.colorScheme.background,
         tonalElevation = 5.dp,
-        modifier = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            Modifier
-                .fillMaxSize()
-                .padding(
-                    bottom = WindowInsets.navigationBars
-                        .asPaddingValues()
-                        .calculateBottomPadding()
-                )
-        } else {
-            Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-        }
+        modifier = sheetModifier
     ) {
-        albums.forEach {
-            if (it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size == 0) return@forEach
+        albums.forEach { album ->
+            val totalWallpapers = album.folders.sumOf { it.wallpapers.size } + album.wallpapers.size
+            if (totalWallpapers == 0) return@forEach
+
+            val isSelected = (homeSelectedAlbum?.album?.initialAlbumName == album.album.initialAlbumName) ||
+                    (lockSelectedAlbum?.album?.displayedAlbumName == album.album.displayedAlbumName)
+
             ListItem(
-                modifier = Modifier
-                    .clickable {
-                        scope.launch {
-                            modalBottomSheetState.hide()
-                            onSelect(it)
-                            onDismiss()
-                        }
-                    },
+                modifier = Modifier.clickable {
+                    scope.launch {
+                        modalBottomSheetState.hide()
+                    }
+                    onSelect(album)
+                    onDismiss()
+                },
                 headlineContent = {
                     Text(
-                        text = it.album.displayedAlbumName,
+                        text = album.album.displayedAlbumName,
                         style = MaterialTheme.typography.titleMedium
-                    ) },
+                    )
+                },
                 supportingContent = {
-                    val totalWallpapers = it.folders.sumOf { folder -> folder.wallpapers.size } + it.wallpapers.size
                     Text(
-                        text = LocalContext.current.resources.getQuantityString(R.plurals.wallpaper_count, totalWallpapers, totalWallpapers),
+                        text = context.resources.getQuantityString(
+                            R.plurals.wallpaper_count,
+                            totalWallpapers,
+                            totalWallpapers
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis
                     )
                 },
                 leadingContent = {
-                    Box (
-                        modifier = Modifier.size(60.dp)
-                    ) {
-                        val showCoverUri = isValidUri(LocalContext.current, it.album.coverUri)
-                        if (showCoverUri) {
+                    Box(modifier = Modifier.size(60.dp)) {
+                        if (isValidUri(context, album.album.coverUri)) {
                             GlideImage(
-                                imageModel = { it.album.coverUri },
+                                imageModel = { album.album.coverUri?.decompress("content://com.android.externalstorage.documents/") },
                                 imageOptions = ImageOptions(
                                     contentScale = ContentScale.Crop,
                                     alignment = Alignment.Center,
-                                    requestSize = IntSize(150, 150),
+                                    requestSize = IntSize(150, 150)
                                 ),
                                 loading = {
                                     if (animate) {
                                         Box(modifier = Modifier.matchParentSize()) {
                                             CircularProgressIndicator(
-                                                modifier = Modifier.align(
-                                                    Alignment.Center
-                                                )
+                                                modifier = Modifier.align(Alignment.Center)
                                             )
                                         }
                                     }
@@ -130,13 +138,15 @@ fun AlbumBottomSheet(
                     }
                 },
                 trailingContent = {
-                    val isSelected = (homeSelectedAlbum?.album?.initialAlbumName == it.album.initialAlbumName) ||
-                            (lockSelectedAlbum?.album?.displayedAlbumName == it.album.displayedAlbumName)
                     Icon(
-                        contentDescription = if (isSelected) stringResource(R.string.currently_selected_album) else stringResource(R.string.unselected_album),
-                        imageVector = if (isSelected) Icons.Filled.RadioButtonChecked else Icons.Filled.RadioButtonUnchecked,
+                        imageVector = if (isSelected) Icons.Filled.RadioButtonChecked 
+                            else Icons.Filled.RadioButtonUnchecked,
+                        contentDescription = stringResource(
+                            if (isSelected) R.string.currently_selected_album 
+                            else R.string.unselected_album
+                        )
                     )
-                },
+                }
             )
         }
     }

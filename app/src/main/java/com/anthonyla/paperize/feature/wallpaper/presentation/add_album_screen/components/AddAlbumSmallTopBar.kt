@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components
 
+import android.R.attr.contentDescription
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
@@ -163,7 +165,7 @@ fun AddAlbumSmallTopBar(
                             }
                         )
                     }
-                    Text("$selectedCount selected")
+                    Text(stringResource(R.string.selected, selectedCount))
                 }
             }
         },
@@ -212,7 +214,7 @@ fun AddAlbumSmallTopBar(
             } else {
                 IconButton(onClick = { showSelectionDeleteDialog = true }) {
                     Icon(
-                        imageVector = Icons.Outlined.Delete,
+                        imageVector = if (showSelectionDeleteDialog) Icons.Filled.Delete else Icons.Outlined.Delete,
                         contentDescription = stringResource(R.string.select_all_images_for_deletion),
                         modifier = Modifier.padding(6.dp)
                     )

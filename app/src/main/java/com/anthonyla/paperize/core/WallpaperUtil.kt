@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.core
-import android.R.attr.order
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -18,6 +17,7 @@ import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
+import android.util.Base64
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -36,6 +36,11 @@ import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.InflaterInputStream
 
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
@@ -395,7 +400,7 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
                             wallpapers.add(
                                 Wallpaper(
                                     initialAlbumName = "",
-                                    wallpaperUri = documentUri.toString(),
+                                    wallpaperUri = documentUri.toString().compress("content://com.android.externalstorage.documents/"),
                                     fileName = displayName.substringBeforeLast('.', displayName),
                                     dateModified = dateModified,
                                     order = wallpapers.size + 1,
@@ -457,46 +462,31 @@ suspend fun getImageMetadata(context: Context, uriString: String): Metadata = wi
 }
 
 /**
- * Helper function to find the first valid URI from a list of wallpapers
- * It will search through all wallpapers of an album first, and then all wallpapers of every folder of an album
+ * Helper function to find the first valid URI from a list of wallpapers and folders
  */
-fun findFirstValidUri(context: Context, wallpapers: List<Wallpaper>, folders: List<Folder>): String? {
-    wallpapers.forEach { wallpaper ->
-        try {
-            val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
-            if (file?.exists() == true) {
-                return wallpaper.wallpaperUri
-            }
-        } catch (_: Exception) {
-            val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
-            if (file?.exists() == true) {
-                return wallpaper.wallpaperUri
-            }
-        }
-    }
+suspend fun findFirstValidUri(
+    context: Context,
+    folders: List<Folder>,
+    wallpapers: List<Wallpaper>
+): String? = withContext(Dispatchers.IO) {
+    // Check folder wallpapers first
     folders.forEach { folder ->
         folder.wallpapers.forEach { wallpaper ->
-            try {
-                val file = DocumentFileCompat.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
-                if (file?.exists() == true) {
-                    return wallpaper.wallpaperUri
-                }
-            } catch (_: Exception) {
-                val file = DocumentFile.fromSingleUri(context, wallpaper.wallpaperUri.toUri())
-                if (file?.exists() == true) {
-                    return wallpaper.wallpaperUri
-                }
-            }
+            isValidUri(context, wallpaper.wallpaperUri).let { return@withContext wallpaper.wallpaperUri }
         }
     }
-    return null
+    // Then check individual wallpapers
+    wallpapers.forEach { wallpaper ->
+        isValidUri(context, wallpaper.wallpaperUri).let { return@withContext wallpaper.wallpaperUri }
+    }
+    return@withContext null
 }
 
 /**
  * Get the folder name from the folder URI
  */
-fun getFolderNameFromUri(folderUri: String, context: Context): String? {
-    return try {
+suspend fun getFolderNameFromUri(folderUri: String, context: Context): String? = withContext(Dispatchers.IO) {
+    return@withContext try {
         DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
     } catch (_: Exception) {
         DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
@@ -507,14 +497,51 @@ fun getFolderNameFromUri(folderUri: String, context: Context): String? {
  * Check if a URI is valid
  */
 fun isValidUri(context: Context, uriString: String?): Boolean {
-    val uri = uriString?.toUri()
+    val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri()
+    if (uri == null) { return false }
     return try {
-        uri?.let {
-            val inputStream = context.contentResolver.openInputStream(it)
-            inputStream?.close()
+        DocumentFileCompat.fromSingleUri(context, uri)?.exists() ?: false
+    } catch (_: Exception) {
+        DocumentFile.fromSingleUri(context, uri)?.exists() ?: false
+    }
+}
+
+fun isDirectory(context: Context, uriString: String?): Boolean {
+    val uri = uriString?.toUri()
+    if (uri == null) { return false }
+    return try {
+        DocumentFileCompat.fromSingleUri(context, uri)?.isDirectory() ?: false
+    } catch (_: Exception) {
+        DocumentFile.fromSingleUri(context, uri)?.isDirectory ?: false
+    }
+}
+
+/**
+ * Compress a string
+ */
+fun String.compress(prefixToRemove: String, charset: Charset = Charsets.UTF_8): String {
+    val modifiedInput = if (this.startsWith(prefixToRemove)) {
+        this.removePrefix(prefixToRemove)
+    } else { this }
+    ByteArrayOutputStream().use { byteStream ->
+        DeflaterOutputStream(byteStream).use { deflaterStream ->
+            deflaterStream.write(modifiedInput.toByteArray(charset))
         }
-        true
-    } catch (_: Exception) { false }
+        return Base64.encodeToString(byteStream.toByteArray(), Base64.DEFAULT)
+    }
+}
+
+/**
+ * Decompress a string
+ */
+fun String.decompress(prefixToAdd: String, charset: Charset = Charsets.UTF_8): String {
+    val compressedData = Base64.decode(this, Base64.DEFAULT)
+    ByteArrayInputStream(compressedData).use { byteStream ->
+        InflaterInputStream(byteStream).use { inflaterStream ->
+            val decompressedBytes = inflaterStream.readBytes()
+            return prefixToAdd + String(decompressedBytes, charset)
+        }
+    }
 }
 
 /**

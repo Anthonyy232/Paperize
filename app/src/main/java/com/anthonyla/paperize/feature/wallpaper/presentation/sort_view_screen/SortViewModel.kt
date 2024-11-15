@@ -52,7 +52,10 @@ class SortViewModel @Inject constructor (): ViewModel() {
                 }
                 val updatedFolders = state.value.folders.map { folder ->
                     if (folder.folderUri == event.folderId) {
-                        folder.copy(wallpapers = currentWallpapers)
+                        folder.copy(
+                            wallpapers = currentWallpapers,
+                            coverUri = currentWallpapers.firstOrNull()?.wallpaperUri ?: folder.coverUri
+                        )
                     } else {
                         folder
                     }

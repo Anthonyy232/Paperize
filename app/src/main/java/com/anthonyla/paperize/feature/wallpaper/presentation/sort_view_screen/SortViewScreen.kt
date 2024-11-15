@@ -25,15 +25,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.presentation.sort_view_screen.components.SortViewTopBar
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -43,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
@@ -51,11 +46,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
 import androidx.core.net.toUri
-import com.skydoves.landscapist.ImageOptions
+import com.anthonyla.paperize.core.decompress
 import com.skydoves.landscapist.glide.GlideImage
 
 
@@ -262,7 +255,7 @@ fun SortViewScreen(
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             GlideImage(
-                                                imageModel = { wallpaper.wallpaperUri.toUri() },
+                                                imageModel = { wallpaper.wallpaperUri.decompress("content://com.android.externalstorage.documents/").toUri() },
                                                 modifier = Modifier
                                                     .size(48.dp)
                                                     .clip(CircleShape)
@@ -289,7 +282,7 @@ fun SortViewScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         leadingContent = {
                                             GlideImage(
-                                                imageModel = { currentFolder.coverUri?.toUri() },
+                                                imageModel = { currentFolder.coverUri?.decompress("content://com.android.externalstorage.documents/")?.toUri() },
                                                 modifier = Modifier
                                                     .size(48.dp)
                                                     .clip(RoundedCornerShape(16.dp))
@@ -368,7 +361,7 @@ fun SortViewScreen(
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 GlideImage(
-                                                    imageModel = { wallpaper.wallpaperUri.toUri() },
+                                                    imageModel = { wallpaper.wallpaperUri.decompress("content://com.android.externalstorage.documents/").toUri() },
                                                     modifier = Modifier
                                                         .size(48.dp)
                                                         .clip(CircleShape)

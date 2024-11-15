@@ -1,9 +1,11 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
+import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
+import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.SelectionState
 
 data class AlbumViewState (
-    val selectedWallpapers: List<String> = emptyList(),
-    val selectedFolders: List<String> = emptyList(),
-    val allSelected: Boolean = false,
-    val selectedCount: Int = 0,
-    val maxSize: Int = 0
+    val albums: List<AlbumWithWallpaperAndFolder> = emptyList(),
+    val initialAlbumName: String = "",
+    val selectionState: SelectionState = SelectionState(),
+    val isEmpty: Boolean = true,
+    val isLoading: Boolean = false
 )

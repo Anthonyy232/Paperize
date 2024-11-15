@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
@@ -80,11 +79,8 @@ fun AddAlbumScreen(
                     val persistedUriPermissions = context.contentResolver.persistedUriPermissions
                     if (persistedUriPermissions.any { it.uri == uri }) uri.toString() else null
                 }
-
                 if (uriList.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
-                    }
+                    addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
                 }
                 addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(false))
             }
@@ -168,9 +164,7 @@ fun AddAlbumScreen(
         },
         bottomBar = {
             if (addAlbumState.value.isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
-                )
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         },
         content = {

@@ -1,11 +1,10 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 
-
-import android.R.attr.order
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.compress
 import com.anthonyla.paperize.core.getFolderLastModified
 import com.anthonyla.paperize.core.getFolderNameFromUri
 import com.anthonyla.paperize.core.getImageMetadata
@@ -51,6 +50,7 @@ class AddAlbumViewModel @Inject constructor(
                         folder.copy(
                             initialAlbumName = event.initialAlbumName,
                             key = event.initialAlbumName.hashCode() + folder.hashCode(),
+                            coverUri = folder.wallpapers.firstOrNull()?.wallpaperUri ?: folder.coverUri,
                             wallpapers = folder.wallpapers.map {
                                 it.copy(
                                     initialAlbumName = event.initialAlbumName,
@@ -59,20 +59,18 @@ class AddAlbumViewModel @Inject constructor(
                             }
                         )
                     }
-                    val totalWallpapers: List<Wallpaper> = folders.flatMap { it.wallpapers } + wallpapers
                     val albumWithWallpaperAndFolder = AlbumWithWallpaperAndFolder(
                         album = Album(
                             initialAlbumName = event.initialAlbumName,
                             displayedAlbumName = event.initialAlbumName,
-                            coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: folders.firstOrNull()?.coverUri,
+                            coverUri = folders.firstOrNull()?.coverUri ?: wallpapers.firstOrNull()?.wallpaperUri ?: "",
                             homeWallpapersInQueue = emptyList(),
                             lockWallpapersInQueue = emptyList(),
-                            initialized = false,
                             selected = false
                         ),
                         wallpapers = wallpapers,
                         folders = folders,
-                        totalWallpapers = totalWallpapers
+                        totalWallpapers = emptyList()
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
                     _state.update { AddAlbumState() }
@@ -106,22 +104,23 @@ class AddAlbumViewModel @Inject constructor(
                     val newWallpapers = event.wallpaperUris.filter { wallpaperUri ->
                         wallpaperUri !in existingWallpapers
                     }
+                    val wallpapers = _state.value.wallpapers.plus(
+                        newWallpapers.mapIndexed { index, wallpaperUri ->
+                            val metadata = getImageMetadata(context, wallpaperUri)
+                            Wallpaper(
+                                initialAlbumName = "",
+                                wallpaperUri = wallpaperUri.compress("content://com.android.externalstorage.documents/"),
+                                fileName = metadata.filename,
+                                dateModified = metadata.lastModified,
+                                order = index + _state.value.wallpapers.size,
+                                key = 0
+                            )
+                        }
+                    )
                     _state.update {
                         it.copy(
-                            wallpapers = it.wallpapers.plus(
-                                newWallpapers.mapIndexed { index, wallpaperUri ->
-                                    val metadata = getImageMetadata(context, wallpaperUri)
-                                    Wallpaper(
-                                        initialAlbumName = "",
-                                        wallpaperUri = wallpaperUri,
-                                        fileName = metadata.filename,
-                                        dateModified = metadata.lastModified,
-                                        order = index + it.wallpapers.size,
-                                        key = 0
-                                    )
-                                }
-                            ),
-                            isEmpty = event.wallpaperUris.isEmpty(),
+                            wallpapers = wallpapers,
+                            isEmpty = false,
                             selectionState = SelectionState(),
                             isLoading = false
                         )
@@ -131,7 +130,9 @@ class AddAlbumViewModel @Inject constructor(
 
             is AddAlbumEvent.AddFolder -> {
                 viewModelScope.launch {
-                    if (event.directoryUri in _state.value.folders.map { it.folderUri }) { return@launch }
+                    if (event.directoryUri in _state.value.folders.map { it.folderUri }) {
+                        return@launch
+                    }
                     _state.update { it.copy(isLoading = true) }
                     val wallpapers = getWallpaperFromFolder(event.directoryUri, context)
                     val folderName = getFolderNameFromUri(event.directoryUri, context)
@@ -154,8 +155,8 @@ class AddAlbumViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    }
                 }
-            }
 
             is AddAlbumEvent.SelectAll -> {
                 viewModelScope.launch {
@@ -222,7 +223,7 @@ class AddAlbumViewModel @Inject constructor(
                         it.copy(
                             selectionState = it.selectionState.copy(
                                 selectedFolders = newSelectedFolders,
-                                selectedCount = newSelectedFolders.size + it.selectionState.selectedWallpapers.size,
+                                selectedCount = it.selectionState.selectedCount - 1,
                                 allSelected = false
                             )
                         )
@@ -238,7 +239,7 @@ class AddAlbumViewModel @Inject constructor(
                             it.copy(
                                 selectionState = it.selectionState.copy(
                                     selectedWallpapers = newSelectedWallpapers,
-                                    selectedCount = newSelectedWallpapers.size + it.selectionState.selectedFolders.size,
+                                    selectedCount = it.selectionState.selectedCount - 1,
                                     allSelected = false
                                 )
                             )

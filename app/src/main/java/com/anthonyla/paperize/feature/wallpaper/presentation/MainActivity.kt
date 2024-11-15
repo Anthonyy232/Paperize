@@ -34,14 +34,10 @@ import androidx.lifecycle.lifecycleScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.data.settings.SettingsDataStore
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsEvent
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeTheme
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperEvent
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreenViewModel
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
@@ -53,11 +49,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val albumsViewModel: AlbumsViewModel by viewModels()
-    private val settingsViewModel: SettingsViewModel by viewModels()
-    private val wallpaperScreenViewModel: WallpaperScreenViewModel by viewModels()
-    private val context = this
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
+    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val context = this
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -84,9 +78,6 @@ class MainActivity : ComponentActivity() {
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
             val scheduler = WallpaperAlarmSchedulerImpl(context)
-            if (isFirstLaunch) {
-                handleFirstLaunch(scheduler)
-            }
 
             LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
                 lifecycleScope.launch {
@@ -109,44 +100,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleFirstLaunch(scheduler: WallpaperAlarmSchedulerImpl) {
-        scheduler.cancelWallpaperAlarm()
-        wallpaperScreenViewModel.onEvent(WallpaperEvent.Reset)
-        settingsViewModel.onEvent(SettingsEvent.Reset)
-        albumsViewModel.onEvent(AlbumsEvent.Reset)
-        clearPersistedUriPermissions()
-    }
-
-    private fun clearPersistedUriPermissions() {
-        val contentResolver = context.contentResolver
-        val persistedUris = contentResolver.persistedUriPermissions
-        for (permission in persistedUris) {
-            contentResolver.releasePersistableUriPermission(
-                permission.uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        }
-    }
-
     private fun handleWallpaperScheduling(
         settings: SettingsState,
         scheduler: WallpaperAlarmSchedulerImpl
     ) {
         val wallpaperSettings = settings.wallpaperSettings
         val scheduleSettings = settings.scheduleSettings
-
         if (!wallpaperSettings.enableChanger) return
         if (wallpaperSettings.homeAlbumName.isNullOrEmpty() || wallpaperSettings.lockAlbumName.isNullOrEmpty()) {
             settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
             return
         }
-
         val shouldScheduleAlarm = if (scheduleSettings.scheduleSeparately) {
             !(isPendingIntentSet(Type.HOME.ordinal) && isPendingIntentSet(Type.LOCK.ordinal))
         } else {
             !isPendingIntentSet(Type.SINGLE.ordinal)
         }
-
         if (shouldScheduleAlarm) {
             scheduleWallpaperAlarm(settings, scheduler)
         }
@@ -158,7 +127,6 @@ class MainActivity : ComponentActivity() {
     ) {
         val scheduleSettings = settings.scheduleSettings
         val wallpaperSettings = settings.wallpaperSettings
-
         scheduler.scheduleWallpaperAlarm(
             WallpaperAlarmItem(
                 homeInterval = scheduleSettings.homeInterval,

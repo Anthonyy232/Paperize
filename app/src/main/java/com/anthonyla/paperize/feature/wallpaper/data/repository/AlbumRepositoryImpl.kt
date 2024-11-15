@@ -28,14 +28,6 @@ class AlbumRepositoryImpl(
         }
     }
 
-    override suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder) {
-        withContext(dispatcher) {
-            dao.upsertAlbum(albumWithWallpaperAndFolder.album)
-            dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
-            dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
-        }
-    }
-
     override fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>> {
         return dao.getSelectedAlbums().map { albumWithWallpaperAndFolderList ->
             albumWithWallpaperAndFolderList.map {
@@ -45,6 +37,14 @@ class AlbumRepositoryImpl(
                     totalWallpapers = it.sortedTotalWallpapers
                 )
             }
+        }
+    }
+
+    override suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder) {
+        withContext(dispatcher) {
+            dao.upsertAlbum(albumWithWallpaperAndFolder.album)
+            dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
+            dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
         }
     }
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
@@ -90,7 +91,7 @@ fun WallpaperViewScreen(
                 ) {
                     if (showUri) {
                         GlideImage(
-                            imageModel = { wallpaperUri.toUri() },
+                            imageModel = { wallpaperUri.decompress("content://com.android.externalstorage.documents/").toUri() },
                             imageOptions = ImageOptions(
                                 contentScale = ContentScale.Fit,
                                 alignment = Alignment.Center

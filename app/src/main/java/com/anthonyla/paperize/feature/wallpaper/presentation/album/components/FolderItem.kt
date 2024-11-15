@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.skydoves.landscapist.ImageOptions
@@ -105,7 +106,7 @@ fun FolderItem(
             Box (modifier = Modifier.fillMaxHeight(0.8f)) {
                 if (showCoverUri) {
                     GlideImage(
-                        imageModel = { folder.coverUri?.toUri() },
+                        imageModel = { folder.coverUri?.decompress("content://com.android.externalstorage.documents/")?.toUri() },
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
