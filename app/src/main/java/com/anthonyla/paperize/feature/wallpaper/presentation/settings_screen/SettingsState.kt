@@ -5,6 +5,7 @@ import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_D
 
 data class SettingsState(
     val firstLaunch: Boolean = true,
+    val initialized: Boolean = false,
     val themeSettings: ThemeSettings = ThemeSettings(),
     val wallpaperSettings: WallpaperSettings = WallpaperSettings(),
     val scheduleSettings: ScheduleSettings = ScheduleSettings(),

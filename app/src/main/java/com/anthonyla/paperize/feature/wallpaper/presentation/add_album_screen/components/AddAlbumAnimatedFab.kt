@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
@@ -126,6 +127,8 @@ fun AddAlbumAnimatedFab(
                         text = stringResource(R.string.add_images_btn),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 16.dp, top = 12.dp, bottom = 12.dp)
                     )
                 }
@@ -158,6 +161,8 @@ fun AddAlbumAnimatedFab(
                         text = stringResource(R.string.add_folder_btn),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 16.dp, top = 12.dp, bottom = 12.dp)
                     )
                 }

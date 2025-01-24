@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.sort_view_screen
 
-import android.R.attr.onClick
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedContent
@@ -30,6 +29,8 @@ import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -119,8 +120,7 @@ fun SortViewScreen(
                                     state = reorderableLazyListStateFolder,
                                     key = folder.folderUri
                                 ) { isDragging ->
-                                    val interactionSource =
-                                        remember { MutableInteractionSource() }
+                                    val interactionSource = remember { MutableInteractionSource() }
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -164,16 +164,14 @@ fun SortViewScreen(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(8.dp),
+                                                .padding(16.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
                                                 text = folder.folderName ?: "",
                                                 modifier = Modifier.sharedElement(
-                                                    rememberSharedContentState(
-                                                        folder.folderName ?: ""
-                                                    ),
+                                                    rememberSharedContentState(folder.folderName ?: ""),
                                                     animatedVisibilityScope = this@AnimatedContent,
                                                 )
                                             )
@@ -258,6 +256,7 @@ fun SortViewScreen(
                                                 imageModel = { wallpaper.wallpaperUri.decompress("content://com.android.externalstorage.documents/").toUri() },
                                                 modifier = Modifier
                                                     .size(48.dp)
+                                                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondaryContainer), CircleShape)
                                                     .clip(CircleShape)
                                             )
                                         }
@@ -285,7 +284,7 @@ fun SortViewScreen(
                                                 imageModel = { currentFolder.coverUri?.decompress("content://com.android.externalstorage.documents/")?.toUri() },
                                                 modifier = Modifier
                                                     .size(48.dp)
-                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .clip(RoundedCornerShape(8.dp))
                                             )
                                         },
                                         headlineContent = {
@@ -365,6 +364,7 @@ fun SortViewScreen(
                                                     modifier = Modifier
                                                         .size(48.dp)
                                                         .clip(CircleShape)
+                                                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondaryContainer), CircleShape)
                                                 )
                                             }
                                         }

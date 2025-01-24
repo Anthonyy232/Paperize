@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 
@@ -83,28 +82,28 @@ fun SortViewTopBar(
                         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Sort Alphabetically (A-Z)") },
+                            text = { Text(stringResource(R.string.sort_alphabetically_a_z)) },
                             onClick = {
                                 onSortAlphabetically()
                                 showSortMenu = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Sort Alphabetically (Z-A)") },
+                            text = { Text(stringResource(R.string.sort_alphabetically_z_a)) },
                             onClick = {
                                 onSortAlphabeticallyReverse()
                                 showSortMenu = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Sort by Last Modified (Newest)") },
+                            text = { Text(stringResource(R.string.sort_by_last_modified_newest)) },
                             onClick = {
                                 onSortByLastModified()
                                 showSortMenu = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Sort by Last Modified (Oldest)") },
+                            text = { Text(stringResource(R.string.sort_by_last_modified_oldest)) },
                             onClick = {
                                 onSortByLastModifiedReverse()
                                 showSortMenu = false

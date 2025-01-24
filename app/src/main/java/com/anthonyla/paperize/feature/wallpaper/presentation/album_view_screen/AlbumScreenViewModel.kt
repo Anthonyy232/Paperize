@@ -3,19 +3,16 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album_view_screen
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.compress
-import com.anthonyla.paperize.core.getFolderLastModified
-import com.anthonyla.paperize.core.getFolderNameFromUri
+import com.anthonyla.paperize.core.getFolderMetadata
 import com.anthonyla.paperize.core.getImageMetadata
 import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
-import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.AddAlbumEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.SelectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,14 +102,13 @@ class AlbumScreenViewModel @Inject constructor(
                             key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode() + it.wallpaperUri.hashCode()
                         )
                     }
-                    val folderName = getFolderNameFromUri(event.directoryUri, context)
-                    val lastModified = getFolderLastModified(event.directoryUri, context)
+                    val metadata = getFolderMetadata(event.directoryUri, context)
                     val folder = Folder(
                         initialAlbumName = _state.value.initialAlbumName,
                         folderUri = event.directoryUri,
-                        folderName = folderName,
+                        folderName = metadata.filename,
                         coverUri = wallpapers.map { it.wallpaperUri }.firstOrNull() ?: "",
-                        dateModified = lastModified,
+                        dateModified = metadata.lastModified,
                         wallpapers = wallpapers,
                         order = album.folders.size + 1,
                         key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode()
@@ -227,7 +223,8 @@ class AlbumScreenViewModel @Inject constructor(
                         repository.deleteFolderList(foldersToDelete)
                         repository.deleteWallpaperList(wallpapersToDelete)
                         if (album.album.coverUri in (foldersToDelete.map { it.folderUri } + wallpapersToDelete.map { it.wallpaperUri })) {
-                            val newCover = album.folders.minus(foldersToDelete).firstOrNull()?.coverUri ?: album.wallpapers.minus(wallpapersToDelete).firstOrNull()?.wallpaperUri ?: ""
+                            val newCover = album.folders.minus(foldersToDelete.toSet()).firstOrNull()?.coverUri ?: album.wallpapers.minus(wallpapersToDelete.toSet()
+                            ).firstOrNull()?.wallpaperUri ?: ""
                             repository.updateAlbum(album.album.copy(coverUri = newCover))
                         }
                     }
@@ -279,7 +276,7 @@ class AlbumScreenViewModel @Inject constructor(
 
             is AlbumViewEvent.LoadFoldersAndWallpapers -> {
                 viewModelScope.launch {
-                    _state.update {
+                    _state.update { state ->
                         val album = _state.value.albums.find { it.album.initialAlbumName == _state.value.initialAlbumName }
                         if (album == null) { return@launch }
                         repository.upsertAlbumWithWallpaperAndFolder(
@@ -293,7 +290,7 @@ class AlbumScreenViewModel @Inject constructor(
                                 wallpapers = event.wallpapers
                             )
                         )
-                        it.copy(
+                        state.copy(
                             selectionState = SelectionState(),
                             isLoading = false
                         )

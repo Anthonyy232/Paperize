@@ -174,4 +174,8 @@
     <string name="close">Close</string>
     <string name="expand">Expand</string>
     <string name="selected">%1$s selected</string>
+    <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+    <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+    <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+    <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
 </resources>

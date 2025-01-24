@@ -5,8 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.compress
-import com.anthonyla.paperize.core.getFolderLastModified
-import com.anthonyla.paperize.core.getFolderNameFromUri
+import com.anthonyla.paperize.core.getFolderMetadata
 import com.anthonyla.paperize.core.getImageMetadata
 import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
@@ -45,7 +44,7 @@ class AddAlbumViewModel @Inject constructor(
                             initialAlbumName = event.initialAlbumName,
                             key = event.initialAlbumName.hashCode() + it.wallpaperUri.hashCode()
                         )
-                    }
+                    }.sortedBy { it.order }
                     val folders = _state.value.folders.map { folder ->
                         folder.copy(
                             initialAlbumName = event.initialAlbumName,
@@ -54,11 +53,14 @@ class AddAlbumViewModel @Inject constructor(
                             wallpapers = folder.wallpapers.map {
                                 it.copy(
                                     initialAlbumName = event.initialAlbumName,
-                                    key = event.initialAlbumName.hashCode() + folder.folderUri.hashCode() + it.wallpaperUri.hashCode()
+                                    key = event.initialAlbumName.hashCode() + folder.folderUri.hashCode() + it.wallpaperUri.hashCode(),
+                                    order = it.order + _state.value.wallpapers.size
                                 )
-                            }
+                            }.sortedBy { it.order }
                         )
-                    }
+                    }.sortedBy { it.order }
+
+                    val totalWallpapers = folders.flatMap { it.wallpapers } + wallpapers
                     val albumWithWallpaperAndFolder = AlbumWithWallpaperAndFolder(
                         album = Album(
                             initialAlbumName = event.initialAlbumName,
@@ -70,7 +72,7 @@ class AddAlbumViewModel @Inject constructor(
                         ),
                         wallpapers = wallpapers,
                         folders = folders,
-                        totalWallpapers = emptyList()
+                        totalWallpapers = totalWallpapers
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
                     _state.update { AddAlbumState() }
@@ -135,15 +137,14 @@ class AddAlbumViewModel @Inject constructor(
                     }
                     _state.update { it.copy(isLoading = true) }
                     val wallpapers = getWallpaperFromFolder(event.directoryUri, context)
-                    val folderName = getFolderNameFromUri(event.directoryUri, context)
-                    val lastModified = getFolderLastModified(event.directoryUri, context)
+                    val metadata = getFolderMetadata(event.directoryUri, context)
                     val folder = Folder(
                         initialAlbumName = "",
-                        folderName = folderName,
+                        folderName = metadata.filename,
                         folderUri = event.directoryUri,
                         wallpapers = wallpapers,
                         coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: "",
-                        dateModified = lastModified,
+                        dateModified = metadata.lastModified,
                         order = _state.value.folders.size + 1,
                         key = 0
                     )

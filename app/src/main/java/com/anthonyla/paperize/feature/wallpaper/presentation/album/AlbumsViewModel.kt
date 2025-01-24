@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.findFirstValidUri
+import com.anthonyla.paperize.core.getFolderMetadata
 import com.anthonyla.paperize.core.getWallpaperFromFolder
 import com.anthonyla.paperize.core.isDirectory
 import com.anthonyla.paperize.core.isValidUri
@@ -13,11 +14,9 @@ import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepositor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -96,7 +95,6 @@ class AlbumsViewModel @Inject constructor (
         viewModelScope.launch {
             _state.value.albumsWithWallpapers.forEach { album ->
                 // Remove invalid wallpapers
-                val album = album
                 val validWallpapers = async {
                     album.wallpapers
                         .asSequence()
@@ -113,37 +111,42 @@ class AlbumsViewModel @Inject constructor (
                         .filterNot { isDirectory(context, it.folderUri) }
                         .map { folder ->
                             async {
-                                val existingWallpapers = folder.wallpapers
-                                    .asSequence()
-                                    .filter { isValidUri(context, it.wallpaperUri) }
-                                    .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
-                                    .toList()
-                                val newWallpapers =
-                                    getWallpaperFromFolder(folder.folderUri, context)
+                                val metadata = getFolderMetadata(folder.folderUri, context)
+                                if (metadata.lastModified != folder.dateModified) {
+                                    val existingWallpapers = folder.wallpapers
                                         .asSequence()
-                                        .filterNot { new -> existingWallpapers.any { it.wallpaperUri == new.wallpaperUri } }
-                                        .mapIndexed { index, wallpaper ->
-                                            wallpaper.copy(
-                                                initialAlbumName = album.album.initialAlbumName,
-                                                order = existingWallpapers.size + 1 + index,
-                                                key = album.album.initialAlbumName.hashCode() +
-                                                        folder.folderUri.hashCode() +
-                                                        wallpaper.wallpaperUri.hashCode()
-                                            )
-                                        }
+                                        .filter { isValidUri(context, it.wallpaperUri) }
+                                        .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
                                         .toList()
-                                val combinedWallpapers = existingWallpapers + newWallpapers
-                                folder.copy(
-                                    coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
-                                    wallpapers = combinedWallpapers
-                                )
+                                    val newWallpapers =
+                                        getWallpaperFromFolder(folder.folderUri, context)
+                                            .asSequence()
+                                            .filterNot { new -> existingWallpapers.any { it.wallpaperUri == new.wallpaperUri } }
+                                            .mapIndexed { index, wallpaper ->
+                                                wallpaper.copy(
+                                                    initialAlbumName = album.album.initialAlbumName,
+                                                    order = existingWallpapers.size + 1 + index,
+                                                    key = album.album.initialAlbumName.hashCode() +
+                                                            folder.folderUri.hashCode() +
+                                                            wallpaper.wallpaperUri.hashCode()
+                                                )
+                                            }.toList()
+                                    val combinedWallpapers = (existingWallpapers + newWallpapers).sortedBy { it.order }
+                                    folder.copy(
+                                        coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
+                                        wallpapers = combinedWallpapers,
+                                        dateModified = metadata.lastModified,
+                                        folderName = metadata.filename
+                                    )
+                                }
+                                else { folder }
                             }
                         }
                         .toList()
                         .awaitAll()
                 }
 
-                val folders = validFolders.await()
+                val folders = validFolders.await().sortedBy { it.order }
                 val wallpapers = validWallpapers.await()
                 val coverUri = findFirstValidUri(context, folders, wallpapers)
                 val totalWallpapers = folders.flatMap { it.wallpapers } + wallpapers

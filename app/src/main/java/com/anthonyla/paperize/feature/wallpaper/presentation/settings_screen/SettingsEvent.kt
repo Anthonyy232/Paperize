@@ -19,7 +19,7 @@ sealed class SettingsEvent {
     data class SetHome(val home: Boolean): SettingsEvent()
     data class SetChangeStartTime(val changeStartTime: Boolean): SettingsEvent()
     data class SetCurrentWallpaper(val currentHomeWallpaper: String?, val currentLockWallpaper: String?): SettingsEvent()
-    data class SetAlbumName(val homeAlbumName: String? = null, val lockAlbumName: String? = null): SettingsEvent()
+    data class SetAlbum(val homeAlbumName: String? = null, val lockAlbumName: String? = null): SettingsEvent()
     data class RemoveSelectedAlbumAsType(val removeLock: Boolean = false, val removeHome: Boolean = false): SettingsEvent()
     data class RemoveSelectedAlbumAsName(val albumName: String): SettingsEvent()
     data class SetScheduleSeparately(val scheduleSeparately: Boolean): SettingsEvent()

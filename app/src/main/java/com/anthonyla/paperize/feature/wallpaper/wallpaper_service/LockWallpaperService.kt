@@ -69,6 +69,7 @@ class LockWallpaperService: Service() {
         if (intent != null) {
             when (intent.action) {
                 Actions.START.toString() -> {
+                    Log.d("PaperizeWallpaperChanger", "Starting lock start wallpaper service")
                     homeInterval = intent.getIntExtra("homeInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     lockInterval = intent.getIntExtra("lockInterval", SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT)
                     scheduleSeparately = intent.getBooleanExtra("scheduleSeparately", false)
@@ -76,9 +77,11 @@ class LockWallpaperService: Service() {
                     workerTaskStart()
                 }
                 Actions.UPDATE.toString() -> {
+                    Log.d("PaperizeWallpaperChanger", "Starting lock update wallpaper service")
                     workerTaskUpdate()
                 }
                 Actions.REFRESH.toString() -> {
+                    Log.d("PaperizeWallpaperChanger", "Starting lock refresh wallpaper service")
                     workerTaskRefresh()
                 }
             }

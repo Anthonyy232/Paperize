@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -94,7 +95,10 @@ fun CurrentSelectedAlbum(
     }
 
     if (scheduleSeparately) {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             // Lock screen album
             ListItem(
                 modifier = baseListItemModifier(16)
@@ -151,8 +155,7 @@ fun CurrentSelectedAlbum(
         }
     } else {
         ListItem(
-            modifier = baseListItemModifier(16)
-                .clickable { onOpenBottomSheet(true, true) },
+            modifier = baseListItemModifier(16).clickable { onOpenBottomSheet(true, true) },
             headlineContent = {
                 Text(
                     text = homeSelectedAlbum?.album?.displayedAlbumName ?: stringResource(R.string.no_album_selected),

@@ -419,26 +419,21 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
 }
 
 /**
- * Get the last modified date of a folder
- * @param folderUri URI of the folder
- * @param context Android context
+ * Get the folder name from the folder URI
  */
-suspend fun getFolderLastModified(folderUri: String, context: Context): Long = withContext(Dispatchers.IO) {
-    val contentResolver = context.contentResolver
-    val projection = arrayOf(
-        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-    )
-    val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-        folderUri.toUri(),
-        DocumentsContract.getTreeDocumentId(folderUri.toUri())
-    )
-    val cursor = contentResolver.query(childrenUri, projection, null, null, null)
-    cursor?.use {
-        if (it.moveToFirst()) {
-            return@use it.getLong(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
+suspend fun getFolderMetadata(folderUri: String, context: Context): Metadata = withContext(Dispatchers.IO) {
+    return@withContext try {
+        val uri = folderUri.toUri()
+        try {
+            val file = DocumentFileCompat.fromTreeUri(context, uri)
+            Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
+        } catch (_: Exception) {
+            val file = DocumentFile.fromTreeUri(context, uri)
+            Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
         }
+    } catch (_: Exception) {
+        Metadata("", 0)
     }
-    return@withContext 0
 }
 
 /**
@@ -451,13 +446,13 @@ suspend fun getImageMetadata(context: Context, uriString: String): Metadata = wi
         val uri = uriString.toUri()
         try {
             val file = DocumentFileCompat.fromSingleUri(context, uri)
-            return@withContext Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
+            Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
         } catch (_: Exception) {
             val file = DocumentFile.fromSingleUri(context, uri)
-            return@withContext Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
+            Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
         }
     } catch (_: Exception) {
-        return@withContext Metadata("", 0)
+        Metadata("", 0)
     }
 }
 
@@ -483,22 +478,11 @@ suspend fun findFirstValidUri(
 }
 
 /**
- * Get the folder name from the folder URI
- */
-suspend fun getFolderNameFromUri(folderUri: String, context: Context): String? = withContext(Dispatchers.IO) {
-    return@withContext try {
-        DocumentFileCompat.fromTreeUri(context, folderUri.toUri())?.name
-    } catch (_: Exception) {
-        DocumentFile.fromTreeUri(context, folderUri.toUri())?.name
-    }
-}
-
-/**
  * Check if a URI is valid
  */
 fun isValidUri(context: Context, uriString: String?): Boolean {
     val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri()
-    if (uri == null) { return false }
+        ?: return false
     return try {
         DocumentFileCompat.fromSingleUri(context, uri)?.exists() ?: false
     } catch (_: Exception) {
@@ -506,9 +490,11 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
     }
 }
 
+/**
+ * Check if a URI is a directory
+ */
 fun isDirectory(context: Context, uriString: String?): Boolean {
-    val uri = uriString?.toUri()
-    if (uri == null) { return false }
+    val uri = uriString?.toUri() ?: return false
     return try {
         DocumentFileCompat.fromSingleUri(context, uri)?.isDirectory() ?: false
     } catch (_: Exception) {

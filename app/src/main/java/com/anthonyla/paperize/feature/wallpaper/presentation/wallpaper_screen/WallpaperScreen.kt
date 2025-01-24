@@ -25,7 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -50,7 +49,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -69,7 +68,7 @@ fun WallpaperScreen(
     onSelectAlbum: (AlbumWithWallpaperAndFolder, Boolean, Boolean) -> Unit,
     onHomeTimeChange: (Int) -> Unit,
     onLockTimeChange: (Int) -> Unit,
-    onStop: (Boolean, Boolean) -> Unit,
+    onDeselect: (Boolean, Boolean) -> Unit,
     onToggleChanger: (Boolean) -> Unit,
     onBlurPercentageChange: (Int, Int) -> Unit,
     onBlurChange: (Boolean) -> Unit,
@@ -89,8 +88,8 @@ fun WallpaperScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val showInterval = rememberSaveable { mutableStateOf(false) }
-    val lockEnabled = rememberSaveable { mutableStateOf(false) }
-    val homeEnabled = rememberSaveable { mutableStateOf(false) }
+    val lockSource = rememberSaveable { mutableStateOf(false) }
+    val homeSource = rememberSaveable { mutableStateOf(false) }
 
     val handleAlbumSelection: (AlbumWithWallpaperAndFolder) -> Unit = { album ->
         openBottomSheet = false
@@ -102,7 +101,7 @@ fun WallpaperScreen(
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager?.canScheduleExactAlarms() == false -> {
                 context.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
             }
-            else -> onSelectAlbum(album, lockEnabled.value, homeEnabled.value)
+            else -> onSelectAlbum(album, lockSource.value, homeSource.value)
         }
     }
 
@@ -167,22 +166,15 @@ fun WallpaperScreen(
                     onOpenBottomSheet = { changeLock, changeHome ->
                         if (albums.firstOrNull() != null) {
                             openBottomSheet = true
-                            lockEnabled.value = changeLock
-                            homeEnabled.value = changeHome
+                            lockSource.value = changeLock
+                            homeSource.value = changeHome
                         } else {
                             showSnackBar(context.getString(R.string.no_albums_found))
                         }
                     },
                     onDeselect = { lock, home ->
                         if (homeSelectedAlbum != null || lockSelectedAlbum != null) {
-                            val albumName = when {
-                                home && lock -> homeSelectedAlbum?.album?.displayedAlbumName
-                                home -> homeSelectedAlbum?.album?.displayedAlbumName
-                                lock -> lockSelectedAlbum?.album?.displayedAlbumName
-                                else -> ""
-                            } ?: ""
-                            showSnackBar(context.getString(R.string.has_been_unselected, albumName))
-                            onStop(lock, home)
+                            onDeselect(lock, home)
                         }
                     },
                     scheduleSeparately = scheduleSettings.scheduleSeparately,

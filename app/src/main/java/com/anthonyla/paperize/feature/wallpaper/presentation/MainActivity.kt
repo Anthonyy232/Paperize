@@ -20,20 +20,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.data.settings.SettingsDataStore
+import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
@@ -42,7 +44,6 @@ import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -51,6 +52,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     private val settingsViewModel: SettingsViewModel by viewModels()
+
     private val context = this
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
@@ -79,9 +81,11 @@ class MainActivity : ComponentActivity() {
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
             val scheduler = WallpaperAlarmSchedulerImpl(context)
 
-            LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
-                lifecycleScope.launch {
+            var hasScheduleRun by remember { mutableStateOf(false) }
+            LaunchedEffect(settingsState.value) {
+                if (!hasScheduleRun && settingsState.value.initialized) {
                     handleWallpaperScheduling(settingsState.value, scheduler)
+                    hasScheduleRun = true
                 }
             }
 
