@@ -69,18 +69,34 @@ class AlbumScreenViewModel @Inject constructor(
                     val existingUris = album.wallpapers.map { it.wallpaperUri }
                     val newUris = event.wallpaperUris.filter { it !in existingUris }
                     if (newUris.isEmpty()) { return@launch }
-                    val wallpapers = newUris.map { uri ->
+                    val wallpapers = newUris.mapIndexed { index, uri ->
                         val metadata = getImageMetadata(context, uri)
                         Wallpaper(
                             initialAlbumName = _state.value.initialAlbumName,
                             wallpaperUri = uri.compress("content://com.android.externalstorage.documents/"),
                             fileName = metadata.filename,
                             dateModified = metadata.lastModified,
-                            order = album.wallpapers.size + 1,
+                            order = if (album.wallpapers.isEmpty()) 0 else album.wallpapers.size + index,
                             key = _state.value.initialAlbumName.hashCode() + uri.hashCode()
                         )
                     }
-                    repository.upsertWallpaperList(wallpapers)
+                    var totalWallpapers = album.wallpapers.size + wallpapers.size
+                    val folders = album.folders.map { folder ->
+                        val updatedWallpapers = folder.wallpapers.mapIndexed { index, wallpaper ->
+                            wallpaper.copy(
+                                order = index + totalWallpapers
+                            )
+                        }
+                        totalWallpapers += folder.wallpapers.size
+                        folder.copy(
+                            wallpapers = updatedWallpapers
+                        )
+                    }
+                    val albumWithWallpaperAndFolder = album.copy(
+                        wallpapers = album.wallpapers + wallpapers,
+                        folders = folders
+                    )
+                    repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
                     _state.update {
                         it.copy(
                             isEmpty = false,
@@ -96,10 +112,11 @@ class AlbumScreenViewModel @Inject constructor(
                     val album = _state.value.albums.find { it.album.initialAlbumName == _state.value.initialAlbumName }
                     if (album == null || album.folders.any { it.folderUri == event.directoryUri }) { return@launch }
                     _state.update { it.copy(isLoading = true) }
-                    val wallpapers = getWallpaperFromFolder(event.directoryUri, context).map {
-                        it.copy(
+                    val wallpapers = getWallpaperFromFolder(event.directoryUri, context).mapIndexed { index, wallpaper ->
+                        wallpaper.copy(
                             initialAlbumName = _state.value.initialAlbumName,
-                            key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode() + it.wallpaperUri.hashCode()
+                            key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode() + wallpaper.wallpaperUri.hashCode(),
+                            order = index + album.wallpapers.size + album.folders.sumOf { it.wallpapers.size }
                         )
                     }
                     val metadata = getFolderMetadata(event.directoryUri, context)
@@ -110,7 +127,7 @@ class AlbumScreenViewModel @Inject constructor(
                         coverUri = wallpapers.map { it.wallpaperUri }.firstOrNull() ?: "",
                         dateModified = metadata.lastModified,
                         wallpapers = wallpapers,
-                        order = album.folders.size + 1,
+                        order = album.folders.size,
                         key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode()
                     )
                     repository.upsertFolder(folder)
@@ -227,6 +244,31 @@ class AlbumScreenViewModel @Inject constructor(
                             ).firstOrNull()?.wallpaperUri ?: ""
                             repository.updateAlbum(album.album.copy(coverUri = newCover))
                         }
+
+                        val remainingWallpapers = album.wallpapers.minus(wallpapersToDelete.toSet())
+                        val newWallpapers = remainingWallpapers.sortedBy { it.order }.mapIndexed { index, wallpaper ->
+                            wallpaper.copy(order = index)
+                        }
+
+                        val remainingFolders = album.folders.minus(foldersToDelete.toSet())
+                        var totalWallpaper = newWallpapers.size
+                        val newFolders = remainingFolders.sortedBy { it.order }.mapIndexed { folderIndex, folder ->
+                            val updatedWallpapers = folder.wallpapers.mapIndexed { index, wallpaper ->
+                                wallpaper.copy(order = index + totalWallpaper)
+                            }
+                            totalWallpaper += folder.wallpapers.size
+                            folder.copy(
+                                wallpapers = updatedWallpapers,
+                                order = folderIndex
+                            )
+                        }
+
+                        repository.upsertAlbumWithWallpaperAndFolder(
+                            album.copy(
+                                folders = newFolders,
+                                wallpapers = newWallpapers
+                            )
+                        )
                     }
                     _state.update {
                         it.copy(

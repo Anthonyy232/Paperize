@@ -45,4 +45,5 @@ object SettingsConstants {
     const val CHANGE_START_TIME = "change_start_time"
     const val START_HOUR = "start_hour"
     const val START_MINUTE = "start_minute"
+    const val SHUFFLE = "shuffle"
 }

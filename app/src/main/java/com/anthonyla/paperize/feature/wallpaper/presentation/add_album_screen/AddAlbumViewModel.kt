@@ -44,23 +44,25 @@ class AddAlbumViewModel @Inject constructor(
                             initialAlbumName = event.initialAlbumName,
                             key = event.initialAlbumName.hashCode() + it.wallpaperUri.hashCode()
                         )
-                    }.sortedBy { it.order }
+                    }
+                    var totalWallpapers = _state.value.wallpapers.size
                     val folders = _state.value.folders.map { folder ->
+                        val updatedWallpapers = folder.wallpapers.map {
+                            it.copy(
+                                initialAlbumName = event.initialAlbumName,
+                                key = event.initialAlbumName.hashCode() + folder.folderUri.hashCode() + it.wallpaperUri.hashCode(),
+                                order = it.order + totalWallpapers
+                            )
+                        }
+                        totalWallpapers += folder.wallpapers.size
                         folder.copy(
                             initialAlbumName = event.initialAlbumName,
                             key = event.initialAlbumName.hashCode() + folder.hashCode(),
-                            coverUri = folder.wallpapers.firstOrNull()?.wallpaperUri ?: folder.coverUri,
-                            wallpapers = folder.wallpapers.map {
-                                it.copy(
-                                    initialAlbumName = event.initialAlbumName,
-                                    key = event.initialAlbumName.hashCode() + folder.folderUri.hashCode() + it.wallpaperUri.hashCode(),
-                                    order = it.order + _state.value.wallpapers.size
-                                )
-                            }.sortedBy { it.order }
+                            coverUri = updatedWallpapers.firstOrNull()?.wallpaperUri ?: folder.coverUri,
+                            wallpapers = updatedWallpapers
                         )
-                    }.sortedBy { it.order }
+                    }
 
-                    val totalWallpapers = folders.flatMap { it.wallpapers } + wallpapers
                     val albumWithWallpaperAndFolder = AlbumWithWallpaperAndFolder(
                         album = Album(
                             initialAlbumName = event.initialAlbumName,
@@ -71,8 +73,7 @@ class AddAlbumViewModel @Inject constructor(
                             selected = false
                         ),
                         wallpapers = wallpapers,
-                        folders = folders,
-                        totalWallpapers = totalWallpapers
+                        folders = folders
                     )
                     repository.upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder)
                     _state.update { AddAlbumState() }
@@ -145,7 +146,7 @@ class AddAlbumViewModel @Inject constructor(
                         wallpapers = wallpapers,
                         coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: "",
                         dateModified = metadata.lastModified,
-                        order = _state.value.folders.size + 1,
+                        order = if (_state.value.folders.isEmpty()) 0 else _state.value.folders.size,
                         key = 0
                     )
                     _state.update {
@@ -162,13 +163,13 @@ class AddAlbumViewModel @Inject constructor(
             is AddAlbumEvent.SelectAll -> {
                 viewModelScope.launch {
                     if (!_state.value.selectionState.allSelected) {
-                        _state.update {
-                            it.copy(
+                        _state.update { state ->
+                            state.copy(
                                 selectionState = SelectionState(
-                                    selectedFolders = it.folders.map { it.folderUri },
-                                    selectedWallpapers = it.wallpapers.map { it.wallpaperUri },
+                                    selectedFolders = state.folders.map { it.folderUri },
+                                    selectedWallpapers = state.wallpapers.map { it.wallpaperUri },
                                     allSelected = true,
-                                    selectedCount = it.folders.size + it.wallpapers.size
+                                    selectedCount = state.folders.size + state.wallpapers.size
                                 )
                             )
                         }

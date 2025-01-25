@@ -198,9 +198,9 @@ fun PaperizeApp(
                     }
                 },
                 onSelectAlbum = { album, lock, home ->
-                    val currentSettings = settingsState.value.wallpaperSettings
+                    val currentSettings = settingsState.value
                     val albumName = album.album.initialAlbumName
-                    val notSameAlbum = currentSettings.homeAlbumName != currentSettings.lockAlbumName
+                    val notSameAlbum = currentSettings.wallpaperSettings.homeAlbumName != currentSettings.wallpaperSettings.lockAlbumName
                     val newHomeAlbum = if (home) albumName else null
                     val newLockAlbum = if (lock) albumName else null
                     settingsViewModel.onEvent(SettingsEvent.SetAlbum(
@@ -208,26 +208,29 @@ fun PaperizeApp(
                         lockAlbumName = newLockAlbum
                     ))
                     val deselectName = when {
-                        notSameAlbum && home -> currentSettings.homeAlbumName
-                        notSameAlbum && lock -> currentSettings.lockAlbumName
+                        notSameAlbum && home -> currentSettings.wallpaperSettings.homeAlbumName
+                        notSameAlbum && lock -> currentSettings.wallpaperSettings.lockAlbumName
                         else -> null
                     }
-                    albumsViewModel.onEvent(AlbumsEvent.AddSelectedAlbum(
-                        album = album,
-                        deselectAlbumName = deselectName
-                    ))
+                    albumsViewModel.onEvent(
+                        AlbumsEvent.AddSelectedAlbum(
+                            album = album,
+                            deselectAlbumName = deselectName,
+                            shuffle = currentSettings.scheduleSettings.shuffle
+                        )
+                    )
 
-                    val shouldSchedule = (home && !currentSettings.lockAlbumName.isNullOrEmpty()) ||
-                            (lock && !currentSettings.homeAlbumName.isNullOrEmpty()) ||
+                    val shouldSchedule = (home && !currentSettings.wallpaperSettings.lockAlbumName.isNullOrEmpty()) ||
+                            (lock && !currentSettings.wallpaperSettings.homeAlbumName.isNullOrEmpty()) ||
                             (lock && home)
 
                     if (shouldSchedule) {
                         job = scope.scheduleWallpaperUpdate(
                             job = job,
                             settingsState = settingsState.value.copy(
-                                wallpaperSettings = currentSettings.copy(
-                                    homeAlbumName = newHomeAlbum ?: currentSettings.homeAlbumName,
-                                    lockAlbumName = newLockAlbum ?: currentSettings.lockAlbumName
+                                wallpaperSettings = currentSettings.wallpaperSettings.copy(
+                                    homeAlbumName = newHomeAlbum ?: currentSettings.wallpaperSettings.homeAlbumName,
+                                    lockAlbumName = newLockAlbum ?: currentSettings.wallpaperSettings.lockAlbumName
                                 )
                             ),
                             settingsViewModel = settingsViewModel,
@@ -490,6 +493,20 @@ fun PaperizeApp(
                         )
                     }
                 },
+                onShuffleCheck = { shuffle ->
+                    settingsViewModel.onEvent(SettingsEvent.SetShuffle(shuffle))
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
+                        job = scope.updateWallpaperAlarm(
+                            job = job,
+                            settingsState = settingsState.value.copy(
+                                scheduleSettings = settingsState.value.scheduleSettings.copy(
+                                    shuffle = shuffle
+                                )
+                            ),
+                            scheduler = scheduler
+                        )
+                    }
+                },
             )
         }
 
@@ -697,7 +714,8 @@ private fun CoroutineScope.scheduleWallpaperUpdate(
             setHome = settingsState.wallpaperSettings.setHomeWallpaper,
             setLock = settingsState.wallpaperSettings.setLockWallpaper,
             changeStartTime = settingsState.scheduleSettings.changeStartTime,
-            startTime = settingsState.scheduleSettings.startTime
+            startTime = settingsState.scheduleSettings.startTime,
+            shuffle = settingsState.scheduleSettings.shuffle
         )
 
         scheduler.scheduleWallpaperAlarm(
@@ -726,7 +744,8 @@ private fun CoroutineScope.updateWallpaperAlarm(
             setHome = settingsState.wallpaperSettings.setHomeWallpaper,
             setLock = settingsState.wallpaperSettings.setLockWallpaper,
             changeStartTime = settingsState.scheduleSettings.changeStartTime,
-            startTime = settingsState.scheduleSettings.startTime
+            startTime = settingsState.scheduleSettings.startTime,
+            shuffle = settingsState.scheduleSettings.shuffle
         )
 
         scheduler.updateWallpaperAlarm(

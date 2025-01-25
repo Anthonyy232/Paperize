@@ -403,7 +403,7 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
                                     wallpaperUri = documentUri.toString().compress("content://com.android.externalstorage.documents/"),
                                     fileName = displayName.substringBeforeLast('.', displayName),
                                     dateModified = dateModified,
-                                    order = wallpapers.size + 1,
+                                    order = wallpapers.size,
                                     key = 0
                                 )
                             )

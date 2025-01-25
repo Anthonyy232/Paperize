@@ -22,7 +22,6 @@ class AlbumRepositoryImpl(
                 it.copy(
                     wallpapers = it.sortedWallpapers,
                     folders = it.sortedFolders,
-                    totalWallpapers = it.sortedTotalWallpapers
                 )
             }
         }
@@ -34,7 +33,6 @@ class AlbumRepositoryImpl(
                 it.copy(
                     wallpapers = it.sortedWallpapers,
                     folders = it.sortedFolders,
-                    totalWallpapers = it.sortedTotalWallpapers
                 )
             }
         }

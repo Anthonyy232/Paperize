@@ -26,6 +26,9 @@ interface AlbumDao {
     @Query("SELECT * FROM album WHERE selected = 1")
     fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>>
 
+    /*@Query("UPDATE album SET selected = :selected WHERE initialAlbumName = :albumName")
+    suspend fun updateAlbumSelection(albumName: String, selected: Boolean)*/
+
     @Query("UPDATE album SET selected = :selected WHERE initialAlbumName = :albumName")
     suspend fun updateAlbumSelection(albumName: String, selected: Boolean)
 

@@ -32,4 +32,5 @@ sealed class SettingsEvent {
     data class SetChangerToggle(val toggle: Boolean): SettingsEvent()
     data class SetWallpaperScaling(val scaling: ScalingConstants): SettingsEvent()
     data class SetStartTime(val hour: Int, val minute: Int): SettingsEvent()
+    data class SetShuffle(val shuffle: Boolean): SettingsEvent()
 }

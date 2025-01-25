@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album
 
 import android.app.Application
 import android.content.Context
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.findFirstValidUri
@@ -58,10 +59,18 @@ class AlbumsViewModel @Inject constructor (
         when (event) {
             is AlbumsEvent.AddSelectedAlbum -> {
                 viewModelScope.launch {
-                    event.deselectAlbumName?.let {
-                        repository.updateAlbumSelection(it, false)
-                    }
-                    repository.updateAlbumSelection(event.album.album.initialAlbumName, true)
+                    event.deselectAlbumName?.let { repository.updateAlbumSelection(it, false) }
+                    val homeWallpapers = if (event.shuffle) event.album.totalWallpapers.shuffled().map { it.wallpaperUri }
+                    else event.album.sortedTotalWallpapers.map { it.wallpaperUri }
+                    val lockWallpapers = if (event.shuffle) event.album.totalWallpapers.shuffled().map { it.wallpaperUri }
+                    else event.album.sortedTotalWallpapers.map { it.wallpaperUri }
+                    repository.updateAlbum(
+                        event.album.album.copy(
+                            selected = true,
+                            homeWallpapersInQueue = homeWallpapers,
+                            lockWallpapersInQueue = lockWallpapers
+                        )
+                    )
                 }
             }
 
@@ -99,7 +108,6 @@ class AlbumsViewModel @Inject constructor (
                     album.wallpapers
                         .asSequence()
                         .filter { isValidUri(context, it.wallpaperUri) }
-                        .sortedBy { it.order }
                         .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
                         .toList()
                 }
@@ -131,7 +139,7 @@ class AlbumsViewModel @Inject constructor (
                                                             wallpaper.wallpaperUri.hashCode()
                                                 )
                                             }.toList()
-                                    val combinedWallpapers = (existingWallpapers + newWallpapers).sortedBy { it.order }
+                                    val combinedWallpapers = existingWallpapers + newWallpapers
                                     folder.copy(
                                         coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
                                         wallpapers = combinedWallpapers,
@@ -146,16 +154,14 @@ class AlbumsViewModel @Inject constructor (
                         .awaitAll()
                 }
 
-                val folders = validFolders.await().sortedBy { it.order }
+                val folders = validFolders.await()
                 val wallpapers = validWallpapers.await()
                 val coverUri = findFirstValidUri(context, folders, wallpapers)
-                val totalWallpapers = folders.flatMap { it.wallpapers } + wallpapers
                 repository.upsertAlbumWithWallpaperAndFolder(
                     album.copy(
                         album = album.album.copy(coverUri = coverUri),
                         wallpapers = wallpapers,
-                        folders = folders,
-                        totalWallpapers = totalWallpapers
+                        folders = folders
                     )
                 )
             }

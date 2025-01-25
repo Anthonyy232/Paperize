@@ -8,8 +8,7 @@ import androidx.room.Relation
  * @param album The album.
  * @param wallpapers The wallpapers.
  * @param folders The folders.
- * @param totalWallpapers The total wallpapers from wallpapers and folders
- */
+ * */
 data class AlbumWithWallpaperAndFolder(
     @Embedded val album: Album,
     @Relation(
@@ -24,13 +23,9 @@ data class AlbumWithWallpaperAndFolder(
         entity = Folder::class
     )
     val folders: List<Folder> = emptyList(),
-    @Relation(
-        parentColumn = "initialAlbumName",
-        entityColumn = "initialAlbumName",
-        entity = Wallpaper::class
-    )
-    val totalWallpapers: List<Wallpaper> = emptyList()
 ) {
+    val totalWallpapers: List<Wallpaper>
+        get() = folders.flatMap { it.wallpapers } + wallpapers
     val sortedFolders: List<Folder>
         get() = folders.map { folder ->
             folder.copy(wallpapers = folder.wallpapers.sortedBy { it.order })
@@ -38,5 +33,5 @@ data class AlbumWithWallpaperAndFolder(
     val sortedWallpapers: List<Wallpaper>
         get() = wallpapers.sortedBy { it.order }
     val sortedTotalWallpapers: List<Wallpaper>
-        get() = totalWallpapers.sortedBy { it.order }
+        get() = (folders.flatMap { it.wallpapers } + wallpapers).sortedBy { it.order }
 }

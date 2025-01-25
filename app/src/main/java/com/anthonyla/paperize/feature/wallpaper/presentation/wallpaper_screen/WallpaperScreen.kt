@@ -16,6 +16,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.GrayscaleSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.IndividualSchedulingAndToggleRow
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShuffleSwitch
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.VignetteSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
@@ -77,7 +79,8 @@ fun WallpaperScreen(
     onGrayscalePercentageChange: (Int, Int) -> Unit,
     onGrayscaleChange: (Boolean) -> Unit,
     onChangeStartTimeToggle: (Boolean) -> Unit,
-    onStartTimeChange: (TimePickerState) -> Unit
+    onStartTimeChange: (TimePickerState) -> Unit,
+    onShuffleCheck: (Boolean) -> Unit
 ) {
     val shouldShowScreen = wallpaperSettings.setHomeWallpaper || wallpaperSettings.setLockWallpaper
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -225,6 +228,10 @@ fun WallpaperScreen(
                         scheduleSeparately = scheduleSettings.scheduleSeparately,
                         changeStartTime = scheduleSettings.changeStartTime,
                         animate = themeSettings.animate
+                    )
+                    ShuffleSwitch(
+                        shuffle = scheduleSettings.shuffle,
+                        onShuffleCheck = { onShuffleCheck(it) },
                     )
                     DarkenSwitchAndSlider(
                         homeDarkenPercentage = effectSettings.homeDarkenPercentage,

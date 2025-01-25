@@ -7,6 +7,10 @@ sealed class AlbumsEvent {
     data object Reset: AlbumsEvent()
     data object Refresh: AlbumsEvent()
 
-    data class AddSelectedAlbum(val album: AlbumWithWallpaperAndFolder, val deselectAlbumName: String? = null): AlbumsEvent()
+    data class AddSelectedAlbum(
+        val album: AlbumWithWallpaperAndFolder,
+        val deselectAlbumName: String? = null,
+        val shuffle: Boolean = true
+    ): AlbumsEvent()
     data class RemoveSelectedAlbum(val deselectAlbumName: String): AlbumsEvent()
 }

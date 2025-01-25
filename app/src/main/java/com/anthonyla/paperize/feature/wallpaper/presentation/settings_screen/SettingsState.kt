@@ -33,6 +33,7 @@ data class SettingsState(
 
     data class ScheduleSettings(
         val scheduleSeparately: Boolean = false,
+        val shuffle: Boolean = true,
         val homeInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
         val lockInterval: Int = WALLPAPER_CHANGE_INTERVAL_DEFAULT,
         val lastSetTime: String? = null,

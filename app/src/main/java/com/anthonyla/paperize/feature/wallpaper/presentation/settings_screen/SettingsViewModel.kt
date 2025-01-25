@@ -106,7 +106,8 @@ class SettingsViewModel @Inject constructor(
         settingsDataStoreImpl.getStringFlow(SettingsConstants.NEXT_SET_TIME),
         settingsDataStoreImpl.getBooleanFlow(SettingsConstants.CHANGE_START_TIME),
         settingsDataStoreImpl.getIntFlow(SettingsConstants.START_HOUR),
-        settingsDataStoreImpl.getIntFlow(SettingsConstants.START_MINUTE)
+        settingsDataStoreImpl.getIntFlow(SettingsConstants.START_MINUTE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SHUFFLE)
     ) { flows ->
         ScheduleSettings(
             scheduleSeparately = flows[0] as Boolean? ?: false,
@@ -115,7 +116,8 @@ class SettingsViewModel @Inject constructor(
             lastSetTime = flows[3] as String?,
             nextSetTime = flows[4] as String?,
             changeStartTime = flows[5] as Boolean? ?: false,
-            startTime = Pair(flows[6] as Int? ?: 0, flows[7] as Int? ?: 0)
+            startTime = Pair(flows[6] as Int? ?: 0, flows[7] as Int? ?: 0),
+            shuffle = flows[8] as Boolean? ?: true
         )
     }
 
@@ -535,6 +537,12 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+            is SettingsEvent.SetShuffle -> {
+                viewModelScope.launch {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.SHUFFLE, event.shuffle)
+                }
+            }
+
             is SettingsEvent.Reset -> {
                 viewModelScope.launch {
                     val keysToDelete = listOf(
@@ -575,7 +583,8 @@ class SettingsViewModel @Inject constructor(
                         SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE,
                         SettingsConstants.CHANGE_START_TIME,
                         SettingsConstants.START_HOUR,
-                        SettingsConstants.START_MINUTE
+                        SettingsConstants.START_MINUTE,
+                        SettingsConstants.SHUFFLE
                     )
                     settingsDataStoreImpl.clear(keysToDelete)
                 }
