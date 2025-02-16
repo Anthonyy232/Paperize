@@ -481,8 +481,7 @@ suspend fun findFirstValidUri(
  * Check if a URI is valid
  */
 fun isValidUri(context: Context, uriString: String?): Boolean {
-    val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri()
-        ?: return false
+    val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri() ?: return false
     return try {
         DocumentFileCompat.fromSingleUri(context, uri)?.exists() ?: false
     } catch (_: Exception) {

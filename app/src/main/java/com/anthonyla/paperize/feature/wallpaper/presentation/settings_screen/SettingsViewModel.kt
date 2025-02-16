@@ -419,12 +419,8 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetAlbum -> {
                 viewModelScope.launch {
-                    if (event.homeAlbumName != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.HOME_ALBUM_NAME, event.homeAlbumName)
-                    }
-                    if (event.lockAlbumName != null) {
-                        settingsDataStoreImpl.putString(SettingsConstants.LOCK_ALBUM_NAME, event.lockAlbumName)
-                    }
+                    event.lockAlbumName?.let { settingsDataStoreImpl.putString(SettingsConstants.LOCK_ALBUM_NAME, it) }
+                    event.homeAlbumName?.let { settingsDataStoreImpl.putString(SettingsConstants.HOME_ALBUM_NAME, it) }
                     val enableChanger: Boolean = when {
                         event.homeAlbumName != null && event.lockAlbumName != null -> { true }
                         event.homeAlbumName != null && !_state.value.wallpaperSettings.lockAlbumName.isNullOrEmpty() -> { true }

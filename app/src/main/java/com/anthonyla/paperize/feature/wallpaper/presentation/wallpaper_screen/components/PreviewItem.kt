@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
@@ -21,7 +22,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.core.net.toUri
 import com.anthonyla.paperize.core.ScalingConstants
+import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
 import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.ImageOptions
@@ -49,8 +52,9 @@ fun PreviewItem(
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
     if (showUri) {
+        val uri = wallpaperUri.decompress("content://com.android.externalstorage.documents/").toUri()
         GlideImage(
-            imageModel = { wallpaperUri },
+            imageModel = { uri },
             imageOptions = ImageOptions(
                 contentScale = when (scaling) {
                     ScalingConstants.FILL -> ContentScale.FillHeight

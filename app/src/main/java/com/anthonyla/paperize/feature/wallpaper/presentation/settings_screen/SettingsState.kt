@@ -56,4 +56,26 @@ data class SettingsState(
         val homeGrayscalePercentage: Int = 0,
         val lockGrayscalePercentage: Int = 0
     )
+
+    data class ServiceSettings(
+        val enableChanger: Boolean,
+        val setHome: Boolean,
+        val setLock: Boolean,
+        val scaling: ScalingConstants,
+        val darken: Boolean,
+        val homeDarkenPercentage: Int,
+        val lockDarkenPercentage: Int,
+        val blur: Boolean,
+        val homeBlurPercentage: Int,
+        val lockBlurPercentage: Int,
+        val vignette: Boolean,
+        val homeVignettePercentage: Int,
+        val lockVignettePercentage: Int,
+        val grayscale: Boolean,
+        val homeGrayscalePercentage: Int,
+        val lockGrayscalePercentage: Int,
+        val lockAlbumName: String,
+        val homeAlbumName: String,
+        val shuffle: Boolean
+    )
 }

@@ -199,30 +199,28 @@ fun PaperizeApp(
                 },
                 onSelectAlbum = { album, lock, home ->
                     val currentSettings = settingsState.value
-                    val albumName = album.album.initialAlbumName
-                    val notSameAlbum = currentSettings.wallpaperSettings.homeAlbumName != currentSettings.wallpaperSettings.lockAlbumName
-                    val newHomeAlbum = if (home) albumName else null
-                    val newLockAlbum = if (lock) albumName else null
+                    val notSameAlbum = currentSettings.wallpaperSettings.lockAlbumName != currentSettings.wallpaperSettings.homeAlbumName
+                    val newLockAlbum = if (lock) album.album.initialAlbumName else null
+                    val newHomeAlbum = if (home) album.album.initialAlbumName else null
                     settingsViewModel.onEvent(SettingsEvent.SetAlbum(
                         homeAlbumName = newHomeAlbum,
                         lockAlbumName = newLockAlbum
                     ))
-                    val deselectName = when {
-                        notSameAlbum && home -> currentSettings.wallpaperSettings.homeAlbumName
-                        notSameAlbum && lock -> currentSettings.wallpaperSettings.lockAlbumName
-                        else -> null
-                    }
                     albumsViewModel.onEvent(
                         AlbumsEvent.AddSelectedAlbum(
                             album = album,
-                            deselectAlbumName = deselectName,
+                            deselectAlbumName = when {
+                                notSameAlbum && lock -> currentSettings.wallpaperSettings.lockAlbumName
+                                notSameAlbum && home -> currentSettings.wallpaperSettings.homeAlbumName
+                                else -> null
+                            },
                             shuffle = currentSettings.scheduleSettings.shuffle
                         )
                     )
-
-                    val shouldSchedule = (home && !currentSettings.wallpaperSettings.lockAlbumName.isNullOrEmpty()) ||
+                    val shouldSchedule =
+                        (home && !currentSettings.wallpaperSettings.lockAlbumName.isNullOrEmpty()) ||
                             (lock && !currentSettings.wallpaperSettings.homeAlbumName.isNullOrEmpty()) ||
-                            (lock && home)
+                                (lock && home)
 
                     if (shouldSchedule) {
                         job = scope.scheduleWallpaperUpdate(
@@ -238,7 +236,8 @@ fun PaperizeApp(
                             refreshNextTime = true,
                             changeImmediate = true,
                             cancelImmediate = true,
-                            firstLaunch = true
+                            firstLaunch = true,
+                            delay = 500L
                         )
                     }
                 },

@@ -2,7 +2,6 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.album
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.findFirstValidUri
