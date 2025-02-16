@@ -6,6 +6,7 @@ import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
@@ -27,7 +28,6 @@ import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepositor
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.tasker_shortcut.triggerWallpaperTaskerEvent
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.Notification
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -464,15 +464,14 @@ class LockWallpaperService: Service() {
     ): Boolean {
         wallpaper?.let {
             try {
-                val wallpaperManager = WallpaperManager.getInstance(context)
+                val wallpaperManager = WallpaperManager.getInstance(this.applicationContext)
                 val size = getDeviceScreenSize(context)
                 val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
-                        if (both) wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
-                        wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
-                        wallpaperManager.forgetLoadedWallpaper()
+                        if (both) setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
+                        setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
                         image.recycle()
                     }
                     bitmap.recycle()
@@ -486,5 +485,21 @@ class LockWallpaperService: Service() {
             }
         }
         return false
+    }
+
+    private fun setWallpaperSafely(bitmap_s: Bitmap?, flag: Int, wallpaperManager: WallpaperManager) {
+        val maxRetries = 3
+        for (attempt in 1..maxRetries) {
+            try {
+                wallpaperManager.setBitmap(bitmap_s, null, true, flag)
+                return
+            } catch (e: IOException) {
+                if (attempt == maxRetries) {
+                    Log.e("Wallpaper", "Final attempt failed: \${e.message}")
+                    return
+                }
+                Thread.sleep(1000L * attempt)
+            }
+        }
     }
 }

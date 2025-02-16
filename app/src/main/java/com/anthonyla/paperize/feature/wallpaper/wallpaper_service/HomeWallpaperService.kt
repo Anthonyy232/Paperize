@@ -1,12 +1,12 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
@@ -574,9 +574,8 @@ class HomeWallpaperService: Service() {
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
-                        if (both) wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_LOCK)
-                        wallpaperManager.setBitmap(image, null, true, WallpaperManager.FLAG_SYSTEM)
-                        wallpaperManager.forgetLoadedWallpaper()
+                        if (both) setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
+                        setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
                         image.recycle()
                     }
                     bitmap.recycle()
@@ -689,6 +688,22 @@ class HomeWallpaperService: Service() {
                 }
             } catch (e: Exception) {
                 Log.e("PaperizeWallpaperChanger", "Error refreshing album", e)
+            }
+        }
+    }
+
+    private fun setWallpaperSafely(bitmap_s: Bitmap?, flag: Int, wallpaperManager: WallpaperManager) {
+        val maxRetries = 3
+        for (attempt in 1..maxRetries) {
+            try {
+                wallpaperManager.setBitmap(bitmap_s, null, true, flag)
+                return
+            } catch (e: IOException) {
+                if (attempt == maxRetries) {
+                    Log.e("Wallpaper", "Final attempt failed: \${e.message}")
+                    return
+                }
+                Thread.sleep(1000L * attempt)
             }
         }
     }

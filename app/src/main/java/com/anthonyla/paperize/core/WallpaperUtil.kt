@@ -9,10 +9,9 @@ import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.ImageDecoder
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RadialGradient
-import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
@@ -41,7 +40,6 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
-
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
 
@@ -91,8 +89,7 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
  * https://stackoverflow.com/a/70087378
  */
 object ScreenMetricsCompat {
-    private val api: Api =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ApiLevel30() else Api()
+    private val api: Api = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ApiLevel30() else Api()
     fun getScreenSize(context: Context): Size = api.getScreenSize(context)
     @Suppress("DEPRECATION")
     private open class Api {
@@ -143,20 +140,13 @@ fun retrieveBitmap(
         try {
             val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
             ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                decoder.setTargetSampleSize(
-                    calculateInSampleSize(
-                        imageSize,
-                        width,
-                        height
-                    )
-                )
+                decoder.setTargetSampleSize(calculateInSampleSize(imageSize, width, height))
                 decoder.isMutableRequired = true
             }
         } catch (e: Exception) {
             context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                 val options = BitmapFactory.Options().apply {
-                    inSampleSize =
-                        calculateInSampleSize(imageSize, width, height)
+                    inSampleSize = calculateInSampleSize(imageSize, width, height)
                     inMutable = true
                 }
                 BitmapFactory.decodeStream(inputStream, null, options)
@@ -165,8 +155,7 @@ fun retrieveBitmap(
     } else {
         context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
             val options = BitmapFactory.Options().apply {
-                inSampleSize =
-                    calculateInSampleSize(imageSize, width, height)
+                inSampleSize = calculateInSampleSize(imageSize, width, height)
                 inMutable = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
@@ -179,16 +168,19 @@ fun retrieveBitmap(
  * The bitmap will fit into the given width while maintaining the same aspect ratio
  */
 fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
+    if (source.width == width && source.height == height) {
+        return source
+    }
     return try {
-        val aspectRatio = source.height.toFloat() / source.width.toFloat()
-        val newHeight = (width * aspectRatio).toInt()
-        val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(newBitmap)
-        val scaledBitmap = Bitmap.createScaledBitmap(source, width, newHeight, true)
-        val top = (height - newHeight) / 2f
-        canvas.drawBitmap(scaledBitmap, 0f, top, null)
-        scaledBitmap.recycle()
-        newBitmap
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val canvas = Canvas(bitmap)
+        val scale = width.toFloat() / source.width
+        val matrix = Matrix().apply {
+            postScale(scale, scale)
+            postTranslate(0f, (height - source.height * scale) / 2)
+        }
+        canvas.drawBitmap(source, matrix, null)
+        bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error fitting bitmap: $e")
         source
@@ -199,24 +191,24 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Scale a bitmap using the fit method
  */
 fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
+    if (source.width == width && source.height == height) {
+        return source
+    }
     return try {
-        val aspectRatio = source.width.toFloat() / source.height.toFloat()
-        val newWidth: Int
-        val newHeight: Int
-        if (width > height * aspectRatio) {
-            newWidth = width
-            newHeight = (width / aspectRatio).toInt()
-        } else {
-            newHeight = height
-            newWidth = (height * aspectRatio).toInt()
-        }
-        val scaledBitmap = Bitmap.createScaledBitmap(source, newWidth, newHeight, true)
-        val x = ((width - newWidth) / 2f)
-        val y = ((height - newHeight) / 2f)
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
         val canvas = Canvas(bitmap)
-        canvas.drawBitmap(scaledBitmap, x, y, null)
-        scaledBitmap.recycle()
+        val sourceAspect = source.width.toFloat() / source.height.toFloat()
+        val targetAspect = width.toFloat() / height.toFloat()
+        val scale = if (sourceAspect > targetAspect) { height.toFloat() / source.height.toFloat() }
+        else { width.toFloat() / source.width.toFloat() }
+        val matrix = Matrix().apply {
+            setScale(scale, scale)
+            postTranslate(
+                (width - source.width * scale) / 2,
+                (height - source.height * scale) / 2
+            )
+        }
+        canvas.drawBitmap(source, matrix, null)
         bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error filling bitmap: $e")
@@ -228,13 +220,20 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Stretch the bitmap to fit the given width and height
  */
 fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
+    if (source.width == width && source.height == height) {
+        return source
+    }
     return try {
-        val newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(newBitmap)
-        val bitmap = Bitmap.createScaledBitmap(source, width, height, true)
-        canvas.drawBitmap(bitmap, 0f, 0f, null)
-        bitmap.recycle()
-        newBitmap
+        val matrix = Matrix().apply {
+            setScale(width.toFloat() / source.width, height.toFloat() / source.height)
+        }
+        val paint = Paint().apply {
+            isFilterBitmap = true
+            isAntiAlias = true
+        }
+        Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565).apply {
+            Canvas(this).drawBitmap(source, matrix, paint)
+        }
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error stretching bitmap: $e")
         source
@@ -245,20 +244,15 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Darken the bitmap by a certain percentage - 0 is darkest, 100 is original
  */
 fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
-    return try {
-        val safePercentage = (100 - percent).coerceIn(0, 100)
-        val factor = 1 - safePercentage / 100f
-        val canvas = Canvas(source)
-        val paint = Paint().apply {
-            colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
-                setScale(factor, factor, factor, 1f)
-            })
-        }
-        canvas.drawBitmap(source, 0f, 0f, paint)
-        source
-    } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error darkening bitmap: $e")
-        source
+    val factor = (100 - percent.coerceIn(0, 100)) / 100f
+    val paint = Paint().apply {
+        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
+            setScale(factor, factor, factor, 1f)
+        })
+    }
+
+    return source.copy(Bitmap.Config.RGB_565, true).apply {
+        Canvas(this).drawBitmap(source, 0f, 0f, paint)
     }
 }
 
@@ -266,11 +260,12 @@ fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
  * Blur the bitmap by a certain percentage
  */
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
+    if (percent <= 0) return source
     return try {
-        val factor = percent.toFloat().div(100f) * 20f
-        Toolkit.blur(source, factor.toInt())
+        val radius = (percent * 0.2f).toInt()
+        Toolkit.blur(source, radius)
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error darkening bitmap: $e")
+        Log.e("WallpaperUtil", "Error blurring bitmap: $e")
         source
     }
 }
@@ -279,39 +274,33 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
  * Apply a vignette effect to the bitmap
  */
 fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
+    if (percent <= 0) return source
     return try {
-        val image = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val image = source.copy(Bitmap.Config.RGB_565, true) ?: return source
         val canvas = Canvas(image)
-        canvas.drawBitmap(source, 0f, 0f, Paint())
-        val rad: Int = if (source.width < source.height) {
-            val o = (source.height * 2) / 100
-            source.height - o * percent / 3
-        } else {
-            val o = (source.width * 2) / 100
-            source.width - o * percent / 3
-        }
-        val rect = Rect(0, 0, source.width, source.height)
-        val rectF = RectF(rect)
-        val colors = intArrayOf(0, 0, Color.BLACK)
-        val pos = floatArrayOf(0.0f, 0.1f, 1.0f)
-        val linGradLR: Shader = RadialGradient(
-            rect.centerX().toFloat(),
-            rect.centerY().toFloat(),
-            rad.toFloat(),
-            colors,
-            pos,
-            Shader.TileMode.CLAMP
+        val dim = if (source.width < source.height) source.height else source.width
+        val rad = (dim * (150f - percent) / 150f).toInt()
+        val centerX = source.width / 2f
+        val centerY = source.height / 2f
+
+        val colors = intArrayOf(
+            Color.TRANSPARENT,
+            Color.TRANSPARENT,
+            Color.argb((0.5f * 255).toInt(), 0, 0, 0)
         )
-        val paint = Paint().apply {
-            shader = linGradLR
+        val pos = floatArrayOf(0f, 0.1f, 1f)
+
+        val vignettePaint = Paint().apply {
+            shader = RadialGradient(
+                centerX, centerY, rad.toFloat(),
+                colors, pos, Shader.TileMode.CLAMP
+            )
             isAntiAlias = true
-            isDither = true
-            alpha = 128
         }
-        canvas.drawRect(rectF, paint)
+        canvas.drawRect(0f, 0f, source.width.toFloat(), source.height.toFloat(), vignettePaint)
         image
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error applying vignette effect: $e")
+        Log.e("WallpaperUtil", "Error applying vignette: $e")
         source
     }
 }
@@ -320,36 +309,30 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
  * Apply a grey filter to the bitmap based on a percentage
  */
 fun grayBitmap(bitmap: Bitmap, percent: Int): Bitmap {
+    if (percent <= 0) return bitmap
     val factor = percent / 100f
-    val colorMatrix = ColorMatrix().apply {
-        setSaturation(1 - factor)
-    }
-    val paint = Paint().apply {
-        colorFilter = ColorMatrixColorFilter(colorMatrix)
-    }
-    val grayBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(grayBitmap)
-    canvas.drawBitmap(bitmap, 0f, 0f, paint)
+    val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
+    val paint = Paint().apply { colorFilter = ColorMatrixColorFilter(colorMatrix) }
 
+    val grayBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.RGB_565)
+    Canvas(grayBitmap).apply { drawBitmap(bitmap, 0f, 0f, paint) }
     return grayBitmap
 }
 
 /**
  * Calculate the brightness of a bitmap (0-100)
- * https://gist.github.com/httnn/b1d772caf76cdc0c11e2
  */
-fun calculateBrightness(bitmap: Bitmap, pixelSpacing: Int = 1): Int {
-    var brightness = 0.0
-    val pixels = IntArray(bitmap.width * bitmap.height)
-    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-    for (i in pixels.indices step pixelSpacing.coerceAtLeast(1)) {
+fun calculateBrightness(bitmap: Bitmap, sampleSize: Int = 16): Int {
+    val pixels = IntArray(bitmap.width * bitmap.height / sampleSize)
+    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height / sampleSize)
+    var total = 0f
+    for (i in pixels.indices step sampleSize) {
         val color = pixels[i]
-        val R = Color.red(color)
-        val G = Color.green(color)
-        val B = Color.blue(color)
-        brightness += 0.299*R + 0.587*G + 0.114*B
+        total += 0.299f * Color.red(color) +
+                0.587f * Color.green(color) +
+                0.114f * Color.blue(color)
     }
-    return (brightness / (pixels.size / pixelSpacing)).toInt()
+    return (total / (pixels.size / sampleSize)).toInt()
 }
 
 /**
@@ -579,8 +562,26 @@ fun processBitmap(
         }
 
         return processedBitmap
-    } catch (e: Exception) {
-        Log.e("PaperizeWallpaperChanger", "Error darkening bitmap", e)
+    }
+    catch (e: OutOfMemoryError) {
+        Log.e("PaperizeWallpaperChanger", "Error ran out of memory", e)
+        return processBitmap(
+            width/2,
+            height/2,
+            source,
+            darken,
+            darkenPercent,
+            scaling,
+            blur,
+            blurPercent,
+            vignette,
+            vignettePercent,
+            grayscale,
+            grayscalePercent
+        )
+    }
+    catch (e: Exception) {
+        Log.e("PaperizeWallpaperChanger", "Error processing bitmap", e)
         return null
     }
 }
