@@ -136,7 +136,9 @@ class HomeWallpaperService: Service() {
     // Creates a notification for the wallpaper service
     private fun createNotification(nextSetTime: LocalDateTime?): android.app.Notification? {
         nextSetTime?.let {
-            val changeWallpaperIntent = Intent(this, WallpaperBootAndChangeReceiver::class.java)
+            val changeWallpaperIntent = Intent(this, WallpaperBootAndChangeReceiver::class.java).apply {
+                action = "com.anthonyla.paperize.SHORTCUT"
+            }
             val pendingChangeWallpaperIntent = PendingIntent.getBroadcast(
                 this,
                 0,
@@ -150,11 +152,8 @@ class HomeWallpaperService: Service() {
                 mainActivityIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-
             val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
             val formattedNextSetTime = nextSetTime.format(formatter)
-
-            // Build the notification
             return NotificationCompat.Builder(this, "wallpaper_service_channel").apply {
                 setContentTitle(getString(R.string.app_name))
                 setContentText(getString(R.string.next_wallpaper_change, formattedNextSetTime))
@@ -596,6 +595,7 @@ class HomeWallpaperService: Service() {
      */
     private fun refreshAlbum(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
+            Log.d("PaperizeWallpaperChanger", "Refreshing album")
             try {
                 val albumWithWallpapers = albumRepository.getAlbumsWithWallpaperAndFolder().first()
                 albumWithWallpapers.forEach { album ->

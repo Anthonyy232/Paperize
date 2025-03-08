@@ -33,7 +33,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.folder_view_screen.FolderViewScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.home_screen.HomeScreen
-import com.anthonyla.paperize.feature.wallpaper.presentation.licenses_screen.LicensesScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.notifications_screen.NotificationScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.privacy_screen.PrivacyScreen
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
@@ -49,7 +48,6 @@ import com.anthonyla.paperize.feature.wallpaper.util.navigation.AddAlbum
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.AlbumView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.FolderView
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Home
-import com.anthonyla.paperize.feature.wallpaper.util.navigation.Licenses
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Notification
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Privacy
 import com.anthonyla.paperize.feature.wallpaper.util.navigation.Settings
@@ -521,8 +519,8 @@ fun PaperizeApp(
                 onConfirmation = {
                     navController.navigateUp()
                 },
-                onShowWallpaperView = {
-                    navController.navigate(WallpaperView(it))
+                onShowWallpaperView = { uri, name ->
+                    navController.navigate(WallpaperView(uri, name))
                 },
                 onShowFolderView = { folder ->
                     if (folder.wallpapers.isNotEmpty()) {
@@ -544,7 +542,8 @@ fun PaperizeApp(
         animatedScreen<WallpaperView>(animate = settingsState.value.themeSettings.animate) { backStackEntry ->
             val wallpaperView: WallpaperView = backStackEntry.toRoute()
             WallpaperViewScreen(
-                wallpaperUri = wallpaperView.wallpaper,
+                wallpaperUri = wallpaperView.wallpaperUri,
+                wallpaperName = wallpaperView.wallpaperName,
                 onBackClick = { navController.navigateUp() },
                 animate = settingsState.value.themeSettings.animate
             )
@@ -559,8 +558,8 @@ fun PaperizeApp(
                 FolderViewScreen(
                     folder = folderState.value.folder!!,
                     onBackClick = { navController.navigateUp() },
-                    onShowWallpaperView = {
-                        navController.navigate(WallpaperView(it))
+                    onShowWallpaperView = { uri, name ->
+                        navController.navigate(WallpaperView(uri, name))
                     },
                     animate = settingsState.value.themeSettings.animate
                 )
@@ -606,8 +605,8 @@ fun PaperizeApp(
                     albumScreenViewModel = albumScreenViewModel ,
                     animate = settingsState.value.themeSettings.animate,
                     onBackClick = { navController.navigateUp() },
-                    onShowWallpaperView = {
-                        navController.navigate(WallpaperView(it))
+                    onShowWallpaperView = { uri, name ->
+                        navController.navigate(WallpaperView(uri, name))
                     },
                     onShowFolderView = { folder ->
                         if (folder.wallpapers.isNotEmpty()) {
@@ -649,9 +648,6 @@ fun PaperizeApp(
                 onPrivacyClick = {
                     navController.navigate(Privacy)
                 },
-                onLicenseClick = {
-                    navController.navigate(Licenses)
-                },
                 onContactClick = {
                     SendContactIntent(context)
                 },
@@ -676,13 +672,6 @@ fun PaperizeApp(
                 onBackClick = { navController.navigateUp() },
             )
         }
-
-        // Navigate to the licenses screen to view the licenses of the libraries used
-        animatedScreen<Licenses>(animate = settingsState.value.themeSettings.animate) {
-            LicensesScreen(
-                onBackClick = { navController.navigateUp() }
-            )
-        }
     }
 }
 
@@ -701,7 +690,6 @@ private fun CoroutineScope.scheduleWallpaperUpdate(
     job?.cancel()
     return launch {
         if (delay > 0) delay(delay)
-
         if (refreshNextTime) {
             settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
         }

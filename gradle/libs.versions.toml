@@ -1,97 +1,93 @@
 [versions]
-androidGradlePlugin = "8.7.1"
-kotlin = "2.0.21"
+androidGradlePlugin = "8.9.0"
+kotlin = "2.1.0"
 hilt = "2.52"
-ksp = "2.0.21-1.0.26"
-aboutLibraries = "11.2.3"
-accompanistPermissions = "0.36.0"
-aboutlibrariesCore = "11.2.3"
-activityCompose = "1.9.3"
+ksp = "2.1.0-1.0.29"
+accompanistPermissions = "0.37.2"
+activityCompose = "1.10.1"
 animation = "1.7.5"
-composeBom = "2024.10.01"
+composeBom = "2025.02.00"
 coreKtx = "1.15.0"
-coreSplashscreen = "1.2.0-alpha02"
-datastore = "1.1.1"
-datastorePreferences = "1.1.1"
-dfc = "1.0.8"
+coreSplashscreen = "1.2.0-beta01"
+datastore = "1.1.3"
+datastorePreferences = "1.1.3"
+dfc = "1.1"
 espressoCore = "3.6.1"
 filamentAndroid = "1.17.1"
-foundation = "1.7.5"
-gson = "2.11.0"
+foundation = "1.7.8"
+gson = "2.12.1"
 documentfile = "1.1.0-alpha01"
-hiltAndroid = "2.52"
-hiltAndroidCompiler = "2.52"
+hiltAndroid = "2.55"
+hiltAndroidCompiler = "2.55"
 hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-kotlinxSerializationJson = "1.7.3"
-landscapistGlide = "2.4.2"
+kotlinxSerializationJson = "1.8.0"
+landscapistGlide = "2.4.7"
 lazycolumnscrollbar = "2.2.0"
 lifecycleRuntimeKtx = "2.8.7"
-lottieCompose = "6.6.0"
-material = "1.7.5"
+lottieCompose = "6.6.2"
+material = "1.7.8"
 material3 = "1.3.1"
-navigationCompose = "2.8.3"
+navigationCompose = "2.8.8"
 profileinstaller = "1.4.1"
 renderscriptIntrinsicsReplacementToolkit = "b6363490c3"
 roomRuntime = "2.6.1"
 roomCompiler = "2.6.1"
 taskerpluginlibrary = "0.4.10"
 toolbarCompose = "2.3.5"
-ui = "1.7.5"
+ui = "1.7.8"
 workRuntimeKtx = "2.10.0"
-zoomable = "2.0.0-beta01"
-reorderable = "2.4.0"
+zoomable = "2.1.0"
+reorderable = "2.4.3"
 
 [libraries]
-aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibrariesCore" }
-aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibrariesCore" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
-androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.2" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.10.1" }
+androidx-animation = { module = "androidx.compose.animation:animation", version = "1.8.0-beta03" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.02.00" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.15.0" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0-beta01" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.3" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
-androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
+androidx-documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0-alpha01" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNavigationCompose" }
-androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material" }
-androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
-androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
-androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "ui" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation", version = "1.8.0-beta03" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version = "1.2.0" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version = "1.2.0" }
+androidx-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version = "2.9.0-alpha11" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version = "2.9.0-alpha11" }
+androidx-material = { module = "androidx.compose.material:material", version = "1.8.0-beta03" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version = "1.7.8" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.4.0-alpha09" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.0-alpha07" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.7.0-rc01" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.7.0-rc01" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version = "2.7.0-rc01" }
+androidx-ui = { module = "androidx.compose.ui:ui", version = "1.8.0-beta03" }
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.8.0-beta03" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "ui" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "ui" }
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-dfc = { module = "com.lazygeniouz:dfc", version.ref = "dfc" }
-filament-android = { module = "com.google.ar.sceneform:filament-android", version.ref = "filamentAndroid" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
-junit = { module = "junit:junit", version.ref = "junit" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version.ref = "landscapistGlide" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.0" }
+dfc = { module = "com.lazygeniouz:dfc", version = "1.1" }
+filament-android = { module = "com.google.ar.sceneform:filament-android", version = "1.17.1" }
+gson = { module = "com.google.code.gson:gson", version = "2.12.1" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version = "2.55" }
+hilt-android = { module = "com.google.dagger:hilt-android", version = "2.55" }
+junit = { module = "junit:junit", version = "4.13.2" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.0" }
+landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.4.7" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazycolumnscrollbar" }
-lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.2" }
 renderscript-intrinsics-replacement-toolkit = { module = "com.github.android:renderscript-intrinsics-replacement-toolkit", version.ref = "renderscriptIntrinsicsReplacementToolkit" }
-taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version.ref = "taskerpluginlibrary" }
-toolbar-compose = { module = "me.onebone:toolbar-compose", version.ref = "toolbarCompose" }
-zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
-reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
+taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
+toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
+zoomable = { module = "net.engawapg.lib:zoomable", version = "2.1.0" }
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "2.4.3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -100,6 +96,5 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidTest = { id = "com.android.test", version.ref = "androidGradlePlugin" }

@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,7 +69,7 @@ fun AlbumViewTopBar(
     var showSelectionDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     TopAppBar(
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)),
         title = { if (!selectionMode) Text(title) },
         navigationIcon = {
             if (!selectionMode) {

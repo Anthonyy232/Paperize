@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlinCompose)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.kotlinSerialization)
 }
 
@@ -36,6 +35,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -54,20 +54,16 @@ android {
         buildConfig = true
     }
 
-    @Suppress("UnstableApiUsage")
     androidResources {
+        @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
     }
 
-    ndkVersion = "26.3.11579264"
-    buildToolsVersion = "35.0.0"
+    ndkVersion = "27.2.12479018"
+    buildToolsVersion = "35.0.1"
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
-    }
-
-    aboutLibraries {
-        excludeFields = arrayOf("generated")
     }
 
     applicationVariants.all {
@@ -112,8 +108,6 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.lottie.compose)
     implementation(libs.accompanist.permissions)
-    implementation(libs.aboutlibraries.core)
-    implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.androidx.foundation)
     implementation(libs.lazycolumnscrollbar)
     implementation(libs.taskerpluginlibrary)

@@ -27,7 +27,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -41,7 +40,6 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.com
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ContactListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.DarkModeListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.DynamicThemingListItem
-import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.LicenseListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.ListSectionTitle
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.NotificationListItem
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.components.PaperizeListItem
@@ -78,7 +76,6 @@ private fun calculateToolbarValues(collapseFraction: Float) = with(ToolbarConfig
     Pair(dynamicPaddingStart, textSize)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen(
     themeSettings: ThemeSettings,
@@ -88,7 +85,6 @@ fun SettingsScreen(
     onDynamicThemingClick: (Boolean) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
-    onLicenseClick: () -> Unit,
     onResetClick: () -> Unit,
     onContactClick: () -> Unit
 ) {
@@ -138,7 +134,6 @@ fun SettingsScreen(
                 onDynamicThemingClick = onDynamicThemingClick,
                 onAnimateClick = onAnimateClick,
                 onPrivacyClick = onPrivacyClick,
-                onLicenseClick = onLicenseClick,
                 onResetClick = onResetClick,
                 onContactClick = onContactClick,
                 context = context
@@ -155,7 +150,6 @@ private fun SettingsContent(
     onDynamicThemingClick: (Boolean) -> Unit,
     onAnimateClick: (Boolean) -> Unit,
     onPrivacyClick: () -> Unit,
-    onLicenseClick: () -> Unit,
     onResetClick: () -> Unit,
     onContactClick: () -> Unit,
     context: android.content.Context
@@ -169,7 +163,7 @@ private fun SettingsContent(
             .padding(horizontal = 24.dp)
     ) {
         AppearanceSection(themeSettings, onDarkModeClick, onAmoledClick, onDynamicThemingClick, onAnimateClick)
-        AboutSection(context, onPrivacyClick, onLicenseClick, onContactClick, onResetClick)
+        AboutSection(context, onPrivacyClick, onContactClick, onResetClick)
     }
 }
 
@@ -211,7 +205,6 @@ private fun AppearanceSection(
 private fun AboutSection(
     context: android.content.Context,
     onPrivacyClick: () -> Unit,
-    onLicenseClick: () -> Unit,
     onContactClick: () -> Unit,
     onResetClick: () -> Unit
 ) {
@@ -230,8 +223,6 @@ private fun AboutSection(
     }
     Spacer(modifier = Modifier.height(16.dp))
     PrivacyPolicyListItem(onPrivacyClick)
-    Spacer(modifier = Modifier.height(16.dp))
-    LicenseListItem(onLicenseClick)
     Spacer(modifier = Modifier.height(16.dp))
     ContactListItem(onContactClick)
     Spacer(modifier = Modifier.height(16.dp))

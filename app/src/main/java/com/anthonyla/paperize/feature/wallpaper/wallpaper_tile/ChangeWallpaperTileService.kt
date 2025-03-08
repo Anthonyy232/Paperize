@@ -12,7 +12,12 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class ChangeWallpaperTileService: TileService() {
-    @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
+    companion object {
+        const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.SHORTCUT"
+    }
+
+    @Inject
+    lateinit var settingsDataStoreImpl: SettingsDataStore
 
     override fun onTileAdded() {
         super.onTileAdded()
@@ -28,7 +33,10 @@ class ChangeWallpaperTileService: TileService() {
 
     override fun onClick() {
         super.onClick()
-        val intent = Intent(this, WallpaperBootAndChangeReceiver::class.java)
+        val intent = Intent(ACTION_CHANGE_WALLPAPER).apply {
+            setClass(this@ChangeWallpaperTileService, WallpaperBootAndChangeReceiver::class.java)
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+        }
         sendBroadcast(intent)
     }
 

@@ -8,6 +8,7 @@ import com.anthonyla.paperize.data.settings.SettingsDataStoreImpl
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDatabase
 import com.anthonyla.paperize.feature.wallpaper.data.repository.AlbumRepositoryImpl
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,10 +26,10 @@ object AppModule {
     @Singleton
     fun provideAlbumDatabase(app: Application): AlbumDatabase {
         return Room.databaseBuilder(
-            app,
-            AlbumDatabase::class.java,
-            AlbumDatabase.DATABASE_NAME
-        ).fallbackToDestructiveMigration().addMigrations().build()
+                app,
+                AlbumDatabase::class.java,
+                AlbumDatabase.DATABASE_NAME
+        ).fallbackToDestructiveMigration(true).addMigrations().build()
     }
 
     @Provides

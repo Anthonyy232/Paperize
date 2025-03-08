@@ -2,11 +2,13 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.CursorWindow
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -35,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.data.settings.SettingsDataStore
-import com.anthonyla.paperize.feature.wallpaper.presentation.album.AlbumsViewModel
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsEvent
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsViewModel
@@ -45,6 +46,7 @@ import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
+import java.lang.reflect.Field
 import javax.inject.Inject
 
 
@@ -104,7 +106,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleWallpaperScheduling(
+    private suspend fun handleWallpaperScheduling(
         settings: SettingsState,
         scheduler: WallpaperAlarmSchedulerImpl
     ) {
@@ -125,7 +127,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun scheduleWallpaperAlarm(
+    private suspend fun scheduleWallpaperAlarm(
         settings: SettingsState,
         scheduler: WallpaperAlarmSchedulerImpl
     ) {
@@ -139,12 +141,14 @@ class MainActivity : ComponentActivity() {
                 setHome = wallpaperSettings.setHomeWallpaper,
                 scheduleSeparately = scheduleSettings.scheduleSeparately,
                 changeStartTime = scheduleSettings.changeStartTime,
-                startTime = scheduleSettings.startTime
+                startTime = scheduleSettings.startTime,
             ),
             origin = null,
             changeImmediate = true,
             cancelImmediate = true,
-            firstLaunch = true
+            firstLaunch = true,
+            homeNextTime = settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME),
+            lockNextTime = settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME)
         )
         settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
     }

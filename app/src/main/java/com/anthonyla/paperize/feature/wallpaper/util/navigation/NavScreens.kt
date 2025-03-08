@@ -28,12 +28,6 @@ object Home
 object Settings
 
 /**
- * Object for Licenses screen
- */
-@Serializable
-object Licenses
-
-/**
  * Object for Privacy screen
  */
 @Serializable
@@ -55,7 +49,7 @@ data class AddAlbum(val initialAlbumName: String)
  * Data class for WallpaperView screen
  */
 @Serializable
-data class WallpaperView(val wallpaper: String)
+data class WallpaperView(val wallpaperUri: String, val wallpaperName: String)
 
 /**
  * Object for FolderView screen

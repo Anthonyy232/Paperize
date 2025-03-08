@@ -46,7 +46,7 @@ fun AlbumViewScreen(
     albumScreenViewModel: AlbumScreenViewModel,
     animate: Boolean,
     onBackClick: () -> Unit,
-    onShowWallpaperView: (String) -> Unit,
+    onShowWallpaperView: (String, String) -> Unit,
     onShowFolderView: (Folder) -> Unit,
     onDeleteAlbum: () -> Unit,
     onSortClick: (List<Folder>, List<Wallpaper>)  -> Unit,
@@ -237,7 +237,7 @@ fun AlbumViewScreen(
                                 },
                                 onWallpaperViewClick = {
                                     if (!albumViewState.value.isLoading)
-                                        onShowWallpaperView(album.wallpapers[index].wallpaperUri)
+                                        onShowWallpaperView(album.wallpapers[index].wallpaperUri, album.wallpapers[index].fileName)
                                 },
                                 modifier = Modifier
                                     .padding(4.dp)

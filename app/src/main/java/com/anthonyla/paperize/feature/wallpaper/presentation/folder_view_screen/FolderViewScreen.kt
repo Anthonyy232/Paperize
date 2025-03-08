@@ -28,7 +28,7 @@ import my.nanihadesuka.compose.ScrollbarSettings
 fun FolderViewScreen(
     folder: Folder,
     onBackClick: () -> Unit,
-    onShowWallpaperView: (String) -> Unit,
+    onShowWallpaperView: (String, String) -> Unit,
     animate: Boolean
 ) {
     val lazyListState = rememberLazyGridState()
@@ -69,7 +69,7 @@ fun FolderViewScreen(
                             allowHapticFeedback = false,
                             onItemSelection = {},
                             onWallpaperViewClick = {
-                                onShowWallpaperView(wallpaper.wallpaperUri)
+                                onShowWallpaperView(wallpaper.wallpaperUri, wallpaper.fileName)
                             },
                             modifier = Modifier
                                 .padding(4.dp)

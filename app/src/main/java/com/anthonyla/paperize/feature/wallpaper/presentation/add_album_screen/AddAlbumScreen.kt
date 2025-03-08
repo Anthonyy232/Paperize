@@ -47,7 +47,7 @@ fun AddAlbumScreen(
     initialAlbumName: String,
     onBackClick: () -> Unit,
     onConfirmation: () -> Unit,
-    onShowWallpaperView: (String) -> Unit,
+    onShowWallpaperView: (String, String) -> Unit,
     onShowFolderView: (Folder) -> Unit,
     onSortClick: (List<Folder>, List<Wallpaper>)  -> Unit,
     animate: Boolean
@@ -234,7 +234,7 @@ fun AddAlbumScreen(
                             },
                             onWallpaperViewClick = {
                                 if (!addAlbumState.value.isLoading) {
-                                    onShowWallpaperView(it.wallpaperUri)
+                                    onShowWallpaperView(it.wallpaperUri, it.fileName)
                                 }
                             },
                             modifier = Modifier

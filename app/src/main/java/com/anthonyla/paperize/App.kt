@@ -1,9 +1,13 @@
 package com.anthonyla.paperize
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.database.CursorWindow
 import dagger.hilt.android.HiltAndroidApp
+import java.lang.reflect.Field
+
 
 /**
  * Application class for Hilt

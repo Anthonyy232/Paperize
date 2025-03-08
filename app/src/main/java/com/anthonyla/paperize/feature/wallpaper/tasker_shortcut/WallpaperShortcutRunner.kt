@@ -35,9 +35,16 @@ class ActivityConfigBasicAction : Activity(), TaskerPluginConfigNoInput {
 }
 
 class ShortcutActionRunner : TaskerPluginRunnerActionNoOutputOrInput() {
+    companion object {
+        private const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.SHORTCUT"
+    }
+
     override fun run(context: Context, input: TaskerInput<Unit>): TaskerPluginResult<Unit> {
         Handler(Looper.getMainLooper()).post {
-            val intent = Intent(context, WallpaperBootAndChangeReceiver::class.java)
+            val intent = Intent(ACTION_CHANGE_WALLPAPER).apply {
+                setClass(context, WallpaperBootAndChangeReceiver::class.java)
+                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            }
             context.sendBroadcast(intent)
         }
         return TaskerPluginResultSucess()

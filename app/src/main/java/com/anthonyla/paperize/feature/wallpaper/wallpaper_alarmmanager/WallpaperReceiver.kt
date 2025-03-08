@@ -1,20 +1,34 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager
 
+import android.app.ActivityOptions
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service.NOTIFICATION_SERVICE
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
+import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 import com.anthonyla.paperize.core.Type
+import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Receiver for the alarm manager to change wallpaper
  */
 @AndroidEntryPoint
-class WallpaperReceiver: BroadcastReceiver() {
+class WallpaperReceiver : BroadcastReceiver() {
+    @Inject
+    lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null) {
             if (intent?.getBooleanExtra("refresh", false) == true) {
@@ -23,8 +37,7 @@ class WallpaperReceiver: BroadcastReceiver() {
                 }
                 context.startService(serviceIntent)
                 WallpaperAlarmSchedulerImpl(context).scheduleRefresh()
-            }
-            else {
+            } else {
                 val homeInterval = intent?.getIntExtra("homeInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val lockInterval = intent?.getIntExtra("lockInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val scheduleSeparately = intent?.getBooleanExtra("scheduleSeparately", false) ?: false
@@ -49,25 +62,26 @@ class WallpaperReceiver: BroadcastReceiver() {
 
                 // Schedule next alarm for next wallpaper change
                 val origin = intent?.getIntExtra("origin", -1)?.takeIf { it != -1 }
-                WallpaperAlarmSchedulerImpl(context).scheduleWallpaperAlarm(
-                    WallpaperAlarmItem(
-                        homeInterval = homeInterval,
-                        lockInterval = lockInterval,
-                        scheduleSeparately = scheduleSeparately,
-                        setHome = setHome,
-                        setLock = setLock,
-                        changeStartTime = changeStartTime,
-                        startTime = Pair(startTime[0], startTime[1]),
-                    ),
-                    origin
-                )
+                CoroutineScope(Dispatchers.IO).launch {
+                    WallpaperAlarmSchedulerImpl(context).scheduleWallpaperAlarm(
+                        wallpaperAlarmItem = WallpaperAlarmItem(
+                            homeInterval = homeInterval,
+                            lockInterval = lockInterval,
+                            scheduleSeparately = scheduleSeparately,
+                            setHome = setHome,
+                            setLock = setLock,
+                            changeStartTime = changeStartTime,
+                            startTime = Pair(startTime[0], startTime[1]),
+                        ),
+                        origin = origin,
+                        homeNextTime = settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME),
+                        lockNextTime = settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME),
+                    )
+                }
             }
         }
     }
 
-    /**
-     * Starts the service to change the wallpaper
-     */
     private fun startService(context: Context, serviceClass: Class<*>, action: String, homeInterval: Int? = null, lockInterval: Int? = null, scheduleSeparately: Boolean? = null, type: Int? = null) {
         val serviceIntent = Intent(context, serviceClass).apply {
             this.action = action

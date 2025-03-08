@@ -10,7 +10,16 @@ interface WallpaperAlarmScheduler {
      * @param setAlarm whether to set the alarm or not
      * @param firstLaunch whether this is the first launch of the wallpaper changer
      */
-    fun scheduleWallpaperAlarm(wallpaperAlarmItem: WallpaperAlarmItem, origin: Int? = null, changeImmediate: Boolean = false, cancelImmediate: Boolean = false, setAlarm: Boolean = true, firstLaunch: Boolean = false)
+    suspend fun scheduleWallpaperAlarm(
+        wallpaperAlarmItem: WallpaperAlarmItem,
+        origin: Int? = null,
+        changeImmediate: Boolean = false,
+        cancelImmediate: Boolean = false,
+        setAlarm: Boolean = true,
+        firstLaunch: Boolean = false,
+        homeNextTime: String? = "",
+        lockNextTime: String? = "",
+    )
 
     /**
      * Update the wallpaper alarm with new times without changing the wallpaper

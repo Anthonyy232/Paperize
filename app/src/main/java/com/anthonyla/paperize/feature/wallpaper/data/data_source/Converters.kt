@@ -21,13 +21,17 @@ class Converters {
      * Convert json string to list of strings
      */
     @TypeConverter
-    fun jsonStringToList(value: String) = gson.fromJson(value, Array<String>::class.java).toList()
+    fun jsonStringToList(value: String?): List<String> {
+        if (value == null) return emptyList()
+        return gson.fromJson(value, Array<String>::class.java).toList()
+    }
 
     @TypeConverter
-    fun fromWallpaperList(value: List<Wallpaper>)= gson.toJson(value)
+    fun fromWallpaperList(value: List<Wallpaper>): String? = gson.toJson(value)
 
     @TypeConverter
-    fun toWallpaperList(value: String): List<Wallpaper> {
+    fun toWallpaperList(value: String?): List<Wallpaper> {
+        if (value == null) return emptyList()
         val listType = object : TypeToken<List<Wallpaper>>() {}.type
         return gson.fromJson(value, listType)
     }

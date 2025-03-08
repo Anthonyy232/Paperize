@@ -35,3 +35,16 @@
 -keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Folder {
  !transient <fields>;
 }
+
+# Keep wallpaper services and their action enums
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService { *; }
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService$Actions { *; }
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService { *; }
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService$Actions { *; }
+
+# Keep WallpaperAction classes
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAction { *; }
+-keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAction$* { *; }
+
+# Keep Type enum
+-keep class com.anthonyla.paperize.core.Type { *; }

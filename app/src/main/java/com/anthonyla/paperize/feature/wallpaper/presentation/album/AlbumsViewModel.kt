@@ -66,10 +66,25 @@ class AlbumsViewModel @Inject constructor (
                     repository.updateAlbum(
                         event.album.album.copy(
                             selected = true,
-                            homeWallpapersInQueue = homeWallpapers,
-                            lockWallpapersInQueue = lockWallpapers
+                            lockWallpapersInQueue = lockWallpapers,
+                            homeWallpapersInQueue = homeWallpapers
                         )
                     )
+
+                    _state.value.albumsWithWallpapers
+                        .filter { it.album.initialAlbumName != event.album.album.initialAlbumName }
+                        .forEach { album ->
+                            val otherHomeWallpapers = if (event.shuffle) album.totalWallpapers.shuffled().map { it.wallpaperUri }
+                            else album.sortedTotalWallpapers.map { it.wallpaperUri }
+                            val otherLockWallpapers = if (event.shuffle) album.totalWallpapers.shuffled().map { it.wallpaperUri }
+                            else album.sortedTotalWallpapers.map { it.wallpaperUri }
+                            repository.updateAlbum(
+                                album.album.copy(
+                                    lockWallpapersInQueue = otherLockWallpapers,
+                                    homeWallpapersInQueue = otherHomeWallpapers
+                                )
+                            )
+                        }
                 }
             }
 
