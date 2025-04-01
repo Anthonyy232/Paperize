@@ -381,7 +381,7 @@ class LockWallpaperService: Service() {
             }
 
             // Run notification
-            if (homeInterval != lockInterval || (settings.setLock && !settings.setHome)) {
+            if (homeInterval != lockInterval && scheduleSeparately) {
                 val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
                 val homeNextSetTime = try {
                     LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
@@ -390,6 +390,30 @@ class LockWallpaperService: Service() {
                 }
                 val currentTime = LocalDateTime.now()
                 val lockNextSetTime = currentTime.plusMinutes(lockInterval.toLong())
+                val nextSetTime = when {
+                    lockNextSetTime.isBefore(homeNextSetTime) && lockNextSetTime.isAfter(currentTime) -> lockNextSetTime
+                    homeNextSetTime.isAfter(currentTime) -> homeNextSetTime
+                    else -> lockNextSetTime
+                }
+                nextSetTime?.let {
+                    settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+                    settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter))
+                    settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, lockNextSetTime.toString())
+                    settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, homeNextSetTime.toString())
+                }
+                val notification = createNotification(nextSetTime)
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notification?.let { notificationManager.notify(1, it) }
+            }
+            else if (settings.setLock && !settings.setHome && !scheduleSeparately) {
+                val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                val homeNextSetTime = try {
+                    LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.HOME_NEXT_SET_TIME))
+                } catch (_: Exception) {
+                    LocalDateTime.now()
+                }
+                val currentTime = LocalDateTime.now()
+                val lockNextSetTime = currentTime.plusMinutes(homeInterval.toLong())
                 val nextSetTime = when {
                     lockNextSetTime.isBefore(homeNextSetTime) && lockNextSetTime.isAfter(currentTime) -> lockNextSetTime
                     homeNextSetTime.isAfter(currentTime) -> homeNextSetTime
