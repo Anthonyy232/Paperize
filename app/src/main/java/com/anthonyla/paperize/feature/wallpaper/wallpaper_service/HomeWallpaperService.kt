@@ -493,8 +493,11 @@ class HomeWallpaperService: Service() {
             }
             val nextSetTime: LocalDateTime = when {
                 homeInterval == lockInterval -> homeNextSetTime
-                homeNextSetTime.isBefore(lockNextSetTime) && homeNextSetTime.isAfter(currentTime) -> homeNextSetTime
-                lockNextSetTime.isAfter(currentTime) -> lockNextSetTime
+                settings.setHome && settings.setLock && scheduleSeparately -> {
+                    if (homeNextSetTime.isBefore(lockNextSetTime) && homeNextSetTime.isAfter(currentTime)) {
+                        homeNextSetTime
+                    } else lockNextSetTime
+                }
                 else -> homeNextSetTime
             }
 
