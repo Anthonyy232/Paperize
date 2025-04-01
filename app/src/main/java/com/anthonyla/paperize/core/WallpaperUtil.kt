@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
+import androidx.core.graphics.createBitmap
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
 
@@ -172,7 +173,7 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         return source
     }
     return try {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val scale = width.toFloat() / source.width
         val matrix = Matrix().apply {
@@ -195,7 +196,7 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         return source
     }
     return try {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val sourceAspect = source.width.toFloat() / source.height.toFloat()
         val targetAspect = width.toFloat() / height.toFloat()
@@ -231,7 +232,7 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
             isFilterBitmap = true
             isAntiAlias = true
         }
-        Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565).apply {
+        createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
             Canvas(this).drawBitmap(source, matrix, paint)
         }
     } catch (e: Exception) {
@@ -251,7 +252,7 @@ fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
         })
     }
 
-    return source.copy(Bitmap.Config.RGB_565, true).apply {
+    return source.copy(Bitmap.Config.ARGB_8888, true).apply {
         Canvas(this).drawBitmap(source, 0f, 0f, paint)
     }
 }
@@ -276,7 +277,7 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
 fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return source
     return try {
-        val image = source.copy(Bitmap.Config.RGB_565, true) ?: return source
+        val image = source.copy(Bitmap.Config.ARGB_8888, true) ?: return source
         val canvas = Canvas(image)
         val dim = if (source.width < source.height) source.height else source.width
         val rad = (dim * (150f - percent) / 150f).toInt()
@@ -314,7 +315,7 @@ fun grayBitmap(bitmap: Bitmap, percent: Int): Bitmap {
     val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
     val paint = Paint().apply { colorFilter = ColorMatrixColorFilter(colorMatrix) }
 
-    val grayBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.RGB_565)
+    val grayBitmap = createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
     Canvas(grayBitmap).apply { drawBitmap(bitmap, 0f, 0f, paint) }
     return grayBitmap
 }
