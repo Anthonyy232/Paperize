@@ -55,6 +55,15 @@
                 <action android:name="com.anthonyla.paperize.SHORTCUT" />
             </intent-filter>
         </receiver>
+        <receiver android:name="com.anthonyla.paperize.feature.wallpaper.glance_widget.PaperizeWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/paperize_widget_info" />
+        </receiver>
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import androidx.core.content.edit
 
 /**
  * Receiver for boot and time change and wallpaper change events to restart alarm manager
@@ -21,15 +21,20 @@ import kotlin.coroutines.EmptyCoroutineContext
 class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_SHORTCUT = "com.anthonyla.paperize.SHORTCUT"
+        private const val PREFS_NAME = "wallpaper_receiver_prefs"
+        private const val LAST_EXECUTION_TIME = "last_execution_time"
+        private const val MIN_INTERVAL_MS = 3000
     }
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onReceive(context: Context, intent: Intent) = goAsync {
         try {
+            if (intent.action == ACTION_SHORTCUT && !canExecute(context)) return@goAsync
             when(intent.action) {
                 Intent.ACTION_BOOT_COMPLETED,
                 Intent.ACTION_TIME_CHANGED,
                 Intent.ACTION_TIMEZONE_CHANGED,
                 ACTION_SHORTCUT -> {
+                    saveExecutionTime(context)
                     val scheduler = WallpaperAlarmSchedulerImpl(context)
                     val toggleChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
                     val selectedAlbum = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
@@ -64,6 +69,19 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun canExecute(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastExecution = prefs.getLong(LAST_EXECUTION_TIME, 0)
+        val currentTime = System.currentTimeMillis()
+
+        return currentTime - lastExecution >= MIN_INTERVAL_MS
+    }
+
+    private fun saveExecutionTime(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit() { putLong(LAST_EXECUTION_TIME, System.currentTimeMillis()) }
     }
 
     /* https://stackoverflow.com/questions/74111692/run-coroutine-functions-on-broadcast-receiver */
