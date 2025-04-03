@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Paperize</string>
-  <string name="SettingsIcon">Settings Icon</string>
+  <string name="SettingsIcon">Options</string>
   <string name="dropdownmenu_settings">Settings</string>
   <string name="home_screen">Home</string>
   <string name="wallpaper_screen">Wallpaper</string>
@@ -172,7 +172,7 @@
   <string name="folders">Folders</string>
   <string name="expand_folder">Expand folder</string>
   <string name="wallpapers_sort">Wallpapers</string>
-  <string name="clos" comment="close">Close</string>
+  <string name="close">Close</string>
   <string name="expand">Expand</string>
   <string name="selected">%1$s selected</string>
   <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>

@@ -168,7 +168,7 @@
   <string name="folders">フォルダ</string>
   <string name="expand_folder">フォルダを展開</string>
   <string name="wallpapers_sort">壁紙</string>
-  <string name="clos" comment="close">閉じる</string>
+  <string name="close">閉じる</string>
   <string name="expand">展開</string>
   <string name="selected">%1$s が選択されました</string>
   <string name="sort_alphabetically_a_z">アルファベット順にソート (A-Z)</string>

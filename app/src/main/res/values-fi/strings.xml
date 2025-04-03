@@ -172,7 +172,7 @@
   <string name="folders">Kansiot</string>
   <string name="expand_folder">Laajenna kansio</string>
   <string name="wallpapers_sort">Taustakuvat</string>
-  <string name="clos" comment="close">Sulje</string>
+  <string name="close">Sulje</string>
   <string name="expand">Laajenna</string>
   <string name="selected">%1$s valittu</string>
   <string name="sort_alphabetically_a_z">Lajittele Aakkosjärjestyksessä (A-Z)</string>

@@ -128,7 +128,7 @@
   <string name="privacy_children_privacy_title">Çocukların Gizliliği</string>
   <string name="privacy_children_privacy_content">%1$s 13 yaşın altındaki çocuklara yönelik değildir. Çocuklardan bilerek herhangi bir bilgi toplamıyoruz.</string>
   <string name="privacy_changes_notice_title">Bu bildirimdeki değişiklikler</string>
-  <string name="privacy_changes_notice_content">Bu gizlilik bildirimini zaman güncelleyebiliriz. Herhangi bir değişiklik uygulamada ve web sitemizde yansıtılacaktır.</string>
+  <string name="privacy_changes_notice_content">Bu gizlilik bildirimini zaman zaman güncelleyebiliriz. Herhangi bir değişiklik uygulamada ve web sitemizde yansıtılacaktır.</string>
   <string name="privacy_contact_us_title">Bize Ulaşın</string>
   <string name="privacy_contact_us_content">Bu gizlilik bildirimiyle ilgili herhangi bir sorunuz veya endişeniz varsa lütfen %1$sadresinden benimle iletişime geçin.</string>
   <string name="no_albums_found">Hiçbir albüm bulunamadı</string>
@@ -172,7 +172,7 @@
   <string name="folders">Folders</string>
   <string name="expand_folder">Expand folder</string>
   <string name="wallpapers_sort">Wallpapers</string>
-  <string name="clos" comment="close">Close</string>
+  <string name="close">Close</string>
   <string name="expand">Expand</string>
   <string name="selected">%1$s selected</string>
   <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>

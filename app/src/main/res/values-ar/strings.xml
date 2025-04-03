@@ -188,7 +188,7 @@
   <string name="folders">مجلدات</string>
   <string name="expand_folder">توسيع المجلد</string>
   <string name="wallpapers_sort">خلفيات</string>
-  <string name="clos" comment="close">أغلق</string>
+  <string name="close">أغلق</string>
   <string name="expand">توسيع</string>
   <string name="selected">تم تحديد %1$s</string>
   <string name="sort_alphabetically_a_z">ترتيب أبجدي (A-Z)</string>

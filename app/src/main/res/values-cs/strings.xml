@@ -180,7 +180,7 @@
   <string name="folders">Složky</string>
   <string name="expand_folder">Rozbalit složku</string>
   <string name="wallpapers_sort">Tapety</string>
-  <string name="clos" comment="close">Zavřít</string>
+  <string name="close">Zavřít</string>
   <string name="expand">Rozbalit</string>
   <string name="selected">%1$s vybráno</string>
   <string name="sort_alphabetically_a_z">Řadit abecedně (A-Z)</string>

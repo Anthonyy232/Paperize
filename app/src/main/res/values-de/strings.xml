@@ -172,7 +172,7 @@
   <string name="folders">Ordner</string>
   <string name="expand_folder">Ordner erweitern</string>
   <string name="wallpapers_sort">Hintergrundbilder</string>
-  <string name="clos" comment="close">Schließen</string>
+  <string name="close">Schließen</string>
   <string name="expand">Erweitern</string>
   <string name="selected">%1$s ausgewählt</string>
   <string name="sort_alphabetically_a_z">Alphabetisch sortieren (A-Z)</string>

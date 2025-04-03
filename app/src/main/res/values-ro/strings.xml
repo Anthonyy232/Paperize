@@ -176,7 +176,7 @@
   <string name="folders">Dosare</string>
   <string name="expand_folder">Extinde dosarul</string>
   <string name="wallpapers_sort">Fundal</string>
-  <string name="clos" comment="close">Inchide</string>
+  <string name="close">Inchide</string>
   <string name="expand">Extinde</string>
   <string name="selected">%1$s selectat</string>
   <string name="sort_alphabetically_a_z">Sortare alfabetică (A-Z)</string>

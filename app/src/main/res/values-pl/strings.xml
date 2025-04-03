@@ -180,7 +180,7 @@
   <string name="folders">Foldery</string>
   <string name="expand_folder">Rozwiń folder</string>
   <string name="wallpapers_sort">Tapety</string>
-  <string name="clos" comment="close">Zamknij</string>
+  <string name="close">Zamknij</string>
   <string name="expand">Rozwiń</string>
   <string name="selected">%1$s selected</string>
   <string name="sort_alphabetically_a_z">Sortuj alfabetycznie (A-Z)</string>

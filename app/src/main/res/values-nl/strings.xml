@@ -172,7 +172,7 @@
   <string name="folders">Mappen</string>
   <string name="expand_folder">Map uitvouwen</string>
   <string name="wallpapers_sort">Achtergronden</string>
-  <string name="clos" comment="close">Afsluiten</string>
+  <string name="close">Afsluiten</string>
   <string name="expand">Uitklappen</string>
   <string name="selected">%1$s selected</string>
   <string name="sort_alphabetically_a_z">Sorteer alfabetisch (A-Z)</string>

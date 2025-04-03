@@ -172,7 +172,7 @@
   <string name="folders">Carpetas</string>
   <string name="expand_folder">Expandir carpeta</string>
   <string name="wallpapers_sort">Fondos de pantalla</string>
-  <string name="clos" comment="close">Cerrar</string>
+  <string name="close">Cerrar</string>
   <string name="expand">Expandir</string>
   <string name="selected">%1$s seleccionado</string>
   <string name="sort_alphabetically_a_z">Ordenar alfabético (A-Z)</string>

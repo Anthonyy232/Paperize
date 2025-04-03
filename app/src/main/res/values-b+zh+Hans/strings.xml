@@ -168,7 +168,7 @@
   <string name="folders">文件夹</string>
   <string name="expand_folder">展开文件夹</string>
   <string name="wallpapers_sort">壁纸</string>
-  <string name="clos" comment="close">关闭</string>
+  <string name="close">关闭</string>
   <string name="expand">扩展</string>
   <string name="selected">已选择 %1$s</string>
   <string name="sort_alphabetically_a_z">按字母顺序排序 (A-Z)</string>

@@ -180,7 +180,7 @@
   <string name="folders">Папки</string>
   <string name="expand_folder">Развернуть папку</string>
   <string name="wallpapers_sort">Обои</string>
-  <string name="clos" comment="close">Закрыть</string>
+  <string name="close">Закрыть</string>
   <string name="expand">Развернуть</string>
   <string name="selected">%1$s выбран</string>
   <string name="sort_alphabetically_a_z">Сортировать по алфавиту (А-Я)</string>

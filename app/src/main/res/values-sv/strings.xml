@@ -172,7 +172,7 @@
   <string name="folders">Mappar</string>
   <string name="expand_folder">Expandera mapp</string>
   <string name="wallpapers_sort">Bakgrundsbilder</string>
-  <string name="clos" comment="close">Stäng</string>
+  <string name="close">Stäng</string>
   <string name="expand">Expandera</string>
   <string name="selected">%1$s vald</string>
   <string name="sort_alphabetically_a_z">Sortera alfabetiskt (A-Ö)</string>

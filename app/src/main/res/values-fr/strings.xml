@@ -172,7 +172,7 @@
   <string name="folders">Dossiers</string>
   <string name="expand_folder">Développer le dossier</string>
   <string name="wallpapers_sort">Fonds d\'écran</string>
-  <string name="clos" comment="close">Fermer</string>
+  <string name="close">Fermer</string>
   <string name="expand">Agrandir</string>
   <string name="selected">%1$s sélectionné</string>
   <string name="sort_alphabetically_a_z">Trier par ordre alphabétique (A-Z)</string>

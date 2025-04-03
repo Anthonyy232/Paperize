@@ -172,7 +172,7 @@
   <string name="folders">Φάκελοι</string>
   <string name="expand_folder">Ανάπτυξη φακέλου</string>
   <string name="wallpapers_sort">Ταπετσαρίες</string>
-  <string name="clos" comment="close">Κλείσιμο</string>
+  <string name="close">Κλείσιμο</string>
   <string name="expand">Ανάπτυξη</string>
   <string name="selected">%1$s επιλέχθηκε</string>
   <string name="sort_alphabetically_a_z">Ταξινόμηση Αλφαβητικά (Α-Ω)</string>

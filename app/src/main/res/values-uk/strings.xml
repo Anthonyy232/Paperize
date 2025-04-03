@@ -180,7 +180,7 @@
   <string name="folders">Папки</string>
   <string name="expand_folder">Розгорнути теку</string>
   <string name="wallpapers_sort">Фонові малюнки</string>
-  <string name="clos" comment="close">Закрити</string>
+  <string name="close">Закрити</string>
   <string name="expand">Розгорнути</string>
   <string name="selected">%1$s вибрано</string>
   <string name="sort_alphabetically_a_z">Сортувати за алфавітом (A-Z)</string>

@@ -172,7 +172,7 @@
   <string name="folders">Mapper</string>
   <string name="expand_folder">Utvid mappe</string>
   <string name="wallpapers_sort">Bakgrunnsbilder</string>
-  <string name="clos" comment="close">Lukk</string>
+  <string name="close">Lukk</string>
   <string name="expand">Utvid</string>
   <string name="selected">%1$s selected</string>
   <string name="sort_alphabetically_a_z">Sorter alfabetisk (A-Z)</string>

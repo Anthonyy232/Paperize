@@ -172,7 +172,7 @@
   <string name="folders">Pastas</string>
   <string name="expand_folder">Expandir pasta</string>
   <string name="wallpapers_sort">Papel de parede</string>
-  <string name="clos" comment="close">FECHAR</string>
+  <string name="close">FECHAR</string>
   <string name="expand">Expandir</string>
   <string name="selected">%1$s selecionado</string>
   <string name="sort_alphabetically_a_z">Ordenar alfabeticamente (A-Z)</string>
