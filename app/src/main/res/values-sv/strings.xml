@@ -67,15 +67,15 @@
   <string name="interval_home">Hemskärm | %1$s</string>
   <string name="interval_lock">Låsskärm | %1$s</string>
   <string name="interval">Intervall | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minut</item>
     <item quantity="other">%d minuter</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d timme</item>
     <item quantity="other">%d timmar</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dag</item>
     <item quantity="other">%d dagar</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">bakgrundsbilder</string>
   <string name="translation">Översättning</string>
   <string name="help_translate_the_app_on_crowdin">Hjälp till att översätta appen på Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d tapeter</item>
     <item quantity="other">%d bakgrundsbilder</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Grå filter</string>
   <string name="select_starting_time">Välj starttid</string>
   <string name="change_notification_settings">Ändra aviseringsinställningar</string>
+  <string name="sort_items">Sortera objekt</string>
+  <string name="folders">Mappar</string>
+  <string name="expand_folder">Expandera mapp</string>
+  <string name="wallpapers_sort">Bakgrundsbilder</string>
+  <string name="clos" comment="close">Stäng</string>
+  <string name="expand">Expandera</string>
+  <string name="selected">%1$s vald</string>
+  <string name="sort_alphabetically_a_z">Sortera alfabetiskt (A-Ö)</string>
+  <string name="sort_alphabetically_z_a">Sortera alfabetiskt (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sortera efter Senast ändrad (Nyast)</string>
+  <string name="sort_by_last_modified_oldest">Sortera efter Senast ändrad (äldst)</string>
+  <string name="shuffle_wallpaper">Blanda bakgrundsbilder</string>
 </resources>

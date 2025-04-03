@@ -67,19 +67,19 @@
   <string name="interval_home">Ekran Główny | %1$s</string>
   <string name="interval_lock">Ekran Blokady | %1$s</string>
   <string name="interval">Przedział Czasowy | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuta</item>
     <item quantity="few">%d minut</item>
     <item quantity="many">%d minuty</item>
     <item quantity="other">%d minuty</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d godzina</item>
     <item quantity="few">%d godziny</item>
     <item quantity="many">%d godzin</item>
     <item quantity="other">%d godzin</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dzień</item>
     <item quantity="few">%d dni</item>
     <item quantity="many">%d dni</item>
@@ -117,7 +117,7 @@
   <string name="wallpapers">tapety</string>
   <string name="translation">Tłumaczenie</string>
   <string name="help_translate_the_app_on_crowdin">Pomóż w tłumaczeniu aplikacji na portalu Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d tapeta</item>
     <item quantity="few">%d tapety</item>
     <item quantity="many">%d tapety</item>
@@ -176,4 +176,16 @@
   <string name="gray_filter">Szary filtr</string>
   <string name="select_starting_time">Wybierz czas rozpoczęcia</string>
   <string name="change_notification_settings">Zmień ustawienia powiadomień</string>
+  <string name="sort_items">Sortuj pozycje</string>
+  <string name="folders">Foldery</string>
+  <string name="expand_folder">Rozwiń folder</string>
+  <string name="wallpapers_sort">Tapety</string>
+  <string name="clos" comment="close">Zamknij</string>
+  <string name="expand">Rozwiń</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sortuj alfabetycznie (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sortuj alfabetycznie (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sortuj według Ostatniej Modyfikacji (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sortuj według Ostatniej Modyfikacji (Oldest)</string>
+  <string name="shuffle_wallpaper">Losuj Tapety</string>
 </resources>

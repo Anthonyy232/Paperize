@@ -3,21 +3,21 @@
   <string name="app_name">Paperize</string>
   <string name="SettingsIcon">Опції</string>
   <string name="dropdownmenu_settings">Налаштування</string>
-  <string name="home_screen">додому</string>
+  <string name="home_screen">Додому</string>
   <string name="wallpaper_screen">Шпалери</string>
   <string name="library_screen">Бібліотека</string>
   <string name="settings_screen">Налаштування</string>
   <string name="settings_back">Назад</string>
   <string name="LibraryFloatingButton">Додати нову бібліотеку</string>
   <string name="set_wallpaper_description">Увімкнути живі шпалери</string>
-  <string name="add_wallpaper">Додайте шпалери</string>
-  <string name="add_images">Додайте зображення</string>
+  <string name="add_wallpaper">Додати шпалери</string>
+  <string name="add_images">Додати зображення</string>
   <string name="add_folder">Додати папку</string>
-  <string name="contact_button">контакт</string>
+  <string name="contact_button">Контакт</string>
   <string name="image_is_selected">Зображення вибрано</string>
   <string name="image_is_not_selected">Зображення не вибрано</string>
   <string name="select_all_images_for_deletion">Виберіть усі зображення для видалення</string>
-  <string name="delete_confirmation">Видалити підтвердження</string>
+  <string name="delete_confirmation">Підтверджувати видалення</string>
   <string name="all_images_selected_for_deletion">Усі зображення вибрано для видалення</string>
   <string name="add_album">Додати альбом</string>
   <string name="add_wallpaper_screen">Додати шпалери екрана</string>
@@ -50,7 +50,7 @@
   <string name="privacy_screen">Екран конфіденційності</string>
   <string name="licenses">Ліцензії</string>
   <string name="licenses_screen">Екран ліцензій</string>
-  <string name="contact">контакт</string>
+  <string name="contact">Контакти</string>
   <string name="contact_the_author_by_email">Зв\'яжіться з автором електронною поштою</string>
   <string name="reset_to_default">Скинути до замовчування</string>
   <string name="reset_all_data">Скинути всі дані</string>
@@ -64,22 +64,22 @@
   <string name="wallpaper_changer_has_been_disabled">Зміну шпалер вимкнено.</string>
   <string name="dismiss">Відхилити</string>
   <string name="has_been_unselected">%1$s було скасовано.</string>
-  <string name="interval_home">Головний екран | %1$s</string>
+  <string name="interval_home">Домашній екран| %1$s</string>
   <string name="interval_lock">Екран блокування | %1$s</string>
   <string name="interval">Інтервал | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d хвилина</item>
     <item quantity="few">%d хвилин</item>
     <item quantity="many">%d хвилин</item>
     <item quantity="other">%d хвилин</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d година</item>
     <item quantity="few">%d годин</item>
     <item quantity="many">%d годин</item>
     <item quantity="other">%d годин</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d день</item>
     <item quantity="few">%d днів</item>
     <item quantity="many">%d днів</item>
@@ -92,32 +92,32 @@
   <string name="view">Переглянути</string>
   <string name="welcome_animation">Вітальна анімація</string>
   <string name="notification_bell_animation">Анімація дзвінка сповіщення</string>
-  <string name="delete_these">Видалити ці?</string>
+  <string name="delete_these">Видалити вибрані?</string>
   <string name="are_you_sure_you_want_to_delete_these_wallpapers">Ви впевнені, що хочете видалити ці шпалери?</string>
   <string name="are_you_sure_you_want_to_delete_this">Ви впевнені, що хочете це видалити?</string>
   <string name="delete_album_question">Видалити альбом?</string>
   <string name="animation">Анімація</string>
   <string name="increase_visual_appeal">Підвищення візуальної привабливості</string>
-  <string name="dark_mode">Темний режим</string>
+  <string name="dark_mode">Темна тема</string>
   <string name="automatic_device_mode">Автоматичний режим пристрою</string>
-  <string name="light_mode">Світловий режим</string>
+  <string name="light_mode">Світла тема</string>
   <string name="easier_on_the_eyes">Легше для очей</string>
   <string name="dynamic_theme">Динамічна тема</string>
-  <string name="material_you">Матеріал Ви</string>
-  <string name="dynamic_theming">Динамічна тематика</string>
+  <string name="material_you">Material You</string>
+  <string name="dynamic_theming">Динамічна тема</string>
   <string name="click_here_to_view_the_licenses">Натисніть тут, щоб переглянути ліцензії</string>
   <string name="click_here_to_view_our_privacy_policy">Натисніть тут, щоб переглянути нашу політику конфіденційності</string>
-  <string name="add_images_btn">Додайте зображення</string>
+  <string name="add_images_btn">Додати зображення</string>
   <string name="add_folder_btn">Додати папку</string>
   <string name="version">Версія: %1$s</string>
   <string name="appearance">Зовнішній вигляд</string>
-  <string name="about">про</string>
+  <string name="about">Про</string>
   <string name="coming_soon">Скоро буде</string>
   <string name="new_album">Новий альбом</string>
   <string name="wallpapers">шпалери</string>
   <string name="translation">Переклад</string>
   <string name="help_translate_the_app_on_crowdin">Допоможіть перекласти додаток на Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d шпалери</item>
     <item quantity="few">%d шпалери</item>
     <item quantity="many">%d шпалери</item>
@@ -176,4 +176,16 @@
   <string name="gray_filter">Сірий фільтр</string>
   <string name="select_starting_time">Оберіть час початку</string>
   <string name="change_notification_settings">Зміна налаштувань для сповіщень</string>
+  <string name="sort_items">Сортувати товари</string>
+  <string name="folders">Папки</string>
+  <string name="expand_folder">Розгорнути теку</string>
+  <string name="wallpapers_sort">Фонові малюнки</string>
+  <string name="clos" comment="close">Закрити</string>
+  <string name="expand">Розгорнути</string>
+  <string name="selected">%1$s вибрано</string>
+  <string name="sort_alphabetically_a_z">Сортувати за алфавітом (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Сортувати за алфавітом (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Сортувати за останньою зміною (новіші)</string>
+  <string name="sort_by_last_modified_oldest">Сортувати за останньою модифікацією (найстаріший)</string>
+  <string name="shuffle_wallpaper">Перемішувати шпалери</string>
 </resources>

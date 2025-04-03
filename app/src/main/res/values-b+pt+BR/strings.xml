@@ -67,15 +67,15 @@
   <string name="interval_home">Tela Inicial | %1$s</string>
   <string name="interval_lock">Tela de Bloqueio | %1$s</string>
   <string name="interval">Intervalo | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuto</item>
     <item quantity="other">%d minutos</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d hora</item>
     <item quantity="other">%d horas</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dia</item>
     <item quantity="other">%d dias</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">papeis de parede</string>
   <string name="translation">Tradução</string>
   <string name="help_translate_the_app_on_crowdin">Ajude a traduzir o aplicativo no Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d papel de parede</item>
     <item quantity="other">%d papéis de parede</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Filtro Cinza</string>
   <string name="select_starting_time">Selecionar hora inicial</string>
   <string name="change_notification_settings">Alterar configurações de notificação</string>
+  <string name="sort_items">Ordenar itens</string>
+  <string name="folders">Pastas</string>
+  <string name="expand_folder">Expandir pasta</string>
+  <string name="wallpapers_sort">Papel de parede</string>
+  <string name="clos" comment="close">FECHAR</string>
+  <string name="expand">Expandir</string>
+  <string name="selected">%1$s selecionado</string>
+  <string name="sort_alphabetically_a_z">Ordenar alfabeticamente (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Ordenar alfabeticamente (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Classificar por Última Modificação (Recente)</string>
+  <string name="sort_by_last_modified_oldest">Classificar por Última Modificação (Mais antigo)</string>
+  <string name="shuffle_wallpaper">Misturar papéis de parede</string>
 </resources>

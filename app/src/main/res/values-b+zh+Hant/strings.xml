@@ -67,13 +67,13 @@
   <string name="interval_home">主頁 | %1$s</string>
   <string name="interval_lock">鎖屏 | %1$s</string>
   <string name="interval">間隔 | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="other">%d 分鐘</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="other">%d 小時</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="other">%d 天</item>
   </plurals>
   <string name="selected_count">%1$s 已選擇</string>
@@ -108,7 +108,7 @@
   <string name="wallpapers">桌布</string>
   <string name="translation">翻譯</string>
   <string name="help_translate_the_app_on_crowdin">在 Crowdin 上帮忙翻譯應用程式！</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="other">%d 張桌布</item>
   </plurals>
   <string name="privacy_intro_title">介紹</string>
@@ -164,4 +164,16 @@
   <string name="gray_filter">灰色濾鏡</string>
   <string name="select_starting_time">選擇開始時間</string>
   <string name="change_notification_settings">更改通知設定</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

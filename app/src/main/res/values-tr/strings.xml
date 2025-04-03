@@ -67,15 +67,15 @@
   <string name="interval_home">Ana Ekran | %1$s</string>
   <string name="interval_lock">Kilit Ekranı | %1$s</string>
   <string name="interval">Aralık | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d dakika</item>
     <item quantity="other">%d dakika</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d saat</item>
     <item quantity="other">%d saat</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d gün</item>
     <item quantity="other">%d gün</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">duvar kağıtları</string>
   <string name="translation">Çeviri</string>
   <string name="help_translate_the_app_on_crowdin">Uygulamanın Crowdin\'de çevrilmesine yardımcı olun!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d duvar kağıdı</item>
     <item quantity="other">%d duvar kağıdı</item>
   </plurals>
@@ -128,7 +128,7 @@
   <string name="privacy_children_privacy_title">Çocukların Gizliliği</string>
   <string name="privacy_children_privacy_content">%1$s 13 yaşın altındaki çocuklara yönelik değildir. Çocuklardan bilerek herhangi bir bilgi toplamıyoruz.</string>
   <string name="privacy_changes_notice_title">Bu bildirimdeki değişiklikler</string>
-  <string name="privacy_changes_notice_content">Bu gizlilik bildirimini zaman zaman güncelleyebiliriz. Herhangi bir değişiklik uygulamada ve web sitemizde yansıtılacaktır.</string>
+  <string name="privacy_changes_notice_content">Bu gizlilik bildirimini zaman güncelleyebiliriz. Herhangi bir değişiklik uygulamada ve web sitemizde yansıtılacaktır.</string>
   <string name="privacy_contact_us_title">Bize Ulaşın</string>
   <string name="privacy_contact_us_content">Bu gizlilik bildirimiyle ilgili herhangi bir sorunuz veya endişeniz varsa lütfen %1$sadresinden benimle iletişime geçin.</string>
   <string name="no_albums_found">Hiçbir albüm bulunamadı</string>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Gri Filtre</string>
   <string name="select_starting_time">Başlangıç saatini seçin</string>
   <string name="change_notification_settings">Bildirim ayarlarını değiştir</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

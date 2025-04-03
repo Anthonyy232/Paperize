@@ -4,14 +4,14 @@
   <string name="SettingsIcon">Opciones</string>
   <string name="dropdownmenu_settings">Ajustes</string>
   <string name="home_screen">Inicio</string>
-  <string name="wallpaper_screen">Papel pintado</string>
+  <string name="wallpaper_screen">Fondo</string>
   <string name="library_screen">Biblioteca</string>
   <string name="settings_screen">Ajustes</string>
   <string name="settings_back">Atrás</string>
-  <string name="LibraryFloatingButton">Agregar una nueva biblioteca</string>
+  <string name="LibraryFloatingButton">Añadir una nueva biblioteca</string>
   <string name="set_wallpaper_description">Activar fondo de pantalla animado</string>
   <string name="add_wallpaper">Añadir fondo de pantalla</string>
-  <string name="add_images">Añadir imágenes</string>
+  <string name="add_images">Añadir imagenes</string>
   <string name="add_folder">Agregar carpeta</string>
   <string name="contact_button">Contacto</string>
   <string name="image_is_selected">La imagen está seleccionada</string>
@@ -35,9 +35,9 @@
   <string name="more_options">Más opciones</string>
   <string name="startup">Iniciar</string>
   <string name="agree">Aceptar</string>
-  <string name="welcome">Bienvenido</string>
+  <string name="welcome">Bienvenido </string>
   <string name="notifications">Notificaciones</string>
-  <string name="continue_button">Estoy dentro</string>
+  <string name="continue_button">Aceptar</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">Se requiere permiso de notificación para que esta aplicación funcione correctamente.</string>
   <string name="allow">Permitir</string>
   <string name="notification_info_message">Se pueden habilitar las notificaciones para mostrar cuándo la aplicación se está ejecutando en segundo plano.</string>
@@ -60,22 +60,22 @@
   <string name="circle_2_animation">Animación del círculo 2</string>
   <string name="circle_1_animation">Animación del círculo 1</string>
   <string name="circle_3_animation">Animación del círculo 3</string>
-  <string name="wallpaper_changer_has_been_enabled">Se ha habilitado el cambiador de fondo de pantalla.</string>
+  <string name="wallpaper_changer_has_been_enabled">Está habilitado el cambiador de fondo de pantalla.</string>
   <string name="wallpaper_changer_has_been_disabled">El cambiador de fondo de pantalla ha sido desactivado.</string>
   <string name="dismiss">Descartar</string>
-  <string name="has_been_unselected">%1$s no ha sido seleccionado.</string>
+  <string name="has_been_unselected">%1$s no fue seleccionado.</string>
   <string name="interval_home">Pantalla de inicio | %1$s</string>
   <string name="interval_lock">Pantalla de bloqueo | %1$s</string>
   <string name="interval">Intervalo | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuto</item>
     <item quantity="other">%d minutos</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d hora</item>
     <item quantity="other">%d horas</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d día</item>
     <item quantity="other">%d días</item>
   </plurals>
@@ -108,17 +108,17 @@
   <string name="about">Acerca de</string>
   <string name="coming_soon">Próximamente</string>
   <string name="new_album">Nuevo álbum</string>
-  <string name="wallpapers">Fondos de pantalla</string>
+  <string name="wallpapers">fondo de pantalla</string>
   <string name="translation">Traducción</string>
   <string name="help_translate_the_app_on_crowdin">¡Ayuda a traducir la aplicación en Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d fondo de pantalla</item>
     <item quantity="other">%d fondos de pantalla</item>
   </plurals>
   <string name="privacy_intro_title">Introducción</string>
   <string name="privacy_intro_content">¡Bienvenido a %1$s! Este aviso de privacidad describe cómo recopilamos, usamos y protegemos su información personal cuando utiliza nuestra aplicación móvil. Al utilizar %1$s, acepta los términos descritos en este aviso.</string>
   <string name="privacy_data_collection_title">Recopilación de datos</string>
-  <string name="privacy_data_collection_content">Acceso a notificaciones: %1$s solicita acceso a notificaciones para brindarte recomendaciones de fondos de pantalla personalizados según tus notificaciones. No almacenamos ningún contenido de notificaciones ni información de identificación personal (PII) fuera de tu dispositivo.\n\nArchivos locales: %1$s accede a los archivos almacenados en tu dispositivo para permitirte configurarlos como fondos de pantalla. No cargamos ni transferimos estos archivos a ningún servidor externo.</string>
+  <string name="privacy_data_collection_content">Acceso a notificaciones: %1$s solicita acceso a notificaciones para brindarte recomendaciones de fondos de pantalla personalizados según tus notificaciones. No almacenamos ningún contenido de notificaciones ni información de identificación personal (PII) fuera de tu dispositivo.\n\nArchivos locales: %1$s accede a los archivos almacenados en tu dispositivo para permitirte configurar como fondos de pantalla. No cargamos ni transferimos estos archivos a ningún servidor externo.</string>
   <string name="privacy_information_usage_title">Uso de la información</string>
   <string name="privacy_information_usage_content">Datos personales: No recopilamos ni almacenamos ningún dato personal como nombres, direcciones de correo electrónico o números de teléfono.\n\nAnálisis de uso: %1$s no rastrea su comportamiento de uso ni recopila datos analíticos.</string>
   <string name="privacy_data_security_title">Privacidad</string>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Filtro gris</string>
   <string name="select_starting_time">Seleccionar hora de inicio</string>
   <string name="change_notification_settings">Cambiar la configuración de notificación</string>
+  <string name="sort_items">sort_elementos</string>
+  <string name="folders">Carpetas</string>
+  <string name="expand_folder">Expandir carpeta</string>
+  <string name="wallpapers_sort">Fondos de pantalla</string>
+  <string name="clos" comment="close">Cerrar</string>
+  <string name="expand">Expandir</string>
+  <string name="selected">%1$s seleccionado</string>
+  <string name="sort_alphabetically_a_z">Ordenar alfabético (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Ordenar alfabéticamente (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Ordenar por última modificación (más reciente)</string>
+  <string name="sort_by_last_modified_oldest">Ordenar por última modificación (más antiguo)</string>
+  <string name="shuffle_wallpaper">Mezclar fondos de pantalla</string>
 </resources>

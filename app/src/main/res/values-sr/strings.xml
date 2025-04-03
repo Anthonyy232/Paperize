@@ -67,17 +67,17 @@
   <string name="interval_home">Почетни екран | %1$s</string>
   <string name="interval_lock">Закључавање екрана | %1$s</string>
   <string name="interval">Интервал | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d минута</item>
     <item quantity="few">%d минута</item>
     <item quantity="other">%d минута</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d сат</item>
     <item quantity="few">%d сати</item>
     <item quantity="other">%d сати</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d дан</item>
     <item quantity="few">%d дана</item>
     <item quantity="other">%d дана</item>
@@ -114,7 +114,7 @@
   <string name="wallpapers">валлпаперс</string>
   <string name="translation">Превод</string>
   <string name="help_translate_the_app_on_crowdin">Помозите у превођењу апликације на Цровдин-у!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d позадина</item>
     <item quantity="few">%d позадине</item>
     <item quantity="other">%d позадине</item>
@@ -172,4 +172,16 @@
   <string name="gray_filter">Греи Филтер</string>
   <string name="select_starting_time">Изаберите време почетка</string>
   <string name="change_notification_settings">Промените подешавања обавештења</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

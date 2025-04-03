@@ -67,15 +67,15 @@
   <string name="interval_home">होम स्क्रीन | %1$s</string>
   <string name="interval_lock">लॉक स्क्रीन | %1$s</string>
   <string name="interval">अंतराल | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minute</item>
     <item quantity="other">%d minutes</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d hour</item>
     <item quantity="other">%d hours</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d day</item>
     <item quantity="other">%d days</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">वॉलपेपर</string>
   <string name="translation">अनुवाद</string>
   <string name="help_translate_the_app_on_crowdin">क्राउडिन पर ऐप का अनुवाद करने में सहायता करें!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d वॉलपेपर</item>
     <item quantity="other">%d वॉलपेपर</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">ग्रे फ़िल्टर</string>
   <string name="select_starting_time">आरंभ समय चुनें</string>
   <string name="change_notification_settings">अधिसूचना सेटिंग बदलें</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

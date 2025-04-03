@@ -67,13 +67,13 @@
   <string name="interval_home">ホーム画面 | %1$s</string>
   <string name="interval_lock">ロック画面 | %1$s</string>
   <string name="interval">間隔 | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="other">%d 分</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="other">%d 時間</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="other">%d 日</item>
   </plurals>
   <string name="selected_count">%1$s 選択済み</string>
@@ -108,7 +108,7 @@
   <string name="wallpapers">壁紙</string>
   <string name="translation">翻訳</string>
   <string name="help_translate_the_app_on_crowdin">Crowdin のアプリの翻訳を手伝ってください!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="other">%d 壁紙</item>
   </plurals>
   <string name="privacy_intro_title">導入</string>
@@ -164,4 +164,16 @@
   <string name="gray_filter">グレーのフィルター</string>
   <string name="select_starting_time">開始時刻を選択</string>
   <string name="change_notification_settings">通知設定の変更</string>
+  <string name="sort_items">アイテムを並べ替える</string>
+  <string name="folders">フォルダ</string>
+  <string name="expand_folder">フォルダを展開</string>
+  <string name="wallpapers_sort">壁紙</string>
+  <string name="clos" comment="close">閉じる</string>
+  <string name="expand">展開</string>
+  <string name="selected">%1$s が選択されました</string>
+  <string name="sort_alphabetically_a_z">アルファベット順にソート (A-Z)</string>
+  <string name="sort_alphabetically_z_a">アルファベット順 (Z-A) にソート</string>
+  <string name="sort_by_last_modified_newest">最終修正日時でソート (新規)</string>
+  <string name="sort_by_last_modified_oldest">最終修正日時でソート (最新)</string>
+  <string name="shuffle_wallpaper">壁紙をシャッフル</string>
 </resources>

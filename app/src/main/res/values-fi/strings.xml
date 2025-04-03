@@ -67,15 +67,15 @@
   <string name="interval_home">Kotinäyttö | %1$s</string>
   <string name="interval_lock">Lukitse näyttö | %1$s</string>
   <string name="interval">Väli | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuutti</item>
     <item quantity="other">%d minuuttia</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d tunti</item>
     <item quantity="other">%d tuntia</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d päivä</item>
     <item quantity="other">%d päivää</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">taustakuvia</string>
   <string name="translation">Käännös</string>
   <string name="help_translate_the_app_on_crowdin">Auta kääntämään sovellus Crowdinissa!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d taustakuva</item>
     <item quantity="other">%d taustakuvia</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Harmaa Suodatin</string>
   <string name="select_starting_time">Valitse aloitusaika</string>
   <string name="change_notification_settings">Muuta ilmoitusasetuksia</string>
+  <string name="sort_items">sort_nimikkeet</string>
+  <string name="folders">Kansiot</string>
+  <string name="expand_folder">Laajenna kansio</string>
+  <string name="wallpapers_sort">Taustakuvat</string>
+  <string name="clos" comment="close">Sulje</string>
+  <string name="expand">Laajenna</string>
+  <string name="selected">%1$s valittu</string>
+  <string name="sort_alphabetically_a_z">Lajittele Aakkosjärjestyksessä (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Lajittele Aakkosjärjestyksessä (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Järjestä viimeksi muokatun (uusi) mukaan</string>
+  <string name="sort_by_last_modified_oldest">Järjestä viimeksi muokatun (Oldest) mukaan</string>
+  <string name="shuffle_wallpaper">Sekoita Taustakuvat</string>
 </resources>

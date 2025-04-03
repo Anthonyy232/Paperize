@@ -67,7 +67,7 @@
   <string name="interval_home">الشاشة الرئيسية | %1$s</string>
   <string name="interval_lock">شاشة القفل | %1$s</string>
   <string name="interval">الفترة | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="zero">ولا دقيقة (%d)</item>
     <item quantity="one">دقيقة واحدة (%d)</item>
     <item quantity="two">دقيقتين (%d)</item>
@@ -75,7 +75,7 @@
     <item quantity="many">%d دقايق</item>
     <item quantity="other">%d دقيقة</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="zero">ولا ساعة (%d)</item>
     <item quantity="one">ساعة واحدة (%d)</item>
     <item quantity="two">ساعتين (%d)</item>
@@ -83,7 +83,7 @@
     <item quantity="many">%d ساعات</item>
     <item quantity="other">%d ساعة</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="zero">ولا يوم (%d)</item>
     <item quantity="one">يوم واحد (%d)</item>
     <item quantity="two">يومين (%d)</item>
@@ -123,7 +123,7 @@
   <string name="wallpapers">الخلفيات</string>
   <string name="translation">الترجمة</string>
   <string name="help_translate_the_app_on_crowdin">ساعد على ترجمة البرنامج على Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="zero">ولا خلفية (%d)</item>
     <item quantity="one">خلفية واحدة (%d)</item>
     <item quantity="two">خلفيتين (%d)</item>
@@ -157,31 +157,43 @@
   <string name="fit">قَيِّفها</string>
   <string name="stretch">مِدَّها</string>
   <string name="wallpaper_scaling">حجم الخلفية</string>
-  <string name="change_brightness">Brightness</string>
+  <string name="change_brightness">السطوع</string>
   <string name="home_screen_btn">الشاشة الرئيسية</string>
   <string name="lock_screen_btn">شاشة القفل</string>
   <string name="individual_scheduling">جدولة فردية</string>
   <string name="show_interval_sliders">بَيِّن شريط الفترات</string>
   <string name="interval_text">فترة زمنية</string>
-  <string name="change_blur">Blur Effect</string>
+  <string name="change_blur">تأثير التغييم</string>
   <string name="paperize_is_running">توريق شغال</string>
   <string name="next_wallpaper_change">تغيير الخلفية الجاى: %1$s</string>
   <string name="delay_notice">إشعار التأخير</string>
   <string name="delay_notice_dialog">إشعار التأخير</string>
   <string name="to_minimize_battery_usage_changing_wallpapers_may_have_some_delays_once_scheduled_when_the_device_is_asleep_the_wallpaper_may_take_longer_to_apply">عشان نقلل استخدام البطارية، ممكن يحصل شوية تأخير في تغيير خلفيات الشاشة بمجرد جدولتها. لما يكون الجهاز في وضع السكون، تفعيل خلفية الشاشة ممكن ياخد وقت أطول.</string>
   <string name="change_wallpaper">تغيير ورق الجدران</string>
-  <string name="theme">سمة</string>
+  <string name="theme">السيم</string>
   <string name="amoled_mode">وضع أموليد</string>
   <string name="full_dark_mode">الوضع المظلم الكامل</string>
   <string name="change_next_short">تغيير ورق الجدران</string>
-  <string name="change_next_long">التغيير إلى خلفية الشاشة التالية في الألبوم</string>
-  <string name="cannot_change_wallpaper">لا يمكن تغيير ورق الحائط</string>
-  <string name="enable_wallpaper_changer">تمكين محول الخلفية</string>
-  <string name="unselected_album">ألبوم غير محدد</string>
+  <string name="change_next_long">غَيَّر للخلفية الجاية فى الألبوم</string>
+  <string name="cannot_change_wallpaper">مش هينفع تغير الخلفية</string>
+  <string name="enable_wallpaper_changer">شَغَّل مُغَيِّر الخلفية</string>
+  <string name="unselected_album">ألبوم مش مُحَدَّد</string>
   <string name="lock">قفل</string>
-  <string name="change_vignette">Vignette Effect</string>
-  <string name="none">None</string>
-  <string name="gray_filter">Gray Filter</string>
-  <string name="select_starting_time">Select starting time</string>
-  <string name="change_notification_settings">Change notification settings</string>
+  <string name="change_vignette">تأثير الشبكية</string>
+  <string name="none">بدون</string>
+  <string name="gray_filter">فلتر رمادى</string>
+  <string name="select_starting_time">اختار السيم المبدأى</string>
+  <string name="change_notification_settings">تغيير إعدادات الإشعارات</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

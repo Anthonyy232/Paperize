@@ -67,15 +67,15 @@
   <string name="interval_home">Écran d\'accueil | %1$s</string>
   <string name="interval_lock">Écran de verrouillage | %1$s</string>
   <string name="interval">Intervalle | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minute</item>
     <item quantity="other">%d minutes</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d heure</item>
     <item quantity="other">%d heures</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d jour</item>
     <item quantity="other">%d jours</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">fonds d\'écran</string>
   <string name="translation">Traduction</string>
   <string name="help_translate_the_app_on_crowdin">Aidez-nous à traduire l\'application sur Crowdin !</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d fond d\'écran</item>
     <item quantity="other">%d fonds d\'écran</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Filtre gris</string>
   <string name="select_starting_time">Sélectionnez l\'heure de début</string>
   <string name="change_notification_settings">Modifier les paramètres de notification</string>
+  <string name="sort_items">tri_éléments</string>
+  <string name="folders">Dossiers</string>
+  <string name="expand_folder">Développer le dossier</string>
+  <string name="wallpapers_sort">Fonds d\'écran</string>
+  <string name="clos" comment="close">Fermer</string>
+  <string name="expand">Agrandir</string>
+  <string name="selected">%1$s sélectionné</string>
+  <string name="sort_alphabetically_a_z">Trier par ordre alphabétique (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Trier par ordre alphabétique (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Trier par dernière modification (plus récent)</string>
+  <string name="sort_by_last_modified_oldest">Trier par Dernière Modification (plus récent)</string>
+  <string name="shuffle_wallpaper">Mélanger les fonds d\'écran</string>
 </resources>

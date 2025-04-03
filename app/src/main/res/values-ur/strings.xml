@@ -67,15 +67,15 @@
   <string name="interval_home">ہوم اسکرین | %1$s</string>
   <string name="interval_lock">لاک اسکرین | %1$s</string>
   <string name="interval">وقفہ | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d منٹ</item>
     <item quantity="other">%d منٹ</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d گھنٹہ</item>
     <item quantity="other">%d گھنٹے</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d دن</item>
     <item quantity="other">%d دن</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">وال پیپر</string>
   <string name="translation">ترجمہ</string>
   <string name="help_translate_the_app_on_crowdin">Crowdin پر ایپ کا ترجمہ کرنے میں مدد کریں!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d وال پیپر</item>
     <item quantity="other">%d وال پیپرز</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">گرے فلٹر</string>
   <string name="select_starting_time">شروع کرنے کا وقت منتخب کریں۔</string>
   <string name="change_notification_settings">اطلاع کی ترتیبات کو تبدیل کریں۔</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

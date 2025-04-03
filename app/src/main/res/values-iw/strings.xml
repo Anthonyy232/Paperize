@@ -67,19 +67,19 @@
   <string name="interval_home">מסך הבית | %1$s</string>
   <string name="interval_lock">מסך נעילה | %1$s</string>
   <string name="interval">מרווח | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d דקה</item>
     <item quantity="two">%d דקות</item>
     <item quantity="many">%d דקות</item>
     <item quantity="other">%d דקות</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d שעה</item>
     <item quantity="two">%d שעות</item>
     <item quantity="many">%d שעות</item>
     <item quantity="other">%d שעות</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d יום</item>
     <item quantity="two">%d ימים</item>
     <item quantity="many">%d ימים</item>
@@ -117,7 +117,7 @@
   <string name="wallpapers">טפטים</string>
   <string name="translation">תִרגוּם</string>
   <string name="help_translate_the_app_on_crowdin">עזרו לתרגם את האפליקציה ב-Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d טפט</item>
     <item quantity="two">%d טפטים</item>
     <item quantity="many">%d טפטים</item>
@@ -176,4 +176,16 @@
   <string name="gray_filter">מסנן אפור</string>
   <string name="select_starting_time">בחר שעת התחלה</string>
   <string name="change_notification_settings">שנה את הגדרות ההתראות</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

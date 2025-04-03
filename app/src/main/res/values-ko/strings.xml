@@ -67,13 +67,13 @@
   <string name="interval_home">홈 화면 | %1$s</string>
   <string name="interval_lock">잠금 화면 | %1$s</string>
   <string name="interval">간격 | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="other">%d 분</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="other">%d 시간</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="other">%d 일</item>
   </plurals>
   <string name="selected_count">%1$s 선택됨</string>
@@ -108,7 +108,7 @@
   <string name="wallpapers">바탕 화면</string>
   <string name="translation">번역</string>
   <string name="help_translate_the_app_on_crowdin">Crowdin에서 앱 번역에 참여하세요!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="other">%d 배경화면</item>
   </plurals>
   <string name="privacy_intro_title">소개</string>
@@ -164,4 +164,16 @@
   <string name="gray_filter">회색 필터</string>
   <string name="select_starting_time">시작시간을 선택하세요</string>
   <string name="change_notification_settings">알림 설정 변경</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

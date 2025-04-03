@@ -67,15 +67,15 @@
   <string name="interval_home">Schermata iniziale | %1$s</string>
   <string name="interval_lock">Schermata di blocco | %1$s</string>
   <string name="interval">Intervallo | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuto</item>
     <item quantity="other">%d minuti</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d ora</item>
     <item quantity="other">%d ore</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d giorno</item>
     <item quantity="other">%d giorni</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">Sfondi</string>
   <string name="translation">Traduzione</string>
   <string name="help_translate_the_app_on_crowdin">Aiutaci a tradurre l\'app su Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">sfondo %d</item>
     <item quantity="other">%d sfondi</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Filtro Grigio</string>
   <string name="select_starting_time">Seleziona ora di inizio</string>
   <string name="change_notification_settings">Modifica impostazioni di notifica</string>
+  <string name="sort_items">Ordina elementi</string>
+  <string name="folders">Cartelle</string>
+  <string name="expand_folder">Espandi cartella</string>
+  <string name="wallpapers_sort">Sfondi</string>
+  <string name="clos" comment="close">Chiudi</string>
+  <string name="expand">Espandi</string>
+  <string name="selected">%1$s selezionato</string>
+  <string name="sort_alphabetically_a_z">Ordina Alfabeticamente (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Ordina Alfabeticamente (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Ordina per ultima modifica (più recente)</string>
+  <string name="sort_by_last_modified_oldest">Ordina per ultima modifica (più vecchio)</string>
+  <string name="shuffle_wallpaper">Mischia Sfondi</string>
 </resources>

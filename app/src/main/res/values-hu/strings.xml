@@ -67,15 +67,15 @@
   <string name="interval_home">Kezdőképernyő | %1$s</string>
   <string name="interval_lock">Képernyőzár | %1$s</string>
   <string name="interval">Intervallum | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d perc</item>
     <item quantity="other">%d perc</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d óra</item>
     <item quantity="other">%d óra</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d nap</item>
     <item quantity="other">%d nap</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">háttérképek</string>
   <string name="translation">Fordítás</string>
   <string name="help_translate_the_app_on_crowdin">Segítsen lefordítani az alkalmazást a Crowdinon!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d háttérkép</item>
     <item quantity="other">%d háttérképek</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Szürke szűrő</string>
   <string name="select_starting_time">Válassza ki a kezdési időpontot</string>
   <string name="change_notification_settings">Módosítsa az értesítési beállításokat</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>

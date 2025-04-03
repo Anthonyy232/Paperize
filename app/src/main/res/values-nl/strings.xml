@@ -67,15 +67,15 @@
   <string name="interval_home">Startscherm | %1$s</string>
   <string name="interval_lock">Vergrendelscherm | %1$s</string>
   <string name="interval">Tussentijd | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuut</item>
     <item quantity="other">%d minuten</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d uur</item>
     <item quantity="other">%d uur</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dag</item>
     <item quantity="other">%d dagen</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">achtergronden</string>
   <string name="translation">Vertaling</string>
   <string name="help_translate_the_app_on_crowdin">Help mee met het vertalen van de app op Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d behang</item>
     <item quantity="other">%d achtergronden</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Grijs Filter</string>
   <string name="select_starting_time">Kies de begintijd</string>
   <string name="change_notification_settings">Meldingsinstellingen wijzigen</string>
+  <string name="sort_items">Artikelen sorteren</string>
+  <string name="folders">Mappen</string>
+  <string name="expand_folder">Map uitvouwen</string>
+  <string name="wallpapers_sort">Achtergronden</string>
+  <string name="clos" comment="close">Afsluiten</string>
+  <string name="expand">Uitklappen</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sorteer alfabetisch (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sorteer alfabetisch (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sorteer op laatst gewijzigd (nieuwste)</string>
+  <string name="sort_by_last_modified_oldest">Sorteer op laatst gewijzigd (oudste)</string>
+  <string name="shuffle_wallpaper">Shuffle achtergronden</string>
 </resources>

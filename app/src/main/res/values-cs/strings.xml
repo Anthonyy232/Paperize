@@ -67,19 +67,19 @@
   <string name="interval_home">Úvodní obrazovka | %1$s</string>
   <string name="interval_lock">Uzamknout obrazovku | %1$s</string>
   <string name="interval">Interval | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuta</item>
     <item quantity="few">%d minut</item>
     <item quantity="many">%d minut</item>
     <item quantity="other">%d minut</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d hodina</item>
     <item quantity="few">%d hodin</item>
     <item quantity="many">%d hodin</item>
     <item quantity="other">%d hodin</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d den</item>
     <item quantity="few">%d dnů</item>
     <item quantity="many">%d dnů</item>
@@ -117,7 +117,7 @@
   <string name="wallpapers">tapety</string>
   <string name="translation">Překlad</string>
   <string name="help_translate_the_app_on_crowdin">Pomozte přeložit aplikaci na Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d tapeta</item>
     <item quantity="few">%d tapety</item>
     <item quantity="many">%d tapety</item>
@@ -176,4 +176,16 @@
   <string name="gray_filter">Šedý filtr</string>
   <string name="select_starting_time">Vyberte počáteční čas</string>
   <string name="change_notification_settings">Změnit nastavení oznámení</string>
+  <string name="sort_items">Seřadit_položky</string>
+  <string name="folders">Složky</string>
+  <string name="expand_folder">Rozbalit složku</string>
+  <string name="wallpapers_sort">Tapety</string>
+  <string name="clos" comment="close">Zavřít</string>
+  <string name="expand">Rozbalit</string>
+  <string name="selected">%1$s vybráno</string>
+  <string name="sort_alphabetically_a_z">Řadit abecedně (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Řadit abecedně (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Seřadit podle poslední úpravy (nejvyšší)</string>
+  <string name="sort_by_last_modified_oldest">Seřadit podle poslední úpravy (Oldest)</string>
+  <string name="shuffle_wallpaper">Zamíchat pozadí</string>
 </resources>

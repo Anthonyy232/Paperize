@@ -67,15 +67,15 @@
   <string name="interval_home">Startskærm | %1$s</string>
   <string name="interval_lock">Lås skærm | %1$s</string>
   <string name="interval">Interval | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minut</item>
     <item quantity="other">%d minutter</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d time</item>
     <item quantity="other">%d timer</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dag</item>
     <item quantity="other">%d dage</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">tapeter</string>
   <string name="translation">Oversættelse</string>
   <string name="help_translate_the_app_on_crowdin">Hjælp med at oversætte appen på Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d tapet</item>
     <item quantity="other">%d tapeter</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Grå Filter</string>
   <string name="select_starting_time">Vælg starttidspunkt</string>
   <string name="change_notification_settings">Skift notifikationsindstillinger</string>
+  <string name="sort_items">sort_items</string>
+  <string name="folders">Mapper</string>
+  <string name="expand_folder">Udvid mappe</string>
+  <string name="wallpapers_sort">Baggrunde</string>
+  <string name="clos" comment="close">Luk</string>
+  <string name="expand">Udvid</string>
+  <string name="selected">%1$s valgt</string>
+  <string name="sort_alphabetically_a_z">Sortér Alfabetisk (A-Å)</string>
+  <string name="sort_alphabetically_z_a">Sorter Alfabetisk (Å-A)</string>
+  <string name="sort_by_last_modified_newest">Sorter efter senest ændret (nevest)</string>
+  <string name="sort_by_last_modified_oldest">Sorter efter senest ændret (ældste)</string>
+  <string name="shuffle_wallpaper">Bland Baggrunde</string>
 </resources>

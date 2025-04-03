@@ -67,19 +67,19 @@
   <string name="interval_home">Главный экран | %1$s</string>
   <string name="interval_lock">Экран блокировки | %1$s</string>
   <string name="interval">Интервал | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d минута</item>
     <item quantity="few">%d минут</item>
     <item quantity="many">%d минут</item>
     <item quantity="other">%d минут</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d час</item>
     <item quantity="few">%d часов</item>
     <item quantity="many">%d часов</item>
     <item quantity="other">%d часов</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d день</item>
     <item quantity="few">%d дней</item>
     <item quantity="many">%d дней</item>
@@ -117,7 +117,7 @@
   <string name="wallpapers">обои</string>
   <string name="translation">Перевод</string>
   <string name="help_translate_the_app_on_crowdin">Помогите перевести приложение на Crowdin!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d обои</item>
     <item quantity="few">%d обои</item>
     <item quantity="many">%d обои</item>
@@ -176,4 +176,16 @@
   <string name="gray_filter">Серый фильтр</string>
   <string name="select_starting_time">Выберите время начала</string>
   <string name="change_notification_settings">Изменить настройки уведомлений</string>
+  <string name="sort_items">Сортировать элементы</string>
+  <string name="folders">Папки</string>
+  <string name="expand_folder">Развернуть папку</string>
+  <string name="wallpapers_sort">Обои</string>
+  <string name="clos" comment="close">Закрыть</string>
+  <string name="expand">Развернуть</string>
+  <string name="selected">%1$s выбран</string>
+  <string name="sort_alphabetically_a_z">Сортировать по алфавиту (А-Я)</string>
+  <string name="sort_alphabetically_z_a">Сортировать по алфавиту (Я-А)</string>
+  <string name="sort_by_last_modified_newest">Сортировать по дате последнего изменения (новый)</string>
+  <string name="sort_by_last_modified_oldest">Сортировать по дате последнего изменения (по убыванию)</string>
+  <string name="shuffle_wallpaper">Перемешать обои</string>
 </resources>

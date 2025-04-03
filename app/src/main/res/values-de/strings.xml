@@ -4,7 +4,7 @@
   <string name="SettingsIcon">Einstellungen</string>
   <string name="dropdownmenu_settings">Einstellungen</string>
   <string name="home_screen">Startseite</string>
-  <string name="wallpaper_screen">Tapete</string>
+  <string name="wallpaper_screen">Hintergrundbild</string>
   <string name="library_screen">Sammlung</string>
   <string name="settings_screen">Einstellungen</string>
   <string name="settings_back">Zurück</string>
@@ -20,7 +20,7 @@
   <string name="delete_confirmation">Löschen bestätigen</string>
   <string name="all_images_selected_for_deletion">Alle zum Löschen ausgewählten Bilder</string>
   <string name="add_album">Album hinzufügen</string>
-  <string name="add_wallpaper_screen">Bildschirm „Hintergrundbild hinzufügen“</string>
+  <string name="add_wallpaper_screen">Hintergrund hinzufügen</string>
   <string name="enter_the_name_of_the_album">Namen des Albums eingeben</string>
   <string name="album_name">Albumname</string>
   <string name="cancel">Abbrechen</string>
@@ -49,7 +49,7 @@
   <string name="privacy_policy">Datenschutzrichtlinie</string>
   <string name="privacy_screen">Datenschutz Bildschirm</string>
   <string name="licenses">Lizenzen</string>
-  <string name="licenses_screen">Bildschirm „Lizenzen“</string>
+  <string name="licenses_screen">Lizenzen</string>
   <string name="contact">Kontakt</string>
   <string name="contact_the_author_by_email">Kontaktiere den Autor per E-Mail</string>
   <string name="reset_to_default">Auf Standard zurücksetzen</string>
@@ -67,15 +67,15 @@
   <string name="interval_home">Startbildschirm | %1$s</string>
   <string name="interval_lock">Sperrbildschirm | %1$s</string>
   <string name="interval">Intervall | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d Minute</item>
     <item quantity="other">%d Minuten</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d Stunde</item>
     <item quantity="other">%d Stunden</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d Tag</item>
     <item quantity="other">%d Tage</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">Hintergründe</string>
   <string name="translation">Übersetzung</string>
   <string name="help_translate_the_app_on_crowdin">Helfen Sie dabei, die App auf Crowdin zu übersetzen!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d Hintergrundbild</item>
     <item quantity="other">%d Hintergrundbilder</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">Grauer Filter</string>
   <string name="select_starting_time">Startzeit auswählen</string>
   <string name="change_notification_settings">Benachrichtigungseinstellungen ändern</string>
+  <string name="sort_items">sortieren</string>
+  <string name="folders">Ordner</string>
+  <string name="expand_folder">Ordner erweitern</string>
+  <string name="wallpapers_sort">Hintergrundbilder</string>
+  <string name="clos" comment="close">Schließen</string>
+  <string name="expand">Erweitern</string>
+  <string name="selected">%1$s ausgewählt</string>
+  <string name="sort_alphabetically_a_z">Alphabetisch sortieren (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Alphabetisch sortieren (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sortieren nach zuletzt geändert (Neueste)</string>
+  <string name="sort_by_last_modified_oldest">Sortieren nach zuletzt geändert (Älteste)</string>
+  <string name="shuffle_wallpaper">Hintergrundbilder mischen</string>
 </resources>

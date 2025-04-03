@@ -67,15 +67,15 @@
   <string name="interval_home">హోమ్ స్క్రీన్ | %1$s</string>
   <string name="interval_lock">లాక్ స్క్రీన్ | %1$s</string>
   <string name="interval">విరామం | %1$s</string>
-  <plurals name="minutes">
+  <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d నిమిషం</item>
     <item quantity="other">%d నిమిషాలు</item>
   </plurals>
-  <plurals name="hours">
+  <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d గంట</item>
     <item quantity="other">%d గంటలు</item>
   </plurals>
-  <plurals name="days">
+  <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d రోజు</item>
     <item quantity="other">%d రోజులు</item>
   </plurals>
@@ -111,7 +111,7 @@
   <string name="wallpapers">వాల్ పేపర్లు</string>
   <string name="translation">అనువాదం</string>
   <string name="help_translate_the_app_on_crowdin">క్రౌడిన్‌లో యాప్‌ని అనువదించడంలో సహాయం చేయండి!</string>
-  <plurals name="wallpaper_count">
+  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d వాల్‌పేపర్</item>
     <item quantity="other">%d వాల్‌పేపర్‌లు</item>
   </plurals>
@@ -168,4 +168,16 @@
   <string name="gray_filter">గ్రే ఫిల్టర్</string>
   <string name="select_starting_time">ప్రారంభ సమయాన్ని ఎంచుకోండి</string>
   <string name="change_notification_settings">నోటిఫికేషన్ సెట్టింగ్‌లను మార్చండి</string>
+  <string name="sort_items">Sort items</string>
+  <string name="folders">Folders</string>
+  <string name="expand_folder">Expand folder</string>
+  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="clos" comment="close">Close</string>
+  <string name="expand">Expand</string>
+  <string name="selected">%1$s selected</string>
+  <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
+  <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
+  <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
+  <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
+  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
 </resources>
