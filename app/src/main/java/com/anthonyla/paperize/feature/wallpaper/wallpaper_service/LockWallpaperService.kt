@@ -208,6 +208,7 @@ class LockWallpaperService: Service() {
                         else lockAlbum.totalWallpapers.map { it.wallpaperUri }
                         wallpaper = newWallpapers.firstOrNull()
                         if (wallpaper == null) {
+                            Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                             albumRepository.cascadeDeleteAlbum(lockAlbum.album)
                             onDestroy()
                             return
@@ -300,6 +301,7 @@ class LockWallpaperService: Service() {
                         else lockAlbum.totalWallpapers.map { it.wallpaperUri }
                         wallpaper = newWallpapers.firstOrNull()
                         if (wallpaper == null) {
+                            Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                             albumRepository.cascadeDeleteAlbum(lockAlbum.album)
                             onDestroy()
                             return

@@ -217,10 +217,11 @@ class HomeWallpaperService: Service() {
                 settings.setHome && settings.setLock && scheduleSeparately -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
-                        val newWallpapers = if (settings.shuffle) homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
-                        else homeAlbum.wallpapers.map { it.wallpaperUri }
+                        val newWallpapers = if (settings.shuffle) homeAlbum.totalWallpapers.map { it.wallpaperUri }.shuffled()
+                        else homeAlbum.totalWallpapers.map { it.wallpaperUri }
                         wallpaper = newWallpapers.firstOrNull()
                         if (wallpaper == null) {
+                            Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                             albumRepository.cascadeDeleteAlbum(homeAlbum.album)
                             onDestroy()
                             return
@@ -308,10 +309,11 @@ class HomeWallpaperService: Service() {
                 settings.setHome && settings.setLock && !scheduleSeparately -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
-                        val newWallpapers = if (settings.shuffle) homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
-                        else homeAlbum.wallpapers.map { it.wallpaperUri }
+                        val newWallpapers = if (settings.shuffle) homeAlbum.totalWallpapers.map { it.wallpaperUri }.shuffled()
+                        else homeAlbum.totalWallpapers.map { it.wallpaperUri }
                         wallpaper = newWallpapers.firstOrNull()
                         if (wallpaper == null) {
+                            Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                             albumRepository.cascadeDeleteAlbum(homeAlbum.album)
                             onDestroy()
                             return
@@ -397,10 +399,11 @@ class HomeWallpaperService: Service() {
                 settings.setHome -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
-                        val newWallpapers = if (settings.shuffle) homeAlbum.wallpapers.map { it.wallpaperUri }.shuffled()
-                        else homeAlbum.wallpapers.map { it.wallpaperUri }
+                        val newWallpapers = if (settings.shuffle) homeAlbum.totalWallpapers.map { it.wallpaperUri }.shuffled()
+                        else homeAlbum.totalWallpapers.map { it.wallpaperUri }
                         wallpaper = newWallpapers.firstOrNull()
                         if (wallpaper == null) {
+                            Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                             albumRepository.cascadeDeleteAlbum(homeAlbum.album)
                             onDestroy()
                             return
@@ -686,6 +689,7 @@ class HomeWallpaperService: Service() {
                         )
                     }
                     else {
+                        Log.d("PaperizeWallpaperChanger", "No wallpaper found")
                         albumRepository.cascadeDeleteAlbum(album.album)
                     }
                 }
