@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
