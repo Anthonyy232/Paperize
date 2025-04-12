@@ -13,7 +13,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
  */
 @Database(
     entities = [Album::class, Wallpaper::class, Folder::class],
-    version = 10
+    version = 11
 )
 @TypeConverters(Converters::class)
 abstract class AlbumDatabase: RoomDatabase() {
