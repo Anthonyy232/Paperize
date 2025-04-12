@@ -45,6 +45,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                         val scheduleSeparately = settingsDataStoreImpl.getBoolean(SettingsConstants.SCHEDULE_SEPARATELY) ?: false
                         val setLock = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_LOCK_WALLPAPER) ?: false
                         val setHome = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_HOME_WALLPAPER) ?: false
+                        val refresh = settingsDataStoreImpl.getBoolean(SettingsConstants.REFRESH) ?: true
                         val alarmItem = WallpaperAlarmItem(
                             homeInterval = homeInterval,
                             lockInterval = lockInterval,
@@ -63,6 +64,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                                 lockNextTime = settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME),
                             )
                         }
+                        scheduler.scheduleRefresh(refresh)
                     }
                 }
             }

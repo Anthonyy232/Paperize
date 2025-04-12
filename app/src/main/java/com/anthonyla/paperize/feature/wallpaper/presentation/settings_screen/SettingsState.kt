@@ -39,7 +39,8 @@ data class SettingsState(
         val lastSetTime: String? = null,
         val nextSetTime: String? = null,
         val changeStartTime: Boolean = false,
-        val startTime: Pair<Int, Int> = Pair(0, 0)
+        val startTime: Pair<Int, Int> = Pair(0, 0),
+        val refresh: Boolean = true
     )
 
     data class EffectSettings(

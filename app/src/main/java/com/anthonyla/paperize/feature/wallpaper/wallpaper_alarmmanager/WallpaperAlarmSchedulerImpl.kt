@@ -243,22 +243,24 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
     /**
      * Schedules a refresh alarm every 24hrs
      */
-    fun scheduleRefresh() {
+    fun scheduleRefresh(refresh: Boolean = true) {
         cancelAlarm(Type.REFRESH)
-        val intent = Intent(context, WallpaperReceiver::class.java).apply {
-            putExtra("refresh", true)
-        }
-        val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-            PendingIntent.getBroadcast(
-                context,
-                Type.REFRESH.ordinal,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        if (refresh) {
+            val intent = Intent(context, WallpaperReceiver::class.java).apply {
+                putExtra("refresh", true)
+            }
+            val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+                PendingIntent.getBroadcast(
+                    context,
+                    Type.REFRESH.ordinal,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
             )
-        )
+        }
     }
 
     /**

@@ -18,6 +18,7 @@ object SettingsConstants {
     const val LOCK_ALBUM_NAME = "lock_album_name"
     const val HOME_WALLPAPER_CHANGE_INTERVAL = "home_wallpaper_change_interval"
     const val LOCK_WALLPAPER_CHANGE_INTERVAL = "lock_wallpaper_change_interval"
+    const val REFRESH = "refresh"
     const val WALLPAPER_CHANGE_INTERVAL_DEFAULT = 15
     const val WALLPAPER_CHANGE_INTERVAL_MIN = 1
     const val FIRST_LAUNCH = "first_launch"

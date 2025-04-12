@@ -1,15 +1,8 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager
 
-import android.app.ActivityOptions
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service.NOTIFICATION_SERVICE
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat.getSystemService
 import com.anthonyla.paperize.core.SettingsConstants
 import com.anthonyla.paperize.core.SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
 import com.anthonyla.paperize.core.Type
@@ -31,12 +24,13 @@ class WallpaperReceiver : BroadcastReceiver() {
     lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null) {
-            if (intent?.getBooleanExtra("refresh", false) == true) {
+            val refresh = intent?.getBooleanExtra("refresh", true)
+            if (refresh == true) {
                 val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply {
                     action = HomeWallpaperService.Actions.REFRESH.toString()
                 }
                 context.startService(serviceIntent)
-                WallpaperAlarmSchedulerImpl(context).scheduleRefresh()
+                WallpaperAlarmSchedulerImpl(context).scheduleRefresh(refresh)
             } else {
                 val homeInterval = intent?.getIntExtra("homeInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val lockInterval = intent?.getIntExtra("lockInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT

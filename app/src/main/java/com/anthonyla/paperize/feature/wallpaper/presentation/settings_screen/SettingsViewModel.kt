@@ -107,7 +107,8 @@ class SettingsViewModel @Inject constructor(
         settingsDataStoreImpl.getBooleanFlow(SettingsConstants.CHANGE_START_TIME),
         settingsDataStoreImpl.getIntFlow(SettingsConstants.START_HOUR),
         settingsDataStoreImpl.getIntFlow(SettingsConstants.START_MINUTE),
-        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SHUFFLE)
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SHUFFLE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.REFRESH)
     ) { flows ->
         ScheduleSettings(
             scheduleSeparately = flows[0] as Boolean? ?: false,
@@ -117,7 +118,8 @@ class SettingsViewModel @Inject constructor(
             nextSetTime = flows[4] as String?,
             changeStartTime = flows[5] as Boolean? ?: false,
             startTime = Pair(flows[6] as Int? ?: 0, flows[7] as Int? ?: 0),
-            shuffle = flows[8] as Boolean? ?: true
+            shuffle = flows[8] as Boolean? ?: true,
+            refresh = flows[9] as Boolean? ?: true
         )
     }
 
@@ -539,6 +541,12 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+            is SettingsEvent.SetRefresh -> {
+                viewModelScope.launch {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.REFRESH, event.refresh)
+                }
+            }
+
             is SettingsEvent.Reset -> {
                 viewModelScope.launch {
                     val keysToDelete = listOf(
@@ -580,7 +588,8 @@ class SettingsViewModel @Inject constructor(
                         SettingsConstants.CHANGE_START_TIME,
                         SettingsConstants.START_HOUR,
                         SettingsConstants.START_MINUTE,
-                        SettingsConstants.SHUFFLE
+                        SettingsConstants.SHUFFLE,
+                        SettingsConstants.REFRESH
                     )
                     settingsDataStoreImpl.clear(keysToDelete)
                 }

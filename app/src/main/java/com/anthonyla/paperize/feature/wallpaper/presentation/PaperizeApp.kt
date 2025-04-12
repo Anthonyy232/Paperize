@@ -504,6 +504,12 @@ fun PaperizeApp(
                         )
                     }
                 },
+                onRefreshChange = { refresh ->
+                    settingsViewModel.onEvent(SettingsEvent.SetRefresh(refresh))
+                    if (settingsState.value.wallpaperSettings.enableChanger) {
+                        scheduler.scheduleRefresh(refresh)
+                    }
+                }
             )
         }
 
@@ -712,7 +718,7 @@ private fun CoroutineScope.scheduleWallpaperUpdate(
             cancelImmediate = cancelImmediate,
             firstLaunch = firstLaunch
         )
-        scheduler.scheduleRefresh()
+        scheduler.scheduleRefresh(settingsState.scheduleSettings.refresh)
     }
 }
 
@@ -739,7 +745,7 @@ private fun CoroutineScope.updateWallpaperAlarm(
             wallpaperAlarmItem = alarmItem,
             firstLaunch = firstLaunch
         )
-        scheduler.scheduleRefresh()
+        scheduler.scheduleRefresh(settingsState.scheduleSettings.refresh)
     }
 }
 

@@ -225,5 +225,4 @@ fun GrayscaleSwitchAndSlider(
             }
         }
     }
-
 }
