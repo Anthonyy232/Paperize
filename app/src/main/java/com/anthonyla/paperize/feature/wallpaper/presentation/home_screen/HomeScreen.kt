@@ -4,14 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
@@ -23,7 +20,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.core.ScalingConstants
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
 import com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen.components.AddAlbumDialog
@@ -36,7 +32,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.WallpaperSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.WallpaperScreen
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     albums: List<AlbumWithWallpaperAndFolder>,
@@ -97,22 +93,8 @@ fun HomeScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            TabRow(
+            PrimaryTabRow(
                 selectedTabIndex = tabIndex,
-                indicator = { tabPositions ->
-                    if (tabIndex in tabPositions.indices) {
-                        TabRowDefaults.PrimaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
-                            shape = RoundedCornerShape(
-                                topStart = 6.dp,
-                                topEnd = 6.dp,
-                                bottomEnd = 0.dp,
-                                bottomStart = 0.dp,
-                            ),
-                            width = 60.dp
-                        )
-                    }
-                }
             ) {
                 tabItems.forEachIndexed { index, item ->
                     Tab(
