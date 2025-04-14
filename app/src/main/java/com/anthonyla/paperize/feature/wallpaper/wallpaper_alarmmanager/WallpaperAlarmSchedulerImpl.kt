@@ -246,20 +246,27 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
     fun scheduleRefresh(refresh: Boolean = true) {
         cancelAlarm(Type.REFRESH)
         if (refresh) {
-            val intent = Intent(context, WallpaperReceiver::class.java).apply {
-                putExtra("refresh", true)
+//            val intent = Intent(context, WallpaperReceiver::class.java).apply {
+//                putExtra("refresh", true)
+//            }
+            val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply {
+                action = HomeWallpaperService.Actions.REFRESH.toString()
             }
-            val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-                PendingIntent.getBroadcast(
-                    context,
-                    Type.REFRESH.ordinal,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            )
+            context.startService(serviceIntent)
+//            val nextMidnight = LocalDateTime.now().plusMinutes(1)
+//            val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
+//            alarmManager.setInexactRepeating(
+//                AlarmManager.RTC_WAKEUP,
+//                nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+//                //AlarmManager.INTERVAL_DAY,
+//                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+//                PendingIntent.getBroadcast(
+//                    context,
+//                    Type.REFRESH.ordinal,
+//                    intent,
+//                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+//                )
+//            )
         }
     }
 

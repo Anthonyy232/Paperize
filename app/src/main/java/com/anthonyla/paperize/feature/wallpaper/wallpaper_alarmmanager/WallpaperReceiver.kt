@@ -30,7 +30,6 @@ class WallpaperReceiver : BroadcastReceiver() {
                     action = HomeWallpaperService.Actions.REFRESH.toString()
                 }
                 context.startService(serviceIntent)
-                WallpaperAlarmSchedulerImpl(context).scheduleRefresh(refresh)
             } else {
                 val homeInterval = intent?.getIntExtra("homeInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val lockInterval = intent?.getIntExtra("lockInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
