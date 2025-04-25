@@ -3,13 +3,17 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -79,75 +83,82 @@ fun AlbumBottomSheet(
         tonalElevation = 5.dp,
         modifier = sheetModifier
     ) {
-        albums.forEach { album ->
-            val totalWallpapers = album.folders.sumOf { it.wallpapers.size } + album.wallpapers.size
-            if (totalWallpapers == 0) return@forEach
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(scrollState)
+        ) {
+            albums.forEach { album ->
+                val totalWallpapers = album.folders.sumOf { it.wallpapers.size } + album.wallpapers.size
+                if (totalWallpapers == 0) return@forEach
 
-            val isSelected = (homeSelectedAlbum?.album?.initialAlbumName == album.album.initialAlbumName) ||
-                    (lockSelectedAlbum?.album?.displayedAlbumName == album.album.displayedAlbumName)
+                val isSelected = (homeSelectedAlbum?.album?.initialAlbumName == album.album.initialAlbumName) ||
+                        (lockSelectedAlbum?.album?.displayedAlbumName == album.album.displayedAlbumName)
 
-            ListItem(
-                modifier = Modifier.clickable {
-                    scope.launch {
-                        modalBottomSheetState.hide()
-                    }
-                    onSelect(album)
-                    onDismiss()
-                },
-                headlineContent = {
-                    Text(
-                        text = album.album.displayedAlbumName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = context.resources.getQuantityString(
-                            R.plurals.wallpaper_count,
-                            totalWallpapers,
-                            totalWallpapers
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                leadingContent = {
-                    Box(modifier = Modifier.size(60.dp)) {
-                        if (isValidUri(context, album.album.coverUri)) {
-                            GlideImage(
-                                imageModel = { album.album.coverUri?.decompress("content://com.android.externalstorage.documents/") },
-                                imageOptions = ImageOptions(
-                                    contentScale = ContentScale.Crop,
-                                    alignment = Alignment.Center,
-                                    requestSize = IntSize(150, 150)
-                                ),
-                                loading = {
-                                    if (animate) {
-                                        Box(modifier = Modifier.matchParentSize()) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.align(Alignment.Center)
-                                            )
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(16.dp))
-                            )
+                ListItem(
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            modalBottomSheetState.hide()
                         }
-                    }
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = if (isSelected) Icons.Filled.RadioButtonChecked 
-                            else Icons.Filled.RadioButtonUnchecked,
-                        contentDescription = stringResource(
-                            if (isSelected) R.string.currently_selected_album 
-                            else R.string.unselected_album
+                        onSelect(album)
+                        onDismiss()
+                    },
+                    headlineContent = {
+                        Text(
+                            text = album.album.displayedAlbumName,
+                            style = MaterialTheme.typography.titleMedium
                         )
-                    )
-                }
-            )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = context.resources.getQuantityString(
+                                R.plurals.wallpaper_count,
+                                totalWallpapers,
+                                totalWallpapers
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    leadingContent = {
+                        Box(modifier = Modifier.size(60.dp)) {
+                            if (isValidUri(context, album.album.coverUri)) {
+                                GlideImage(
+                                    imageModel = { album.album.coverUri?.decompress("content://com.android.externalstorage.documents/") },
+                                    imageOptions = ImageOptions(
+                                        contentScale = ContentScale.Crop,
+                                        alignment = Alignment.Center,
+                                        requestSize = IntSize(150, 150)
+                                    ),
+                                    loading = {
+                                        if (animate) {
+                                            Box(modifier = Modifier.matchParentSize()) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.align(Alignment.Center)
+                                                )
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                )
+                            }
+                        }
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = if (isSelected) Icons.Filled.RadioButtonChecked
+                                else Icons.Filled.RadioButtonUnchecked,
+                            contentDescription = stringResource(
+                                if (isSelected) R.string.currently_selected_album
+                                else R.string.unselected_album
+                            )
+                        )
+                    }
+                )
+            }
         }
     }
 }
