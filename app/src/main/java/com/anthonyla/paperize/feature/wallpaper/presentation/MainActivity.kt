@@ -6,10 +6,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.CursorWindow
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -48,6 +50,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import java.lang.reflect.Field
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 
 @AndroidEntryPoint
@@ -64,6 +67,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
+
         }
         val splashScreen = installSplashScreen()
 
@@ -79,6 +83,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { settingsViewModel.setKeepOnScreenCondition }
 
         setContent {
+            ensureExactAlarmPermission(context)
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
             val scheduler = WallpaperAlarmSchedulerImpl(context)
@@ -102,6 +107,19 @@ class MainActivity : ComponentActivity() {
                 ) {
                     PaperizeApp(isFirstLaunch, scheduler)
                 }
+            }
+        }
+    }
+
+    private fun ensureExactAlarmPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!am.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = "package:${context.packageName}".toUri()
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
             }
         }
     }

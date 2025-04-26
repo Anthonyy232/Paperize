@@ -500,7 +500,7 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
 fun isDirectory(context: Context, uriString: String?): Boolean {
     val uri = uriString?.toUri() ?: return false
     return try {
-        val valid = DocumentFileCompat.fromSingleUri(context, uri)?.isDirectory() ?: false
+        val valid = DocumentFile.fromSingleUri(context, uri)?.isDirectory() ?: false
         Log.d("WallpaperUtil", "URI is directory: $uri")
         valid
     } catch (e: Exception) {
