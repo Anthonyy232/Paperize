@@ -24,14 +24,14 @@ class WallpaperReceiver : BroadcastReceiver() {
     lateinit var settingsDataStoreImpl: SettingsDataStore
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null) {
-            val refresh = intent?.getBooleanExtra("refresh", true)
+            val refresh = intent?.getBooleanExtra("refresh", false)
             if (refresh == true) {
                 val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply {
                     action = HomeWallpaperService.Actions.REFRESH.toString()
                 }
                 context.startService(serviceIntent)
-                WallpaperAlarmSchedulerImpl(context).scheduleRefresh(refresh)
-            } else {
+            }
+            else {
                 val homeInterval = intent?.getIntExtra("homeInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val lockInterval = intent?.getIntExtra("lockInterval", WALLPAPER_CHANGE_INTERVAL_DEFAULT) ?: WALLPAPER_CHANGE_INTERVAL_DEFAULT
                 val scheduleSeparately = intent?.getBooleanExtra("scheduleSeparately", false) ?: false

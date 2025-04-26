@@ -209,7 +209,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
                     calculateFutureTime(baseTime, wallpaperAlarmItem.homeInterval.toLong())
                 }
             }
-            return nextTime
+            return nextTime.withSecond(0).withNano(0)
         }
     }
 
@@ -250,9 +250,10 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
                 putExtra("refresh", true)
             }
             val nextMidnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
-            alarmManager.setAndAllowWhileIdle(
+            alarmManager.setInexactRepeating(
                 AlarmManager.RTC_WAKEUP,
                 nextMidnight.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
+                AlarmManager.INTERVAL_DAY,
                 PendingIntent.getBroadcast(
                     context,
                     Type.REFRESH.ordinal,

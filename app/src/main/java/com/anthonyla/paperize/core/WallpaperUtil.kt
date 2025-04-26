@@ -396,7 +396,8 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
                 }
             }
         }
-    } catch (_: SecurityException) {
+    } catch (e: SecurityException) {
+        Log.e("WallpaperUtil", "Error getting wallpapers from folder: ", e)
         return@withContext emptyList<Wallpaper>()
     }
     return@withContext wallpapers
@@ -411,11 +412,13 @@ suspend fun getFolderMetadata(folderUri: String, context: Context): Metadata = w
         try {
             val file = DocumentFileCompat.fromTreeUri(context, uri)
             Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("WallpaperUtil", "Error getting folder metadata: ", e)
             val file = DocumentFile.fromTreeUri(context, uri)
             Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
         }
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error getting folder metadata: ", e)
         Metadata("", 0)
     }
 }
@@ -431,11 +434,13 @@ suspend fun getImageMetadata(context: Context, uriString: String): Metadata = wi
         try {
             val file = DocumentFileCompat.fromSingleUri(context, uri)
             Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("WallpaperUtil", "Error getting image metadata: ", e)
             val file = DocumentFile.fromSingleUri(context, uri)
             Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
         }
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error getting image metadata: ", e)
         Metadata("", 0)
     }
 }
@@ -448,17 +453,32 @@ suspend fun findFirstValidUri(
     folders: List<Folder>,
     wallpapers: List<Wallpaper>
 ): String? = withContext(Dispatchers.IO) {
-    // Check folder wallpapers first
-    folders.forEach { folder ->
-        folder.wallpapers.forEach { wallpaper ->
-            isValidUri(context, wallpaper.wallpaperUri).let { return@withContext wallpaper.wallpaperUri }
+    try {
+        folders.forEach { folder ->
+            folder.wallpapers.forEach { wallpaper ->
+                try {
+                    if (isValidUri(context, wallpaper.wallpaperUri)) {
+                        return@withContext wallpaper.wallpaperUri
+                    }
+                } catch (e: Exception) {
+                    Log.e("WallpaperUtil", "Error checking URI validity: ${wallpaper.wallpaperUri}", e)
+                }
+            }
         }
+        wallpapers.forEach { wallpaper ->
+            try {
+                if (isValidUri(context, wallpaper.wallpaperUri)) {
+                    return@withContext wallpaper.wallpaperUri
+                }
+            } catch (e: Exception) {
+                Log.e("WallpaperUtil", "Error checking URI validity: ${wallpaper.wallpaperUri}", e)
+            }
+        }
+        return@withContext null
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error finding valid URI", e)
+        return@withContext null
     }
-    // Then check individual wallpapers
-    wallpapers.forEach { wallpaper ->
-        isValidUri(context, wallpaper.wallpaperUri).let { return@withContext wallpaper.wallpaperUri }
-    }
-    return@withContext null
 }
 
 /**
@@ -468,7 +488,8 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
     val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri() ?: return false
     return try {
         DocumentFileCompat.fromSingleUri(context, uri)?.exists() ?: false
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error checking URI validity: ", e)
         DocumentFile.fromSingleUri(context, uri)?.exists() ?: false
     }
 }
@@ -479,8 +500,11 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
 fun isDirectory(context: Context, uriString: String?): Boolean {
     val uri = uriString?.toUri() ?: return false
     return try {
-        DocumentFileCompat.fromSingleUri(context, uri)?.isDirectory() ?: false
-    } catch (_: Exception) {
+        val valid = DocumentFile.fromSingleUri(context, uri)?.isDirectory() ?: false
+        Log.d("WallpaperUtil", "URI is directory: $uri")
+        valid
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error checking if URI is a directory: ", e)
         DocumentFile.fromSingleUri(context, uri)?.isDirectory ?: false
     }
 }
