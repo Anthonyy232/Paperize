@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -86,7 +86,7 @@ fun AlbumBottomSheet(
         val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .fillMaxHeight()
+                .wrapContentHeight()
                 .verticalScroll(scrollState)
         ) {
             albums.forEach { album ->
