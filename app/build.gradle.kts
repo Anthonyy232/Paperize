@@ -111,7 +111,6 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.lazycolumnscrollbar)
     implementation(libs.taskerpluginlibrary)
-    implementation(libs.filament.android)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.reorderable)
     implementation(libs.androidx.glance.appwidget)
