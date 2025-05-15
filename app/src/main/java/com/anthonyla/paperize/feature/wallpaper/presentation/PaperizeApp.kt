@@ -756,6 +756,7 @@ private fun CoroutineScope.updateWallpaper(
 ): Job {
     job?.cancel()
     return launch {
+        delay(500L)
         scheduler.updateWallpaper(
             scheduleSeparately = settingsState.scheduleSettings.scheduleSeparately,
             setHome = settingsState.wallpaperSettings.setHomeWallpaper,

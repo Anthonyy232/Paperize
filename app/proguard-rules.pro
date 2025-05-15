@@ -23,6 +23,8 @@
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
 -keep class kotlin.coroutines.Continuation
+-keep class androidx.datastore.*.** {*;}
+
 -keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Album {
  !transient <fields>;
 }

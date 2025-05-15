@@ -24,6 +24,7 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.util.fastRoundToInt
+import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
@@ -40,7 +41,6 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
-import androidx.core.graphics.createBitmap
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
 
@@ -48,39 +48,49 @@ enum class Type { HOME, LOCK, SINGLE, REFRESH }
  * Get the dimensions of the image from the uri
  */
 fun Uri.getImageDimensions(context: Context): Size? {
-    return try {
+    try {
         context.contentResolver.openInputStream(this)?.use { inputStream ->
             val exif = ExifInterface(inputStream)
-            var width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-            var height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
-            if (width == 0 || height == 0) {
-                val options = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
-                }
-                BitmapFactory.decodeStream(
-                    context.contentResolver.openInputStream(this),
-                    null,
-                    options
-                )
-                width = options.outWidth
-                height = options.outHeight
+            val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
+            val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
+            if (width > 0 && height > 0) {
+                return Size(width, height)
             }
-            Size(width, height)
         }
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error getting image dimensions: $e")
-        null
+        Log.w("WallpaperUtil", "Error reading EXIF dimensions for $this, falling back: $e")
     }
+
+    try {
+        context.contentResolver.openInputStream(this)?.use { inputStream ->
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeStream(inputStream, null, options)
+            if (options.outWidth > 0 && options.outHeight > 0) {
+                return Size(options.outWidth, options.outHeight)
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error getting image dimensions with BitmapFactory for $this: $e")
+        return null
+    }
+    Log.w("WallpaperUtil", "Could not get image dimensions for $this")
+    return null
 }
+
 
 /**
  * Calculate the inSampleSize for the image
  */
 fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
+    if (imageSize.width == 0 || imageSize.height == 0) return 1
+    if (width == 0 || height == 0) return 1
+
     if (imageSize.width > width || imageSize.height > height) {
         val heightRatio = (imageSize.height.toFloat() / height.toFloat()).fastRoundToInt()
         val widthRatio = (imageSize.width.toFloat() / width.toFloat()).fastRoundToInt()
-        return if (heightRatio < widthRatio) { heightRatio } else { widthRatio }
+        return (if (heightRatio < widthRatio) heightRatio else widthRatio).coerceAtLeast(1)
     }
     else { return 1 }
 }
@@ -95,7 +105,8 @@ object ScreenMetricsCompat {
     @Suppress("DEPRECATION")
     private open class Api {
         open fun getScreenSize(context: Context): Size {
-            val display = context.getSystemService(WindowManager::class.java).defaultDisplay
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val display = windowManager.defaultDisplay
             val metrics = if (display != null) {
                 DisplayMetrics().also { display.getRealMetrics(it) }
             } else {
@@ -108,7 +119,8 @@ object ScreenMetricsCompat {
     @RequiresApi(Build.VERSION_CODES.R)
     private class ApiLevel30 : Api() {
         override fun getScreenSize(context: Context): Size {
-            val metrics: WindowMetrics = context.getSystemService(WindowManager::class.java).currentWindowMetrics
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val metrics: WindowMetrics = windowManager.currentWindowMetrics
             return Size(metrics.bounds.width(), metrics.bounds.height())
         }
     }
@@ -121,9 +133,9 @@ fun getDeviceScreenSize(context: Context): Size {
     val orientation = context.resources.configuration.orientation
     val size = getScreenSize(context)
     return if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Size(size.width, size.height)
+        Size(minOf(size.width, size.height), maxOf(size.width, size.height))
     } else {
-        Size(size.height, size.width)
+        Size(maxOf(size.width, size.height), minOf(size.width, size.height))
     }
 }
 
@@ -137,17 +149,24 @@ fun retrieveBitmap(
     height: Int
 ): Bitmap? {
     val imageSize = wallpaper.getImageDimensions(context) ?: return null
+    if (imageSize.width <= 0 || imageSize.height <= 0) {
+        Log.e("WallpaperUtil", "Invalid image dimensions from URI: $imageSize")
+        return null
+    }
+    val sampleSize = calculateInSampleSize(imageSize, width, height)
+
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         try {
             val source = ImageDecoder.createSource(context.contentResolver, wallpaper)
             ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                decoder.setTargetSampleSize(calculateInSampleSize(imageSize, width, height))
+                decoder.setTargetSampleSize(sampleSize)
                 decoder.isMutableRequired = true
             }
         } catch (e: Exception) {
+            Log.w("WallpaperUtil", "ImageDecoder failed, falling back to BitmapFactory: $e")
             context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
                 val options = BitmapFactory.Options().apply {
-                    inSampleSize = calculateInSampleSize(imageSize, width, height)
+                    inSampleSize = sampleSize
                     inMutable = true
                 }
                 BitmapFactory.decodeStream(inputStream, null, options)
@@ -156,13 +175,15 @@ fun retrieveBitmap(
     } else {
         context.contentResolver.openInputStream(wallpaper)?.use { inputStream ->
             val options = BitmapFactory.Options().apply {
-                inSampleSize = calculateInSampleSize(imageSize, width, height)
+                inSampleSize = sampleSize
                 inMutable = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
         }
     }
 }
+
+private val SharedPaintFilterAntiAlias = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
 
 /**
  * Scale a bitmap using the fit width method
@@ -173,14 +194,15 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         return source
     }
     return try {
-        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val scale = width.toFloat() / source.width
+        val yOffset = (height - source.height * scale) / 2f
         val matrix = Matrix().apply {
             postScale(scale, scale)
-            postTranslate(0f, (height - source.height * scale) / 2)
+            postTranslate(0f, yOffset)
         }
-        canvas.drawBitmap(source, matrix, null)
+        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
         bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error fitting bitmap: $e")
@@ -189,27 +211,37 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
 }
 
 /**
- * Scale a bitmap using the fit method
+ * Scale a bitmap using the fill method
  */
 fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
     if (source.width == width && source.height == height) {
         return source
     }
     return try {
-        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val sourceAspect = source.width.toFloat() / source.height.toFloat()
         val targetAspect = width.toFloat() / height.toFloat()
-        val scale = if (sourceAspect > targetAspect) { height.toFloat() / source.height.toFloat() }
-        else { width.toFloat() / source.width.toFloat() }
+
+        val scale: Float
+        val xOffset: Float
+        val yOffset: Float
+
+        if (sourceAspect > targetAspect) {
+            scale = height.toFloat() / source.height.toFloat()
+            xOffset = (width - source.width * scale) / 2f
+            yOffset = 0f
+        } else {
+            scale = width.toFloat() / source.width.toFloat()
+            xOffset = 0f
+            yOffset = (height - source.height * scale) / 2f
+        }
+
         val matrix = Matrix().apply {
             setScale(scale, scale)
-            postTranslate(
-                (width - source.width * scale) / 2,
-                (height - source.height * scale) / 2
-            )
+            postTranslate(xOffset, yOffset)
         }
-        canvas.drawBitmap(source, matrix, null)
+        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
         bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error filling bitmap: $e")
@@ -228,12 +260,8 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         val matrix = Matrix().apply {
             setScale(width.toFloat() / source.width, height.toFloat() / source.height)
         }
-        val paint = Paint().apply {
-            isFilterBitmap = true
-            isAntiAlias = true
-        }
-        createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
-            Canvas(this).drawBitmap(source, matrix, paint)
+        createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888).apply {
+            Canvas(this).drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
         }
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error stretching bitmap: $e")
@@ -244,17 +272,25 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
 /**
  * Darken the bitmap by a certain percentage - 0 is darkest, 100 is original
  */
-fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
-    val factor = (100 - percent.coerceIn(0, 100)) / 100f
-    val paint = Paint().apply {
-        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
-            setScale(factor, factor, factor, 1f)
-        })
+fun darkenBitmap(source: Bitmap, brightnessToRetainPercent: Int): Bitmap {
+    if (!source.isMutable) {
+        Log.w("WallpaperUtil", "darkenBitmap received an immutable bitmap. Returning a copy.")
+        val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+        return darkenBitmap(mutableCopy, brightnessToRetainPercent)
     }
 
-    return source.copy(Bitmap.Config.ARGB_8888, true).apply {
-        Canvas(this).drawBitmap(source, 0f, 0f, paint)
+    val targetBrightnessFactor = brightnessToRetainPercent.coerceIn(0, 100) / 100f
+    if (targetBrightnessFactor >= 1.0f) {
+        return source
     }
+
+    val paint = Paint().apply {
+        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
+            setScale(targetBrightnessFactor, targetBrightnessFactor, targetBrightnessFactor, 1f)
+        })
+    }
+    Canvas(source).drawBitmap(source, 0f, 0f, paint)
+    return source
 }
 
 /**
@@ -263,10 +299,10 @@ fun darkenBitmap(source: Bitmap, percent: Int): Bitmap {
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return source
     return try {
-        val radius = (percent * 0.2f).toInt()
-        Toolkit.blur(source, radius)
+        val radius = (percent.coerceIn(0, 100) * 0.25f).coerceIn(1f, 25f)
+        Toolkit.blur(source, radius.toInt())
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error blurring bitmap: $e")
+        Log.e("WallpaperUtil", "Error blurring bitmap (Renderscript): $e")
         source
     }
 }
@@ -276,33 +312,38 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
  */
 fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return source
-    return try {
-        val image = source.copy(Bitmap.Config.ARGB_8888, true) ?: return source
-        val canvas = Canvas(image)
+    if (!source.isMutable) {
+        Log.w("WallpaperUtil", "vignetteBitmap received an immutable bitmap. Returning a copy.")
+        val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+        return vignetteBitmap(mutableCopy, percent)
+    }
+
+    try {
+        val canvas = Canvas(source)
         val dim = if (source.width < source.height) source.height else source.width
-        val rad = (dim * (150f - percent) / 150f).toInt()
+        val rad = (dim * (1 - (percent.coerceIn(0, 100) / 150f))).coerceAtLeast(0.1f)
         val centerX = source.width / 2f
         val centerY = source.height / 2f
 
         val colors = intArrayOf(
             Color.TRANSPARENT,
-            Color.TRANSPARENT,
-            Color.argb((0.5f * 255).toInt(), 0, 0, 0)
+            Color.argb((0.1f * 255).toInt(), 0, 0, 0),
+            Color.argb((0.8f * 255).toInt(), 0, 0, 0)
         )
-        val pos = floatArrayOf(0f, 0.1f, 1f)
+        val pos = floatArrayOf(0f, 0.7f, 1f)
 
-        val vignettePaint = Paint().apply {
+
+        val vignettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = RadialGradient(
-                centerX, centerY, rad.toFloat(),
+                centerX, centerY, rad,
                 colors, pos, Shader.TileMode.CLAMP
             )
-            isAntiAlias = true
         }
         canvas.drawRect(0f, 0f, source.width.toFloat(), source.height.toFloat(), vignettePaint)
-        image
+        return source
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error applying vignette: $e")
-        source
+        return source
     }
 }
 
@@ -311,45 +352,37 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
  */
 fun grayBitmap(bitmap: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return bitmap
-    val factor = percent / 100f
+    if (!bitmap.isMutable) {
+        Log.w("WallpaperUtil", "grayBitmap received an immutable bitmap. Returning a copy.")
+        val mutableCopy = bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true)
+        return grayBitmap(mutableCopy, percent)
+    }
+
+    val factor = percent.coerceIn(0, 100) / 100f
+    if (factor <= 0f) return bitmap
+
     val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
     val paint = Paint().apply { colorFilter = ColorMatrixColorFilter(colorMatrix) }
 
-    val grayBitmap = createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-    Canvas(grayBitmap).apply { drawBitmap(bitmap, 0f, 0f, paint) }
-    return grayBitmap
-}
-
-/**
- * Calculate the brightness of a bitmap (0-100)
- */
-fun calculateBrightness(bitmap: Bitmap, sampleSize: Int = 16): Int {
-    val pixels = IntArray(bitmap.width * bitmap.height / sampleSize)
-    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height / sampleSize)
-    var total = 0f
-    for (i in pixels.indices step sampleSize) {
-        val color = pixels[i]
-        total += 0.299f * Color.red(color) +
-                0.587f * Color.green(color) +
-                0.114f * Color.blue(color)
-    }
-    return (total / (pixels.size / sampleSize)).toInt()
+    Canvas(bitmap).drawBitmap(bitmap, 0f, 0f, paint)
+    return bitmap
 }
 
 /**
  * Get all wallpapers from a folder URI
  */
 suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wallpaper> = withContext(Dispatchers.IO) {
-    val allowedExtensions = setOf("jpg", "jpeg", "png", "heif", "webp")
+    val allowedExtensions = setOf("jpg", "jpeg", "png", "heif", "heic", "webp")
     val contentResolver = context.contentResolver
     val wallpapers = mutableListOf<Wallpaper>()
 
-    val foldersToVisit = ArrayDeque<Uri>()
-    val visitedFolders = mutableSetOf<Uri>()
     if (folderUri.isEmpty()) {
         return@withContext emptyList<Wallpaper>()
     }
-    foldersToVisit.add(folderUri.toUri())
+    val rootUri = folderUri.toUri()
+    val foldersToVisit = ArrayDeque<Uri>()
+    foldersToVisit.add(rootUri)
+
     val projection = arrayOf(
         DocumentsContract.Document.COLUMN_DOCUMENT_ID,
         DocumentsContract.Document.COLUMN_DISPLAY_NAME,
@@ -359,25 +392,37 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
 
     try {
         while (foldersToVisit.isNotEmpty()) {
-            val currentFolderUri = foldersToVisit.removeFirst()
-            if (currentFolderUri.toString().isEmpty()) { continue }
-            visitedFolders.add(currentFolderUri)
+            val currentFolderDocumentUri = foldersToVisit.removeFirst()
+            val currentFolderTreeDocId = DocumentsContract.getTreeDocumentId(currentFolderDocumentUri)
+                ?: DocumentsContract.getDocumentId(currentFolderDocumentUri)
+
+            if (currentFolderTreeDocId == null) {
+                Log.w("WallpaperUtil", "Could not get tree document ID for $currentFolderDocumentUri")
+                continue
+            }
+
             val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                folderUri.toUri(),
-                DocumentsContract.getTreeDocumentId(currentFolderUri)
+                rootUri,
+                currentFolderTreeDocId
             )
-            val cursor = contentResolver.query(childrenUri, projection, null, null, null)
-            cursor?.use {
-                while (it.moveToNext()) {
-                    val documentId = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
-                    val displayName = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME))
-                    val mimeType = it.getString(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE))
-                    val dateModified = it.getLong(it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
-                    val documentUri = DocumentsContract.buildDocumentUriUsingTree(folderUri.toUri(), documentId)
+
+            contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                val idIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                val mimeTypeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+                val lastModifiedIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+
+                while (cursor.moveToNext()) {
+                    val documentId = cursor.getString(idIndex)
+                    val displayName = cursor.getString(nameIndex)
+                    val mimeType = cursor.getString(mimeTypeIndex)
+                    val dateModified = cursor.getLong(lastModifiedIndex)
+
+                    val documentUri = DocumentsContract.buildDocumentUriUsingTree(rootUri, documentId)
+
                     if (DocumentsContract.Document.MIME_TYPE_DIR == mimeType) {
-                        if (documentUri !in visitedFolders) {
-                            foldersToVisit.add(DocumentsContract.buildTreeDocumentUri(currentFolderUri.authority, documentId))
-                        }
+                        val dirTreeUri = DocumentsContract.buildTreeDocumentUri(rootUri.authority, documentId)
+                        foldersToVisit.add(dirTreeUri)
                     } else {
                         val extension = displayName.substringAfterLast('.', "").lowercase()
                         if (extension in allowedExtensions) {
@@ -396,30 +441,37 @@ suspend fun getWallpaperFromFolder(folderUri: String, context: Context): List<Wa
                 }
             }
         }
-    } catch (e: SecurityException) {
-        Log.e("WallpaperUtil", "Error getting wallpapers from folder: ", e)
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error getting wallpapers from folder '$folderUri': ", e)
         return@withContext emptyList<Wallpaper>()
     }
     return@withContext wallpapers
 }
 
+
 /**
  * Get the folder name from the folder URI
  */
 suspend fun getFolderMetadata(folderUri: String, context: Context): Metadata = withContext(Dispatchers.IO) {
+    if (folderUri.isEmpty()) return@withContext Metadata("", 0)
     return@withContext try {
         val uri = folderUri.toUri()
-        try {
-            val file = DocumentFileCompat.fromTreeUri(context, uri)
-            Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
-        } catch (e: Exception) {
-            Log.e("WallpaperUtil", "Error getting folder metadata: ", e)
-            val file = DocumentFile.fromTreeUri(context, uri)
-            Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
-        }
+        val file = DocumentFileCompat.fromTreeUri(context, uri)
+        val name = file?.name?.substringBeforeLast('.', file.name) ?: ""
+        val lastModified = file?.lastModified ?: 0
+        Metadata(name, lastModified)
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error getting folder metadata: ", e)
-        Metadata("", 0)
+        Log.w("WallpaperUtil", "Error getting folder metadata with DocumentFileCompat for '$folderUri': $e, trying DocumentFile")
+        try {
+            val uri = folderUri.toUri()
+            val file = DocumentFile.fromTreeUri(context, uri)
+            val name = file?.name?.substringBeforeLast('.', file.name.orEmpty()) ?: ""
+            val lastModified = file?.lastModified() ?: 0
+            Metadata(name, lastModified)
+        } catch (e2: Exception) {
+            Log.e("WallpaperUtil", "Error getting folder metadata with DocumentFile for '$folderUri': $e2")
+            Metadata("", 0)
+        }
     }
 }
 
@@ -429,19 +481,25 @@ suspend fun getFolderMetadata(folderUri: String, context: Context): Metadata = w
  * @param uriString URI string of the image
  */
 suspend fun getImageMetadata(context: Context, uriString: String): Metadata = withContext(Dispatchers.IO) {
+    if (uriString.isEmpty()) return@withContext Metadata("", 0)
     return@withContext try {
         val uri = uriString.toUri()
-        try {
-            val file = DocumentFileCompat.fromSingleUri(context, uri)
-            Metadata(file?.name?.substringBeforeLast('.', file.name).toString(), file?.lastModified ?: 0)
-        } catch (e: Exception) {
-            Log.e("WallpaperUtil", "Error getting image metadata: ", e)
-            val file = DocumentFile.fromSingleUri(context, uri)
-            Metadata(file?.name?.substringBeforeLast('.', file.name.toString()) ?: "", file?.lastModified() ?: 0)
-        }
+        val file = DocumentFileCompat.fromSingleUri(context, uri)
+        val name = file?.name?.substringBeforeLast('.', file.name) ?: ""
+        val lastModified = file?.lastModified ?: 0
+        Metadata(name, lastModified)
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error getting image metadata: ", e)
-        Metadata("", 0)
+        Log.w("WallpaperUtil", "Error getting image metadata with DocumentFileCompat for '$uriString': $e, trying DocumentFile")
+        try {
+            val uri = uriString.toUri()
+            val file = DocumentFile.fromSingleUri(context, uri)
+            val name = file?.name?.substringBeforeLast('.', file.name.orEmpty()) ?: ""
+            val lastModified = file?.lastModified() ?: 0
+            Metadata(name, lastModified)
+        } catch (e2: Exception) {
+            Log.e("WallpaperUtil", "Error getting image metadata with DocumentFile for '$uriString': $e2")
+            Metadata("", 0)
+        }
     }
 }
 
@@ -454,24 +512,24 @@ suspend fun findFirstValidUri(
     wallpapers: List<Wallpaper>
 ): String? = withContext(Dispatchers.IO) {
     try {
-        folders.forEach { folder ->
-            folder.wallpapers.forEach { wallpaper ->
+        for (folder in folders) {
+            for (wallpaper in folder.wallpapers) {
                 try {
                     if (isValidUri(context, wallpaper.wallpaperUri)) {
                         return@withContext wallpaper.wallpaperUri
                     }
                 } catch (e: Exception) {
-                    Log.e("WallpaperUtil", "Error checking URI validity: ${wallpaper.wallpaperUri}", e)
+                    Log.w("WallpaperUtil", "Error checking URI validity for folder wallpaper: ${wallpaper.wallpaperUri}", e)
                 }
             }
         }
-        wallpapers.forEach { wallpaper ->
+        for (wallpaper in wallpapers) {
             try {
                 if (isValidUri(context, wallpaper.wallpaperUri)) {
                     return@withContext wallpaper.wallpaperUri
                 }
             } catch (e: Exception) {
-                Log.e("WallpaperUtil", "Error checking URI validity: ${wallpaper.wallpaperUri}", e)
+                Log.w("WallpaperUtil", "Error checking URI validity for standalone wallpaper: ${wallpaper.wallpaperUri}", e)
             }
         }
         return@withContext null
@@ -485,12 +543,25 @@ suspend fun findFirstValidUri(
  * Check if a URI is valid
  */
 fun isValidUri(context: Context, uriString: String?): Boolean {
-    val uri = uriString?.decompress("content://com.android.externalstorage.documents/")?.toUri() ?: return false
-    return try {
-        DocumentFileCompat.fromSingleUri(context, uri)?.exists() ?: false
+    if (uriString.isNullOrEmpty()) return false
+    val decompressedUriString = try {
+        uriString.decompress("content://com.android.externalstorage.documents/")
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error checking URI validity: ", e)
-        DocumentFile.fromSingleUri(context, uri)?.exists() ?: false
+        Log.w("WallpaperUtil", "Failed to decompress URI string: $uriString", e)
+        uriString
+    }
+    val uri = decompressedUriString.toUri()
+
+    return try {
+        DocumentFileCompat.fromSingleUri(context, uri)?.exists() == true
+    } catch (e: Exception) {
+        Log.w("WallpaperUtil", "Error checking URI validity with DocumentFileCompat for '$uri': $e, trying DocumentFile")
+        try {
+            DocumentFile.fromSingleUri(context, uri)?.exists() == true
+        } catch (e2: Exception) {
+            Log.w("WallpaperUtil", "Error checking URI validity with DocumentFile for '$uri': $e2")
+            false
+        }
     }
 }
 
@@ -498,14 +569,18 @@ fun isValidUri(context: Context, uriString: String?): Boolean {
  * Check if a URI is a directory
  */
 fun isDirectory(context: Context, uriString: String?): Boolean {
-    val uri = uriString?.toUri() ?: return false
+    if (uriString.isNullOrEmpty()) return false
+    val uri = uriString.toUri()
     return try {
-        val valid = DocumentFile.fromSingleUri(context, uri)?.isDirectory() ?: false
-        Log.d("WallpaperUtil", "URI is directory: $uri")
-        valid
+        DocumentFile.fromSingleUri(context, uri)?.isDirectory == true
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error checking if URI is a directory: ", e)
-        DocumentFile.fromSingleUri(context, uri)?.isDirectory ?: false
+        Log.w("WallpaperUtil", "Error checking if URI is a directory for '$uri': $e")
+        try {
+            DocumentFile.fromTreeUri(context, uri)?.isDirectory == true
+        } catch (e2: Exception) {
+            Log.w("WallpaperUtil", "Error checking tree URI directory status for '$uri': $e2")
+            false
+        }
     }
 }
 
@@ -514,13 +589,13 @@ fun isDirectory(context: Context, uriString: String?): Boolean {
  */
 fun String.compress(prefixToRemove: String, charset: Charset = Charsets.UTF_8): String {
     val modifiedInput = if (this.startsWith(prefixToRemove)) {
-        this.removePrefix(prefixToRemove)
+        this.substring(prefixToRemove.length)
     } else { this }
     ByteArrayOutputStream().use { byteStream ->
         DeflaterOutputStream(byteStream).use { deflaterStream ->
             deflaterStream.write(modifiedInput.toByteArray(charset))
         }
-        return Base64.encodeToString(byteStream.toByteArray(), Base64.DEFAULT)
+        return Base64.encodeToString(byteStream.toByteArray(), Base64.NO_WRAP)
     }
 }
 
@@ -528,7 +603,7 @@ fun String.compress(prefixToRemove: String, charset: Charset = Charsets.UTF_8): 
  * Decompress a string
  */
 fun String.decompress(prefixToAdd: String, charset: Charset = Charsets.UTF_8): String {
-    val compressedData = Base64.decode(this, Base64.DEFAULT)
+    val compressedData = Base64.decode(this, Base64.NO_WRAP)
     ByteArrayInputStream(compressedData).use { byteStream ->
         InflaterInputStream(byteStream).use { inflaterStream ->
             val decompressedBytes = inflaterStream.readBytes()
@@ -558,7 +633,6 @@ fun processBitmap(
     try {
         var processedBitmap = source
 
-        // Apply wallpaper scaling effects
         processedBitmap = when (scaling) {
             ScalingConstants.FILL -> fillBitmap(processedBitmap, width, height)
             ScalingConstants.FIT -> fitBitmap(processedBitmap, width, height)
@@ -566,22 +640,28 @@ fun processBitmap(
             ScalingConstants.NONE -> processedBitmap
         }
 
-        // Apply brightness effect
-        if (darken && darkenPercent < 100) {
+        if (!processedBitmap.isMutable && (darken || vignette || grayscale)) {
+            Log.w("ProcessBitmap", "Bitmap became immutable before effects. Making a mutable copy.")
+            processedBitmap = processedBitmap.copy(processedBitmap.config ?: Bitmap.Config.ARGB_8888, true)
+        }
+
+        if (darken && darkenPercent > 0) {
             processedBitmap = darkenBitmap(processedBitmap, darkenPercent)
         }
 
-        // Apply blur effect
         if (blur && blurPercent > 0) {
-            processedBitmap = blurBitmap(processedBitmap, blurPercent)
+            val blurred = blurBitmap(processedBitmap, blurPercent)
+            processedBitmap = blurred
+            if (!processedBitmap.isMutable && (vignette || grayscale)) {
+                Log.w("ProcessBitmap", "Bitmap became immutable after blur. Making a mutable copy.")
+                processedBitmap = processedBitmap.copy(processedBitmap.config ?: Bitmap.Config.ARGB_8888, true)
+            }
         }
 
-        // Apply vignette effect
         if (vignette && vignettePercent > 0) {
             processedBitmap = vignetteBitmap(processedBitmap, vignettePercent)
         }
 
-        // Apply gray effect
         if (grayscale && grayscalePercent > 0) {
             processedBitmap = grayBitmap(processedBitmap, grayscalePercent)
         }
@@ -589,21 +669,26 @@ fun processBitmap(
         return processedBitmap
     }
     catch (e: OutOfMemoryError) {
-        Log.e("PaperizeWallpaperChanger", "Error ran out of memory", e)
-        return processBitmap(
-            width/2,
-            height/2,
-            source,
-            darken,
-            darkenPercent,
-            scaling,
-            blur,
-            blurPercent,
-            vignette,
-            vignettePercent,
-            grayscale,
-            grayscalePercent
-        )
+        Log.e("PaperizeWallpaperChanger", "Error: Ran out of memory during bitmap processing. Attempting with smaller dimensions.", e)
+        if (width / 2 > 0 && height / 2 > 0) {
+            return processBitmap(
+                width / 2,
+                height / 2,
+                source,
+                darken,
+                darkenPercent,
+                scaling,
+                blur,
+                blurPercent,
+                vignette,
+                vignettePercent,
+                grayscale,
+                grayscalePercent
+            )
+        } else {
+            Log.e("PaperizeWallpaperChanger", "Cannot reduce dimensions further for OOM recovery.")
+            return null
+        }
     }
     catch (e: Exception) {
         Log.e("PaperizeWallpaperChanger", "Error processing bitmap", e)

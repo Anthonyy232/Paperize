@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 
+import android.Manifest
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -12,6 +13,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
@@ -42,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -699,15 +700,16 @@ class HomeWallpaperService: Service() {
         }
     }
 
+    @RequiresPermission(Manifest.permission.SET_WALLPAPER)
     private fun setWallpaperSafely(bitmap_s: Bitmap?, flag: Int, wallpaperManager: WallpaperManager) {
         val maxRetries = 3
         for (attempt in 1..maxRetries) {
             try {
                 wallpaperManager.setBitmap(bitmap_s, null, true, flag)
                 return
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 if (attempt == maxRetries) {
-                    Log.e("Wallpaper", "Final attempt failed: \${e.message}")
+                    Log.e("Wallpaper", "Final attempt failed: ${e.message}")
                     return
                 }
                 Thread.sleep(1000L * attempt)

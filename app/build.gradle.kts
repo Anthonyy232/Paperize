@@ -59,7 +59,6 @@ android {
         generateLocaleConfig = true
     }
 
-    ndkVersion = "27.2.12479018"
     buildToolsVersion = "35.0.1"
     dependenciesInfo {
         includeInApk = false
@@ -116,6 +115,7 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.material)
+    implementation(files("dependencies/renderscript-toolkit-release.aar"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -129,6 +129,5 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.dfc)
     implementation (libs.kotlinx.serialization.json)
-    implementation(libs.renderscript.intrinsics.replacement.toolkit)
     implementation(libs.toolbar.compose)
 }
