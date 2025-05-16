@@ -582,9 +582,7 @@ class HomeWallpaperService: Service() {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
                         if (both) setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
                         setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
-                        image.recycle()
                     }
-                    bitmap.recycle()
                     context.triggerWallpaperTaskerEvent()
                     return true
                 }

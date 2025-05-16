@@ -193,11 +193,17 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
     if (source.width == width && source.height == height) {
         return source
     }
+    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
+        Log.w("WallpaperUtil", "Invalid dimensions for fitBitmap, returning source.")
+        return source
+    }
+
     return try {
         val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val scale = width.toFloat() / source.width
-        val yOffset = (height - source.height * scale) / 2f
+        val scaledSourceHeight = source.height * scale
+        val yOffset = (height - scaledSourceHeight) / 2f
         val matrix = Matrix().apply {
             postScale(scale, scale)
             postTranslate(0f, yOffset)
@@ -227,7 +233,7 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         val xOffset: Float
         val yOffset: Float
 
-        if (sourceAspect > targetAspect) {
+        if (sourceAspect >= targetAspect) {
             scale = height.toFloat() / source.height.toFloat()
             xOffset = (width - source.width * scale) / 2f
             yOffset = 0f
@@ -238,7 +244,7 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         }
 
         val matrix = Matrix().apply {
-            setScale(scale, scale)
+            postScale(scale, scale)
             postTranslate(xOffset, yOffset)
         }
         canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
@@ -257,12 +263,16 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
         return source
     }
     return try {
+        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
         val matrix = Matrix().apply {
-            setScale(width.toFloat() / source.width, height.toFloat() / source.height)
+            setScale(
+                width.toFloat() / source.width,
+                height.toFloat() / source.height
+            )
         }
-        createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888).apply {
-            Canvas(this).drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
-        }
+        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
+        bitmap
     } catch (e: Exception) {
         Log.e("WallpaperUtil", "Error stretching bitmap: $e")
         source

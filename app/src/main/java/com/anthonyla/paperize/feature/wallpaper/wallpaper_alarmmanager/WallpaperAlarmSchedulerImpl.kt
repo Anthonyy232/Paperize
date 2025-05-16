@@ -1,10 +1,13 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresPermission
 import com.anthonyla.paperize.core.Type
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService
@@ -37,6 +40,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
     /**
      * Schedules the wallpaper alarm based on the origin and changeImmediate
      */
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override suspend fun scheduleWallpaperAlarm(
         wallpaperAlarmItem: WallpaperAlarmItem,
         origin: Int?,
@@ -132,6 +136,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
     /**
      * Schedules the wallpaper alarm based on type and time
      */
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     private fun scheduleWallpaper(wallpaperAlarmItem: WallpaperAlarmItem, type: Type, origin: Int? = null, firstLaunch: Boolean = false, homeNextTime: String? = null, lockNextTime: String? = null) {
         try {
             val nextTime = calculateNextAlarmTime(wallpaperAlarmItem, type, firstLaunch, homeNextTime ?: "", lockNextTime ?: "")
@@ -146,6 +151,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
             
             scheduleExactAlarm(nextTime, intent)
         } catch (e: Exception) {
+            Log.e("WallpaperAlarmScheduler", "Error scheduling wallpaper alarm: ${e.message}")
             cancelWallpaperAlarm()
         }
     }
@@ -226,6 +232,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
         }
     }
 
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     private fun scheduleExactAlarm(nextTime: LocalDateTime, intent: Intent) {
         val pendingIntent = PendingIntent.getBroadcast(
             context,
