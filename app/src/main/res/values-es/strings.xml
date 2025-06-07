@@ -11,7 +11,7 @@
   <string name="LibraryFloatingButton">Añadir una nueva biblioteca</string>
   <string name="set_wallpaper_description">Activar fondo de pantalla animado</string>
   <string name="add_wallpaper">Añadir fondo de pantalla</string>
-  <string name="add_images">Añadir imagenes</string>
+  <string name="add_images">Añadir imágenes</string>
   <string name="add_folder">Agregar carpeta</string>
   <string name="contact_button">Contacto</string>
   <string name="image_is_selected">La imagen está seleccionada</string>
@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Ordenar alfabéticamente (Z-A)</string>
   <string name="sort_by_last_modified_newest">Ordenar por última modificación (más reciente)</string>
   <string name="sort_by_last_modified_oldest">Ordenar por última modificación (más antiguo)</string>
-  <string name="shuffle_wallpaper">Mezclar fondos de pantalla</string>
+  <string name="shuffle">Mezclar fondos de pantalla</string>
+  <string name="periodic_refresh">Refresco periego</string>
+  <string name="days_txt">Días</string>
+  <string name="hours_txt">Horas</string>
+  <string name="minutes_txt">Minutos</string>
+  <string name="change_the_image_brightness">Cambiar el brillo de la imagen</string>
+  <string name="check_folders_for_new_wallpapers">Comprobar carpetas para nuevos fondos de pantalla</string>
+  <string name="add_blur_to_the_image">Añadir desenfoque a la imagen</string>
+  <string name="darken_the_edges_of_the_image">Oscurecer los bordes de la imagen</string>
+  <string name="make_the_colors_grayscale">Hacer la escala de grises de colores</string>
+  <string name="shuffle_the_wallpapers">Mezclar los fondos de pantalla</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
@@ -288,7 +289,7 @@ fun PaperizeApp(
                     settingsViewModel.onEvent(SettingsEvent.SetHome(setHome))
                     if (albumState.value.selectedAlbum.isNotEmpty() && !setHome && !settingsState.value.wallpaperSettings.setLockWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
-                        albumState.value.selectedAlbum.let { albumsViewModel.onEvent(AlbumsEvent.Reset) }
+                        albumState.value.selectedAlbum.let { albumsViewModel.onEvent(AlbumsEvent.DeselectSelected) }
                         scheduler.cancelWallpaperAlarm()
                     }
                     else if (albumState.value.selectedAlbum.isNotEmpty() && ((setHome && !settingsState.value.wallpaperSettings.setLockWallpaper) || (!setHome && settingsState.value.wallpaperSettings.setLockWallpaper))) {
@@ -325,7 +326,7 @@ fun PaperizeApp(
                     if (!setLock && !settingsState.value.wallpaperSettings.setHomeWallpaper) {
                         settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
                         albumState.value.selectedAlbum.let {
-                            albumsViewModel.onEvent(AlbumsEvent.Reset)
+                            albumsViewModel.onEvent(AlbumsEvent.DeselectSelected)
                         }
                         scheduler.cancelWallpaperAlarm()
                     }
@@ -681,6 +682,7 @@ fun PaperizeApp(
     }
 }
 
+@SuppressLint("MissingPermission")
 private fun CoroutineScope.scheduleWallpaperUpdate(
     job: Job?,
     settingsState: SettingsState,

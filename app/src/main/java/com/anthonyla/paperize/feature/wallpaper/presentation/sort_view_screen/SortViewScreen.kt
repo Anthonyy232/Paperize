@@ -51,6 +51,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.net.toUri
 import com.anthonyla.paperize.core.decompress
 import com.skydoves.landscapist.glide.GlideImage
+import com.skydoves.landscapist.ImageOptions
+import androidx.compose.ui.layout.ContentScale
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -64,6 +66,25 @@ fun SortViewScreen(
     val state = sortViewModel.state.collectAsStateWithLifecycle()
     val lazyListState = rememberLazyListState()
     val expandedFolderId = remember { mutableStateOf<String?>(null) }
+
+    val onTopBarBackClick: () -> Unit = {
+        if (expandedFolderId.value != null) {
+            expandedFolderId.value = null
+        } else {
+            onBackClick()
+        }
+    }
+
+    // Logic to determine the title for the top bar
+    val topBarTitle = remember(expandedFolderId.value, state.value.folders) {
+        val currentFolderId = expandedFolderId.value
+        if (!currentFolderId.isNullOrEmpty()) {
+            state.value.folders.find { it.folderUri == currentFolderId }?.folderName ?: ""
+        } else {
+            ""
+        }
+    }
+
     val reorderableLazyListStateFolder = rememberReorderableLazyListState(lazyListState) { from, to ->
         sortViewModel.onEvent(SortEvent.ShiftFolder(from, to))
     }
@@ -81,8 +102,8 @@ fun SortViewScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SortViewTopBar(
-                title = "",
-                onBackClick = onBackClick,
+                title = topBarTitle,
+                onBackClick = onTopBarBackClick,
                 onSaveClick = onSaveClick,
                 onSortAlphabetically = { sortViewModel.onEvent(SortEvent.SortAlphabetically) },
                 onSortAlphabeticallyReverse = { sortViewModel.onEvent(SortEvent.SortAlphabeticallyReverse) },
@@ -257,7 +278,10 @@ fun SortViewScreen(
                                                 modifier = Modifier
                                                     .size(48.dp)
                                                     .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondaryContainer), CircleShape)
-                                                    .clip(CircleShape)
+                                                    .clip(CircleShape),
+                                                imageOptions = ImageOptions(
+                                                    contentScale = ContentScale.Crop
+                                                )
                                             )
                                         }
                                     }
@@ -284,7 +308,10 @@ fun SortViewScreen(
                                                 imageModel = { currentFolder.coverUri?.decompress("content://com.android.externalstorage.documents/")?.toUri() },
                                                 modifier = Modifier
                                                     .size(48.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .clip(RoundedCornerShape(8.dp)),
+                                                imageOptions = ImageOptions(
+                                                    contentScale = ContentScale.Crop
+                                                )
                                             )
                                         },
                                         headlineContent = {
@@ -364,7 +391,10 @@ fun SortViewScreen(
                                                     modifier = Modifier
                                                         .size(48.dp)
                                                         .clip(CircleShape)
-                                                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondaryContainer), CircleShape)
+                                                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondaryContainer), CircleShape),
+                                                    imageOptions = ImageOptions(
+                                                        contentScale = ContentScale.Crop
+                                                    )
                                                 )
                                             }
                                         }

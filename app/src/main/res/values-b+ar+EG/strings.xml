@@ -187,13 +187,23 @@
   <string name="sort_items">Sort items</string>
   <string name="folders">Folders</string>
   <string name="expand_folder">Expand folder</string>
-  <string name="wallpapers_sort">Wallpapers</string>
+  <string name="wallpapers_sort">خلفية</string>
   <string name="close">Close</string>
   <string name="expand">Expand</string>
-  <string name="selected">%1$s selected</string>
+  <string name="selected">%1$s متعَلِّم عليه</string>
   <string name="sort_alphabetically_a_z">Sort Alphabetically (A-Z)</string>
   <string name="sort_alphabetically_z_a">Sort Alphabetically (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sort by Last Modified (Newest)</string>
   <string name="sort_by_last_modified_oldest">Sort by Last Modified (Oldest)</string>
-  <string name="shuffle_wallpaper">Shuffle Wallpapers</string>
+  <string name="shuffle">Shuffle</string>
+  <string name="periodic_refresh">Periodic Refresh</string>
+  <string name="days_txt">Days</string>
+  <string name="hours_txt">Hours</string>
+  <string name="minutes_txt">Minutes</string>
+  <string name="change_the_image_brightness">Change the image brightness</string>
+  <string name="check_folders_for_new_wallpapers">Check folders for new wallpapers</string>
+  <string name="add_blur_to_the_image">Add blur to the image</string>
+  <string name="darken_the_edges_of_the_image">Darken the edges of the image</string>
+  <string name="make_the_colors_grayscale">Make the colors grayscale</string>
+  <string name="shuffle_the_wallpapers">Shuffle the wallpapers</string>
 </resources>

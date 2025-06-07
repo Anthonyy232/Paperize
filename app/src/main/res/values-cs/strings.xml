@@ -187,5 +187,15 @@
   <string name="sort_alphabetically_z_a">Řadit abecedně (Z-A)</string>
   <string name="sort_by_last_modified_newest">Seřadit podle poslední úpravy (nejvyšší)</string>
   <string name="sort_by_last_modified_oldest">Seřadit podle poslední úpravy (Oldest)</string>
-  <string name="shuffle_wallpaper">Zamíchat pozadí</string>
+  <string name="shuffle">Zamíchat pozadí</string>
+  <string name="periodic_refresh">Periodická obnova</string>
+  <string name="days_txt">Dny</string>
+  <string name="hours_txt">Hodiny</string>
+  <string name="minutes_txt">Zápis z jednání</string>
+  <string name="change_the_image_brightness">Změnit jas obrázku</string>
+  <string name="check_folders_for_new_wallpapers">Kontrola složek pro nové tapety</string>
+  <string name="add_blur_to_the_image">Přidat rozostření k obrázku</string>
+  <string name="darken_the_edges_of_the_image">Ztmavit okraje obrázku</string>
+  <string name="make_the_colors_grayscale">Udělej barvy šedě</string>
+  <string name="shuffle_the_wallpapers">Zamíchat tapety</string>
 </resources>

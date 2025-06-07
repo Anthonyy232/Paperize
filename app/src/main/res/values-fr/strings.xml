@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Trier par ordre alphabétique (Z-A)</string>
   <string name="sort_by_last_modified_newest">Trier par dernière modification (plus récent)</string>
   <string name="sort_by_last_modified_oldest">Trier par Dernière Modification (plus récent)</string>
-  <string name="shuffle_wallpaper">Mélanger les fonds d\'écran</string>
+  <string name="shuffle">Mélanger les fonds d\'écran</string>
+  <string name="periodic_refresh">Rafraîchissement périodique</string>
+  <string name="days_txt">Jours</string>
+  <string name="hours_txt">Heures</string>
+  <string name="minutes_txt">Minutes</string>
+  <string name="change_the_image_brightness">Changer la luminosité de l\'image</string>
+  <string name="check_folders_for_new_wallpapers">Vérifier les dossiers pour les nouveaux fonds d\'écran</string>
+  <string name="add_blur_to_the_image">Ajouter du flou à l\'image</string>
+  <string name="darken_the_edges_of_the_image">Assombrir les bords de l\'image</string>
+  <string name="make_the_colors_grayscale">Faire les couleurs en niveaux de gris</string>
+  <string name="shuffle_the_wallpapers">Mélanger les fonds d\'écran</string>
 </resources>

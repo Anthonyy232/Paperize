@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Ταξινόμηση Αλφαβητικά (Ω-Α)</string>
   <string name="sort_by_last_modified_newest">Ταξινόμηση κατά Τελευταία Τροποποίηση (Νεότερη)</string>
   <string name="sort_by_last_modified_oldest">Ταξινόμηση κατά Τελευταία Τροποποίηση (Παλαιότερη)</string>
-  <string name="shuffle_wallpaper">Τυχαία Αναπαραγωγή Ταπετσαριών</string>
+  <string name="shuffle">Τυχαία Αναπαραγωγή Ταπετσαριών</string>
+  <string name="periodic_refresh">Περιοδική Ανανέωση</string>
+  <string name="days_txt">Ημέρες</string>
+  <string name="hours_txt">Ώρες</string>
+  <string name="minutes_txt">Λεπτά</string>
+  <string name="change_the_image_brightness">Αλλαγή της φωτεινότητας της εικόνας</string>
+  <string name="check_folders_for_new_wallpapers">Έλεγχος φακέλων για νέες ταπετσαρίες</string>
+  <string name="add_blur_to_the_image">Προσθήκη θολώματος στην εικόνα</string>
+  <string name="darken_the_edges_of_the_image">Σκούρο τις άκρες της εικόνας</string>
+  <string name="make_the_colors_grayscale">Κάντε τα χρώματα κλίμακας του γκρι</string>
+  <string name="shuffle_the_wallpapers">Τυχαία αναπαραγωγή των ταπετσαριών</string>
 </resources>

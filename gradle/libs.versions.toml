@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.10.0"
+androidGradlePlugin = "8.10.1"
 kotlin = "2.1.21"
 hilt = "2.56.2"
 ksp = "2.1.21-2.0.1"
@@ -45,7 +45,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.4.8" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.6" }
-    taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
+taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
 zoomable = { module = "net.engawapg.lib:zoomable", version = "2.7.0" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "2.4.3" }

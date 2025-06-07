@@ -23,16 +23,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -108,10 +113,16 @@ fun TimeSliders(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.large,
-                tonalElevation = 5.dp,
+                tonalElevation = 8.dp,
                 modifier = Modifier
                     .width(IntrinsicSize.Min)
                     .height(IntrinsicSize.Min)
+                    .animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -122,23 +133,54 @@ fun TimeSliders(
                             .fillMaxWidth()
                             .padding(bottom = 24.dp),
                         text = stringResource(R.string.select_starting_time),
-                        style = MaterialTheme.typography.labelMedium
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    TimePicker(state = timePickerState)
+                    TimePicker(
+                        state = timePickerState,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor = MaterialTheme.colorScheme.primaryContainer,
+                            clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            clockDialUnselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                            selectorColor = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            periodSelectorBorderColor = MaterialTheme.colorScheme.outline,
+                            periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.surface,
+                            periodSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface,
+                            timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.surface,
+                            timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Button(
-                            onClick = { shouldShowDialog.value = false }
+                            onClick = { shouldShowDialog.value = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) { Text(stringResource(R.string.dismiss)) }
                         Button(
-                            onClick = { onStartTimeChange(timePickerState); shouldShowDialog.value = false }
+                            onClick = { onStartTimeChange(timePickerState); shouldShowDialog.value = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) { Text(stringResource(R.string.confirm)) }
                     }
-                    Button(
-                        onClick = { onChangeStartTimeToggle(false); shouldShowDialog.value = false }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(
+                        onClick = { onChangeStartTimeToggle(false); shouldShowDialog.value = false },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
                     ) { Text(stringResource(R.string.reset_to_default)) }
                 }
             }
@@ -277,7 +319,26 @@ fun TimeSliders(
                         )
                     )
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        // Days Slider
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.days_txt),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = days1.toInt().toString(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         Slider(
                             value = days1,
                             onValueChange = { newDays ->
@@ -301,9 +362,31 @@ fun TimeSliders(
                             },
                             valueRange = 0f..30f,
                             steps = 30,
-                            modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        // Hours Slider
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.hours_txt),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = hours1.toInt().toString(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         Slider(
                             value = hours1,
                             onValueChange = { newHours ->
@@ -327,9 +410,31 @@ fun TimeSliders(
                             },
                             valueRange = 0f..24f,
                             steps = 24,
-                            modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        // Minutes Slider
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.minutes_txt),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = minutes1.toInt().toString(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         Slider(
                             value = minutes1,
                             onValueChange = { newMinutes ->
@@ -352,8 +457,13 @@ fun TimeSliders(
                             },
                             valueRange = 0f..60f,
                             steps = 60,
-                            modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
+
                         if (homeEnabled && lockEnabled) {
                             AnimatedVisibility(
                                 visible = scheduleSeparately,
@@ -385,6 +495,23 @@ fun TimeSliders(
                                         text = formattedTime2,
                                         fontWeight = FontWeight.W500,
                                     )
+                                    // Days Slider
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.days_txt),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = days2.toInt().toString(),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                     Slider(
                                         value = days2,
                                         onValueChange = { newDays ->
@@ -408,9 +535,31 @@ fun TimeSliders(
                                         },
                                         valueRange = 0f..30f,
                                         steps = 30,
-                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = MaterialTheme.colorScheme.primary,
+                                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                                            inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Hours Slider
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.hours_txt),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = hours2.toInt().toString(),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                     Slider(
                                         value = hours2,
                                         onValueChange = { newHours ->
@@ -434,9 +583,31 @@ fun TimeSliders(
                                         },
                                         valueRange = 0f..24f,
                                         steps = 24,
-                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = MaterialTheme.colorScheme.primary,
+                                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                                            inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Minutes Slider
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.minutes_txt),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = minutes2.toInt().toString(),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                     Slider(
                                         value = minutes2,
                                         onValueChange = { newMinutes ->
@@ -459,31 +630,64 @@ fun TimeSliders(
                                         },
                                         valueRange = 0f..60f,
                                         steps = 60,
-                                        modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = MaterialTheme.colorScheme.primary,
+                                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                                            inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
                                     )
                                 }
                             }
                         }
                         Button(
-                            onClick = {
-                                shouldShowDialog.value = true
-                            },
+                            onClick = { shouldShowDialog.value = true },
                             modifier = Modifier
-                                .padding(16.dp)
+                                .padding(12.dp)
                                 .align(Alignment.CenterHorizontally)
+                                .then(
+                                    if (animate) {
+                                        Modifier.animateContentSize(
+                                            animationSpec = spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessLow
+                                            )
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
+                                ),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            shape = RoundedCornerShape(16.dp)
                         ) {
-                            val (hour, minute, period) = if (changeStartTime) {
-                                val hour = if (timePickerState.hour == 0) 12 else timePickerState.hour % 12
-                                val period = if (timePickerState.hour < 12) "AM" else "PM"
-                                Triple(hour, timePickerState.minute, period)
-                            } else {
-                                val currentTime = Calendar.getInstance()
-                                val hour = if (currentTime.get(Calendar.HOUR) == 0) 12 else currentTime.get(Calendar.HOUR) % 12
-                                val period = if (currentTime.get(Calendar.AM_PM) == 0) "AM" else "PM"
-                                Triple(hour, currentTime.get(Calendar.MINUTE), period)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                val (hour, minute, period) = if (changeStartTime) {
+                                    val hour = if (timePickerState.hour == 0) 12 else timePickerState.hour % 12
+                                    val period = if (timePickerState.hour < 12) "AM" else "PM"
+                                    Triple(hour, timePickerState.minute, period)
+                                } else {
+                                    val currentTime = Calendar.getInstance()
+                                    val hour = if (currentTime.get(Calendar.HOUR) == 0) 12 else currentTime.get(Calendar.HOUR) % 12
+                                    val period = if (currentTime.get(Calendar.AM_PM) == 0) "AM" else "PM"
+                                    Triple(hour, currentTime.get(Calendar.MINUTE), period)
+                                }
+                                val formattedMinutes = String.format(Locale.getDefault(), "%02d", minute)
+                                Text(
+                                    text = "$hour:$formattedMinutes $period",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                             }
-                            val formattedMinutes = String.format(Locale.getDefault(), "%02d", minute)
-                            Text(text = "$hour:$formattedMinutes $period")
                         }
                     }
                 }

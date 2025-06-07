@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Ordenar alfabeticamente (Z-A)</string>
   <string name="sort_by_last_modified_newest">Classificar por Última Modificação (Recente)</string>
   <string name="sort_by_last_modified_oldest">Classificar por Última Modificação (Mais antigo)</string>
-  <string name="shuffle_wallpaper">Misturar papéis de parede</string>
+  <string name="shuffle">Misturar papéis de parede</string>
+  <string name="periodic_refresh">Atualização periódica</string>
+  <string name="days_txt">dias</string>
+  <string name="hours_txt">horas</string>
+  <string name="minutes_txt">minutos</string>
+  <string name="change_the_image_brightness">Alterar o brilho da imagem</string>
+  <string name="check_folders_for_new_wallpapers">Verificar pastas para novos papéis de parede</string>
+  <string name="add_blur_to_the_image">Adicionar desfoque à imagem</string>
+  <string name="darken_the_edges_of_the_image">Escurece as bordas da imagem</string>
+  <string name="make_the_colors_grayscale">Faça as cores do cinza</string>
+  <string name="shuffle_the_wallpapers">Misturar os papéis de parede</string>
 </resources>

@@ -183,5 +183,15 @@
   <string name="sort_alphabetically_z_a">Sortează Alfabetic (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sortează după ultima modificare (nouă)</string>
   <string name="sort_by_last_modified_oldest">Sortează după ultima modificare (Oldest)</string>
-  <string name="shuffle_wallpaper">Amestecare fundaluri</string>
+  <string name="shuffle">Amestecare fundaluri</string>
+  <string name="periodic_refresh">Actualizare periodică</string>
+  <string name="days_txt">Zile</string>
+  <string name="hours_txt">Ore</string>
+  <string name="minutes_txt">Minute</string>
+  <string name="change_the_image_brightness">Schimbă luminozitatea imaginii</string>
+  <string name="check_folders_for_new_wallpapers">Verifică dosare pentru noi imagini de fundal</string>
+  <string name="add_blur_to_the_image">Adaugă blur la imagine</string>
+  <string name="darken_the_edges_of_the_image">Întunecă marginile imaginii</string>
+  <string name="make_the_colors_grayscale">Fă culorile la scară gri</string>
+  <string name="shuffle_the_wallpapers">Amestecă fundalurile</string>
 </resources>

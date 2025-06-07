@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Lajittele Aakkosjärjestyksessä (Z-A)</string>
   <string name="sort_by_last_modified_newest">Järjestä viimeksi muokatun (uusi) mukaan</string>
   <string name="sort_by_last_modified_oldest">Järjestä viimeksi muokatun (Oldest) mukaan</string>
-  <string name="shuffle_wallpaper">Sekoita Taustakuvat</string>
+  <string name="shuffle">Sekoita Taustakuvat</string>
+  <string name="periodic_refresh">Säännöllinen Päivitys</string>
+  <string name="days_txt">Päivää</string>
+  <string name="hours_txt">Tuntia</string>
+  <string name="minutes_txt">Minuuttia</string>
+  <string name="change_the_image_brightness">Muuta kuvan kirkkautta</string>
+  <string name="check_folders_for_new_wallpapers">Tarkista uudet taustakuvat</string>
+  <string name="add_blur_to_the_image">Lisää sumennus kuvaan</string>
+  <string name="darken_the_edges_of_the_image">Tummenna kuvan reunat</string>
+  <string name="make_the_colors_grayscale">Tee värit harmaasävy</string>
+  <string name="shuffle_the_wallpapers">Sekoita taustakuvat</string>
 </resources>

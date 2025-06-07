@@ -68,16 +68,16 @@
   <string name="interval_lock">Ekran Blokady | %1$s</string>
   <string name="interval">Przedział Czasowy | %1$s</string>
   <plurals name="minutes" comment="minutes [one] [other]">
-    <item quantity="one">%d minuta</item>
-    <item quantity="few">%d minut</item>
+    <item quantity="one">%d minuty</item>
+    <item quantity="few">%d minuty</item>
     <item quantity="many">%d minuty</item>
     <item quantity="other">%d minuty</item>
   </plurals>
   <plurals name="hours" comment="hours [one] [other]">
-    <item quantity="one">%d godzina</item>
+    <item quantity="one">%d godziny</item>
     <item quantity="few">%d godziny</item>
-    <item quantity="many">%d godzin</item>
-    <item quantity="other">%d godzin</item>
+    <item quantity="many">%d godziny</item>
+    <item quantity="other">%d godziny</item>
   </plurals>
   <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d dzień</item>
@@ -85,7 +85,7 @@
     <item quantity="many">%d dni</item>
     <item quantity="other">%d dni</item>
   </plurals>
-  <string name="selected_count">%1$s wybrano</string>
+  <string name="selected_count">Wybrano %1$s</string>
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Aby korzystać z aplikacji, przeczytaj i zaakceptuj poniższą politykę prywatności.</string>
   <string name="privacy_notice">Informacja o Ochronie Prywatności</string>
   <string name="please_read_and_agree_to_the_privacy_notice">Przeczytaj i zaakceptuj politykę prywatności.</string>
@@ -182,10 +182,20 @@
   <string name="wallpapers_sort">Tapety</string>
   <string name="close">Zamknij</string>
   <string name="expand">Rozwiń</string>
-  <string name="selected">%1$s selected</string>
+  <string name="selected">Wybrano %1$s</string>
   <string name="sort_alphabetically_a_z">Sortuj alfabetycznie (A-Z)</string>
   <string name="sort_alphabetically_z_a">Sortuj alfabetycznie (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sortuj według Ostatniej Modyfikacji (Newest)</string>
   <string name="sort_by_last_modified_oldest">Sortuj według Ostatniej Modyfikacji (Oldest)</string>
-  <string name="shuffle_wallpaper">Losuj Tapety</string>
+  <string name="shuffle">Losuj Tapety</string>
+  <string name="periodic_refresh">Okresowe odświeżanie</string>
+  <string name="days_txt">Dni</string>
+  <string name="hours_txt">Godziny</string>
+  <string name="minutes_txt">Protokoły</string>
+  <string name="change_the_image_brightness">Zmień jasność obrazu</string>
+  <string name="check_folders_for_new_wallpapers">Sprawdź foldery pod kątem nowych tapetów</string>
+  <string name="add_blur_to_the_image">Dodaj rozmycie do obrazu</string>
+  <string name="darken_the_edges_of_the_image">Przyciemnij krawędzie obrazu</string>
+  <string name="make_the_colors_grayscale">Skala kolorów szarości</string>
+  <string name="shuffle_the_wallpapers">Losuj tapetę</string>
 </resources>

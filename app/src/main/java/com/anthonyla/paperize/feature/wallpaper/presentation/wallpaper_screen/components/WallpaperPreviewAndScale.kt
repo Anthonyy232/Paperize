@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -76,60 +74,60 @@ fun WallpaperPreviewAndScale(
     )
 
     Surface(
-        tonalElevation = 10.dp,
-        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 8.dp,
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
+            .padding(PaddingValues(horizontal = 16.dp, vertical = 12.dp))
     ) {
-        Column (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(vertical = 16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val modifier = if (lockEnabled && homeEnabled) {
-                    Modifier
-                        .weight(1f)
-                        .padding(8.dp)
-                } else {
-                    Modifier
-                        .fillMaxSize(0.5f)
-                        .padding(8.dp)
-                }
-
-                if (lockEnabled) {
+            if (lockEnabled && homeEnabled) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column(
-                        modifier = modifier,
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = stringResource(R.string.lock_screen), fontWeight = FontWeight.W500)
+                        Text(
+                            text = stringResource(R.string.lock_screen),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.W500
+                        )
                         if (currentLockWallpaper != null) {
                             PreviewItem(
                                 wallpaperUri = currentLockWallpaper,
                                 darken = darken,
-                                darkenPercentage = if (!homeEnabled) homeDarkenPercentage else lockDarkenPercentage,
+                                darkenPercentage = lockDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = if (!homeEnabled) homeBlurPercentage else lockBlurPercentage,
+                                blurPercentage = lockBlurPercentage,
                                 vignette = vignette,
-                                vignettePercentage = if (!homeEnabled) homeVignettePercentage else lockVignettePercentage,
+                                vignettePercentage = lockVignettePercentage,
                                 grayscale = grayscale,
-                                grayscalePercentage = if (!homeEnabled) homeGrayscalePercentage else lockGrayscalePercentage
+                                grayscalePercentage = lockGrayscalePercentage
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
-                }
-                if (homeEnabled) {
                     Column(
-                        modifier = modifier,
-                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = stringResource(R.string.home), fontWeight = FontWeight.W500)
+                        Text(
+                            text = stringResource(R.string.home),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.W500
+                        )
                         if (currentHomeWallpaper != null) {
                             PreviewItem(
                                 wallpaperUri = currentHomeWallpaper,
@@ -143,15 +141,66 @@ fun WallpaperPreviewAndScale(
                                 grayscale = grayscale,
                                 grayscalePercentage = homeGrayscalePercentage
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (lockEnabled) {
+                        Text(
+                            text = stringResource(R.string.lock_screen),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.W500
+                        )
+                        if (currentLockWallpaper != null) {
+                            PreviewItem(
+                                wallpaperUri = currentLockWallpaper,
+                                darken = darken,
+                                darkenPercentage = lockDarkenPercentage,
+                                scaling = scaling,
+                                blur = blur,
+                                blurPercentage = lockBlurPercentage,
+                                vignette = vignette,
+                                vignettePercentage = lockVignettePercentage,
+                                grayscale = grayscale,
+                                grayscalePercentage = lockGrayscalePercentage
+                            )
+                        }
+                    }
+                    if (homeEnabled) {
+                        Text(
+                            text = stringResource(R.string.home),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.W500
+                        )
+                        if (currentHomeWallpaper != null) {
+                            PreviewItem(
+                                wallpaperUri = currentHomeWallpaper,
+                                darken = darken,
+                                darkenPercentage = homeDarkenPercentage,
+                                scaling = scaling,
+                                blur = blur,
+                                blurPercentage = homeBlurPercentage,
+                                vignette = vignette,
+                                vignettePercentage = homeVignettePercentage,
+                                grayscale = grayscale,
+                                grayscalePercentage = homeGrayscalePercentage
+                            )
                         }
                     }
                 }
             }
-            SingleChoiceSegmentedButtonRow (
+
+            SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingValues(start = 8.dp, end = 8.dp, bottom = 16.dp))
+                    .padding(horizontal = 16.dp)
             ) {
                 options.forEachIndexed { index, label ->
                     SegmentedButton(
@@ -166,12 +215,14 @@ fun WallpaperPreviewAndScale(
                                     3 -> ScalingConstants.NONE
                                     else -> ScalingConstants.FILL
                                 }
-                            ) },
-                        selected = index == selectedIndex
+                            )
+                        },
+                        selected = index == selectedIndex,
+                        modifier = Modifier.weight(1f)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Icon(
                                 painter = when (index) {
@@ -183,9 +234,14 @@ fun WallpaperPreviewAndScale(
                                 },
                                 contentDescription = null,
                                 tint = Color.Unspecified,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(24.dp)
                             )
-                            Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis )
+                            Text(
+                                text = label,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }

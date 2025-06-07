@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Sorter alfabetisk (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sorter etter sist endret (Forvalg)</string>
   <string name="sort_by_last_modified_oldest">Sorter etter sist endret (eldste)</string>
-  <string name="shuffle_wallpaper">Bland bakgrunner</string>
+  <string name="shuffle">Bland bakgrunner</string>
+  <string name="periodic_refresh">Periodiske oppdateringer</string>
+  <string name="days_txt">Dager</string>
+  <string name="hours_txt">Timer</string>
+  <string name="minutes_txt">Minutter</string>
+  <string name="change_the_image_brightness">Endre lysstyrken på bildet</string>
+  <string name="check_folders_for_new_wallpapers">Sjekk mapper for nye bakgrunnsbilder</string>
+  <string name="add_blur_to_the_image">Legg uskarphet til bildet</string>
+  <string name="darken_the_edges_of_the_image">Formørk kantene på bildet</string>
+  <string name="make_the_colors_grayscale">Gjør fargene gråtoner</string>
+  <string name="shuffle_the_wallpapers">Bland bakgrunnsbilder</string>
 </resources>

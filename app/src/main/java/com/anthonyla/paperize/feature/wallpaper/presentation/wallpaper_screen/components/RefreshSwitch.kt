@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,21 +34,31 @@ fun RefreshSwitch(
             .fillMaxWidth()
             .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
     ) {
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row (horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.periodic_refresh),
-                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.W500
                 )
-                Switch(
-                    checked = refresh,
-                    onCheckedChange = onRefreshChange
+                Text(
+                    text = stringResource(R.string.check_folders_for_new_wallpapers),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Switch(
+                checked = refresh,
+                onCheckedChange = onRefreshChange
+            )
         }
     }
 }

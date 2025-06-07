@@ -1,6 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
-import android.util.Log
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
@@ -19,11 +19,13 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import com.anthonyla.paperize.core.ScalingConstants
+import com.anthonyla.paperize.core.VignetteBitmapTransformation
 import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
 import com.bumptech.glide.request.RequestOptions
@@ -33,6 +35,7 @@ import com.skydoves.landscapist.glide.GlideImage
 /**
  * A composable that displays a wallpaper for preview
  */
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun PreviewItem(
     wallpaperUri: String,

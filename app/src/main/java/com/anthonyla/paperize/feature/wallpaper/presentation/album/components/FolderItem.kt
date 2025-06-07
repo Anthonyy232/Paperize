@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.sharp.Block
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -65,24 +65,24 @@ fun FolderItem(
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    val transition = updateTransition(itemSelected, label = "")
+    val transition = updateTransition(itemSelected, label = "FolderSelectionTransition")
 
     val iconSelectionColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
-    val paddingTransition by transition.animateDp(label = "") { selected ->
-        if (selected) 5.dp else 0.dp
+    val paddingTransition by transition.animateDp(label = "FolderPaddingTransition") { selected ->
+        if (selected) 4.dp else 0.dp
     }
-    val roundedCornerShapeTransition by transition.animateDp(label = "") { selected ->
+    val roundedCornerShapeTransition by transition.animateDp(label = "FolderRoundedCornerTransition") { selected ->
         if (selected) 24.dp else 16.dp
     }
 
-    val showCoverUri by remember { mutableStateOf(!folder.coverUri.isNullOrEmpty() && isValidUri(context, folder.coverUri)) }
+    val showCoverUri by remember(folder.coverUri) { mutableStateOf(!folder.coverUri.isNullOrEmpty() && isValidUri(context, folder.coverUri)) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(roundedCornerShapeTransition),
         modifier = modifier
             .fillMaxSize()
             .padding(paddingTransition)
-            .clip(RoundedCornerShape(roundedCornerShapeTransition))
             .combinedClickable(
                 onClick = {
                     if (!selectionMode) {
@@ -100,10 +100,21 @@ fun FolderItem(
             ),
     ) {
         Column(
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box (modifier = Modifier.fillMaxHeight(0.8f)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(0.8f)
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
                 if (showCoverUri) {
                     GlideImage(
                         imageModel = { folder.coverUri?.decompress("content://com.android.externalstorage.documents/")?.toUri() },
@@ -112,38 +123,43 @@ fun FolderItem(
                             alignment = Alignment.Center,
                             requestSize = IntSize(300, 300),
                         ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
+                        modifier = Modifier.fillMaxSize()
                     )
-                }
-                else {
-                    Box (modifier = Modifier.fillMaxSize()) {
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         Icon(
                             imageVector = Icons.Rounded.Block,
                             contentDescription = stringResource(R.string.image_is_not_selected),
-                            modifier = Modifier.fillMaxSize().padding(16.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                     }
                 }
                 if (selectionMode) {
-                    if (itemSelected) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = stringResource(R.string.image_is_selected),
-                            modifier = Modifier
-                                .padding(9.dp)
-                                .border(2.dp, iconSelectionColor, CircleShape)
-                                .clip(CircleShape)
-                                .background(iconSelectionColor)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.RadioButtonUnchecked,
-                            contentDescription = stringResource(R.string.image_is_not_selected),
-                            tint = Color.White.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(6.dp)
-                        )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (itemSelected) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = stringResource(R.string.image_is_selected),
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(9.dp)
+                                    .border(2.dp, iconSelectionColor, CircleShape)
+                                    .clip(CircleShape)
+                                    .background(iconSelectionColor)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.RadioButtonUnchecked,
+                                contentDescription = stringResource(R.string.image_is_not_selected),
+                                tint = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(6.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -151,7 +167,6 @@ fun FolderItem(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
                     .align(Alignment.Start)
                     .fillMaxHeight()
                     .wrapContentHeight(Alignment.CenterVertically),

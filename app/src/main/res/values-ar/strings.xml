@@ -195,5 +195,15 @@
   <string name="sort_alphabetically_z_a">الترتيب الأبجدي (Z-A)</string>
   <string name="sort_by_last_modified_newest">الترتيب حسب آخر تعديل (حديث)</string>
   <string name="sort_by_last_modified_oldest">فرز حسب آخر تعديل (متدني)</string>
-  <string name="shuffle_wallpaper">خلط الخلفيات</string>
+  <string name="shuffle">خلط الخلفيات</string>
+  <string name="periodic_refresh">تحديث دوري</string>
+  <string name="days_txt">أيام</string>
+  <string name="hours_txt">الساعات</string>
+  <string name="minutes_txt">دقائق</string>
+  <string name="change_the_image_brightness">تغيير سطوع الصورة</string>
+  <string name="check_folders_for_new_wallpapers">التحقق من المجلدات للخلفيات الجديدة</string>
+  <string name="add_blur_to_the_image">إضافة طمس إلى الصورة</string>
+  <string name="darken_the_edges_of_the_image">طمس حواف الصورة</string>
+  <string name="make_the_colors_grayscale">جعل الألوان مقياسا رماديا</string>
+  <string name="shuffle_the_wallpapers">خلط الخلفيات</string>
 </resources>

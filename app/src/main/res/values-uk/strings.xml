@@ -187,5 +187,15 @@
   <string name="sort_alphabetically_z_a">Сортувати за алфавітом (Z-A)</string>
   <string name="sort_by_last_modified_newest">Сортувати за останньою зміною (новіші)</string>
   <string name="sort_by_last_modified_oldest">Сортувати за останньою модифікацією (найстаріший)</string>
-  <string name="shuffle_wallpaper">Перемішувати шпалери</string>
+  <string name="shuffle">Перемішувати шпалери</string>
+  <string name="periodic_refresh">Періодичне оновлення</string>
+  <string name="days_txt">Днів</string>
+  <string name="hours_txt">Годин</string>
+  <string name="minutes_txt">Хвилин</string>
+  <string name="change_the_image_brightness">Змінити яскравість зображення</string>
+  <string name="check_folders_for_new_wallpapers">Перевірити папки на нові шпалери</string>
+  <string name="add_blur_to_the_image">Додати розмиття до зображення</string>
+  <string name="darken_the_edges_of_the_image">Затемнити краї зображення</string>
+  <string name="make_the_colors_grayscale">Зробити відтінки сірого</string>
+  <string name="shuffle_the_wallpapers">Перемішувати шпалери</string>
 </resources>

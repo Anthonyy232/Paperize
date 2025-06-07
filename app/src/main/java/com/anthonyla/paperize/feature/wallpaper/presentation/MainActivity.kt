@@ -3,15 +3,12 @@ package com.anthonyla.paperize.feature.wallpaper.presentation
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.CursorWindow
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -21,7 +18,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,27 +46,47 @@ import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.Wallpaper
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
-import java.lang.reflect.Field
 import javax.inject.Inject
 import androidx.core.net.toUri
-
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var settingsDataStoreImpl: SettingsDataStore
     private val settingsViewModel: SettingsViewModel by viewModels()
 
-    private val context = this
+    // Launcher for SET_WALLPAPER permission
+    private val requestSetWallpaperPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (!isGranted) {
+            // Handle the case where the user denies the permission.
+            // For wallpaper apps, this permission is critical, so denying it
+            // means the app won't function as intended.
+            // Consider showing a dialog explaining why it's needed and
+            // offering to open app settings.
+        }
+    }
+
+    // Launcher for SCHEDULE_EXACT_ALARM permission (Android 12+)
+    private val requestExactAlarmPermission = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        // No specific action needed on result here, as we just want the permission granted.
+        // The check `am.canScheduleExactAlarms()` will reflect the new state when needed.
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
         super.onCreate(savedInstanceState)
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.SET_WALLPAPER), 0)
 
+        // Request SET_WALLPAPER permission immediately if not granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
+            requestSetWallpaperPermission.launch(Manifest.permission.SET_WALLPAPER)
         }
+
         val splashScreen = installSplashScreen()
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
@@ -83,13 +101,19 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { settingsViewModel.setKeepOnScreenCondition }
 
         setContent {
-            ensureExactAlarmPermission(context)
+            // Request SCHEDULE_EXACT_ALARM permission when the Composable is active.
+            // This will prompt the user to grant the permission if not already granted.
+            LaunchedEffect(Unit) {
+                requestExactAlarmPermissionIfNeeded(this@MainActivity)
+            }
+
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
-            val scheduler = WallpaperAlarmSchedulerImpl(context)
+            val scheduler = WallpaperAlarmSchedulerImpl(this)
 
             var hasScheduleRun by remember { mutableStateOf(false) }
             LaunchedEffect(settingsState.value) {
+                // Only attempt to schedule once settings are initialized and the scheduling logic hasn't run yet.
                 if (!hasScheduleRun && settingsState.value.initialized) {
                     handleWallpaperScheduling(settingsState.value, scheduler)
                     hasScheduleRun = true
@@ -111,46 +135,80 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun ensureExactAlarmPermission(context: Context) {
+    /**
+     * Requests the SCHEDULE_EXACT_ALARM permission if needed on Android 12 (S) and above.
+     * This function should be called from a LaunchedEffect or similar lifecycle-aware scope
+     * within Compose, or directly in onCreate if you prefer.
+     */
+    private fun requestExactAlarmPermissionIfNeeded(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
             if (!am.canScheduleExactAlarms()) {
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
                     data = "package:${context.packageName}".toUri()
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
-                context.startActivity(intent)
+                requestExactAlarmPermission.launch(intent)
             }
         }
     }
 
+    @SuppressLint("MissingPermission")
     private suspend fun handleWallpaperScheduling(
         settings: SettingsState,
         scheduler: WallpaperAlarmSchedulerImpl
     ) {
         val wallpaperSettings = settings.wallpaperSettings
         val scheduleSettings = settings.scheduleSettings
-        if (!wallpaperSettings.enableChanger) return
-        if (wallpaperSettings.homeAlbumName.isNullOrEmpty() || wallpaperSettings.lockAlbumName.isNullOrEmpty()) {
-            settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
+
+        // If changer is not enabled, or essential album names are missing, disable changer and return.
+        if (!wallpaperSettings.enableChanger || wallpaperSettings.homeAlbumName.isNullOrEmpty() || wallpaperSettings.lockAlbumName.isNullOrEmpty()) {
+            if (wallpaperSettings.enableChanger) { // Only dispatch event if it was enabled
+                settingsViewModel.onEvent(SettingsEvent.SetChangerToggle(false))
+            }
             return
         }
+
+        // Check if alarms are already set to avoid redundant scheduling
         val shouldScheduleAlarm = if (scheduleSettings.scheduleSeparately) {
             !(isPendingIntentSet(Type.HOME.ordinal) && isPendingIntentSet(Type.LOCK.ordinal))
         } else {
             !isPendingIntentSet(Type.SINGLE.ordinal)
         }
+
         if (shouldScheduleAlarm) {
-            scheduleWallpaperAlarm(settings, scheduler)
+            val canScheduleExactAlarms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
+
+            if (canScheduleExactAlarms) {
+                scheduleWallpaperAlarm(settings, scheduler)
+            } else {
+                // Optionally prompt user to grant permission
+                requestExactAlarmPermissionIfNeeded(this)
+            }
         }
     }
 
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     private suspend fun scheduleWallpaperAlarm(
         settings: SettingsState,
         scheduler: WallpaperAlarmSchedulerImpl
     ) {
         val scheduleSettings = settings.scheduleSettings
         val wallpaperSettings = settings.wallpaperSettings
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val am = getSystemService(ALARM_SERVICE) as AlarmManager
+            if (!am.canScheduleExactAlarms()) {
+
+                return
+            }
+        }
+
         scheduler.scheduleWallpaperAlarm(
             WallpaperAlarmItem(
                 homeInterval = scheduleSettings.homeInterval,
@@ -171,23 +229,10 @@ class MainActivity : ComponentActivity() {
         settingsViewModel.onEvent(SettingsEvent.RefreshNextSetTime)
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = ContextCompat.getSystemService(context, AlarmManager::class.java)
-            if (alarmManager?.canScheduleExactAlarms() == false) {
-                Intent().also { intent ->
-                    intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-                    context.startActivity(intent)
-                }
-            }
-        }
-    }
-
     private fun isPendingIntentSet(requestCode: Int): Boolean {
-        val intent = Intent(context.applicationContext, WallpaperReceiver::class.java)
+        val intent = Intent(applicationContext, WallpaperReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
-            context.applicationContext,
+            applicationContext,
             requestCode,
             intent,
             PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_NO_CREATE

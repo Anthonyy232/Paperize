@@ -1,11 +1,14 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.album.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -21,9 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.anthonyla.paperize.core.decompress
 import com.anthonyla.paperize.core.isValidUri
@@ -41,7 +44,9 @@ fun AlbumItem(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val showCoverUri by remember { mutableStateOf(!album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri)) }
+    val showCoverUri by remember(album.coverUri) {
+        mutableStateOf(!album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri))
+    }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -50,10 +55,22 @@ fun AlbumItem(
         onClick = onAlbumViewClick
     ) {
         Column(
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
-            Box {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clip(RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
                 if (showCoverUri) {
                     GlideImage(
                         imageModel = {
@@ -64,23 +81,19 @@ fun AlbumItem(
                             alignment = Alignment.Center,
                             requestSize = IntSize(300, 300),
                         ),
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(16.dp))
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = album.displayedAlbumName,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(Alignment.Start),
-                fontSize = 16.sp,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }

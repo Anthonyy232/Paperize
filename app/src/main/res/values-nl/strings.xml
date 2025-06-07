@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Sorteer alfabetisch (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sorteer op laatst gewijzigd (nieuwste)</string>
   <string name="sort_by_last_modified_oldest">Sorteer op laatst gewijzigd (oudste)</string>
-  <string name="shuffle_wallpaper">Shuffle achtergronden</string>
+  <string name="shuffle">Shuffle achtergronden</string>
+  <string name="periodic_refresh">Periodiek verversen</string>
+  <string name="days_txt">dagen</string>
+  <string name="hours_txt">Uren</string>
+  <string name="minutes_txt">minuten</string>
+  <string name="change_the_image_brightness">Helderheid van de afbeelding wijzigen</string>
+  <string name="check_folders_for_new_wallpapers">Mappen voor nieuwe achtergronden controleren</string>
+  <string name="add_blur_to_the_image">Vervagen toevoegen aan de afbeelding</string>
+  <string name="darken_the_edges_of_the_image">De randen van de afbeelding dimmen</string>
+  <string name="make_the_colors_grayscale">Maak de kleuren grijswaarden</string>
+  <string name="shuffle_the_wallpapers">Achtergronden verwisselen</string>
 </resources>

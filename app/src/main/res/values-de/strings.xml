@@ -165,7 +165,7 @@
   <string name="lock">Sperren</string>
   <string name="change_vignette">Vignetteneffekt</string>
   <string name="none">Keiner</string>
-  <string name="gray_filter">Grauer Filter</string>
+  <string name="gray_filter">Graufilter</string>
   <string name="select_starting_time">Startzeit auswählen</string>
   <string name="change_notification_settings">Benachrichtigungseinstellungen ändern</string>
   <string name="sort_items">sortieren</string>
@@ -179,5 +179,15 @@
   <string name="sort_alphabetically_z_a">Alphabetisch sortieren (Z-A)</string>
   <string name="sort_by_last_modified_newest">Sortieren nach zuletzt geändert (Neueste)</string>
   <string name="sort_by_last_modified_oldest">Sortieren nach zuletzt geändert (Älteste)</string>
-  <string name="shuffle_wallpaper">Hintergrundbilder mischen</string>
+  <string name="shuffle">Hintergrundbilder mischen</string>
+  <string name="periodic_refresh">Periodische Aktualisierung</string>
+  <string name="days_txt">Tage</string>
+  <string name="hours_txt">Stunden</string>
+  <string name="minutes_txt">Minuten</string>
+  <string name="change_the_image_brightness">Helligkeit des Bildes ändern</string>
+  <string name="check_folders_for_new_wallpapers">Ordner auf neue Hintergründe prüfen</string>
+  <string name="add_blur_to_the_image">Unschärfe zum Bild hinzufügen</string>
+  <string name="darken_the_edges_of_the_image">Verdunkelt die Kanten des Bildes</string>
+  <string name="make_the_colors_grayscale">Farben Graustufen machen</string>
+  <string name="shuffle_the_wallpapers">Mischen Sie die Hintergrundbilder</string>
 </resources>

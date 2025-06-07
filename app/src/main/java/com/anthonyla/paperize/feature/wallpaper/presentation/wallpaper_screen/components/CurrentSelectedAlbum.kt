@@ -59,7 +59,7 @@ fun CurrentSelectedAlbum(
 
     val baseListItemModifier = { horizontal: Int ->
         Modifier
-            .padding(PaddingValues(vertical = 8.dp, horizontal = horizontal.dp))
+            .padding(PaddingValues(vertical = 4.dp, horizontal = horizontal.dp))
             .clip(RoundedCornerShape(16.dp))
     }
 

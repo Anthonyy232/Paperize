@@ -175,5 +175,15 @@
   <string name="sort_alphabetically_z_a">アルファベット順 (Z-A) にソート</string>
   <string name="sort_by_last_modified_newest">最終修正日時でソート (新規)</string>
   <string name="sort_by_last_modified_oldest">最終修正日時でソート (最新)</string>
-  <string name="shuffle_wallpaper">壁紙をシャッフル</string>
+  <string name="shuffle">壁紙をシャッフル</string>
+  <string name="periodic_refresh">定期的な更新</string>
+  <string name="days_txt">日数</string>
+  <string name="hours_txt">時間</string>
+  <string name="minutes_txt">分</string>
+  <string name="change_the_image_brightness">画像の明るさを変更する</string>
+  <string name="check_folders_for_new_wallpapers">新しい壁紙のフォルダを確認する</string>
+  <string name="add_blur_to_the_image">画像にぼかしを追加</string>
+  <string name="darken_the_edges_of_the_image">画像の端を暗くする</string>
+  <string name="make_the_colors_grayscale">色をグレースケールにする</string>
+  <string name="shuffle_the_wallpapers">壁紙をシャッフル</string>
 </resources>

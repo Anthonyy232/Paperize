@@ -187,5 +187,15 @@
   <string name="sort_alphabetically_z_a">Сортировать по алфавиту (Я-А)</string>
   <string name="sort_by_last_modified_newest">Сортировать по дате последнего изменения (новый)</string>
   <string name="sort_by_last_modified_oldest">Сортировать по дате последнего изменения (по убыванию)</string>
-  <string name="shuffle_wallpaper">Перемешать обои</string>
+  <string name="shuffle">Перемешать обои</string>
+  <string name="periodic_refresh">Периодическое обновление</string>
+  <string name="days_txt">Дней</string>
+  <string name="hours_txt">Часы</string>
+  <string name="minutes_txt">Минут</string>
+  <string name="change_the_image_brightness">Изменить яркость изображения</string>
+  <string name="check_folders_for_new_wallpapers">Проверять папки для новых обоев</string>
+  <string name="add_blur_to_the_image">Добавить размытие к изображению</string>
+  <string name="darken_the_edges_of_the_image">Затемнить края изображения</string>
+  <string name="make_the_colors_grayscale">Сделать цвета оттенками серого</string>
+  <string name="shuffle_the_wallpapers">Перемешать обои</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
+import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -18,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -71,17 +74,31 @@ fun BlurSwitchAndSlider(
         val columnModifier = if (animate) {
             Modifier.animateContentSize(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing))
         } else { Modifier }
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = columnModifier
+        Column(
+            modifier = columnModifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row (horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.change_blur),
-                    modifier = Modifier.padding(16.dp),
-                    fontWeight = FontWeight.W500
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.change_blur),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.W500
+                    )
+                    if (!blur) {
+                        Text(
+                            text = stringResource(R.string.add_blur_to_the_image),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 Switch(
                     checked = blur,
                     onCheckedChange = onBlurChange
@@ -98,128 +115,135 @@ fun BlurSwitchAndSlider(
                         )
                     )
                 ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         if (bothEnabled) {
                             Text(
-                                text = stringResource(R.string.home_screen) + " | " + stringResource(R.string.percentage, homePercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
+                                text = stringResource(R.string.home_screen),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
-                        else {
-                            Text(
-                                text = stringResource(R.string.percentage, homePercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                        Slider(
-                            value = homePercentage,
-                            onValueChange = {
-                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                homePercentage = it
-                                job?.cancel()
-                                job = scope.launch {
-                                    delay(500)
-                                    if (bothEnabled) {
-                                        onBlurPercentageChange(it.roundToInt(), lockPercentage.roundToInt())
-                                    } else {
-                                        onBlurPercentageChange(it.roundToInt(), it.roundToInt())
-                                    }
-                                }
-                            },
-                            valueRange = 0f..100f,
-                            steps = 100,
-                            modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
-                        )
-                        if (bothEnabled) {
-                            Text(
-                                text = stringResource(R.string.lock) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${homePercentage.roundToInt()}%",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Slider(
-                                value = lockPercentage,
-                                onValueChange = {
+                                value = homePercentage,
+                                onValueChange = { value ->
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    lockPercentage = it
+                                    homePercentage = value
                                     job?.cancel()
                                     job = scope.launch {
-                                        delay(500)
-                                        onBlurPercentageChange(homePercentage.roundToInt(), it.roundToInt())
+                                        delay(100)
+                                        onBlurPercentageChange(value.roundToInt(), lockPercentage.roundToInt())
                                     }
                                 },
                                 valueRange = 0f..100f,
                                 steps = 100,
-                                modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                }
-            } else {
-                if (blur) {
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        if (bothEnabled) {
-                            Text(
-                                text = stringResource(R.string.home_screen) + " | " + stringResource(R.string.percentage, homePercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                        else {
-                            Text(
-                                text = stringResource(R.string.percentage, homePercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                        Slider(
-                            value = homePercentage,
-                            onValueChange = {
-                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                homePercentage = it
-                                job?.cancel()
-                                job = scope.launch {
-                                    delay(500)
-                                    if (bothEnabled) {
-                                        onBlurPercentageChange(it.roundToInt(), lockPercentage.roundToInt())
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                onValueChangeFinished = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                                     } else {
-                                        onBlurPercentageChange(it.roundToInt(), it.roundToInt())
+                                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                     }
                                 }
-                            },
-                            valueRange = 0f..100f,
-                            steps = 100,
-                            modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
-                        )
-                        if (bothEnabled) {
-                            Text(
-                                text = stringResource(R.string.lock) + " | " + stringResource(R.string.percentage, lockPercentage.roundToInt()),
-                                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp)),
-                                fontWeight = FontWeight.W400
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.lock_screen),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${lockPercentage.roundToInt()}%",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Slider(
                                 value = lockPercentage,
-                                onValueChange = {
+                                onValueChange = { value ->
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    lockPercentage = it
+                                    lockPercentage = value
                                     job?.cancel()
                                     job = scope.launch {
-                                        delay(500)
-                                        onBlurPercentageChange(homePercentage.roundToInt(), it.roundToInt())
+                                        delay(100)
+                                        onBlurPercentageChange(homePercentage.roundToInt(), value.roundToInt())
                                     }
                                 },
                                 valueRange = 0f..100f,
                                 steps = 100,
-                                modifier = Modifier.padding(PaddingValues(horizontal = 30.dp))
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                onValueChangeFinished = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                    } else {
+                                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    }
+                                }
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${homePercentage.roundToInt()}%",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Slider(
+                                value = homePercentage,
+                                onValueChange = { value ->
+                                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    homePercentage = value
+                                    job?.cancel()
+                                    job = scope.launch {
+                                        delay(100)
+                                        onBlurPercentageChange(value.roundToInt(), lockPercentage.roundToInt())
+                                    }
+                                },
+                                valueRange = 0f..100f,
+                                steps = 100,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                onValueChangeFinished = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                    } else {
+                                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                    }
+                                }
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
