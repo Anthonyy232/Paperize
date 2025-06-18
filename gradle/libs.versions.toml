@@ -33,7 +33,7 @@ androidx-ui = { module = "androidx.compose.ui:ui", version = "1.8.1" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.8.1" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version = "1.8.1" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.8.1" }
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.8.1" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.8.3" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version = "1.8.1" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.1" }
 dfc = { module = "com.lazygeniouz:dfc", version = "1.2" }
