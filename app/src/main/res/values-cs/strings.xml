@@ -3,22 +3,22 @@
   <string name="app_name">Paperize</string>
   <string name="SettingsIcon">Možnosti</string>
   <string name="dropdownmenu_settings">Nastavení</string>
-  <string name="home_screen">Domov</string>
+  <string name="home_screen">Domů</string>
   <string name="wallpaper_screen">Tapeta</string>
   <string name="library_screen">Knihovna</string>
   <string name="settings_screen">Nastavení</string>
-  <string name="settings_back">Zadní</string>
+  <string name="settings_back">Zpět</string>
   <string name="LibraryFloatingButton">Přidat novou knihovnu</string>
   <string name="set_wallpaper_description">Povolit živé tapety</string>
   <string name="add_wallpaper">Přidat tapetu</string>
-  <string name="add_images">Přidejte obrázky</string>
+  <string name="add_images">Přidat obrázky</string>
   <string name="add_folder">Přidat složku</string>
   <string name="contact_button">Kontakt</string>
   <string name="image_is_selected">Obrázek je vybrán</string>
   <string name="image_is_not_selected">Obrázek není vybrán</string>
-  <string name="select_all_images_for_deletion">Vyberte všechny snímky k odstranění</string>
+  <string name="select_all_images_for_deletion">Vyberte obrázky k odstranění</string>
   <string name="delete_confirmation">Potvrzení smazání</string>
-  <string name="all_images_selected_for_deletion">Všechny snímky vybrané k odstranění</string>
+  <string name="all_images_selected_for_deletion">Všechny vybrané obrázky k odstranění</string>
   <string name="add_album">Přidat album</string>
   <string name="add_wallpaper_screen">Přidat obrazovku tapety</string>
   <string name="enter_the_name_of_the_album">Zadejte název alba</string>
@@ -26,7 +26,7 @@
   <string name="cancel">Zrušit</string>
   <string name="save">Uložit</string>
   <string name="delete_album">Vymazat</string>
-  <string name="change_name">Upravit jméno</string>
+  <string name="change_name">Přejmenovat</string>
   <string name="click_to_select_a_different_album">Klepnutím vyberte jiné album</string>
   <string name="no_icon">Žádná ikona</string>
   <string name="no_album_selected">Není vybráno žádné album</string>
@@ -34,7 +34,7 @@
   <string name="stop_the_album">Zastavte album</string>
   <string name="more_options">Více možností</string>
   <string name="startup">Spuštění</string>
-  <string name="agree">souhlas</string>
+  <string name="agree">Souhlas</string>
   <string name="welcome">Vítejte</string>
   <string name="notifications">Oznámení</string>
   <string name="continue_button">Jsem In</string>
@@ -42,13 +42,13 @@
   <string name="allow">Povolit</string>
   <string name="notification_info_message">Oznámení lze povolit, aby se zobrazovala, když aplikace běží na pozadí.</string>
   <string name="set_as_lock_screen">Nastavit jako zamykací obrazovku</string>
-  <string name="lock_screen">Uzamknout obrazovku</string>
+  <string name="lock_screen">Zamykací obrazovka</string>
   <string name="home">Domovská obrazovka</string>
   <string name="last_change">Poslední změna</string>
   <string name="next_change">Další změna</string>
   <string name="privacy_policy">Zásady ochrany osobních údajů</string>
   <string name="privacy_screen">Obrazovka soukromí</string>
-  <string name="licenses">licence</string>
+  <string name="licenses">Licence</string>
   <string name="licenses_screen">Obrazovka licencí</string>
   <string name="contact">Kontakt</string>
   <string name="contact_the_author_by_email">Kontaktujte autora emailem</string>
@@ -60,28 +60,28 @@
   <string name="circle_2_animation">Animace kruhu 2</string>
   <string name="circle_1_animation">Animace kruhu 1</string>
   <string name="circle_3_animation">Animace kruhu 3</string>
-  <string name="wallpaper_changer_has_been_enabled">Měnič tapety byl povolen.</string>
-  <string name="wallpaper_changer_has_been_disabled">Měnič tapet byl deaktivován.</string>
+  <string name="wallpaper_changer_has_been_enabled">Měnič tapety je zapnut.</string>
+  <string name="wallpaper_changer_has_been_disabled">Měnič tapety je vypnut.</string>
   <string name="dismiss">Propustit</string>
   <string name="has_been_unselected">Výběr %1$s byl zrušen.</string>
   <string name="interval_home">Úvodní obrazovka | %1$s</string>
-  <string name="interval_lock">Uzamknout obrazovku | %1$s</string>
+  <string name="interval_lock">Zamykací obrazovka | %1$s</string>
   <string name="interval">Interval | %1$s</string>
   <plurals name="minutes" comment="minutes [one] [other]">
     <item quantity="one">%d minuta</item>
-    <item quantity="few">%d minut</item>
+    <item quantity="few">%d minuty</item>
     <item quantity="many">%d minut</item>
     <item quantity="other">%d minut</item>
   </plurals>
   <plurals name="hours" comment="hours [one] [other]">
     <item quantity="one">%d hodina</item>
-    <item quantity="few">%d hodin</item>
+    <item quantity="few">%d hodiny</item>
     <item quantity="many">%d hodin</item>
     <item quantity="other">%d hodin</item>
   </plurals>
   <plurals name="days" comment="days [one] [other]">
     <item quantity="one">%d den</item>
-    <item quantity="few">%d dnů</item>
+    <item quantity="few">%d dny</item>
     <item quantity="many">%d dnů</item>
     <item quantity="other">%d dnů</item>
   </plurals>
@@ -97,21 +97,21 @@
   <string name="are_you_sure_you_want_to_delete_this">Opravdu to chcete smazat?</string>
   <string name="delete_album_question">Smazat album?</string>
   <string name="animation">Animace</string>
-  <string name="increase_visual_appeal">Zvyšte vizuální přitažlivost</string>
+  <string name="increase_visual_appeal">Zapnutí animace při změně tapety</string>
   <string name="dark_mode">Tmavý režim</string>
   <string name="automatic_device_mode">Režim automatického zařízení</string>
   <string name="light_mode">Světelný režim</string>
-  <string name="easier_on_the_eyes">Jednodušší pro oči</string>
+  <string name="easier_on_the_eyes">Změna tématu aplikace</string>
   <string name="dynamic_theme">Dynamické téma</string>
-  <string name="material_you">Materiál vás</string>
+  <string name="material_you">Téma generované na základě tapety</string>
   <string name="dynamic_theming">Dynamické téma</string>
-  <string name="click_here_to_view_the_licenses">Kliknutím sem zobrazíte licence</string>
-  <string name="click_here_to_view_our_privacy_policy">Kliknutím sem zobrazíte naše zásady ochrany osobních údajů</string>
+  <string name="click_here_to_view_the_licenses">Zobrazení licencí</string>
+  <string name="click_here_to_view_our_privacy_policy">Zobrazí naše zásady ochrany osobních údajů</string>
   <string name="add_images_btn">Přidat obrázky</string>
   <string name="add_folder_btn">Přidat složku</string>
   <string name="version">Verze: %1$s</string>
   <string name="appearance">Vzhled</string>
-  <string name="about">O</string>
+  <string name="about">O aplikaci</string>
   <string name="coming_soon">Již brzy</string>
   <string name="new_album">Nové album</string>
   <string name="wallpapers">tapety</string>
@@ -120,15 +120,15 @@
   <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d tapeta</item>
     <item quantity="few">%d tapety</item>
-    <item quantity="many">%d tapety</item>
-    <item quantity="other">%d tapety</item>
+    <item quantity="many">%d tapet</item>
+    <item quantity="other">%d tapet</item>
   </plurals>
   <string name="privacy_intro_title">Zavedení</string>
-  <string name="privacy_intro_content">Vítejte v %1$s! Toto oznámení o ochraně osobních údajů popisuje, jak shromažďujeme, používáme a chráníme vaše osobní údaje, když používáte naši mobilní aplikaci. Používáním %1$ssouhlasíte s podmínkami popsanými v tomto oznámení.</string>
+  <string name="privacy_intro_content">Vítejte v %1$s! Toto oznámení o ochraně osobních údajů popisuje, jak shromažďujeme, používáme a chráníme vaše osobní údaje, když používáte naši mobilní aplikaci. Používáním %1$s souhlasíte s podmínkami popsanými v tomto oznámení.</string>
   <string name="privacy_data_collection_title">Sběr dat</string>
   <string name="privacy_data_collection_content">Přístup k oznámením: %1$s požaduje přístup k oznámení, aby vám na základě vašich oznámení poskytl přizpůsobená doporučení tapet. Mimo vaše zařízení neukládáme žádný obsah oznámení ani osobní údaje (PII).\n\nMístní soubory: %1$s přistupuje k souborům uloženým ve vašem zařízení a umožňuje vám je nastavit jako tapety. Tyto soubory nenahráváme ani nepřenášíme na žádné externí servery.</string>
   <string name="privacy_information_usage_title">Využití informací</string>
-  <string name="privacy_information_usage_content">Osobní údaje: Neshromažďujeme ani neukládáme žádné osobní údaje, jako jsou jména, e-mailové adresy nebo telefonní čísla.\n\nAnalýza využití: %1$s nesleduje vaše chování při používání ani neshromažďuje analytická data.</string>
+  <string name="privacy_information_usage_content">Osobní údaje: Neshromažďujeme ani neukládáme žádné osobní údaje, jako jsou jména, emailové adresy nebo telefonní čísla.\n\nAnalýza využití: %1$s nesleduje vaše chování při používání ani neshromažďuje analytická data.</string>
   <string name="privacy_data_security_title">Zabezpečení dat</string>
   <string name="privacy_data_security_content">Úložiště v zařízení: Všechna data používaná %1$s zůstávají ve vašem zařízení. Nepřenášíme ani neukládáme žádná data externě.</string>
   <string name="privacy_third_party_services_title">Služby třetích stran</string>
@@ -147,11 +147,11 @@
   <string name="percentage">%1$s%%</string>
   <string name="fill">Vyplnit</string>
   <string name="fit">Fit</string>
-  <string name="stretch">Úsek</string>
+  <string name="stretch">Roztáhnout</string>
   <string name="wallpaper_scaling">Měřítko tapety</string>
   <string name="change_brightness">Jas</string>
   <string name="home_screen_btn">Domovská obrazovka</string>
-  <string name="lock_screen_btn">Uzamknout obrazovku</string>
+  <string name="lock_screen_btn">Zamykací obrazovka</string>
   <string name="individual_scheduling">Individuální plánování</string>
   <string name="show_interval_sliders">Zobrazit posuvníky intervalů</string>
   <string name="interval_text">Časový interval</string>
@@ -176,7 +176,7 @@
   <string name="gray_filter">Šedý filtr</string>
   <string name="select_starting_time">Vyberte počáteční čas</string>
   <string name="change_notification_settings">Změnit nastavení oznámení</string>
-  <string name="sort_items">Seřadit_položky</string>
+  <string name="sort_items">Seřadit položky</string>
   <string name="folders">Složky</string>
   <string name="expand_folder">Rozbalit složku</string>
   <string name="wallpapers_sort">Tapety</string>
@@ -185,13 +185,13 @@
   <string name="selected">%1$s vybráno</string>
   <string name="sort_alphabetically_a_z">Řadit abecedně (A-Z)</string>
   <string name="sort_alphabetically_z_a">Řadit abecedně (Z-A)</string>
-  <string name="sort_by_last_modified_newest">Seřadit podle poslední úpravy (nejvyšší)</string>
-  <string name="sort_by_last_modified_oldest">Seřadit podle poslední úpravy (Oldest)</string>
-  <string name="shuffle">Zamíchat pozadí</string>
+  <string name="sort_by_last_modified_newest">Seřadit podle poslední úpravy (Nejnovější)</string>
+  <string name="sort_by_last_modified_oldest">Seřadit podle poslední úpravy (Nejstarší)</string>
+  <string name="shuffle">Zamíchat</string>
   <string name="periodic_refresh">Periodická obnova</string>
   <string name="days_txt">Dny</string>
   <string name="hours_txt">Hodiny</string>
-  <string name="minutes_txt">Zápis z jednání</string>
+  <string name="minutes_txt">Minuty</string>
   <string name="change_the_image_brightness">Změnit jas obrázku</string>
   <string name="check_folders_for_new_wallpapers">Kontrola složek pro nové tapety</string>
   <string name="add_blur_to_the_image">Přidat rozostření k obrázku</string>
