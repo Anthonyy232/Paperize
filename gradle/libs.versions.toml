@@ -2,7 +2,7 @@
 androidGradlePlugin = "8.10.1"
 kotlin = "2.1.21"
 hilt = "2.56.2"
-ksp = "2.1.21-2.0.1"
+ksp = "2.1.21-2.0.2"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
