@@ -146,14 +146,20 @@ fun retrieveBitmap(
     context: Context,
     wallpaper: Uri,
     width: Int,
-    height: Int
+    height: Int,
+    scaling: ScalingConstants = ScalingConstants.FIT
 ): Bitmap? {
     val imageSize = wallpaper.getImageDimensions(context) ?: return null
     if (imageSize.width <= 0 || imageSize.height <= 0) {
         Log.e("WallpaperUtil", "Invalid image dimensions from URI: $imageSize")
         return null
     }
-    val sampleSize = calculateInSampleSize(imageSize, width, height)
+
+    val sampleSize = if (scaling == ScalingConstants.NONE) {
+        1
+    } else {
+        calculateInSampleSize(imageSize, width, height)
+    }
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         try {

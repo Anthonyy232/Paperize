@@ -576,7 +576,7 @@ class HomeWallpaperService: Service() {
             try {
                 val wallpaperManager = WallpaperManager.getInstance(context)
                 val size = getDeviceScreenSize(context)
-                val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
+                val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height, scaling)
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->

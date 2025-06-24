@@ -286,12 +286,12 @@ class LockWallpaperService: Service() {
                             }
                         }
                     }
-                    // Refreshing home wallpaper to keep dynamic theming color based on home screen wallpaper
-                    if (homeInterval != lockInterval) {
-                        delay(15000)
-                        val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply { this.action = HomeWallpaperService.Actions.UPDATE.toString() }
-                        context.startService(serviceIntent)
-                    }
+//                    // Refreshing home wallpaper to keep dynamic theming color based on home screen wallpaper
+//                    if (homeInterval != lockInterval) {
+//                        delay(15000)
+//                        val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply { this.action = HomeWallpaperService.Actions.UPDATE.toString() }
+//                        context.startService(serviceIntent)
+//                    }
                 }
                 // Case: Set home and lock screen wallpapers using the same album (home screen album)
                 settings.setHome && settings.setLock && !scheduleSeparately -> { /* handled by home wallpaper service */ return }
@@ -494,11 +494,10 @@ class LockWallpaperService: Service() {
             try {
                 val wallpaperManager = WallpaperManager.getInstance(this.applicationContext)
                 val size = getDeviceScreenSize(context)
-                val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height)
+                val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height, scaling)
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
-                        if (both) setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
                         setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
                         image.recycle()
                     }
