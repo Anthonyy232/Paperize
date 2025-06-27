@@ -41,7 +41,7 @@ gson = { module = "com.google.code.gson:gson", version = "2.13.1" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version = "2.56.2" }
 hilt-android = { module = "com.google.dagger:hilt-android", version = "2.56.2" }
 junit = { module = "junit:junit", version = "4.13.2" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.1" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
 landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.5.0" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.7" }
