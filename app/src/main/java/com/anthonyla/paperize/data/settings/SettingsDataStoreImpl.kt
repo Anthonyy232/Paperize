@@ -58,9 +58,11 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
 
     override suspend fun getInt(key: String): Int? {
         return try {
-            val head = context.dataStore.data.first()
-            val preferencesKey = intPreferencesKey(key)
-            head[preferencesKey]?.toInt()
+            val preferences = context.dataStore.data.first()
+            val intKey = intPreferencesKey(key)
+            val stringKey = stringPreferencesKey(key)
+
+            preferences[intKey] ?: preferences[stringKey]?.toIntOrNull()
         } catch (exception: Exception) {
             exception.printStackTrace()
             null
@@ -85,14 +87,26 @@ class SettingsDataStoreImpl(private val context: Context) : SettingsDataStore {
             preferences[stringPreferencesKey(key)]
         }
 
-    override fun getIntFlow(key: String): Flow<Int?> = context.dataStore.data
-        .catch { exception ->
-            exception.printStackTrace()
-            emit(emptyPreferences())
-        }
-        .map { preferences ->
-            preferences[intPreferencesKey(key)]
-        }
+    override fun getIntFlow(key: String): Flow<Int?> {
+        val intKey = intPreferencesKey(key)
+        val stringKey = stringPreferencesKey(key)
+
+        return context.dataStore.data
+            .catch { exception ->
+                exception.printStackTrace()
+                emit(emptyPreferences())
+            }
+            .map { preferences ->
+                val valueAsInt = preferences[intKey]
+
+                if (valueAsInt != null) {
+                    valueAsInt
+                } else {
+                    val valueAsString = preferences[stringKey]
+                    valueAsString?.toIntOrNull()
+                }
+            }
+    }
 
     override suspend fun deleteBoolean(key: String) {
         val preferencesKey = booleanPreferencesKey(key)
