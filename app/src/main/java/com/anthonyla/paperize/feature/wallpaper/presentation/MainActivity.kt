@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.core.SettingsConstants
@@ -44,10 +45,10 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.themes.PaperizeThem
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmItem
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAlarmSchedulerImpl
 import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver
+import com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
-import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -86,6 +87,12 @@ class MainActivity : ComponentActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_WALLPAPER) != PackageManager.PERMISSION_GRANTED) {
             requestSetWallpaperPermission.launch(Manifest.permission.SET_WALLPAPER)
         }
+
+        // Trigger a refresh of wallpapers when the app is opened.
+        val refreshIntent = Intent(this, HomeWallpaperService::class.java).apply {
+            action = HomeWallpaperService.Actions.REFRESH.toString()
+        }
+        startService(refreshIntent)
 
         val splashScreen = installSplashScreen()
 

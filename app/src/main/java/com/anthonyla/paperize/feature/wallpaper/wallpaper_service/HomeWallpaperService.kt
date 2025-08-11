@@ -48,6 +48,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
+import kotlin.collections.containsKey
+import kotlin.collections.shuffle
+import kotlin.hashCode
+import kotlin.text.contains
 
 /**
  * Service for changing home screen
@@ -596,101 +600,98 @@ class HomeWallpaperService: Service() {
     }
 
     /**
-     * Refreshes the album by deleting invalid wallpapers and updating folder cover uri and wallpapers uri-
+     * Refreshes the album by deleting invalid wallpapers and updating folder cover uri and wallpapers uri.
      */
     private fun refreshAlbum(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
-            Log.d("PaperizeWallpaperChanger", "Refreshing album")
+            Log.d("PaperizeWallpaperChanger", "Refreshing albums")
             try {
-                val albumWithWallpapers = albumRepository.getAlbumsWithWallpaperAndFolder().first()
-                albumWithWallpapers.forEach { album ->
-                    // Remove invalid wallpapers
-                    val validWallpapers = async {
-                        album.wallpapers
-                            .asSequence()
-                            .filter { isValidUri(context, it.wallpaperUri) }
-                            .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
-                            .toList()
-                    }
+                val albumsToRefresh = albumRepository.getAlbumsWithWallpaperAndFolder().first()
+                val settings = getWallpaperSettings()
 
-                    // Remove invalid folders and inner wallpapers
-                    val validFolders = async {
-                        album.folders
-                            .asSequence()
-                            .filterNot { isDirectory(context, it.folderUri) }
-                            .map { folder ->
-                                async {
-                                    val metadata = getFolderMetadata(folder.folderUri, context)
-                                    if (metadata.lastModified != folder.dateModified) {
-                                        val existingWallpapers = folder.wallpapers
-                                            .asSequence()
-                                            .filter { isValidUri(context, it.wallpaperUri) }
-                                            .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
-                                            .toList()
-                                        val newWallpapers =
-                                            getWallpaperFromFolder(folder.folderUri, context)
-                                                .asSequence()
-                                                .filterNot { new -> existingWallpapers.any { it.wallpaperUri == new.wallpaperUri } }
-                                                .mapIndexed { index, wallpaper ->
-                                                    wallpaper.copy(
-                                                        initialAlbumName = album.album.initialAlbumName,
-                                                        order = existingWallpapers.size + 1 + index,
-                                                        key = album.album.initialAlbumName.hashCode() +
-                                                                folder.folderUri.hashCode() +
-                                                                wallpaper.wallpaperUri.hashCode()
-                                                    )
-                                                }.toList()
-                                        val combinedWallpapers = existingWallpapers + newWallpapers
-                                        folder.copy(
-                                            coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
-                                            wallpapers = combinedWallpapers,
-                                            dateModified = metadata.lastModified,
-                                            folderName = metadata.filename
-                                        )
-                                    }
-                                    else { folder }
+                albumsToRefresh.forEach { albumWithDetails ->
+                    // Filter out invalid URIs, preserving the original order.
+                    val validStandaloneWallpapers = albumWithDetails.wallpapers
+                        .filter { isValidUri(context, it.wallpaperUri) }
+
+                    val updatedFolders = albumWithDetails.folders
+                        .mapNotNull { folder ->
+                            try {
+                                val metadata = getFolderMetadata(folder.folderUri, context)
+                                // Only rescan a folder if it has been modified
+                                if (metadata.lastModified != folder.dateModified) {
+                                    val wallpapersInDb = folder.wallpapers
+                                        .filter { isValidUri(context, it.wallpaperUri) }
+                                        .associateBy { it.wallpaperUri }
+
+                                    val wallpapersOnDisk = getWallpaperFromFolder(folder.folderUri, context)
+
+                                    // Find new wallpapers not already in the DB for this folder
+                                    val newWallpapers = wallpapersOnDisk
+                                        .filterNot { wallpapersInDb.containsKey(it.wallpaperUri) }
+                                        .mapIndexed { index, wallpaper ->
+                                            wallpaper.copy(
+                                                initialAlbumName = albumWithDetails.album.initialAlbumName,
+                                                order = (wallpapersInDb.size) + 1 + index,
+                                                key = albumWithDetails.album.initialAlbumName.hashCode() +
+                                                        folder.folderUri.hashCode() +
+                                                        wallpaper.wallpaperUri.hashCode()
+                                            )
+                                        }
+
+                                    val combinedWallpapers = wallpapersInDb.values.toList() + newWallpapers
+                                    folder.copy(
+                                        coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
+                                        wallpapers = combinedWallpapers.sortedBy { it.order },
+                                        dateModified = metadata.lastModified,
+                                        folderName = metadata.filename
+                                    )
+                                } else {
+                                    folder // Folder hasn't changed, return it as is
                                 }
+                            } catch (e: Exception) {
+                                Log.w("PaperizeWallpaperChanger", "Failed to process folder ${folder.folderUri}: ${e.message}")
+                                null // Filter out this folder if it can't be processed
                             }
-                            .toList()
-                            .awaitAll()
+                        }
+
+                    // Rest of the function remains the same...
+                    val allValidWallpapers = (updatedFolders.flatMap { it.wallpapers } + validStandaloneWallpapers)
+                        .sortedBy { it.order }
+
+                    if (allValidWallpapers.isEmpty()) {
+                        Log.d("PaperizeWallpaperChanger", "Album '${albumWithDetails.album.initialAlbumName}' is now empty. Deleting.")
+                        albumRepository.cascadeDeleteAlbum(albumWithDetails.album)
+                        return@forEach
                     }
 
-                    val folders = validFolders.await()
-                    val wallpapers = validWallpapers.await()
-                    if (folders.isNotEmpty() || wallpapers.isNotEmpty()) {
-                        val settings = getWallpaperSettings()
-                        val coverUri = findFirstValidUri(context, folders, wallpapers)
-                        val allValidWallpaperUri = (folders.flatMap { it.wallpapers } + wallpapers).sortedBy { it.order }.map{ it.wallpaperUri }.toSet()
-                        val validatedHomeQueue = album.album.homeWallpapersInQueue.filter { allValidWallpaperUri.contains(it) }
-                        val validatedLockQueue = album.album.lockWallpapersInQueue.filter { allValidWallpaperUri.contains(it) }
-                        val newUris = allValidWallpaperUri - (validatedHomeQueue + validatedLockQueue).toSet()
-                        val finalHomeQueue = if (settings.shuffle) {
-                            validatedHomeQueue + newUris.shuffled()
-                        } else {
-                            allValidWallpaperUri.filter { it in validatedHomeQueue || it in newUris }
-                        }
-                        val finalLockQueue = if (settings.shuffle) {
-                            validatedLockQueue + newUris.shuffled()
-                        } else {
-                            allValidWallpaperUri.filter { it in validatedLockQueue || it in newUris }
-                        }
+                    val allValidUris = allValidWallpapers.map { it.wallpaperUri }.toSet()
 
-                        albumRepository.upsertAlbumWithWallpaperAndFolder(
-                            album.copy(
-                                album = album.album.copy(
-                                    coverUri = coverUri,
-                                    homeWallpapersInQueue = finalHomeQueue,
-                                    lockWallpapersInQueue = finalLockQueue
-                                ),
-                                wallpapers = wallpapers,
-                                folders = folders
-                            )
+                    fun rebuildQueue(currentQueue: List<String>, allWallpapers: List<String>, isShuffle: Boolean): List<String> {
+                        val validQueueItems = currentQueue.filter { allValidUris.contains(it) }
+                        val newItems = allWallpapers.filterNot { validQueueItems.contains(it) }
+                        return if (isShuffle) {
+                            validQueueItems + newItems.shuffled()
+                        } else {
+                            validQueueItems + newItems
+                        }
+                    }
+
+                    val allValidUrisOrdered = allValidWallpapers.map { it.wallpaperUri }
+                    val finalHomeQueue = rebuildQueue(albumWithDetails.album.homeWallpapersInQueue, allValidUrisOrdered, settings.shuffle)
+                    val finalLockQueue = rebuildQueue(albumWithDetails.album.lockWallpapersInQueue, allValidUrisOrdered, settings.shuffle)
+
+                    albumRepository.upsertAlbumWithWallpaperAndFolder(
+                        albumWithDetails.copy(
+                            album = albumWithDetails.album.copy(
+                                coverUri = findFirstValidUri(context, updatedFolders, validStandaloneWallpapers),
+                                homeWallpapersInQueue = finalHomeQueue,
+                                lockWallpapersInQueue = finalLockQueue
+                            ),
+                            wallpapers = validStandaloneWallpapers,
+                            folders = updatedFolders
                         )
-                    }
-                    else {
-                        Log.d("PaperizeWallpaperChanger", "No wallpaper found")
-                        albumRepository.cascadeDeleteAlbum(album.album)
-                    }
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("PaperizeWallpaperChanger", "Error refreshing album", e)
