@@ -57,6 +57,7 @@ class LockWallpaperService: Service() {
     private var homeInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var lockInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var type = Type.SINGLE.ordinal
+    private var isForeground = false
 
     enum class Actions {
         START,
@@ -71,6 +72,14 @@ class LockWallpaperService: Service() {
         super.onCreate()
         handleThread.start()
         workerHandler = Handler(handleThread.looper)
+        // Start foreground as soon as possible
+        if (!isForeground) {
+            val notification = createNotification(LocalDateTime.now())
+            if (notification != null) {
+                startForeground(1, notification)
+                isForeground = true
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,6 +111,7 @@ class LockWallpaperService: Service() {
             CoroutineScope(Dispatchers.Default).launch {
                 changeWallpaper(this@LockWallpaperService)
                 withContext(Dispatchers.Main) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 }
             }
@@ -113,6 +123,7 @@ class LockWallpaperService: Service() {
             CoroutineScope(Dispatchers.Default).launch {
                 updateCurrentWallpaper(this@LockWallpaperService)
                 withContext(Dispatchers.Main) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 }
             }
@@ -318,14 +329,14 @@ class LockWallpaperService: Service() {
                                     context = context,
                                     wallpaper = wallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                                     darken = settings.darken,
-                                    darkenPercent = settings.homeDarkenPercentage,
+                                    darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
                                     scaling = settings.scaling,
                                     blur = settings.blur,
-                                    blurPercent = settings.homeBlurPercentage,
+                                    blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
                                     vignette = settings.vignette,
-                                    vignettePercent = settings.homeVignettePercentage,
+                                    vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
                                     grayscale = settings.grayscale,
-                                    grayscalePercent = settings.homeGrayscalePercentage
+                                    grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
                                 )
                             }
                             else {
@@ -355,14 +366,14 @@ class LockWallpaperService: Service() {
                                 context = context,
                                 wallpaper = wallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                                 darken = settings.darken,
-                                darkenPercent = settings.homeDarkenPercentage,
+                                darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
                                 scaling = settings.scaling,
                                 blur = settings.blur,
-                                blurPercent = settings.homeBlurPercentage,
+                                blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
                                 vignette = settings.vignette,
-                                vignettePercent = settings.homeVignettePercentage,
+                                vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
                                 grayscale = settings.grayscale,
-                                grayscalePercent = settings.homeGrayscalePercentage
+                                grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
                             )
                         } else {
                             val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -459,14 +470,14 @@ class LockWallpaperService: Service() {
                 context = context,
                 wallpaper = currentLockWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                 darken = settings.darken,
-                darkenPercent = if (!settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
+                darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
                 scaling = settings.scaling,
                 blur = settings.blur,
-                blurPercent = if (!settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
+                blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
                 vignette = settings.vignette,
-                vignettePercent = if (!settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
+                vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
                 grayscale = settings.grayscale,
-                grayscalePercent = if (!settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
+                grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
             )
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in updating", e)
@@ -499,9 +510,7 @@ class LockWallpaperService: Service() {
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
                         setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
-                        image.recycle()
                     }
-                    bitmap.recycle()
                     context.triggerWallpaperTaskerEvent()
                     return true
                 }

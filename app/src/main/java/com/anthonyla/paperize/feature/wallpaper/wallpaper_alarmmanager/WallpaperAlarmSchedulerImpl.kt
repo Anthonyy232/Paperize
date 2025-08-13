@@ -338,6 +338,7 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
                 it.type?.let { type -> putExtra("type", type) }
             }
         }
-        context.startService(serviceIntent)
+        context.startForegroundService(serviceIntent)
     }
 }
+

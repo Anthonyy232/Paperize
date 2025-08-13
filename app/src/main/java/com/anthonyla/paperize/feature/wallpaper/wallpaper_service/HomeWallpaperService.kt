@@ -66,6 +66,7 @@ class HomeWallpaperService: Service() {
     private var homeInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var lockInterval: Int = SettingsConstants.WALLPAPER_CHANGE_INTERVAL_DEFAULT
     private var type = Type.SINGLE.ordinal
+    private var isForeground = false
 
     enum class Actions {
         START,
@@ -81,6 +82,14 @@ class HomeWallpaperService: Service() {
         super.onCreate()
         handleThread.start()
         workerHandler = Handler(handleThread.looper)
+        // Start foreground as soon as possible
+        if (!isForeground) {
+            val notification = createNotification(LocalDateTime.now())
+            if (notification != null) {
+                startForeground(1, notification)
+                isForeground = true
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -115,6 +124,7 @@ class HomeWallpaperService: Service() {
             delay(50)
             changeWallpaper(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
@@ -124,6 +134,7 @@ class HomeWallpaperService: Service() {
         CoroutineScope(Dispatchers.Default).launch {
             updateCurrentWallpaper(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
@@ -133,6 +144,7 @@ class HomeWallpaperService: Service() {
         CoroutineScope(Dispatchers.Default).launch {
             refreshAlbum(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
@@ -541,19 +553,44 @@ class HomeWallpaperService: Service() {
             }
 
             val currentHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) ?: ""
-            setWallpaper(
-                context = context,
-                wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
-                darken = settings.darken,
-                darkenPercent = settings.homeDarkenPercentage,
-                scaling = settings.scaling,
-                blur = settings.blur,
-                blurPercent = settings.homeBlurPercentage,
-                vignette = settings.vignette,
-                vignettePercent = settings.homeVignettePercentage,
-                grayscale = settings.grayscale,
-                grayscalePercent = settings.homeGrayscalePercentage
-            )
+            val currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) ?: ""
+
+            // Check if we're using the same wallpaper for both home and lock
+            val bothEnabled = settings.setHome && settings.setLock && currentHomeWallpaper == currentLockWallpaper
+
+            if (bothEnabled) {
+                setWallpaper(
+                    context = context,
+                    wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
+                    darken = settings.darken,
+                    darkenPercent = settings.homeDarkenPercentage,
+                    scaling = settings.scaling,
+                    blur = settings.blur,
+                    blurPercent = settings.homeBlurPercentage,
+                    vignette = settings.vignette,
+                    vignettePercent = settings.homeVignettePercentage,
+                    grayscale = settings.grayscale,
+                    grayscalePercent = settings.homeGrayscalePercentage,
+                    both = true
+                )
+            } else {
+                // Update home screen only
+                if (settings.setHome) {
+                    setWallpaper(
+                        context = context,
+                        wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
+                        darken = settings.darken,
+                        darkenPercent = settings.homeDarkenPercentage,
+                        scaling = settings.scaling,
+                        blur = settings.blur,
+                        blurPercent = settings.homeBlurPercentage,
+                        vignette = settings.vignette,
+                        vignettePercent = settings.homeVignettePercentage,
+                        grayscale = settings.grayscale,
+                        grayscalePercent = settings.homeGrayscalePercentage
+                    )
+                }
+            }
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in updating", e)
         }
@@ -583,9 +620,40 @@ class HomeWallpaperService: Service() {
                 val bitmap = retrieveBitmap(context, wallpaper, size.width, size.height, scaling)
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
-                    processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
-                        if (both) setWallpaperSafely(image, WallpaperManager.FLAG_LOCK, wallpaperManager)
-                        setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
+                    if (both) {
+                        // Need to get settings to apply different effects for home and lock
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val settings = getWallpaperSettings()
+
+                            // Process bitmap for home screen with home settings
+                            processBitmap(
+                                size.width, size.height, bitmap,
+                                settings.darken, settings.homeDarkenPercentage,
+                                scaling,
+                                settings.blur, settings.homeBlurPercentage,
+                                settings.vignette, settings.homeVignettePercentage,
+                                settings.grayscale, settings.homeGrayscalePercentage
+                            )?.let { homeImage ->
+                                setWallpaperSafely(homeImage, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
+                            }
+
+                            // Process bitmap for lock screen with lock settings
+                            processBitmap(
+                                size.width, size.height, bitmap,
+                                settings.darken, settings.lockDarkenPercentage,
+                                scaling,
+                                settings.blur, settings.lockBlurPercentage,
+                                settings.vignette, settings.lockVignettePercentage,
+                                settings.grayscale, settings.lockGrayscalePercentage
+                            )?.let { lockImage ->
+                                setWallpaperSafely(lockImage, WallpaperManager.FLAG_LOCK, wallpaperManager)
+                            }
+                        }
+                    } else {
+                        // Single wallpaper processing (existing logic)
+                        processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
+                            setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
+                        }
                     }
                     context.triggerWallpaperTaskerEvent()
                     return true

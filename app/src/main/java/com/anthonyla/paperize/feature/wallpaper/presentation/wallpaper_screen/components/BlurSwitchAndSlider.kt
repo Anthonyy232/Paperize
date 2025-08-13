@@ -104,17 +104,9 @@ fun BlurSwitchAndSlider(
                     onCheckedChange = onBlurChange
                 )
             }
-            if (animate) {
-                AnimatedVisibility(
-                    visible = blur,
-                    enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
-                    exit = fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = LinearOutSlowInEasing
-                        )
-                    )
-                ) {
+            // Show sliders when blur is enabled, regardless of animation setting
+            if (blur) {
+                val sliderContent = @Composable {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -246,8 +238,27 @@ fun BlurSwitchAndSlider(
                         }
                     }
                 }
+
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = blur,
+                        enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = LinearOutSlowInEasing
+                            )
+                        )
+                    ) {
+                        sliderContent()
+                    }
+                } else {
+                    sliderContent()
+                }
             }
         }
     }
 
 }
+
+
