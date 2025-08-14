@@ -13,14 +13,15 @@ ksp {
 
 android {
     namespace = "com.anthonyla.paperize"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.anthonyla.paperize"
-        minSdk = 26
-        targetSdk = 37
-        versionCode = 37
-        versionName = "3.0.0"
+        minSdk = 31
+        targetSdk = 36
+        versionCode = 38
+        versionName = "3.1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -115,7 +116,6 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.material)
-    implementation(files("dependencies/renderscript-toolkit-release.aar"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

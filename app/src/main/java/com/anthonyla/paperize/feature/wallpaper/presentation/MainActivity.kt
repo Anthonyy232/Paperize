@@ -92,11 +92,7 @@ class MainActivity : ComponentActivity() {
         val refreshIntent = Intent(this, HomeWallpaperService::class.java).apply {
             action = HomeWallpaperService.Actions.REFRESH.toString()
         }
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(refreshIntent)
-        } else {
-            startService(refreshIntent)
-        }
+        startForegroundService(refreshIntent)
 
         val splashScreen = installSplashScreen()
 

@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.HardwareRenderer
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -32,7 +33,6 @@ import com.anthonyla.paperize.core.ScreenMetricsCompat.getScreenSize
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Folder
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Metadata
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper
-import com.google.android.renderscript.Toolkit
 import com.lazygeniouz.dfc.file.DocumentFileCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,6 +41,13 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
+import android.graphics.PixelFormat
+import android.graphics.RenderEffect
+import android.graphics.RenderNode
+import android.hardware.HardwareBuffer
+import android.media.ImageReader
+import kotlin.compareTo
+import kotlin.or
 
 enum class Type { HOME, LOCK, SINGLE, REFRESH }
 
@@ -313,14 +320,62 @@ fun darkenBitmap(source: Bitmap, brightnessToRetainPercent: Int): Bitmap {
  * Blur the bitmap by a certain percentage
  */
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
-    if (percent <= 0) return source
-    return try {
-        val radius = (percent.coerceIn(0, 100) * 0.25f).coerceIn(1f, 25f)
-        Toolkit.blur(source, radius.toInt())
-    } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error blurring bitmap (Renderscript): $e")
-        source
+    val clampedPercent = percent.coerceIn(0, 100)
+    if (clampedPercent == 0) {
+        return source
     }
+
+    val maxBlurRadius = 25.0f
+    val radius = (clampedPercent / 100.0f) * maxBlurRadius
+
+    val imageReader = ImageReader.newInstance(
+        source.width, source.height,
+        PixelFormat.RGBA_8888, 1,
+        HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE or HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
+    )
+
+    val renderNode = RenderNode("BlurEffect")
+    val hardwareRenderer = HardwareRenderer()
+
+    var resultBitmap: Bitmap?
+    try {
+        hardwareRenderer.setSurface(imageReader.surface)
+        hardwareRenderer.setContentRoot(renderNode)
+        renderNode.setPosition(0, 0, source.width, source.height)
+
+        val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.MIRROR)
+        renderNode.setRenderEffect(blurEffect)
+
+        val canvas = renderNode.beginRecording()
+        canvas.drawBitmap(source, 0f, 0f, null)
+        renderNode.endRecording()
+
+        hardwareRenderer.createRenderRequest()
+            .setWaitForPresent(true)
+            .syncAndDraw()
+
+        val image = imageReader.acquireNextImage()
+            ?: throw IllegalStateException("Failed to acquire blurred image")
+
+        val hardwareBuffer = image.hardwareBuffer
+            ?: throw IllegalStateException("Failed to acquire hardware buffer")
+
+        val hardwareBitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, null)
+            ?: throw IllegalStateException("Failed to create bitmap from hardware buffer")
+
+        // Convert hardware bitmap to regular bitmap for further processing
+        resultBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+
+        hardwareBuffer.close()
+        image.close()
+
+    } finally {
+        hardwareRenderer.destroy()
+        renderNode.discardDisplayList()
+        imageReader.close()
+    }
+
+    return resultBitmap
 }
 
 /**
@@ -649,6 +704,12 @@ fun processBitmap(
     try {
         var processedBitmap = source
 
+        // Apply blur first on the original size for better quality
+        if (blur && blurPercent > 0) {
+            processedBitmap = blurBitmap(processedBitmap, blurPercent)
+        }
+
+        // Then scale the bitmap
         processedBitmap = when (scaling) {
             ScalingConstants.FILL -> fillBitmap(processedBitmap, width, height)
             ScalingConstants.FIT -> fitBitmap(processedBitmap, width, height)
@@ -656,22 +717,14 @@ fun processBitmap(
             ScalingConstants.NONE -> processedBitmap
         }
 
+        // Ensure mutability for color effects
         if (!processedBitmap.isMutable && (darken || vignette || grayscale)) {
-            Log.w("ProcessBitmap", "Bitmap became immutable before effects. Making a mutable copy.")
+            Log.w("ProcessBitmap", "Bitmap became immutable. Making a mutable copy.")
             processedBitmap = processedBitmap.copy(processedBitmap.config ?: Bitmap.Config.ARGB_8888, true)
         }
 
         if (darken && darkenPercent > 0) {
             processedBitmap = darkenBitmap(processedBitmap, darkenPercent)
-        }
-
-        if (blur && blurPercent > 0) {
-            val blurred = blurBitmap(processedBitmap, blurPercent)
-            processedBitmap = blurred
-            if (!processedBitmap.isMutable && (vignette || grayscale)) {
-                Log.w("ProcessBitmap", "Bitmap became immutable after blur. Making a mutable copy.")
-                processedBitmap = processedBitmap.copy(processedBitmap.config ?: Bitmap.Config.ARGB_8888, true)
-            }
         }
 
         if (vignette && vignettePercent > 0) {

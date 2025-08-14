@@ -297,12 +297,6 @@ class LockWallpaperService: Service() {
                             }
                         }
                     }
-//                    // Refreshing home wallpaper to keep dynamic theming color based on home screen wallpaper
-//                    if (homeInterval != lockInterval) {
-//                        delay(15000)
-//                        val serviceIntent = Intent(context, HomeWallpaperService::class.java).apply { this.action = HomeWallpaperService.Actions.UPDATE.toString() }
-//                        context.startService(serviceIntent)
-//                    }
                 }
                 // Case: Set home and lock screen wallpapers using the same album (home screen album)
                 settings.setHome && settings.setLock && !scheduleSeparately -> { /* handled by home wallpaper service */ return }
@@ -329,14 +323,14 @@ class LockWallpaperService: Service() {
                                     context = context,
                                     wallpaper = wallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                                     darken = settings.darken,
-                                    darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
+                                    darkenPercent = settings.lockDarkenPercentage,
                                     scaling = settings.scaling,
                                     blur = settings.blur,
-                                    blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
+                                    blurPercent = settings.lockBlurPercentage,
                                     vignette = settings.vignette,
-                                    vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
+                                    vignettePercent = settings.lockVignettePercentage,
                                     grayscale = settings.grayscale,
-                                    grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
+                                    grayscalePercent = settings.lockGrayscalePercentage
                                 )
                             }
                             else {
