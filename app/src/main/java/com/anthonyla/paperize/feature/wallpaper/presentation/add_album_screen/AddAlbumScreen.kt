@@ -96,22 +96,25 @@ fun AddAlbumScreen(
         contract = ActivityResultContracts.OpenMultipleDocuments(),
         onResult = { uris: List<Uri> ->
             scope.launch(Dispatchers.IO) {
-                addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(true))
+                withContext(Dispatchers.Main) {
+                    addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(true))
+                }
                 val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 val uriList = uris.mapNotNull { uri ->
                     try {
                         context.contentResolver.takePersistableUriPermission(uri, takeFlags)
                         uri.toString()
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        Log.e("AddAlbumScreen", "Failed to take persistable URI permission for image: ${e.message}")
                         null
                     }
                 }
-                if (uriList.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
+                    if (uriList.isNotEmpty()) {
                         addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
                     }
+                    addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(false))
                 }
-                addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(false))
             }
         }
     )
