@@ -148,6 +148,7 @@
   <string name="show_interval_sliders">Show interval sliders</string>
   <string name="interval_text">Time Interval</string>
   <string name="change_blur">Blur Effect</string>
+  <string name="skip_landscape_mode">Skip in landscape mode</string>
   <string name="paperize_is_running">Paperize is running</string>
   <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
   <string name="delay_notice">Delay Notice</string>
@@ -190,4 +191,5 @@
   <string name="darken_the_edges_of_the_image">Darken the edges of the image</string>
   <string name="make_the_colors_grayscale">Make the colors grayscale</string>
   <string name="shuffle_the_wallpapers">Shuffle the wallpapers</string>
+  <string name="prevent_changing_during_landscape_mode">Prevent changing during landscape mode</string>
 </resources>

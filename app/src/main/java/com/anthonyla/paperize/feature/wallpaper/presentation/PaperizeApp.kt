@@ -510,6 +510,9 @@ fun PaperizeApp(
                     if (settingsState.value.wallpaperSettings.enableChanger) {
                         scheduler.scheduleRefresh(refresh)
                     }
+                },
+                onSkipLandscapeChange = { skipLandscape ->
+                    settingsViewModel.onEvent(SettingsEvent.SetSkipLandscape(skipLandscape))
                 }
             )
         }

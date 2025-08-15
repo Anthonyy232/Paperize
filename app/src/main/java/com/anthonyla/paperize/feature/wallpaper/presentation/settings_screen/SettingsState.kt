@@ -40,7 +40,8 @@ data class SettingsState(
         val nextSetTime: String? = null,
         val changeStartTime: Boolean = false,
         val startTime: Pair<Int, Int> = Pair(0, 0),
-        val refresh: Boolean = true
+        val refresh: Boolean = true,
+        val skipLandscape: Boolean = false
     )
 
     data class EffectSettings(
@@ -77,6 +78,7 @@ data class SettingsState(
         val lockGrayscalePercentage: Int,
         val lockAlbumName: String,
         val homeAlbumName: String,
-        val shuffle: Boolean
+        val shuffle: Boolean,
+        val skipLandscape: Boolean
     )
 }

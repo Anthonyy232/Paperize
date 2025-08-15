@@ -186,7 +186,8 @@ class LockWallpaperService: Service() {
             lockGrayscalePercentage = settingsDataStoreImpl.getInt(SettingsConstants.LOCK_GRAYSCALE_PERCENTAGE) ?: 0,
             lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: "",
             homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: "",
-            shuffle = settingsDataStoreImpl.getBoolean(SettingsConstants.SHUFFLE) ?: true
+            shuffle = settingsDataStoreImpl.getBoolean(SettingsConstants.SHUFFLE) ?: true,
+            skipLandscape = settingsDataStoreImpl.getBoolean(SettingsConstants.SKIP_LANDSCAPE) ?: false
         )
     }
 
@@ -206,6 +207,14 @@ class LockWallpaperService: Service() {
                 onDestroy()
                 return
             }
+
+            // Check if we should skip wallpaper change due to landscape orientation
+            if (settings.skipLandscape && context.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+                Log.d("PaperizeWallpaperChanger", "Skipping wallpaper change - device is in landscape mode")
+                onDestroy()
+                return
+            }
+
             val lockAlbum = selectedAlbum.find { it.album.initialAlbumName == settings.lockAlbumName }
             val homeAlbum = selectedAlbum.find { it.album.initialAlbumName == settings.homeAlbumName }
             if (lockAlbum == null || homeAlbum == null) {

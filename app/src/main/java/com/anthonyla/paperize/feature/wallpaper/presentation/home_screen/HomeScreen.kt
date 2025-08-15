@@ -64,7 +64,8 @@ fun HomeScreen(
     onChangeStartTimeToggle: (Boolean) -> Unit,
     onStartTimeChange: (TimePickerState) -> Unit,
     onShuffleCheck: (Boolean) -> Unit,
-    onRefreshChange: (Boolean) -> Unit
+    onRefreshChange: (Boolean) -> Unit,
+    onSkipLandscapeChange: (Boolean) -> Unit
 ) {
     val tabItems = getTabItems()
     val pagerState = rememberPagerState(0) { tabItems.size }
@@ -142,7 +143,8 @@ fun HomeScreen(
                         onChangeStartTimeToggle = onChangeStartTimeToggle,
                         onStartTimeChange = onStartTimeChange,
                         onShuffleCheck = onShuffleCheck,
-                        onRefreshChange = onRefreshChange
+                        onRefreshChange = onRefreshChange,
+                        onSkipLandscapeChange = onSkipLandscapeChange
                     )
                     else -> LibraryScreen(
                         albums = albums,
