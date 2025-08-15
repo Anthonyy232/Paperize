@@ -94,19 +94,26 @@ fun AlbumViewScreen(
         onResult = remember(albumScreenViewModel, scope, context) {
             { uris: List<Uri> ->
                 scope.launch(Dispatchers.IO) {
-                    albumScreenViewModel.onEvent(AlbumViewEvent.SetLoading(true))
+                    withContext(Dispatchers.Main) {
+                        albumScreenViewModel.onEvent(AlbumViewEvent.SetLoading(true))
+                    }
                     val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     val uriList = uris.mapNotNull { uri ->
-                        context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                        val persistedUriPermissions = context.contentResolver.persistedUriPermissions
-                        if (persistedUriPermissions.any { it.uri == uri }) uri.toString() else null
-                    }
-                    if (uriList.isNotEmpty()) {
-                        withContext(Dispatchers.Main) {
-                            albumScreenViewModel.onEvent(AlbumViewEvent.AddWallpapers(uriList))
+                        try {
+                            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                            val persistedUriPermissions = context.contentResolver.persistedUriPermissions
+                            if (persistedUriPermissions.any { it.uri == uri }) uri.toString() else null
+                        } catch (e: Exception) {
+                            android.util.Log.e("AlbumViewScreen", "Failed to take persistable URI permission for image: ${e.message}")
+                            null
                         }
                     }
-                    albumScreenViewModel.onEvent(AlbumViewEvent.SetLoading(false))
+                    withContext(Dispatchers.Main) {
+                        if (uriList.isNotEmpty()) {
+                            albumScreenViewModel.onEvent(AlbumViewEvent.AddWallpapers(uriList))
+                        }
+                        albumScreenViewModel.onEvent(AlbumViewEvent.SetLoading(false))
+                    }
                 }
             }
         }
@@ -120,10 +127,16 @@ fun AlbumViewScreen(
                 scope.launch(Dispatchers.IO) {
                     val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     if (uri != null) {
-                        context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                        val persistedUriPermissions = context.contentResolver.persistedUriPermissions
-                        if (persistedUriPermissions.any { it.uri == uri }) {
-                            albumScreenViewModel.onEvent(AlbumViewEvent.AddFolder(uri.toString()))
+                        try {
+                            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                            val persistedUriPermissions = context.contentResolver.persistedUriPermissions
+                            if (persistedUriPermissions.any { it.uri == uri }) {
+                                withContext(Dispatchers.Main) {
+                                    albumScreenViewModel.onEvent(AlbumViewEvent.AddFolder(uri.toString()))
+                                }
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("AlbumViewScreen", "Failed to take persistable URI permission for folder: ${e.message}")
                         }
                     }
                 }
