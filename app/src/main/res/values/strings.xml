@@ -192,4 +192,5 @@
   <string name="make_the_colors_grayscale">Make the colors grayscale</string>
   <string name="shuffle_the_wallpapers">Shuffle the wallpapers</string>
   <string name="prevent_changing_during_landscape_mode">Prevent changing during landscape mode</string>
+  <string name="changing_wallpaper">Changing wallpaper…</string>
 </resources>

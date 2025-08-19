@@ -116,7 +116,7 @@ class MainActivity : ComponentActivity() {
 
             val settingsState = settingsViewModel.state.collectAsStateWithLifecycle()
             val isFirstLaunch = runBlocking { settingsDataStoreImpl.getBoolean(SettingsConstants.FIRST_LAUNCH) } ?: true
-            val scheduler = WallpaperAlarmSchedulerImpl(this)
+            val scheduler = WallpaperAlarmSchedulerImpl(this, settingsDataStoreImpl)
 
             var hasScheduleRun by remember { mutableStateOf(false) }
             LaunchedEffect(settingsState.value) {
@@ -247,4 +247,3 @@ class MainActivity : ComponentActivity() {
         return pendingIntent != null
     }
 }
-

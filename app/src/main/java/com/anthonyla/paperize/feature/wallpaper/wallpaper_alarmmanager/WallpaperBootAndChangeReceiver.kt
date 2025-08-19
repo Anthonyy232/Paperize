@@ -35,7 +35,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                 Intent.ACTION_TIMEZONE_CHANGED,
                 ACTION_SHORTCUT -> {
                     saveExecutionTime(context)
-                    val scheduler = WallpaperAlarmSchedulerImpl(context)
+                    val scheduler = WallpaperAlarmSchedulerImpl(context, settingsDataStoreImpl)
                     val toggleChanger = settingsDataStoreImpl.getBoolean(SettingsConstants.ENABLE_CHANGER) ?: false
                     val selectedAlbum = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: ""
 
@@ -64,7 +64,7 @@ class WallpaperBootAndChangeReceiver : BroadcastReceiver() {
                                 lockNextTime = settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME),
                             )
                         }
-                        scheduler.scheduleRefresh(refresh)
+                        WallpaperAlarmSchedulerImpl.scheduleRefresh(context, refresh)
                     }
                 }
             }

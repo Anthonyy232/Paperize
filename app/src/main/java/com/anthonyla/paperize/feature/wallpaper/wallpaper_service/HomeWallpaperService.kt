@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.wallpaper_service
 
 import android.Manifest
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.app.WallpaperManager
@@ -17,45 +16,21 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.ScalingConstants
-import com.anthonyla.paperize.core.SettingsConstants
-import com.anthonyla.paperize.core.Type
-import com.anthonyla.paperize.core.decompress
-import com.anthonyla.paperize.core.findFirstValidUri
-import com.anthonyla.paperize.core.getDeviceScreenSize
-import com.anthonyla.paperize.core.getFolderMetadata
-import com.anthonyla.paperize.core.getWallpaperFromFolder
-import com.anthonyla.paperize.core.isDirectory
-import com.anthonyla.paperize.core.isValidUri
-import com.anthonyla.paperize.core.processBitmap
-import com.anthonyla.paperize.core.retrieveBitmap
+import com.anthonyla.paperize.core.*
 import com.anthonyla.paperize.data.settings.SettingsDataStore
 import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepository
 import com.anthonyla.paperize.feature.wallpaper.presentation.MainActivity
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState
 import com.anthonyla.paperize.feature.wallpaper.tasker_shortcut.triggerWallpaperTaskerEvent
-import com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import javax.inject.Inject
-import kotlin.collections.containsKey
-import kotlin.collections.shuffle
-import kotlin.hashCode
-import kotlin.text.contains
 
-/**
- * Service for changing home screen
- */
 @AndroidEntryPoint
 class HomeWallpaperService: Service() {
     private val handleThread = HandlerThread("HomeThread")
@@ -74,21 +49,16 @@ class HomeWallpaperService: Service() {
         REFRESH
     }
 
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(p0: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         handleThread.start()
         workerHandler = Handler(handleThread.looper)
-        // Start foreground as soon as possible
         if (!isForeground) {
-            val notification = createNotification(LocalDateTime.now())
-            if (notification != null) {
-                startForeground(1, notification)
-                isForeground = true
-            }
+            val notification = createInitialNotification()
+            startForeground(1, notification)
+            isForeground = true
         }
     }
 
@@ -102,12 +72,8 @@ class HomeWallpaperService: Service() {
                     type = intent.getIntExtra("type", Type.SINGLE.ordinal)
                     workerTaskStart()
                 }
-                Actions.UPDATE.toString() -> {
-                    workerTaskUpdate()
-                }
-                Actions.REFRESH.toString() -> {
-                    workerTaskRefresh()
-                }
+                Actions.UPDATE.toString() -> workerTaskUpdate()
+                Actions.REFRESH.toString() -> workerTaskRefresh()
             }
         }
         return START_NOT_STICKY
@@ -124,7 +90,6 @@ class HomeWallpaperService: Service() {
             delay(50)
             changeWallpaper(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
-                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
@@ -134,7 +99,6 @@ class HomeWallpaperService: Service() {
         CoroutineScope(Dispatchers.Default).launch {
             updateCurrentWallpaper(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
-                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
@@ -144,44 +108,23 @@ class HomeWallpaperService: Service() {
         CoroutineScope(Dispatchers.Default).launch {
             refreshAlbum(this@HomeWallpaperService)
             withContext(Dispatchers.Main) {
-                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
     }
 
-    // Creates a notification for the wallpaper service
-    private fun createNotification(nextSetTime: LocalDateTime?): android.app.Notification? {
-        nextSetTime?.let {
-            val changeWallpaperIntent = Intent(this, WallpaperBootAndChangeReceiver::class.java).apply {
-                action = "com.anthonyla.paperize.SHORTCUT"
-            }
-            val pendingChangeWallpaperIntent = PendingIntent.getBroadcast(
-                this,
-                0,
-                changeWallpaperIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val mainActivityIntent = Intent(this, MainActivity::class.java)
-            val pendingMainActivityIntent = PendingIntent.getActivity(
-                this,
-                3,
-                mainActivityIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-            val formattedNextSetTime = nextSetTime.format(formatter)
-            return NotificationCompat.Builder(this, "wallpaper_service_channel").apply {
-                setContentTitle(getString(R.string.app_name))
-                setContentText(getString(R.string.next_wallpaper_change, formattedNextSetTime))
-                setSmallIcon(R.drawable.notification_icon)
-                setContentIntent(pendingMainActivityIntent)
-                addAction(R.drawable.notification_icon, getString(R.string.change_wallpaper), pendingChangeWallpaperIntent)
-                priority = NotificationCompat.PRIORITY_DEFAULT
-                setAutoCancel(true)
-            }.build()
-        }
-        return null
+    private fun createInitialNotification(): android.app.Notification {
+        val mainActivityIntent = Intent(this, MainActivity::class.java)
+        val pendingMainActivityIntent = PendingIntent.getActivity(
+            this, 3, mainActivityIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        return NotificationCompat.Builder(this, "wallpaper_service_channel").apply {
+            setContentTitle(getString(R.string.app_name))
+            setContentText(getString(R.string.changing_wallpaper))
+            setSmallIcon(R.drawable.notification_icon)
+            setContentIntent(pendingMainActivityIntent)
+            priority = NotificationCompat.PRIORITY_DEFAULT
+        }.build()
     }
 
     private suspend fun getWallpaperSettings(): SettingsState.ServiceSettings {
@@ -209,10 +152,6 @@ class HomeWallpaperService: Service() {
         )
     }
 
-    /**
-     * Changes the wallpaper to the next wallpaper in the queue of the selected album
-     * If none left, reshuffle the wallpapers and pick the first one
-     */
     private suspend fun changeWallpaper(context: Context) {
         try {
             var selectedAlbum = albumRepository.getSelectedAlbums().first()
@@ -226,7 +165,6 @@ class HomeWallpaperService: Service() {
                 return
             }
 
-            // Check if we should skip wallpaper change due to landscape orientation
             if (settings.skipLandscape && context.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
                 Log.d("PaperizeWallpaperChanger", "Skipping wallpaper change - device is in landscape mode")
                 onDestroy()
@@ -239,7 +177,6 @@ class HomeWallpaperService: Service() {
                 return
             }
             when {
-                // Case: Set home and lock screen wallpapers using separate albums (home screen and lock screen album)
                 settings.setHome && settings.setLock && scheduleSeparately -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
@@ -331,7 +268,6 @@ class HomeWallpaperService: Service() {
                         }
                     }
                 }
-                // Case: Set home and lock screen wallpapers using the same album (home screen album)
                 settings.setHome && settings.setLock && !scheduleSeparately -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
@@ -421,7 +357,6 @@ class HomeWallpaperService: Service() {
                         }
                     }
                 }
-                // Case: Set home screen wallpaper (home screen album)
                 settings.setHome -> {
                     var wallpaper = homeAlbum.album.homeWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
@@ -510,44 +445,12 @@ class HomeWallpaperService: Service() {
                     }
                 }
             }
-
-            // Run notification
-            val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-            val currentTime = LocalDateTime.now()
-            val homeNextSetTime: LocalDateTime = currentTime.plusMinutes(homeInterval.toLong())
-            val lockNextSetTime: LocalDateTime = try {
-                LocalDateTime.parse(settingsDataStoreImpl.getString(SettingsConstants.LOCK_NEXT_SET_TIME))
-            } catch (e: Exception) {
-                currentTime
-            }
-            val nextSetTime: LocalDateTime = when {
-                homeInterval == lockInterval -> homeNextSetTime
-                settings.setHome && settings.setLock && scheduleSeparately -> {
-                    if (homeNextSetTime.isBefore(lockNextSetTime) && homeNextSetTime.isAfter(currentTime)) {
-                        homeNextSetTime
-                    } else lockNextSetTime
-                }
-                else -> homeNextSetTime
-            }
-
-            nextSetTime.let {
-                settingsDataStoreImpl.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-                settingsDataStoreImpl.putString(SettingsConstants.NEXT_SET_TIME, it.format(formatter))
-                settingsDataStoreImpl.putString(SettingsConstants.HOME_NEXT_SET_TIME, homeNextSetTime.toString())
-                settingsDataStoreImpl.putString(SettingsConstants.LOCK_NEXT_SET_TIME, lockNextSetTime.toString())
-            }
-
-            val notification = createNotification(nextSetTime)
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notification?.let { notificationManager.notify(1, it) }
+            Log.d("HomeWallpaperService", "Wallpaper change task completed.")
         } catch (e: Exception) {
-            Log.e("PaperizeWallpaperChanger", "Error in changing wallpaper", e)
+            Log.e("PaperizeWallpaperChanger", "Error in changing wallpaper (Home)", e)
         }
     }
 
-    /**
-     * Updates the current wallpaper with current settings
-     */
     private suspend fun updateCurrentWallpaper(context: Context) {
         try {
             val selectedAlbum = albumRepository.getSelectedAlbums().first()
@@ -564,7 +467,6 @@ class HomeWallpaperService: Service() {
             val currentHomeWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_HOME_WALLPAPER) ?: ""
             val currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) ?: ""
 
-            // Check if we're using the same wallpaper for both home and lock
             val bothEnabled = settings.setHome && settings.setLock && currentHomeWallpaper == currentLockWallpaper
 
             if (bothEnabled) {
@@ -583,7 +485,6 @@ class HomeWallpaperService: Service() {
                     both = true
                 )
             } else {
-                // Update home screen only
                 if (settings.setHome) {
                     setWallpaper(
                         context = context,
@@ -605,9 +506,6 @@ class HomeWallpaperService: Service() {
         }
     }
 
-    /**
-     * Sets the wallpaper to the given uri
-     */
     private fun setWallpaper(
         context: Context,
         wallpaper: Uri?,
@@ -630,11 +528,9 @@ class HomeWallpaperService: Service() {
                 if (bitmap == null) return false
                 else if (wallpaperManager.isSetWallpaperAllowed) {
                     if (both) {
-                        // Need to get settings to apply different effects for home and lock
                         CoroutineScope(Dispatchers.IO).launch {
                             val settings = getWallpaperSettings()
 
-                            // Process bitmap for home screen with home settings
                             processBitmap(
                                 size.width, size.height, bitmap,
                                 settings.darken, settings.homeDarkenPercentage,
@@ -646,7 +542,6 @@ class HomeWallpaperService: Service() {
                                 setWallpaperSafely(homeImage, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
                             }
 
-                            // Process bitmap for lock screen with lock settings
                             processBitmap(
                                 size.width, size.height, bitmap,
                                 settings.darken, settings.lockDarkenPercentage,
@@ -659,7 +554,6 @@ class HomeWallpaperService: Service() {
                             }
                         }
                     } else {
-                        // Single wallpaper processing (existing logic)
                         processBitmap(size.width, size.height, bitmap, darken, darkenPercent, scaling, blur, blurPercent, vignette, vignettePercent, grayscale, grayscalePercent)?.let { image ->
                             setWallpaperSafely(image, WallpaperManager.FLAG_SYSTEM, wallpaperManager)
                         }
@@ -676,9 +570,6 @@ class HomeWallpaperService: Service() {
         return false
     }
 
-    /**
-     * Refreshes the album by deleting invalid wallpapers and updating folder cover uri and wallpapers uri.
-     */
     private fun refreshAlbum(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             Log.d("PaperizeWallpaperChanger", "Refreshing albums")
@@ -687,7 +578,6 @@ class HomeWallpaperService: Service() {
                 val settings = getWallpaperSettings()
 
                 albumsToRefresh.forEach { albumWithDetails ->
-                    // Filter out invalid URIs, preserving the original order.
                     val validStandaloneWallpapers = albumWithDetails.wallpapers
                         .filter { isValidUri(context, it.wallpaperUri) }
 
@@ -695,7 +585,6 @@ class HomeWallpaperService: Service() {
                         .mapNotNull { folder ->
                             try {
                                 val metadata = getFolderMetadata(folder.folderUri, context)
-                                // Only rescan a folder if it has been modified
                                 if (metadata.lastModified != folder.dateModified) {
                                     val wallpapersInDb = folder.wallpapers
                                         .filter { isValidUri(context, it.wallpaperUri) }
@@ -703,7 +592,6 @@ class HomeWallpaperService: Service() {
 
                                     val wallpapersOnDisk = getWallpaperFromFolder(folder.folderUri, context)
 
-                                    // Find new wallpapers not already in the DB for this folder
                                     val newWallpapers = wallpapersOnDisk
                                         .filterNot { wallpapersInDb.containsKey(it.wallpaperUri) }
                                         .mapIndexed { index, wallpaper ->
@@ -724,15 +612,14 @@ class HomeWallpaperService: Service() {
                                         folderName = metadata.filename
                                     )
                                 } else {
-                                    folder // Folder hasn't changed, return it as is
+                                    folder
                                 }
                             } catch (e: Exception) {
                                 Log.w("PaperizeWallpaperChanger", "Failed to process folder ${folder.folderUri}: ${e.message}")
-                                null // Filter out this folder if it can't be processed
+                                null
                             }
                         }
 
-                    // Rest of the function remains the same...
                     val allValidWallpapers = (updatedFolders.flatMap { it.wallpapers } + validStandaloneWallpapers)
                         .sortedBy { it.order }
 

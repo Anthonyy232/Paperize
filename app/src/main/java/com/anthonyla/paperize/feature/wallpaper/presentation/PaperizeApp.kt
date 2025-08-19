@@ -131,7 +131,8 @@ fun PaperizeApp(
                                     homeInterval = timeInMinutes
                                 )
                             ),
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -145,7 +146,8 @@ fun PaperizeApp(
                                     lockInterval = timeInMinutes
                                 )
                             ),
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -190,6 +192,7 @@ fun PaperizeApp(
                                 ),
                                 settingsViewModel = settingsViewModel,
                                 scheduler = scheduler,
+                                context = context,
                                 refreshNextTime = true
                             )
                         }
@@ -232,6 +235,7 @@ fun PaperizeApp(
                             ),
                             settingsViewModel = settingsViewModel,
                             scheduler = scheduler,
+                            context = context,
                             refreshNextTime = true,
                             changeImmediate = true,
                             cancelImmediate = true,
@@ -305,7 +309,8 @@ fun PaperizeApp(
                                 )
                             ),
                             settingsViewModel = settingsViewModel,
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                     else if (albumState.value.selectedAlbum.isNotEmpty() && settingsState.value.wallpaperSettings.enableChanger) {
@@ -317,7 +322,8 @@ fun PaperizeApp(
                                 )
                             ),
                             settingsViewModel = settingsViewModel,
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -343,7 +349,8 @@ fun PaperizeApp(
                                 )
                             ),
                             settingsViewModel = settingsViewModel,
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                     else if (albumState.value.selectedAlbum.isNotEmpty() && settingsState.value.wallpaperSettings.enableChanger) {
@@ -355,7 +362,8 @@ fun PaperizeApp(
                                 )
                             ),
                             settingsViewModel = settingsViewModel,
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -371,6 +379,7 @@ fun PaperizeApp(
                             ),
                             settingsViewModel = settingsViewModel,
                             scheduler = scheduler,
+                            context = context,
                             changeImmediate = true,
                             cancelImmediate = true,
                             firstLaunch = true
@@ -473,7 +482,8 @@ fun PaperizeApp(
                                 scheduleSettings = settingsState.value.scheduleSettings.copy(
                                     startTime = Pair(time.hour, time.minute))
                             ),
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -487,7 +497,8 @@ fun PaperizeApp(
                                     changeStartTime = changeStartTime
                                 )
                             ),
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
@@ -501,14 +512,15 @@ fun PaperizeApp(
                                     shuffle = shuffle
                                 )
                             ),
-                            scheduler = scheduler
+                            scheduler = scheduler,
+                            context = context
                         )
                     }
                 },
                 onRefreshChange = { refresh ->
                     settingsViewModel.onEvent(SettingsEvent.SetRefresh(refresh))
                     if (settingsState.value.wallpaperSettings.enableChanger) {
-                        scheduler.scheduleRefresh(refresh)
+                        WallpaperAlarmSchedulerImpl.scheduleRefresh(context, refresh)
                     }
                 },
                 onSkipLandscapeChange = { skipLandscape ->
@@ -691,6 +703,7 @@ private fun CoroutineScope.scheduleWallpaperUpdate(
     settingsState: SettingsState,
     settingsViewModel: SettingsViewModel,
     scheduler: WallpaperAlarmSchedulerImpl,
+    context: android.content.Context,
     refreshNextTime: Boolean = false,
     changeImmediate: Boolean = true,
     cancelImmediate: Boolean = true,
@@ -723,7 +736,7 @@ private fun CoroutineScope.scheduleWallpaperUpdate(
             cancelImmediate = cancelImmediate,
             firstLaunch = firstLaunch
         )
-        scheduler.scheduleRefresh(settingsState.scheduleSettings.refresh)
+        WallpaperAlarmSchedulerImpl.scheduleRefresh(context, settingsState.scheduleSettings.refresh)
     }
 }
 
@@ -731,6 +744,7 @@ private fun CoroutineScope.updateWallpaperAlarm(
     job: Job?,
     settingsState: SettingsState,
     scheduler: WallpaperAlarmSchedulerImpl,
+    context: android.content.Context,
     firstLaunch: Boolean = true,
 ): Job {
     job?.cancel()
@@ -750,7 +764,7 @@ private fun CoroutineScope.updateWallpaperAlarm(
             wallpaperAlarmItem = alarmItem,
             firstLaunch = firstLaunch
         )
-        scheduler.scheduleRefresh(settingsState.scheduleSettings.refresh)
+        WallpaperAlarmSchedulerImpl.scheduleRefresh(context, settingsState.scheduleSettings.refresh)
     }
 }
 
