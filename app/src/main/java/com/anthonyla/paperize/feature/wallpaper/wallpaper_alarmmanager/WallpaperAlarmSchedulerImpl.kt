@@ -168,11 +168,6 @@ class WallpaperAlarmSchedulerImpl @Inject constructor(
                 else -> {}
             }
 
-            if (firstLaunch) {
-                val currentTime = LocalDateTime.now()
-                settingsDataStore.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
-            }
-
             val currentHomeNext = settingsDataStore.getString(SettingsConstants.HOME_NEXT_SET_TIME)
             val currentLockNext = settingsDataStore.getString(SettingsConstants.LOCK_NEXT_SET_TIME)
             val nextHomeDateTime = runCatching { LocalDateTime.parse(currentHomeNext) }.getOrNull()

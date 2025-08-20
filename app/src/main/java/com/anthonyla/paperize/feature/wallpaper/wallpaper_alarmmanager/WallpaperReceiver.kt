@@ -14,6 +14,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,6 +64,11 @@ class WallpaperReceiver : BroadcastReceiver() {
                 val origin = intent.getIntExtra("origin", -1).takeIf { it != -1 }
                 Log.d(TAG, "Rescheduling next alarm from receiver with origin: $origin")
                 CoroutineScope(Dispatchers.IO).launch {
+                    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    val currentTime = LocalDateTime.now()
+                    settingsDataStore.putString(SettingsConstants.LAST_SET_TIME, currentTime.format(formatter))
+
+
                     val homeNext = settingsDataStore.getString(SettingsConstants.HOME_NEXT_SET_TIME)
                     val lockNext = settingsDataStore.getString(SettingsConstants.LOCK_NEXT_SET_TIME)
 
