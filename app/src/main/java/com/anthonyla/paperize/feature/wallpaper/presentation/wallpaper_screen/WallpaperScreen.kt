@@ -47,6 +47,7 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.co
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.RefreshSwitch
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShuffleSwitch
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SkipLandscapeSwitch
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SkipNonInteractiveSwitch
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.VignetteSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
@@ -83,7 +84,8 @@ fun WallpaperScreen(
     onStartTimeChange: (TimePickerState) -> Unit,
     onShuffleCheck: (Boolean) -> Unit,
     onRefreshChange: (Boolean) -> Unit,
-    onSkipLandscapeChange: (Boolean) -> Unit
+    onSkipLandscapeChange: (Boolean) -> Unit,
+    onSkipNonInteractiveChange: (Boolean) -> Unit
 ) {
     val shouldShowScreen = wallpaperSettings.setHomeWallpaper || wallpaperSettings.setLockWallpaper
     val shouldShowSettings = shouldShowScreen && homeSelectedAlbum != null && lockSelectedAlbum != null
@@ -279,6 +281,10 @@ fun WallpaperScreen(
                     SkipLandscapeSwitch(
                         skipLandscape = scheduleSettings.skipLandscape,
                         onSkipLandscapeChange = onSkipLandscapeChange
+                    )
+                    SkipNonInteractiveSwitch(
+                        skipNonInteractive = scheduleSettings.skipNonInteractive,
+                        onSkipNonInteractiveChange = onSkipNonInteractiveChange
                     )
                 }
             }

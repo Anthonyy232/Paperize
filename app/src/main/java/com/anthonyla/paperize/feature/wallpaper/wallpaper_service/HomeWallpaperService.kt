@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
+import android.os.PowerManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
@@ -148,7 +149,8 @@ class HomeWallpaperService: Service() {
             lockAlbumName = settingsDataStoreImpl.getString(SettingsConstants.LOCK_ALBUM_NAME) ?: "",
             homeAlbumName = settingsDataStoreImpl.getString(SettingsConstants.HOME_ALBUM_NAME) ?: "",
             shuffle = settingsDataStoreImpl.getBoolean(SettingsConstants.SHUFFLE) ?: true,
-            skipLandscape = settingsDataStoreImpl.getBoolean(SettingsConstants.SKIP_LANDSCAPE) ?: false
+            skipLandscape = settingsDataStoreImpl.getBoolean(SettingsConstants.SKIP_LANDSCAPE) ?: false,
+            skipNonInteractive = settingsDataStoreImpl.getBoolean(SettingsConstants.SKIP_NON_INTERACTIVE) ?: false
         )
     }
 
@@ -169,6 +171,16 @@ class HomeWallpaperService: Service() {
                 Log.d("PaperizeWallpaperChanger", "Skipping wallpaper change - device is in landscape mode")
                 onDestroy()
                 return
+            }
+
+            if (settings.skipNonInteractive){
+                val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
+                if (!powerManager.isInteractive){
+                    Log.d(
+                        "PaperizeWallpaperChanger", "Skipping wallpaper change - device is in non-interactive state")
+                    onDestroy()
+                    return
+                }
             }
 
             var homeAlbum = selectedAlbum.find { it.album.initialAlbumName == settings.homeAlbumName }

@@ -525,6 +525,10 @@ fun PaperizeApp(
                 },
                 onSkipLandscapeChange = { skipLandscape ->
                     settingsViewModel.onEvent(SettingsEvent.SetSkipLandscape(skipLandscape))
+                },
+                onSkipNonInteractiveChange = {
+                    skipNonInteractive ->
+                    settingsViewModel.onEvent(SettingsEvent.SetSkipNonInteractive(skipNonInteractive))
                 }
             )
         }

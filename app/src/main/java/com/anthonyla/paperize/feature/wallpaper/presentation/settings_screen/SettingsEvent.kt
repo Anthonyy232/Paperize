@@ -35,4 +35,5 @@ sealed class SettingsEvent {
     data class SetShuffle(val shuffle: Boolean): SettingsEvent()
     data class SetRefresh(val refresh: Boolean): SettingsEvent()
     data class SetSkipLandscape(val skipLandscape: Boolean): SettingsEvent()
+    data class SetSkipNonInteractive(val skipNonInteractive: Boolean): SettingsEvent()
 }
