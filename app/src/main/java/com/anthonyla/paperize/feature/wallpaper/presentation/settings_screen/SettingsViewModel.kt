@@ -109,7 +109,8 @@ class SettingsViewModel @Inject constructor(
         settingsDataStoreImpl.getIntFlow(SettingsConstants.START_MINUTE),
         settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SHUFFLE),
         settingsDataStoreImpl.getBooleanFlow(SettingsConstants.REFRESH),
-        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SKIP_LANDSCAPE)
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SKIP_LANDSCAPE),
+        settingsDataStoreImpl.getBooleanFlow(SettingsConstants.SKIP_NON_INTERACTIVE)
     ) { flows ->
         ScheduleSettings(
             scheduleSeparately = flows[0] as Boolean? ?: false,
@@ -121,7 +122,8 @@ class SettingsViewModel @Inject constructor(
             startTime = Pair(flows[6] as Int? ?: 0, flows[7] as Int? ?: 0),
             shuffle = flows[8] as Boolean? ?: true,
             refresh = flows[9] as Boolean? ?: true,
-            skipLandscape = flows[10] as Boolean? ?: false
+            skipLandscape = flows[10] as Boolean? ?: false,
+            skipNonInteractive = flows[11] as Boolean? ?: false,
         )
     }
 
@@ -555,6 +557,13 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+
+            is SettingsEvent.SetSkipNonInteractive -> {
+                viewModelScope.launch {
+                    settingsDataStoreImpl.putBoolean(SettingsConstants.SKIP_NON_INTERACTIVE, event.skipNonInteractive)
+                }
+            }
+
             is SettingsEvent.Reset -> {
                 viewModelScope.launch {
                     val keysToDelete = listOf(
@@ -598,7 +607,8 @@ class SettingsViewModel @Inject constructor(
                         SettingsConstants.START_MINUTE,
                         SettingsConstants.SHUFFLE,
                         SettingsConstants.REFRESH,
-                        SettingsConstants.SKIP_LANDSCAPE
+                        SettingsConstants.SKIP_LANDSCAPE,
+                        SettingsConstants.SKIP_NON_INTERACTIVE
                     )
                     settingsDataStoreImpl.clear(keysToDelete)
                 }
