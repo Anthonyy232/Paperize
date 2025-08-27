@@ -484,7 +484,7 @@ class HomeWallpaperService: Service() {
             if (bothEnabled) {
                 setWallpaper(
                     context = context,
-                    wallpaper = currentHomeWallpaper.decompress("content://com.android/externalstorage/documents/").toUri(),
+                    wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                     darken = settings.darken,
                     darkenPercent = settings.homeDarkenPercentage,
                     scaling = settings.scaling,
@@ -500,7 +500,7 @@ class HomeWallpaperService: Service() {
                 if (settings.setHome) {
                     setWallpaper(
                         context = context,
-                        wallpaper = currentHomeWallpaper.decompress("content://com.android/externalstorage/documents/").toUri(),
+                        wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                         darken = settings.darken,
                         darkenPercent = settings.homeDarkenPercentage,
                         scaling = settings.scaling,
