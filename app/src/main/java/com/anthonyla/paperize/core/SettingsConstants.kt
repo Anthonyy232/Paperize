@@ -48,4 +48,5 @@ object SettingsConstants {
     const val START_MINUTE = "start_minute"
     const val SHUFFLE = "shuffle"
     const val SKIP_LANDSCAPE = "skip_landscape"
+    const val SKIP_NON_INTERACTIVE = "skip_non_interactive"
 }
