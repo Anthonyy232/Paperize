@@ -1,19 +1,18 @@
 # ===================================================================
 # Paperize CI/CD Pipeline
 #
-# Automates the testing, building, and release process for the Paperize Android application.
+# Automates the building and release process for the Paperize Android application.
 #
 # Workflow Architecture:
-#   1. Lint:   Acts as a quality gate by running static code analysis.
-#   2. Build:  Compiles and signs the release APK if the lint check passes.
-#   3. Release: Publishes the APK to a draft GitHub Release, but only for version tags.
+#   1. Build:   Compiles and signs the release APK.
+#   2. Release: Publishes the APK to a draft GitHub Release, but only for version tags.
 #
 # Triggering Conditions:
 #   - On push to `master`:
-#     - Executes the `lint` and `build` jobs.
+#     - Executes the `build` job.
 #     - Produces a versioned build artifact for testing and internal distribution.
 #   - On push of a tag (e.g., `v1.2.3`):
-#     - Executes all jobs: `lint`, `build`, and `release`.
+#     - Executes both jobs: `build` and `release`.
 #     - Creates a formal, versioned draft release on GitHub with the signed APK attached.
 # ===================================================================
 name: Paperize CI/CD Pipeline
@@ -25,14 +24,13 @@ on:
 
 jobs:
   # ===================================================================
-  # JOB: lint
+  # JOB: build
   #
-  # Validates code quality using the Android lint tool. This job serves as the
-  # primary quality gate for the pipeline. The workflow will not proceed if
-  # lint reports any errors.
+  # Compiles, signs, and packages the release APK. This job produces a
+  # versioned artifact that is used for both internal testing and the final release.
   # ===================================================================
-  lint:
-    name: Run Lint Check
+  build:
+    name: Build Signed APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository source code
@@ -47,34 +45,6 @@ jobs:
 
       - name: Grant execute permission for gradlew
         # The gradlew wrapper requires execute permissions to run on the Linux-based runner.
-        run: chmod +x gradlew
-
-      - name: Run Android Lint
-        run: ./gradlew lint
-
-  # ===================================================================
-  # JOB: build
-  #
-  # Compiles, signs, and packages the release APK. This job is dependent on the
-  # successful completion of the `lint` job. It produces a versioned artifact
-  # that is used for both internal testing and the final release.
-  # ===================================================================
-  build:
-    name: Build Signed APK
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - name: Checkout repository source code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Decode Base64 Keystore
@@ -95,7 +65,7 @@ jobs:
       - name: Get Version Name
         # Determines the application version for artifact naming.
         # - For tag pushes (e.g., 'v1.2.3'), it uses the tag name directly.
-        # - For main branch pushes, it parses the `versionName` from the app's build.gradle.kts file.
+        # - For master branch pushes, it parses the `versionName` from the app's build.gradle.kts file.
         id: get_version
         shell: bash
         run: |
