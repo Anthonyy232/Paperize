@@ -1,11 +1,11 @@
 name: Build APK and Create Release on Tag
 
 # This workflow runs on two conditions:
-# 1. A push to the 'main' branch.
+# 1. A push to the 'master' branch.
 # 2. A push of a new tag that starts with 'v' (e.g., v1.0, v3.1.2).
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
     tags: [ 'v*' ]
 
 jobs:
