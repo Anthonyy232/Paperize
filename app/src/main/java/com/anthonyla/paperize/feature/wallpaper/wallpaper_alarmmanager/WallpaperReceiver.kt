@@ -106,6 +106,6 @@ class WallpaperReceiver : BroadcastReceiver() {
             scheduleSeparately?.let { putExtra("scheduleSeparately", it) }
             type?.let { putExtra("type", it) }
         }
-        context.startService(serviceIntent)
+        context.startForegroundService(serviceIntent)
     }
 }
