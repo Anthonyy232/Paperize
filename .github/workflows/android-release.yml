@@ -9,7 +9,7 @@
 #   3. Release: Publishes the APK to a draft GitHub Release, but only for version tags.
 #
 # Triggering Conditions:
-#   - On push to `main`:
+#   - On push to `master`:
 #     - Executes the `lint` and `build` jobs.
 #     - Produces a versioned build artifact for testing and internal distribution.
 #   - On push of a tag (e.g., `v1.2.3`):
@@ -20,7 +20,7 @@ name: Paperize CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
     tags: [ 'v*' ]
 
 jobs:
