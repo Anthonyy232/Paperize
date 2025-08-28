@@ -15,6 +15,18 @@ android {
     namespace = "com.anthonyla.paperize"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = System.getenv("SIGNING_KEYSTORE_PATH")
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.anthonyla.paperize"
         minSdk = 31
@@ -36,7 +48,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -45,6 +57,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    @Suppress("DEPRECATION")
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -73,12 +86,6 @@ android {
                 val apkName = "paperize-v${this.versionName}.apk"
                 output.outputFileName = apkName
             }
-    }
-}
-
-androidComponents {
-    onVariants(selector().withBuildType("release")) {
-        it.packaging.resources.excludes.add("META-INF/**")
     }
 }
 
