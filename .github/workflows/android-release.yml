@@ -2,7 +2,7 @@ name: Paperize CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
     tags: [ 'v*' ]
 
 jobs:
