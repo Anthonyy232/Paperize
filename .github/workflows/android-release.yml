@@ -101,7 +101,7 @@ jobs:
       - name: Download signed APK artifact
         # Downloads the versioned artifact produced by the `build` job. The pattern ensures
         # it finds the correct artifact regardless of the specific version number.
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: paperize-v*
           path: ./apk-artifact
