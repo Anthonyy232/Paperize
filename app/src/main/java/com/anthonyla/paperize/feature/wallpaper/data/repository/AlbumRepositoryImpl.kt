@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.data.repository
 
+import android.database.sqlite.SQLiteBlobTooBigException
+import android.util.Log
 import com.anthonyla.paperize.feature.wallpaper.data.data_source.AlbumDao
 import com.anthonyla.paperize.feature.wallpaper.domain.model.Album
 import com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder
@@ -9,6 +11,7 @@ import com.anthonyla.paperize.feature.wallpaper.domain.repository.AlbumRepositor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -17,32 +20,90 @@ class AlbumRepositoryImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): AlbumRepository {
     override fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>> {
-        return dao.getAlbumsWithWallpaperAndFolder().map { albumWithWallpaperAndFolderList ->
-            albumWithWallpaperAndFolderList.map {
-                it.copy(
-                    wallpapers = it.sortedWallpapers,
-                    folders = it.sortedFolders,
-                )
+        return dao.getAlbumsWithWallpaperAndFolder()
+            .map { albumWithWallpaperAndFolderList ->
+                albumWithWallpaperAndFolderList.map {
+                    it.copy(
+                        wallpapers = it.sortedWallpapers,
+                        folders = it.sortedFolders,
+                    )
+                }
             }
-        }
+            .catch { exception ->
+                if (exception is SQLiteBlobTooBigException) {
+                    Log.e("AlbumRepository", "CursorWindow too small for large dataset, falling back to basic album list", exception)
+                    // Fallback to basic album list when data is too large
+                    emit(emptyList())
+                } else {
+                    Log.e("AlbumRepository", "Error loading albums with wallpapers and folders", exception)
+                    throw exception
+                }
+            }
     }
 
     override fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>> {
-        return dao.getSelectedAlbums().map { albumWithWallpaperAndFolderList ->
-            albumWithWallpaperAndFolderList.map {
-                it.copy(
-                    wallpapers = it.sortedWallpapers,
-                    folders = it.sortedFolders,
+        return dao.getSelectedAlbums()
+            .map { albumWithWallpaperAndFolderList ->
+                albumWithWallpaperAndFolderList.map {
+                    it.copy(
+                        wallpapers = it.sortedWallpapers,
+                        folders = it.sortedFolders,
+                    )
+                }
+            }
+            .catch { exception ->
+                if (exception is SQLiteBlobTooBigException) {
+                    Log.e("AlbumRepository", "CursorWindow too small for selected albums, falling back to basic album list", exception)
+                    // Fallback to basic album list when data is too large
+                    emit(emptyList())
+                } else {
+                    Log.e("AlbumRepository", "Error loading selected albums with wallpapers and folders", exception)
+                    throw exception
+                }
+            }
+    }
+
+    override fun getAlbums(): Flow<List<Album>> {
+        return dao.getAlbums()
+    }
+
+    override fun getSelectedAlbumsBasic(): Flow<List<Album>> {
+        return dao.getSelectedAlbumsBasic()
+    }
+
+    override fun getAlbumWithWallpaperAndFolder(albumName: String): Flow<AlbumWithWallpaperAndFolder?> {
+        return dao.getAlbumWithWallpaperAndFolder(albumName)
+            .map { albumWithWallpaperAndFolder ->
+                albumWithWallpaperAndFolder?.copy(
+                    wallpapers = albumWithWallpaperAndFolder.sortedWallpapers,
+                    folders = albumWithWallpaperAndFolder.sortedFolders,
                 )
             }
-        }
+            .catch { exception ->
+                if (exception is SQLiteBlobTooBigException) {
+                    Log.e("AlbumRepository", "CursorWindow too small for album: $albumName, falling back to basic album", exception)
+                    // Fallback to basic album when data is too large
+                    emit(null)
+                } else {
+                    Log.e("AlbumRepository", "Error loading album: $albumName", exception)
+                    throw exception
+                }
+            }
     }
 
     override suspend fun upsertAlbumWithWallpaperAndFolder(albumWithWallpaperAndFolder: AlbumWithWallpaperAndFolder) {
-        withContext(dispatcher) {
-            dao.upsertAlbum(albumWithWallpaperAndFolder.album)
-            dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
-            dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
+        try {
+            withContext(dispatcher) {
+                dao.upsertAlbum(albumWithWallpaperAndFolder.album)
+                dao.upsertWallpaperList(albumWithWallpaperAndFolder.wallpapers)
+                dao.upsertFolderList(albumWithWallpaperAndFolder.folders)
+            }
+        } catch (e: SQLiteBlobTooBigException) {
+            Log.e("AlbumRepository", "Failed to upsert album with large dataset: ${albumWithWallpaperAndFolder.album.initialAlbumName}", e)
+            // Try to save just the album without wallpapers/folders if data is too large
+            withContext(dispatcher) {
+                dao.upsertAlbum(albumWithWallpaperAndFolder.album)
+            }
         }
     }
 
@@ -77,14 +138,42 @@ class AlbumRepositoryImpl(
     }
 
     override suspend fun upsertFolderList(folders: List<Folder>) {
-        withContext(dispatcher) {
-            dao.upsertFolderList(folders)
+        try {
+            withContext(dispatcher) {
+                dao.upsertFolderList(folders)
+            }
+        } catch (e: SQLiteBlobTooBigException) {
+            Log.e("AlbumRepository", "Failed to upsert folder list due to large dataset", e)
+            // Try to upsert folders individually if the batch fails
+            withContext(dispatcher) {
+                folders.forEach { folder ->
+                    try {
+                        dao.upsertFolder(folder)
+                    } catch (folderException: Exception) {
+                        Log.e("AlbumRepository", "Failed to upsert individual folder: ${folder.folderName}", folderException)
+                    }
+                }
+            }
         }
     }
 
     override suspend fun upsertWallpaperList(wallpapers: List<Wallpaper>) {
-        withContext(dispatcher) {
-            dao.upsertWallpaperList(wallpapers)
+        try {
+            withContext(dispatcher) {
+                dao.upsertWallpaperList(wallpapers)
+            }
+        } catch (e: SQLiteBlobTooBigException) {
+            Log.e("AlbumRepository", "Failed to upsert wallpaper list due to large dataset", e)
+            // Try to upsert wallpapers individually if the batch fails
+            withContext(dispatcher) {
+                wallpapers.forEach { wallpaper ->
+                    try {
+                        dao.upsertWallpaper(wallpaper)
+                    } catch (wallpaperException: Exception) {
+                        Log.e("AlbumRepository", "Failed to upsert individual wallpaper: ${wallpaper.fileName}", wallpaperException)
+                    }
+                }
+            }
         }
     }
 

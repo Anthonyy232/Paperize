@@ -135,28 +135,29 @@ class AlbumsViewModel @Inject constructor (
                             async {
                                 val metadata = getFolderMetadata(folder.folderUri, context)
                                 if (metadata.lastModified != folder.dateModified) {
-                                    val existingWallpapers = folder.wallpapers
+                                    val existingWallpaperUris = folder.wallpaperUris
                                         .asSequence()
-                                        .filter { isValidUri(context, it.wallpaperUri) }
-                                        .mapIndexed { index, wallpaper -> wallpaper.copy(order = index) }
+                                        .filter { isValidUri(context, it) }
                                         .toList()
-                                    val newWallpapers =
-                                        getWallpaperFromFolder(folder.folderUri, context)
-                                            .asSequence()
-                                            .filterNot { new -> existingWallpapers.any { it.wallpaperUri == new.wallpaperUri } }
-                                            .mapIndexed { index, wallpaper ->
-                                                wallpaper.copy(
-                                                    initialAlbumName = album.album.initialAlbumName,
-                                                    order = existingWallpapers.size + 1 + index,
-                                                    key = album.album.initialAlbumName.hashCode() +
-                                                            folder.folderUri.hashCode() +
-                                                            wallpaper.wallpaperUri.hashCode()
-                                                )
-                                            }.toList()
-                                    val combinedWallpapers = existingWallpapers + newWallpapers
+
+                                    val wallpapersOnDisk = getWallpaperFromFolder(folder.folderUri, context)
+                                    val newWallpapers = wallpapersOnDisk
+                                        .asSequence()
+                                        .filterNot { new -> existingWallpaperUris.contains(new.wallpaperUri) }
+                                        .mapIndexed { index, wallpaper ->
+                                            wallpaper.copy(
+                                                initialAlbumName = album.album.initialAlbumName,
+                                                order = album.wallpapers.size + 1 + index,
+                                                key = album.album.initialAlbumName.hashCode() +
+                                                        folder.folderUri.hashCode() +
+                                                        wallpaper.wallpaperUri.hashCode()
+                                            )
+                                        }.toList()
+
+                                    val combinedWallpaperUris = (existingWallpaperUris + newWallpapers.map { it.wallpaperUri }).sorted()
                                     folder.copy(
-                                        coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
-                                        wallpapers = combinedWallpapers,
+                                        coverUri = newWallpapers.firstOrNull()?.wallpaperUri ?: folder.coverUri,
+                                        wallpaperUris = combinedWallpaperUris,
                                         dateModified = metadata.lastModified,
                                         folderName = metadata.filename
                                     )

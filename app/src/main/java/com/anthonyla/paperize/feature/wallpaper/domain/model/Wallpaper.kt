@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.domain.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -11,7 +12,7 @@ import androidx.room.PrimaryKey
  * @param fileName The name of the file
  * @param dateModified The date the wallpaper was last modified
  */
-@Entity
+@Entity(indices = [Index(value = ["initialAlbumName"])])
 data class Wallpaper(
     val initialAlbumName: String,
     val wallpaperUri: String,

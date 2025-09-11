@@ -598,7 +598,8 @@ class HomeWallpaperService: Service() {
                             try {
                                 val metadata = getFolderMetadata(folder.folderUri, context)
                                 if (metadata.lastModified != folder.dateModified) {
-                                    val wallpapersInDb = folder.wallpapers
+                                    val wallpapersInDb = albumWithDetails.wallpapers
+                                        .filter { folder.wallpaperUris.contains(it.wallpaperUri) }
                                         .filter { isValidUri(context, it.wallpaperUri) }
                                         .associateBy { it.wallpaperUri }
 
@@ -617,9 +618,11 @@ class HomeWallpaperService: Service() {
                                         }
 
                                     val combinedWallpapers = wallpapersInDb.values.toList() + newWallpapers
+                                    val combinedWallpaperUris = combinedWallpapers.map { it.wallpaperUri }.sorted()
+
                                     folder.copy(
                                         coverUri = combinedWallpapers.firstOrNull()?.wallpaperUri ?: "",
-                                        wallpapers = combinedWallpapers.sortedBy { it.order },
+                                        wallpaperUris = combinedWallpaperUris,
                                         dateModified = metadata.lastModified,
                                         folderName = metadata.filename
                                     )
@@ -632,7 +635,10 @@ class HomeWallpaperService: Service() {
                             }
                         }
 
-                    val allValidWallpapers = (updatedFolders.flatMap { it.wallpapers } + validStandaloneWallpapers)
+                    val folderWallpapers = updatedFolders.flatMap { folder ->
+                        albumWithDetails.wallpapers.filter { folder.wallpaperUris.contains(it.wallpaperUri) }
+                    }
+                    val allValidWallpapers = (folderWallpapers + validStandaloneWallpapers)
                         .sortedBy { it.order }
 
                     if (allValidWallpapers.isEmpty()) {

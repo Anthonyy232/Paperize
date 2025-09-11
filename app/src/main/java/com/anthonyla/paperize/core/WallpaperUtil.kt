@@ -584,13 +584,13 @@ suspend fun findFirstValidUri(
 ): String? = withContext(Dispatchers.IO) {
     try {
         for (folder in folders) {
-            for (wallpaper in folder.wallpapers) {
+            for (wallpaperUri in folder.wallpaperUris) {
                 try {
-                    if (isValidUri(context, wallpaper.wallpaperUri)) {
-                        return@withContext wallpaper.wallpaperUri
+                    if (isValidUri(context, wallpaperUri)) {
+                        return@withContext wallpaperUri
                     }
                 } catch (e: Exception) {
-                    Log.w("WallpaperUtil", "Error checking URI validity for folder wallpaper: ${wallpaper.wallpaperUri}", e)
+                    Log.w("WallpaperUtil", "Error checking URI validity for folder wallpaper: $wallpaperUri", e)
                 }
             }
         }

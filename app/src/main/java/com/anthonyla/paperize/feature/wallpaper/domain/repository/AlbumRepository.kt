@@ -18,6 +18,21 @@ interface AlbumRepository {
     fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>>
 
     /**
+     * Get all albums (basic info only, no wallpapers/folders)
+     */
+    fun getAlbums(): Flow<List<Album>>
+
+    /**
+     * Get all selected albums (basic info only)
+     */
+    fun getSelectedAlbumsBasic(): Flow<List<Album>>
+
+    /**
+     * Get a specific album with wallpapers and folders
+     */
+    fun getAlbumWithWallpaperAndFolder(albumName: String): Flow<AlbumWithWallpaperAndFolder?>
+
+    /**
      * Update album selection
      */
     suspend fun updateAlbumSelection(albumName: String, selected: Boolean)

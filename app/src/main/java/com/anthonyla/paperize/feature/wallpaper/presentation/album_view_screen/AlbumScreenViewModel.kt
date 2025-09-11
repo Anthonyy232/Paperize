@@ -116,7 +116,7 @@ class AlbumScreenViewModel @Inject constructor(
                         wallpaper.copy(
                             initialAlbumName = _state.value.initialAlbumName,
                             key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode() + wallpaper.wallpaperUri.hashCode(),
-                            order = index + album.wallpapers.size + album.folders.sumOf { it.wallpapers.size }
+                            order = index + album.wallpapers.size + album.folders.sumOf { it.wallpaperUris.size }
                         )
                     }
                     val metadata = getFolderMetadata(event.directoryUri, context)
@@ -126,7 +126,7 @@ class AlbumScreenViewModel @Inject constructor(
                         folderName = metadata.filename,
                         coverUri = wallpapers.map { it.wallpaperUri }.firstOrNull() ?: "",
                         dateModified = metadata.lastModified,
-                        wallpapers = wallpapers,
+                        wallpaperUris = wallpapers.map { it.wallpaperUri },
                         order = album.folders.size,
                         key = _state.value.initialAlbumName.hashCode() + event.directoryUri.hashCode()
                     )

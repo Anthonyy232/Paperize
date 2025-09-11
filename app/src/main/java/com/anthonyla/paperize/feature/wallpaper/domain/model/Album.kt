@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.feature.wallpaper.domain.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -13,7 +14,7 @@ import androidx.room.PrimaryKey
  * @param lockWallpapersInQueue The list of lock wallpapers in the queue
  * @param selected Whether the album is selected
  */
-@Entity
+@Entity(indices = [Index(value = ["selected"])])
 data class Album(
     @PrimaryKey(autoGenerate = false) val initialAlbumName: String,
     val displayedAlbumName: String,

@@ -24,14 +24,18 @@ data class AlbumWithWallpaperAndFolder(
     )
     val folders: List<Folder> = emptyList(),
 ) {
-    val totalWallpapers: List<Wallpaper>
-        get() = folders.flatMap { it.wallpapers } + wallpapers
+    val totalWallpaperUris: List<String>
+        get() = folders.flatMap { it.wallpaperUris } + wallpapers.map { it.wallpaperUri }
     val sortedFolders: List<Folder>
-        get() = folders.map { folder ->
-            folder.copy(wallpapers = folder.wallpapers.sortedBy { it.order })
-        }.sortedBy { it.order }
+        get() = folders.sortedBy { it.order }
+    val totalWallpapers: List<Wallpaper>
+        get() = wallpapers + folders.flatMap { folder ->
+            folder.wallpaperUris.mapNotNull { uri ->
+                wallpapers.find { it.wallpaperUri == uri }
+            }
+        }
     val sortedWallpapers: List<Wallpaper>
         get() = wallpapers.sortedBy { it.order }
     val sortedTotalWallpapers: List<Wallpaper>
-        get() = (folders.flatMap { it.wallpapers } + wallpapers).sortedBy { it.order }
+        get() = totalWallpapers.sortedBy { it.order }
 }

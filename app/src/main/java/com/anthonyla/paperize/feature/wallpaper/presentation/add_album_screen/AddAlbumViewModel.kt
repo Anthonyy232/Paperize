@@ -143,7 +143,7 @@ class AddAlbumViewModel @Inject constructor(
                         initialAlbumName = "",
                         folderName = metadata.filename,
                         folderUri = event.directoryUri,
-                        wallpapers = wallpapers,
+                        wallpaperUris = wallpapers.map { it.wallpaperUri },
                         coverUri = wallpapers.firstOrNull()?.wallpaperUri ?: "",
                         dateModified = metadata.lastModified,
                         order = if (_state.value.folders.isEmpty()) 0 else _state.value.folders.size,

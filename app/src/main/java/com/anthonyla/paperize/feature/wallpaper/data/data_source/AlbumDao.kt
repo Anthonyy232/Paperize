@@ -19,12 +19,22 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AlbumDao {
     @Transaction
-    @Query("SELECT * FROM album")
+    @Query("SELECT * FROM album ORDER BY initialAlbumName LIMIT 50")
     fun getAlbumsWithWallpaperAndFolder(): Flow<List<AlbumWithWallpaperAndFolder>>
 
     @Transaction
-    @Query("SELECT * FROM album WHERE selected = 1")
+    @Query("SELECT * FROM album WHERE selected = 1 ORDER BY initialAlbumName LIMIT 20")
     fun getSelectedAlbums(): Flow<List<AlbumWithWallpaperAndFolder>>
+
+    @Query("SELECT * FROM album ORDER BY initialAlbumName")
+    fun getAlbums(): Flow<List<Album>>
+
+    @Query("SELECT * FROM album WHERE selected = 1 ORDER BY initialAlbumName")
+    fun getSelectedAlbumsBasic(): Flow<List<Album>>
+
+    @Transaction
+    @Query("SELECT * FROM album WHERE initialAlbumName = :albumName")
+    fun getAlbumWithWallpaperAndFolder(albumName: String): Flow<AlbumWithWallpaperAndFolder?>
 
     @Query("UPDATE album SET selected = :selected WHERE initialAlbumName = :albumName")
     suspend fun updateAlbumSelection(albumName: String, selected: Boolean)
