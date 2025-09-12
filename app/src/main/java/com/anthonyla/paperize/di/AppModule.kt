@@ -28,7 +28,7 @@ object AppModule {
                 app,
                 AlbumDatabase::class.java,
                 AlbumDatabase.DATABASE_NAME
-        ).fallbackToDestructiveMigration(true).addMigrations().build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 
     @Provides
