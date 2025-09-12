@@ -3,6 +3,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.add_album_screen
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -95,25 +96,36 @@ fun AddAlbumScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments(),
         onResult = { uris: List<Uri> ->
-            scope.launch(Dispatchers.IO) {
-                withContext(Dispatchers.Main) {
-                    addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(true))
-                }
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                val uriList = uris.mapNotNull { uri ->
-                    try {
-                        context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                        uri.toString()
-                    } catch (e: Exception) {
-                        Log.e("AddAlbumScreen", "Failed to take persistable URI permission for image: ${e.message}")
-                        null
+            val selectionLimit = 500
+            if (uris.size > selectionLimit) {
+                // Inform the user that they selected too many files.
+                Toast.makeText(
+                    context,
+                    "Please select fewer than $selectionLimit images at a time. For bulk imports, use the 'Add Folder' option.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            else if (uris.isNotEmpty()) {
+                scope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(true))
                     }
-                }
-                withContext(Dispatchers.Main) {
-                    if (uriList.isNotEmpty()) {
-                        addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
+                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    val uriList = uris.mapNotNull { uri ->
+                        try {
+                            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                            uri.toString()
+                        } catch (e: Exception) {
+                            Log.e("AddAlbumScreen", "Failed to take persistable URI permission for image: ${e.message}")
+                            null
+                        }
                     }
-                    addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(false))
+                    withContext(Dispatchers.Main) {
+                        if (uriList.isNotEmpty()) {
+                            addAlbumViewModel.onEvent(AddAlbumEvent.AddWallpapers(uriList))
+                        }
+                        addAlbumViewModel.onEvent(AddAlbumEvent.SetLoading(false))
+                    }
                 }
             }
         }
