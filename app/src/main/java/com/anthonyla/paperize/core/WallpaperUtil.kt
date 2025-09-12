@@ -659,28 +659,14 @@ fun isDirectory(context: Context, uriString: String?): Boolean {
  * Compress a string
  */
 fun String.compress(prefixToRemove: String, charset: Charset = Charsets.UTF_8): String {
-    val modifiedInput = if (this.startsWith(prefixToRemove)) {
-        this.substring(prefixToRemove.length)
-    } else { this }
-    ByteArrayOutputStream().use { byteStream ->
-        DeflaterOutputStream(byteStream).use { deflaterStream ->
-            deflaterStream.write(modifiedInput.toByteArray(charset))
-        }
-        return Base64.encodeToString(byteStream.toByteArray(), Base64.NO_WRAP)
-    }
+    return this
 }
 
 /**
  * Decompress a string
  */
 fun String.decompress(prefixToAdd: String, charset: Charset = Charsets.UTF_8): String {
-    val compressedData = Base64.decode(this, Base64.NO_WRAP)
-    ByteArrayInputStream(compressedData).use { byteStream ->
-        InflaterInputStream(byteStream).use { inflaterStream ->
-            val decompressedBytes = inflaterStream.readBytes()
-            return prefixToAdd + String(decompressedBytes, charset)
-        }
-    }
+    return this
 }
 
 /**
