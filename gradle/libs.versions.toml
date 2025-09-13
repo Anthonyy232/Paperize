@@ -1,6 +1,6 @@
 [versions]
 androidGradlePlugin = "8.11.1"
-kotlin = "2.2.10"
+kotlin = "2.2.20"
 hilt = "2.57.1"
 ksp = "2.2.10-2.0.2"
 renderscriptToolkit = "1.0.0"
