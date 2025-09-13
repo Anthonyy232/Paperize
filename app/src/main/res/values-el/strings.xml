@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">Σκούρο τις άκρες της εικόνας</string>
   <string name="make_the_colors_grayscale">Κάντε τα χρώματα κλίμακας του γκρι</string>
   <string name="shuffle_the_wallpapers">Τυχαία αναπαραγωγή των ταπετσαριών</string>
+  <string name="prevent_changing_during_landscape_mode">Αποτροπή αλλαγής κατά τη λειτουργία τοπίου</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Αποτροπή αλλαγής κατά τη διάρκεια μη διαδραστικής κατάστασης\n(π.χ. η οθόνη είναι απενεργοποιημένη)</string>
+  <string name="changing_wallpaper">Αλλαγή ταπετσαρίας…</string>
 </resources>

@@ -186,4 +186,7 @@
   <string name="darken_the_edges_of_the_image">画像の端を暗くする</string>
   <string name="make_the_colors_grayscale">色をグレースケールにする</string>
   <string name="shuffle_the_wallpapers">壁紙をシャッフル</string>
+  <string name="prevent_changing_during_landscape_mode">横画面モード時の変更を防止</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">非対話型\n状態（画面消灯など）中の変更を防止</string>
+  <string name="changing_wallpaper">Changing wallpaper…</string>
 </resources>

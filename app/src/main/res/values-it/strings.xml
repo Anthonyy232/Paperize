@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">Scurisci i bordi dell\'immagine</string>
   <string name="make_the_colors_grayscale">Rendi i colori in scala di grigi</string>
   <string name="shuffle_the_wallpapers">Mischia gli sfondi</string>
+  <string name="prevent_changing_during_landscape_mode">Impedisci di cambiare durante la modalità orizzontale</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Impedisci di cambiare lo stato\nnon interattivo (ad es. schermo spento)</string>
+  <string name="changing_wallpaper">Modifica sfondo…</string>
 </resources>

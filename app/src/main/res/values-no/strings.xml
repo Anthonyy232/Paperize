@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">Formørk kantene på bildet</string>
   <string name="make_the_colors_grayscale">Gjør fargene gråtoner</string>
   <string name="shuffle_the_wallpapers">Bland bakgrunnsbilder</string>
+  <string name="prevent_changing_during_landscape_mode">Unngå endring under landskapsmodus</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Hindre endring under ikke-interaktiv\ntilstand (f.eks. skjermen er av)</string>
+  <string name="changing_wallpaper">Endrer bakgrunn…</string>
 </resources>

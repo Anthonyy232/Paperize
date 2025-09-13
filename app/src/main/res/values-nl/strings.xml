@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">De randen van de afbeelding dimmen</string>
   <string name="make_the_colors_grayscale">Maak de kleuren grijswaarden</string>
   <string name="shuffle_the_wallpapers">Achtergronden verwisselen</string>
+  <string name="prevent_changing_during_landscape_mode">Voorkom verandering tijdens landscape mode</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Voorkom wijzigen tijdens niet-interactieve\nstatus (bijvoorbeeld scherm is uitgeschakeld)</string>
+  <string name="changing_wallpaper">Changing wallpaper…</string>
 </resources>

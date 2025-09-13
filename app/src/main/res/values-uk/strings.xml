@@ -198,4 +198,7 @@
   <string name="darken_the_edges_of_the_image">Затемнити краї зображення</string>
   <string name="make_the_colors_grayscale">Зробити відтінки сірого</string>
   <string name="shuffle_the_wallpapers">Перемішувати шпалери</string>
+  <string name="prevent_changing_during_landscape_mode">Запобігти зміну в ландшафтному режимі</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Заборонити зміну під час неінтерактивного\nстану (наприклад, екран вимкнений)</string>
+  <string name="changing_wallpaper">Changing wallpaper…</string>
 </resources>

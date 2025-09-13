@@ -3,7 +3,7 @@
   <string name="app_name">Paperize</string>
   <string name="SettingsIcon">Možnosti</string>
   <string name="dropdownmenu_settings">Nastavení</string>
-  <string name="home_screen">Domů</string>
+  <string name="home_screen">Domovská obrazovka</string>
   <string name="wallpaper_screen">Tapeta</string>
   <string name="library_screen">Knihovna</string>
   <string name="settings_screen">Nastavení</string>
@@ -37,12 +37,12 @@
   <string name="agree">Souhlas</string>
   <string name="welcome">Vítejte</string>
   <string name="notifications">Oznámení</string>
-  <string name="continue_button">Jsem In</string>
+  <string name="continue_button">Jdu na to</string>
   <string name="notification_permission_is_required_for_this_app_to_work_properly">Aby tato aplikace správně fungovala, je vyžadováno oprávnění k oznámení</string>
   <string name="allow">Povolit</string>
   <string name="notification_info_message">Oznámení lze povolit, aby se zobrazovala, když aplikace běží na pozadí.</string>
-  <string name="set_as_lock_screen">Nastavit jako zamykací obrazovku</string>
-  <string name="lock_screen">Zamykací obrazovka</string>
+  <string name="set_as_lock_screen">Nastavit jako obrazovku zámku</string>
+  <string name="lock_screen">Obrazovka zámku</string>
   <string name="home">Domovská obrazovka</string>
   <string name="last_change">Poslední změna</string>
   <string name="next_change">Další změna</string>
@@ -62,7 +62,7 @@
   <string name="circle_3_animation">Animace kruhu 3</string>
   <string name="wallpaper_changer_has_been_enabled">Měnič tapety je zapnut.</string>
   <string name="wallpaper_changer_has_been_disabled">Měnič tapety je vypnut.</string>
-  <string name="dismiss">Propustit</string>
+  <string name="dismiss">Přijmout</string>
   <string name="has_been_unselected">Výběr %1$s byl zrušen.</string>
   <string name="interval_home">Úvodní obrazovka | %1$s</string>
   <string name="interval_lock">Zamykací obrazovka | %1$s</string>
@@ -89,7 +89,7 @@
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Chcete-li aplikaci používat, přečtěte si a odsouhlaste následující oznámení o ochraně osobních údajů.</string>
   <string name="privacy_notice">Oznámení o ochraně osobních údajů</string>
   <string name="please_read_and_agree_to_the_privacy_notice">Přečtěte si prosím oznámení o ochraně osobních údajů a potvrďte souhlas.</string>
-  <string name="view">Pohled</string>
+  <string name="view">Zobrazit</string>
   <string name="welcome_animation">Uvítací animace</string>
   <string name="notification_bell_animation">Animace zvonku upozornění</string>
   <string name="delete_these">Smazat tyto?</string>
@@ -151,7 +151,7 @@
   <string name="wallpaper_scaling">Měřítko tapety</string>
   <string name="change_brightness">Jas</string>
   <string name="home_screen_btn">Domovská obrazovka</string>
-  <string name="lock_screen_btn">Zamykací obrazovka</string>
+  <string name="lock_screen_btn">Obrazovka zámku</string>
   <string name="individual_scheduling">Individuální plánování</string>
   <string name="show_interval_sliders">Zobrazit posuvníky intervalů</string>
   <string name="interval_text">Časový interval</string>
@@ -196,6 +196,9 @@
   <string name="check_folders_for_new_wallpapers">Kontrola složek pro nové tapety</string>
   <string name="add_blur_to_the_image">Přidat rozostření k obrázku</string>
   <string name="darken_the_edges_of_the_image">Ztmavit okraje obrázku</string>
-  <string name="make_the_colors_grayscale">Udělej barvy šedě</string>
+  <string name="make_the_colors_grayscale">Snížení sytosti barev</string>
   <string name="shuffle_the_wallpapers">Zamíchat tapety</string>
+  <string name="prevent_changing_during_landscape_mode">Zabránit změnám v režimu na šířku</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Zabránit změně během neinteraktivního stavu\n(např. obrazovka je vypnuta)</string>
+  <string name="changing_wallpaper">Změna tapety…</string>
 </resources>

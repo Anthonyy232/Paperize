@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">Verdunkelt die Kanten des Bildes</string>
   <string name="make_the_colors_grayscale">Farben Graustufen machen</string>
   <string name="shuffle_the_wallpapers">Mischen Sie die Hintergrundbilder</string>
+  <string name="prevent_changing_during_landscape_mode">Verhindern Sie Änderungen im Querformat</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Verhindere das Ändern bei nicht-interaktivem\nStatus (z.B. Bildschirm ist ausgeschaltet)</string>
+  <string name="changing_wallpaper">Hintergrund wird geändert…</string>
 </resources>

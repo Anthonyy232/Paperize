@@ -186,4 +186,7 @@
   <string name="darken_the_edges_of_the_image">调暗图像的边缘</string>
   <string name="make_the_colors_grayscale">使颜色灰度</string>
   <string name="shuffle_the_wallpapers">随机显示壁纸</string>
+  <string name="prevent_changing_during_landscape_mode">在横屏模式下防止变化</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">防止在非交互式\n状态时改变(例如，屏幕关闭)</string>
+  <string name="changing_wallpaper">更改壁纸…</string>
 </resources>

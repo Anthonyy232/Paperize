@@ -190,4 +190,7 @@
   <string name="darken_the_edges_of_the_image">Mörka kanterna på bilden</string>
   <string name="make_the_colors_grayscale">Gör färgerna gråskala</string>
   <string name="shuffle_the_wallpapers">Blanda bakgrundsbilder</string>
+  <string name="prevent_changing_during_landscape_mode">Förhindra förändring under landskapsläge</string>
+  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Förhindra ändring under icke-interaktivt\ntillstånd (t.ex. Skärmen är avstängd)</string>
+  <string name="changing_wallpaper">Ändrar bakgrund…</string>
 </resources>
