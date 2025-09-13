@@ -199,6 +199,8 @@
   <string name="make_the_colors_grayscale">Skala kolorów szarości</string>
   <string name="shuffle_the_wallpapers">Losuj tapetę</string>
   <string name="prevent_changing_during_landscape_mode">Zapobiegaj zmianie w trybie poziomym</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Zapobiegaj zmianie podczas nieinteraktywnego stanu\n(np. ekran jest wyłączony)</string>
+  <string name="prevent_changing_during_non_interactive_state">Zapobiegaj zmianie podczas nieinteraktywnego stanu\n(np. ekran jest wyłączony)</string>
   <string name="changing_wallpaper">Zmiana tapety…</string>
+  <string name="skip_landscape_mode">Pomiń w trybie poziomym</string>
+  <string name="skip_non_interactive_state">Pomiń w stanie nieinteraktywnym</string>
 </resources>

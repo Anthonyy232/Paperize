@@ -191,6 +191,8 @@
   <string name="make_the_colors_grayscale">Hacer la escala de grises de colores</string>
   <string name="shuffle_the_wallpapers">Mezclar los fondos de pantalla</string>
   <string name="prevent_changing_during_landscape_mode">Evitar cambios durante el modo horizontal</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Evitar cambios durante el estado\nno interactivo (p. ej. Pantalla apagada)</string>
+  <string name="prevent_changing_during_non_interactive_state">Evitar cambios durante el estado\nno interactivo (p. ej. Pantalla apagada)</string>
   <string name="changing_wallpaper">Cambiando fondo de pantalla…</string>
+  <string name="skip_landscape_mode">Saltar en modo apaisado</string>
+  <string name="skip_non_interactive_state">Saltar en estado no interactivo</string>
 </resources>

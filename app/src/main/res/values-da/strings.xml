@@ -191,6 +191,8 @@
   <string name="make_the_colors_grayscale">Gør farverne gråskala</string>
   <string name="shuffle_the_wallpapers">Bland baggrundene</string>
   <string name="prevent_changing_during_landscape_mode">Forhindr ændring under liggende tilstand</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Undgå at ændre tilstand under ikke-interaktiv\n(f.eks. Skærmen er slukket)</string>
+  <string name="prevent_changing_during_non_interactive_state">Undgå at ændre tilstand under ikke-interaktiv\n(f.eks. Skærmen er slukket)</string>
   <string name="changing_wallpaper">Ændrer baggrund…</string>
+  <string name="skip_landscape_mode">Spring over i liggende tilstand</string>
+  <string name="skip_non_interactive_state">Spring over i ikke-interaktiv tilstand</string>
 </resources>

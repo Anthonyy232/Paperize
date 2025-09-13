@@ -191,6 +191,8 @@
   <string name="make_the_colors_grayscale">Faça as cores do cinza</string>
   <string name="shuffle_the_wallpapers">Misturar os papéis de parede</string>
   <string name="prevent_changing_during_landscape_mode">Impedir mudanças durante o modo paisagem</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Impedir mudanças durante o estado\nnão interativo (por exemplo, a tela está desligada)</string>
+  <string name="prevent_changing_during_non_interactive_state">Impedir mudanças durante o estado\nnão interativo (por exemplo, a tela está desligada)</string>
   <string name="changing_wallpaper">Alterando plano de fundo…</string>
+  <string name="skip_landscape_mode">Pular em modo paisagem</string>
+  <string name="skip_non_interactive_state">Pular em estado não interativo</string>
 </resources>

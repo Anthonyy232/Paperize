@@ -195,6 +195,8 @@
   <string name="make_the_colors_grayscale">Fă culorile la scară gri</string>
   <string name="shuffle_the_wallpapers">Amestecă fundalurile</string>
   <string name="prevent_changing_during_landscape_mode">Împiedică schimbarea în modul peisaj</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Previne schimbarea în starea\nnon-interactivă (de exemplu, ecranul este oprit)</string>
+  <string name="prevent_changing_during_non_interactive_state">Previne schimbarea în starea\nnon-interactivă (de exemplu, ecranul este oprit)</string>
   <string name="changing_wallpaper">Se schimbă imaginea de fundal…</string>
+  <string name="skip_landscape_mode">Sari în modul peisaj</string>
+  <string name="skip_non_interactive_state">Omite starea non-interactivă</string>
 </resources>

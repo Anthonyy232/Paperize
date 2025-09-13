@@ -199,6 +199,8 @@
   <string name="make_the_colors_grayscale">Snížení sytosti barev</string>
   <string name="shuffle_the_wallpapers">Zamíchat tapety</string>
   <string name="prevent_changing_during_landscape_mode">Zabránit změnám v režimu na šířku</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Zabránit změně během neinteraktivního stavu\n(např. obrazovka je vypnuta)</string>
+  <string name="prevent_changing_during_non_interactive_state">Zabránit změně během neinteraktivního stavu\n(např. obrazovka je vypnuta)</string>
   <string name="changing_wallpaper">Změna tapety…</string>
+  <string name="skip_landscape_mode">Přeskočit v režimu na šířku</string>
+  <string name="skip_non_interactive_state">Přeskočit v neinteraktivním stavu</string>
 </resources>

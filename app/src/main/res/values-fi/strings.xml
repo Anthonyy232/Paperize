@@ -191,6 +191,8 @@
   <string name="make_the_colors_grayscale">Muuta värit harmaasävyiksi</string>
   <string name="shuffle_the_wallpapers">Sekoita taustakuvat</string>
   <string name="prevent_changing_during_landscape_mode">Estä muuttuminen vaakatilan aikana</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Estä muuttuminen ei-interaktiivisen\n-tilan aikana (esim. Näyttö on pois päältä)</string>
+  <string name="prevent_changing_during_non_interactive_state">Estä muuttuminen ei-interaktiivisen\n-tilan aikana (esim. Näyttö on pois päältä)</string>
   <string name="changing_wallpaper">Muutetaan taustakuvaa…</string>
+  <string name="skip_landscape_mode">Ohita vaakatilassa</string>
+  <string name="skip_non_interactive_state">Ohita ei-interaktiivisessa tilassa</string>
 </resources>

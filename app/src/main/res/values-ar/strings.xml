@@ -207,6 +207,8 @@
   <string name="make_the_colors_grayscale">جعل الألوان مقياسا رماديا</string>
   <string name="shuffle_the_wallpapers">خلط الخلفيات</string>
   <string name="prevent_changing_during_landscape_mode">منع التغيير أثناء الوضع الأفقي</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">منع التغيير أثناء حالة\nغير التفاعلية (على سبيل المثال الشاشة متوقفة)</string>
+  <string name="prevent_changing_during_non_interactive_state">منع التغيير أثناء حالة\nغير التفاعلية (على سبيل المثال الشاشة متوقفة)</string>
   <string name="changing_wallpaper">تغيير الخلفية…</string>
+  <string name="skip_landscape_mode">تخطي في الوضع الأفقي</string>
+  <string name="skip_non_interactive_state">تخطي حالة غير تفاعلية</string>
 </resources>

@@ -191,6 +191,8 @@
   <string name="make_the_colors_grayscale">Faire les couleurs en niveaux de gris</string>
   <string name="shuffle_the_wallpapers">Mélanger les fonds d\'écran</string>
   <string name="prevent_changing_during_landscape_mode">Empêcher les changements en mode paysage</string>
-  <string name="prevent_changing_during_non_interactive_stateprevent_changing_during_non_interactive_state" comment="prevent_changing_during_non_interactive_state">Empêcher le changement pendant l\'état\nnon interactif (par exemple, l\'écran est éteint)</string>
+  <string name="prevent_changing_during_non_interactive_state">Empêcher le changement pendant l\'état\nnon interactif (par exemple, l\'écran est éteint)</string>
   <string name="changing_wallpaper">Changement du fond d\'écran…</string>
+  <string name="skip_landscape_mode">Passer en mode paysage</string>
+  <string name="skip_non_interactive_state">Passer dans un état non interactif</string>
 </resources>
