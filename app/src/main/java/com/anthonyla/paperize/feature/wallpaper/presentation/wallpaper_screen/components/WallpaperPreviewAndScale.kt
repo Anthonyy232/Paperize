@@ -162,14 +162,14 @@ fun WallpaperPreviewAndScale(
                             PreviewItem(
                                 wallpaperUri = currentLockWallpaper,
                                 darken = darken,
-                                darkenPercentage = lockDarkenPercentage,
+                                darkenPercentage = homeDarkenPercentage,
                                 scaling = scaling,
                                 blur = blur,
-                                blurPercentage = lockBlurPercentage,
+                                blurPercentage = homeBlurPercentage,
                                 vignette = vignette,
-                                vignettePercentage = lockVignettePercentage,
+                                vignettePercentage = homeVignettePercentage,
                                 grayscale = grayscale,
-                                grayscalePercentage = lockGrayscalePercentage
+                                grayscalePercentage = homeGrayscalePercentage
                             )
                         }
                     }

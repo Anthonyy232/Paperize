@@ -481,7 +481,7 @@ class HomeWallpaperService: Service() {
 
             val bothEnabled = settings.setHome && settings.setLock && currentHomeWallpaper == currentLockWallpaper
 
-            if (bothEnabled) {
+            if (bothEnabled || settings.setHome) {
                 setWallpaper(
                     context = context,
                     wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
@@ -494,24 +494,8 @@ class HomeWallpaperService: Service() {
                     vignettePercent = settings.homeVignettePercentage,
                     grayscale = settings.grayscale,
                     grayscalePercent = settings.homeGrayscalePercentage,
-                    both = true
+                    both = bothEnabled
                 )
-            } else {
-                if (settings.setHome) {
-                    setWallpaper(
-                        context = context,
-                        wallpaper = currentHomeWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
-                        darken = settings.darken,
-                        darkenPercent = settings.homeDarkenPercentage,
-                        scaling = settings.scaling,
-                        blur = settings.blur,
-                        blurPercent = settings.homeBlurPercentage,
-                        vignette = settings.vignette,
-                        vignettePercent = settings.homeVignettePercentage,
-                        grayscale = settings.grayscale,
-                        grayscalePercent = settings.homeGrayscalePercentage
-                    )
-                }
             }
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in updating", e)

@@ -263,6 +263,7 @@ class LockWallpaperService: Service() {
                     }
                 }
                 settings.setHome && settings.setLock && !scheduleSeparately -> { /* handled by home wallpaper service */ return }
+                // uses home effect settings for lockscreen
                 settings.setLock -> {
                     var wallpaper = lockAlbum.album.lockWallpapersInQueue.firstOrNull()
                     if (wallpaper == null) {
@@ -285,14 +286,14 @@ class LockWallpaperService: Service() {
                                     context = context,
                                     wallpaper = wallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                                     darken = settings.darken,
-                                    darkenPercent = settings.lockDarkenPercentage,
+                                    darkenPercent = settings.homeDarkenPercentage,
                                     scaling = settings.scaling,
                                     blur = settings.blur,
-                                    blurPercent = settings.lockBlurPercentage,
+                                    blurPercent = settings.homeBlurPercentage,
                                     vignette = settings.vignette,
-                                    vignettePercent = settings.lockVignettePercentage,
+                                    vignettePercent = settings.homeVignettePercentage,
                                     grayscale = settings.grayscale,
-                                    grayscalePercent = settings.lockGrayscalePercentage
+                                    grayscalePercent = settings.homeGrayscalePercentage
                                 )
                             }
                             else {
@@ -322,14 +323,14 @@ class LockWallpaperService: Service() {
                                 context = context,
                                 wallpaper = wallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                                 darken = settings.darken,
-                                darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
+                                darkenPercent = settings.homeDarkenPercentage,
                                 scaling = settings.scaling,
                                 blur = settings.blur,
-                                blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
+                                blurPercent = settings.homeBlurPercentage,
                                 vignette = settings.vignette,
-                                vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
+                                vignettePercent = settings.homeVignettePercentage,
                                 grayscale = settings.grayscale,
-                                grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
+                                grayscalePercent = settings.homeGrayscalePercentage
                             )
                         } else {
                             val wallpaperToDelete = lockAlbum.wallpapers.find { it.wallpaperUri == wallpaper }
@@ -369,24 +370,26 @@ class LockWallpaperService: Service() {
                 return
             }
 
+            val useLockSettings = settings.setHome && settings.setLock
             val currentLockWallpaper = settingsDataStoreImpl.getString(SettingsConstants.CURRENT_LOCK_WALLPAPER) ?: ""
             setWallpaper(
                 context = context,
                 wallpaper = currentLockWallpaper.decompress("content://com.android.externalstorage.documents/").toUri(),
                 darken = settings.darken,
-                darkenPercent = if (settings.setHome) settings.homeDarkenPercentage else settings.lockDarkenPercentage,
+                darkenPercent = if (useLockSettings) settings.lockDarkenPercentage else settings.homeDarkenPercentage,
                 scaling = settings.scaling,
                 blur = settings.blur,
-                blurPercent = if (settings.setHome) settings.homeBlurPercentage else settings.lockBlurPercentage,
+                blurPercent = if (useLockSettings) settings.lockBlurPercentage else settings.homeBlurPercentage,
                 vignette = settings.vignette,
-                vignettePercent = if (settings.setHome) settings.homeVignettePercentage else settings.lockVignettePercentage,
+                vignettePercent = if (useLockSettings) settings.lockVignettePercentage else settings.homeVignettePercentage,
                 grayscale = settings.grayscale,
-                grayscalePercent = if (settings.setHome) settings.homeGrayscalePercentage else settings.lockGrayscalePercentage
+                grayscalePercent = if (useLockSettings) settings.lockGrayscalePercentage else settings.homeGrayscalePercentage
             )
         } catch (e: Exception) {
             Log.e("PaperizeWallpaperChanger", "Error in updating", e)
         }
     }
+
 
     private fun setWallpaper(
         context: Context,
