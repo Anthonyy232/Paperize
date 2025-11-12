@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,12 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.R
 
+/**
+ * Generic setting switch component with title and description
+ */
 @Composable
-fun ShuffleSwitch(
-    shuffle: Boolean,
-    onShuffleCheck: (Boolean) -> Unit
+fun SettingSwitch(
+    @StringRes title: Int,
+    @StringRes description: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     Surface(
         tonalElevation = 10.dp,
@@ -42,19 +47,19 @@ fun ShuffleSwitch(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.shuffle),
+                    text = stringResource(title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.W500
                 )
                 Text(
-                    text = stringResource(R.string.shuffle_the_wallpapers),
+                    text = stringResource(description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Switch(
-                checked = shuffle,
-                onCheckedChange = onShuffleCheck
+                checked = checked,
+                onCheckedChange = onCheckedChange
             )
         }
     }
