@@ -2,6 +2,7 @@ package com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.c
 
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -40,29 +41,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 /**
- * Composable that displays a switch and slider to adjust the brightness of the wallpaper
+ * Generic setting switch component with title, description, and adjustable sliders
  */
 @Composable
-fun DarkenSwitchAndSlider(
-    onDarkCheck: (Boolean) -> Unit,
-    onDarkenChange: (Int, Int) -> Unit,
-    darken: Boolean,
+fun SettingSwitchWithSlider(
+    @StringRes title: Int,
+    @StringRes description: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     bothEnabled: Boolean,
-    homeDarkenPercentage: Int,
-    lockDarkenPercentage: Int,
+    homePercentage: Int,
+    lockPercentage: Int,
+    onPercentageChange: (Int, Int) -> Unit,
     animate: Boolean
 ) {
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     var job by remember { mutableStateOf<Job?>(null) }
-    var homePercentage by rememberSaveable { mutableFloatStateOf(homeDarkenPercentage.toFloat()) }
-    var lockPercentage by rememberSaveable { mutableFloatStateOf(lockDarkenPercentage.toFloat()) }
+    var homeValue by rememberSaveable { mutableFloatStateOf(homePercentage.toFloat()) }
+    var lockValue by rememberSaveable { mutableFloatStateOf(lockPercentage.toFloat()) }
 
     Surface(
         tonalElevation = 10.dp,
@@ -72,8 +75,15 @@ fun DarkenSwitchAndSlider(
             .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
     ) {
         val columnModifier = if (animate) {
-            Modifier.animateContentSize(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing))
-        } else { Modifier }
+            Modifier.animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        } else {
+            Modifier
+        }
         Column(
             modifier = columnModifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -87,34 +97,25 @@ fun DarkenSwitchAndSlider(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.change_brightness),
+                        text = stringResource(title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.W500
                     )
-                    if (!darken) {
+                    if (!checked) {
                         Text(
-                            text = stringResource(R.string.change_the_image_brightness),
+                            text = stringResource(description),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
                 Switch(
-                    checked = darken,
-                    onCheckedChange = onDarkCheck
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
                 )
             }
-            if (animate) {
-                AnimatedVisibility(
-                    visible = darken,
-                    enter = expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)),
-                    exit = fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = LinearOutSlowInEasing
-                        )
-                    )
-                ) {
+            if (checked) {
+                val sliderContent = @Composable {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -131,20 +132,23 @@ fun DarkenSwitchAndSlider(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "${homePercentage.roundToInt()}%",
+                                    text = "${homeValue.roundToInt()}%",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
                             Slider(
-                                value = homePercentage,
+                                value = homeValue,
                                 onValueChange = { value ->
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    homePercentage = value
+                                    homeValue = value
                                     job?.cancel()
                                     job = scope.launch {
                                         delay(100)
-                                        onDarkenChange(value.roundToInt(), lockPercentage.roundToInt())
+                                        onPercentageChange(
+                                            value.roundToInt(),
+                                            lockValue.roundToInt()
+                                        )
                                     }
                                 },
                                 valueRange = 0f..100f,
@@ -174,20 +178,23 @@ fun DarkenSwitchAndSlider(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "${lockPercentage.roundToInt()}%",
+                                    text = "${lockValue.roundToInt()}%",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
                             Slider(
-                                value = lockPercentage,
+                                value = lockValue,
                                 onValueChange = { value ->
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    lockPercentage = value
+                                    lockValue = value
                                     job?.cancel()
                                     job = scope.launch {
                                         delay(100)
-                                        onDarkenChange(homePercentage.roundToInt(), value.roundToInt())
+                                        onPercentageChange(
+                                            homeValue.roundToInt(),
+                                            value.roundToInt()
+                                        )
                                     }
                                 },
                                 valueRange = 0f..100f,
@@ -212,20 +219,23 @@ fun DarkenSwitchAndSlider(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "${homePercentage.roundToInt()}%",
+                                    text = "${homeValue.roundToInt()}%",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
                             Slider(
-                                value = homePercentage,
+                                value = homeValue,
                                 onValueChange = { value ->
                                     view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                                    homePercentage = value
+                                    homeValue = value
                                     job?.cancel()
                                     job = scope.launch {
                                         delay(100)
-                                        onDarkenChange(value.roundToInt(), lockPercentage.roundToInt())
+                                        onPercentageChange(
+                                            value.roundToInt(),
+                                            lockValue.roundToInt()
+                                        )
                                     }
                                 },
                                 valueRange = 0f..100f,
@@ -246,8 +256,29 @@ fun DarkenSwitchAndSlider(
                         }
                     }
                 }
+
+                if (animate) {
+                    AnimatedVisibility(
+                        visible = checked,
+                        enter = expandVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = LinearOutSlowInEasing
+                            )
+                        )
+                    ) {
+                        sliderContent()
+                    }
+                } else {
+                    sliderContent()
+                }
             }
         }
     }
-
 }

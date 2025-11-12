@@ -37,19 +37,13 @@ import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.Set
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.ThemeSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.settings_screen.SettingsState.WallpaperSettings
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.AlbumBottomSheet
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.BlurSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ChangerSelectionRow
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentAndNextChange
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.CurrentSelectedAlbum
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.DarkenSwitchAndSlider
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.GrayscaleSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.IndividualSchedulingAndToggleRow
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.RefreshSwitch
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.ShuffleSwitch
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SkipLandscapeSwitch
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SkipNonInteractiveSwitch
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SettingSwitch
+import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.SettingSwitchWithSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.TimeSliders
-import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.VignetteSwitchAndSlider
 import com.anthonyla.paperize.feature.wallpaper.presentation.wallpaper_screen.components.WallpaperPreviewAndScale
 import kotlinx.coroutines.launch
 
@@ -234,57 +228,73 @@ fun WallpaperScreen(
                         changeStartTime = scheduleSettings.changeStartTime,
                         animate = themeSettings.animate
                     )
-                    ShuffleSwitch(
-                        shuffle = scheduleSettings.shuffle,
-                        onShuffleCheck = { onShuffleCheck(it) },
+                    SettingSwitch(
+                        title = R.string.shuffle,
+                        description = R.string.shuffle_the_wallpapers,
+                        checked = scheduleSettings.shuffle,
+                        onCheckedChange = onShuffleCheck
                     )
-                    DarkenSwitchAndSlider(
-                        homeDarkenPercentage = effectSettings.homeDarkenPercentage,
-                        lockDarkenPercentage = effectSettings.lockDarkenPercentage,
-                        onDarkCheck = onDarkCheck,
-                        onDarkenChange = onDarkenPercentage,
-                        darken = effectSettings.darken,
-                        animate = themeSettings.animate,
-                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
+                    SettingSwitchWithSlider(
+                        title = R.string.change_brightness,
+                        description = R.string.change_the_image_brightness,
+                        checked = effectSettings.darken,
+                        onCheckedChange = onDarkCheck,
+                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper,
+                        homePercentage = effectSettings.homeDarkenPercentage,
+                        lockPercentage = effectSettings.lockDarkenPercentage,
+                        onPercentageChange = onDarkenPercentage,
+                        animate = themeSettings.animate
                     )
-                    BlurSwitchAndSlider(
-                        homeBlurPercentage = effectSettings.homeBlurPercentage,
-                        lockBlurPercentage = effectSettings.lockBlurPercentage,
-                        onBlurPercentageChange = onBlurPercentageChange,
-                        onBlurChange = onBlurChange,
-                        blur = effectSettings.blur,
-                        animate = themeSettings.animate,
-                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
+                    SettingSwitchWithSlider(
+                        title = R.string.change_blur,
+                        description = R.string.add_blur_to_the_image,
+                        checked = effectSettings.blur,
+                        onCheckedChange = onBlurChange,
+                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper,
+                        homePercentage = effectSettings.homeBlurPercentage,
+                        lockPercentage = effectSettings.lockBlurPercentage,
+                        onPercentageChange = onBlurPercentageChange,
+                        animate = themeSettings.animate
                     )
-                    VignetteSwitchAndSlider(
-                        homeVignettePercentage = effectSettings.homeVignettePercentage,
-                        lockVignettePercentage = effectSettings.lockVignettePercentage,
-                        onVignettePercentageChange = onVignettePercentageChange,
-                        onVignetteChange = onVignetteChange,
-                        vignette = effectSettings.vignette,
-                        animate = themeSettings.animate,
-                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
+                    SettingSwitchWithSlider(
+                        title = R.string.change_vignette,
+                        description = R.string.darken_the_edges_of_the_image,
+                        checked = effectSettings.vignette,
+                        onCheckedChange = onVignetteChange,
+                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper,
+                        homePercentage = effectSettings.homeVignettePercentage,
+                        lockPercentage = effectSettings.lockVignettePercentage,
+                        onPercentageChange = onVignettePercentageChange,
+                        animate = themeSettings.animate
                     )
-                    GrayscaleSwitchAndSlider(
-                        homeGrayscalePercentage = effectSettings.homeGrayscalePercentage,
-                        lockGrayscalePercentage = effectSettings.lockGrayscalePercentage,
-                        onGrayscalePercentageChange = onGrayscalePercentageChange,
-                        onGrayscaleChange = onGrayscaleChange,
-                        grayscale = effectSettings.grayscale,
-                        animate = themeSettings.animate,
-                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper
+                    SettingSwitchWithSlider(
+                        title = R.string.gray_filter,
+                        description = R.string.make_the_colors_grayscale,
+                        checked = effectSettings.grayscale,
+                        onCheckedChange = onGrayscaleChange,
+                        bothEnabled = wallpaperSettings.setHomeWallpaper && wallpaperSettings.setLockWallpaper,
+                        homePercentage = effectSettings.homeGrayscalePercentage,
+                        lockPercentage = effectSettings.lockGrayscalePercentage,
+                        onPercentageChange = onGrayscalePercentageChange,
+                        animate = themeSettings.animate
                     )
-                    RefreshSwitch(
-                        refresh = scheduleSettings.refresh,
-                        onRefreshChange = onRefreshChange
+                    SettingSwitch(
+                        title = R.string.periodic_refresh,
+                        description = R.string.check_folders_for_new_wallpapers,
+                        checked = scheduleSettings.refresh,
+                        onCheckedChange = onRefreshChange
                     )
-                    SkipLandscapeSwitch(
-                        skipLandscape = scheduleSettings.skipLandscape,
-                        onSkipLandscapeChange = onSkipLandscapeChange
+                    SettingSwitch(
+                        title = R.string.skip_landscape_mode,
+                        description = R.string.prevent_changing_during_landscape_mode,
+                        checked = scheduleSettings.skipLandscape,
+                        onCheckedChange = onSkipLandscapeChange
                     )
-                    SkipNonInteractiveSwitch(
-                        skipNonInteractive = scheduleSettings.skipNonInteractive,
-                        onSkipNonInteractiveChange = onSkipNonInteractiveChange
+                    SettingSwitch(
+                        title = R.string.skip_non_interactive_state,
+                        description = R.string.prevent_changing_during_non_interactive_state,
+                        checked = scheduleSettings.skipNonInteractive,
+                        onCheckedChange = onSkipNonInteractiveChange
                     )
                 }
             }
