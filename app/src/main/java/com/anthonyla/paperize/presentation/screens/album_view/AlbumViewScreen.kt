@@ -67,8 +67,8 @@ fun AlbumViewScreen(
         when (sortOption) {
             SortOption.NAME_ASC -> folders.sortedBy { it.name.lowercase() }
             SortOption.NAME_DESC -> folders.sortedByDescending { it.name.lowercase() }
-            SortOption.DATE_ADDED_ASC -> folders.sortedBy { it.createdAt }
-            SortOption.DATE_ADDED_DESC -> folders.sortedByDescending { it.createdAt }
+            SortOption.DATE_ADDED_ASC -> folders.sortedBy { it.addedAt }
+            SortOption.DATE_ADDED_DESC -> folders.sortedByDescending { it.addedAt }
             SortOption.DATE_MODIFIED_ASC -> folders.sortedBy { it.dateModified }
             SortOption.DATE_MODIFIED_DESC -> folders.sortedByDescending { it.dateModified }
         }

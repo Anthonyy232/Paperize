@@ -40,12 +40,6 @@ fun StoragePermissionScreen(
         )
     }
 
-    // Check permission status when screen is resumed
-    DisposableEffect(Unit) {
-        val listener = androidx.lifecycle.DefaultLifecycleObserver()
-        onDispose { }
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
