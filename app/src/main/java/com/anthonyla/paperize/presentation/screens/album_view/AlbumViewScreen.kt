@@ -26,7 +26,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,6 +39,8 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
+import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
+import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
 import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
 
 @Composable
@@ -53,6 +58,32 @@ fun AlbumViewScreen(
     val album by viewModel.album.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val wallpapers by viewModel.wallpapers.collectAsState()
+
+    var showSortSheet by rememberSaveable { mutableStateOf(false) }
+    var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
+
+    // Sort wallpapers and folders
+    val sortedFolders = remember(folders, sortOption) {
+        when (sortOption) {
+            SortOption.NAME_ASC -> folders.sortedBy { it.name.lowercase() }
+            SortOption.NAME_DESC -> folders.sortedByDescending { it.name.lowercase() }
+            SortOption.DATE_ADDED_ASC -> folders.sortedBy { it.createdAt }
+            SortOption.DATE_ADDED_DESC -> folders.sortedByDescending { it.createdAt }
+            SortOption.DATE_MODIFIED_ASC -> folders.sortedBy { it.dateModified }
+            SortOption.DATE_MODIFIED_DESC -> folders.sortedByDescending { it.dateModified }
+        }
+    }
+
+    val sortedWallpapers = remember(wallpapers, sortOption) {
+        when (sortOption) {
+            SortOption.NAME_ASC -> wallpapers.sortedBy { it.fileName.lowercase() }
+            SortOption.NAME_DESC -> wallpapers.sortedByDescending { it.fileName.lowercase() }
+            SortOption.DATE_ADDED_ASC -> wallpapers.sortedBy { it.addedAt }
+            SortOption.DATE_ADDED_DESC -> wallpapers.sortedByDescending { it.addedAt }
+            SortOption.DATE_MODIFIED_ASC -> wallpapers.sortedBy { it.dateModified }
+            SortOption.DATE_MODIFIED_DESC -> wallpapers.sortedByDescending { it.dateModified }
+        }
+    }
 
     val colorScheme = MaterialTheme.colorScheme
 
@@ -99,7 +130,7 @@ fun AlbumViewScreen(
             AlbumViewTopBar(
                 title = album?.name ?: "",
                 onBackClick = onBackClick,
-                onSortClick = { /* TODO: Implement sort */ },
+                onSortClick = { showSortSheet = true },
                 onDeleteAlbum = { viewModel.deleteAlbum(); onBackClick() }
             )
         },
@@ -124,7 +155,7 @@ fun AlbumViewScreen(
         ) {
             // Folders
             items(
-                items = folders,
+                items = sortedFolders,
                 key = { folder -> folder.id }
             ) { folder ->
                 FolderItem(
@@ -145,7 +176,7 @@ fun AlbumViewScreen(
 
             // Wallpapers
             items(
-                items = wallpapers,
+                items = sortedWallpapers,
                 key = { wallpaper -> wallpaper.id }
             ) { wallpaper ->
                 WallpaperItem(
@@ -164,5 +195,14 @@ fun AlbumViewScreen(
                 )
             }
         }
+    }
+
+    // Sort Bottom Sheet
+    if (showSortSheet) {
+        SortBottomSheet(
+            currentSort = sortOption,
+            onSortSelected = { sortOption = it },
+            onDismiss = { showSortSheet = false }
+        )
     }
 }
