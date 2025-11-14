@@ -28,6 +28,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,11 +46,10 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
-import com.anthonyla.paperize.presentation.common.components.SettingClickableItem
 import com.anthonyla.paperize.presentation.common.components.SettingSliderItem
-import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.AlbumSelectionBottomSheet
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitch
+import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
 
 @Composable
@@ -68,11 +68,25 @@ fun WallpaperScreen(
     var homeEnabled by remember { mutableStateOf(true) }
     var lockEnabled by remember { mutableStateOf(true) }
 
+    // Auto-disable wallpaper changer when no albums selected
+    LaunchedEffect(selectedAlbums) {
+        if (selectedAlbums.isEmpty() && scheduleSettings.enableChanger) {
+            onToggleChanger(false)
+        }
+    }
+
+    // Auto-enable wallpaper changer when album is selected
+    LaunchedEffect(selectedAlbums) {
+        if (selectedAlbums.isNotEmpty() && !scheduleSettings.enableChanger) {
+            onToggleChanger(true)
+        }
+    }
+
     val scalingOptions = listOf(
         stringResource(R.string.fill),
         stringResource(R.string.fit),
         stringResource(R.string.stretch),
-        "None"
+        stringResource(R.string.none)
     )
 
     var selectedScalingIndex by rememberSaveable {
@@ -95,11 +109,11 @@ fun WallpaperScreen(
     ) {
         // Home and Lock Screen Toggles
         Surface(
-            tonalElevation = 8.dp,
+            tonalElevation = 10.dp,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -131,9 +145,9 @@ fun WallpaperScreen(
                             Text(
                                 text = if (homeEnabled) "Enabled" else "Disabled",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (homeEnabled) 
-                                    MaterialTheme.colorScheme.primary 
-                                else 
+                                color = if (homeEnabled)
+                                    MaterialTheme.colorScheme.primary
+                                else
                                     MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -155,9 +169,9 @@ fun WallpaperScreen(
                             Text(
                                 text = if (lockEnabled) "Enabled" else "Disabled",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (lockEnabled) 
-                                    MaterialTheme.colorScheme.primary 
-                                else 
+                                color = if (lockEnabled)
+                                    MaterialTheme.colorScheme.primary
+                                else
                                     MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -167,44 +181,61 @@ fun WallpaperScreen(
         }
 
         // Selected Album
-        SettingClickableItem(
-            title = if (selectedAlbums.isEmpty()) {
-                stringResource(R.string.no_album_selected)
-            } else {
-                selectedAlbums.first().name
-            },
-            description = if (selectedAlbums.isNotEmpty()) {
-                stringResource(R.string.currently_selected_album)
-            } else {
-                stringResource(R.string.click_to_select_a_different_album)
-            },
-            onClick = { showAlbumSelectionSheet = true },
-            trailingContent = {
+        Surface(
+            tonalElevation = 10.dp,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            onClick = { showAlbumSelectionSheet = true }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (selectedAlbums.isEmpty()) {
+                            stringResource(R.string.no_album_selected)
+                        } else {
+                            selectedAlbums.first().name
+                        },
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = if (selectedAlbums.isNotEmpty()) {
+                            stringResource(R.string.currently_selected_album)
+                        } else {
+                            stringResource(R.string.click_to_select_a_different_album)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        )
-
-        // Enable wallpaper changer
-        SettingSwitchItem(
-            title = stringResource(R.string.enable_wallpaper_changer),
-            description = if (selectedAlbums.isEmpty()) {
-                stringResource(R.string.no_album_selected)
-            } else null,
-            checked = scheduleSettings.enableChanger,
-            onCheckedChange = onToggleChanger,
-            enabled = selectedAlbums.isNotEmpty()
-        )
+        }
 
         // Manual wallpaper change buttons
         if (scheduleSettings.enableChanger && selectedAlbums.isNotEmpty()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Surface(
+                tonalElevation = 10.dp,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = stringResource(R.string.change_wallpaper),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.W500
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -299,13 +330,21 @@ fun WallpaperScreen(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Scaling Options
+            // Effects Section Header
+            Text(
+                text = "Wallpaper Effects",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            // Scaling Options (moved to effects section)
             Surface(
                 tonalElevation = 10.dp,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
+                    .padding(PaddingValues(horizontal = 8.dp, vertical = 4.dp))
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -346,16 +385,6 @@ fun WallpaperScreen(
                     }
                 }
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            // Effects Section Header
-            Text(
-                text = "Wallpaper Effects",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
 
             // Darken/Brightness
             SettingSwitchWithSlider(

@@ -21,7 +21,6 @@ import com.anthonyla.paperize.R
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
-    onNavigateToEffects: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -84,26 +83,6 @@ fun SettingsScreen(
                 checked = appSettings.animate,
                 onCheckedChange = { viewModel.updateAnimate(it) }
             )
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            // Wallpaper section
-            ListItem(
-                headlineContent = { Text("Wallpaper") },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-
-            Card(
-                onClick = onNavigateToEffects,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                ListItem(
-                    headlineContent = { Text("Wallpaper Effects") },
-                    supportingContent = { Text("Configure blur, brightness, vignette, and more") }
-                )
-            }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 

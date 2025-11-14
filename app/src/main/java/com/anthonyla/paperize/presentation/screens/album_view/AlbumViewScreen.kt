@@ -155,8 +155,8 @@ fun AlbumViewScreen(
         ) {
             // Folders
             items(
-                items = sortedFolders,
-                key = { folder -> folder.id }
+                items = sortedFolders.filter { it.id.isNotEmpty() },
+                key = { folder -> "folder-${folder.id}" }
             ) { folder ->
                 FolderItem(
                     folder = folder,
@@ -176,8 +176,8 @@ fun AlbumViewScreen(
 
             // Wallpapers
             items(
-                items = sortedWallpapers,
-                key = { wallpaper -> wallpaper.id }
+                items = sortedWallpapers.filter { it.id.isNotEmpty() },
+                key = { wallpaper -> "wallpaper-${wallpaper.id}" }
             ) { wallpaper ->
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,

@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.presentation.screens.album_view.AlbumViewScreen
-import com.anthonyla.paperize.presentation.screens.effects.WallpaperEffectsScreen
 import com.anthonyla.paperize.presentation.screens.folder_view.FolderViewScreen
 import com.anthonyla.paperize.presentation.screens.home.HomeScreen
 import com.anthonyla.paperize.presentation.screens.notification.NotificationPermissionScreen
@@ -116,19 +115,11 @@ fun NavigationGraph(
             )
         }
 
-        // Effects screen
-        composable<EffectsRoute> {
-            WallpaperEffectsScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
         // Settings screen
         composable<SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToPrivacy = { navController.navigate(PrivacyRoute) },
-                onNavigateToEffects = { navController.navigate(EffectsRoute) }
+                onNavigateToPrivacy = { navController.navigate(PrivacyRoute) }
             )
         }
 
