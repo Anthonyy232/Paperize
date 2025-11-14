@@ -8,36 +8,37 @@ import com.anthonyla.paperize.core.constants.Constants
  * Represents the visual effects applied to wallpapers
  */
 data class WallpaperEffects(
-    val darkenPercentage: Int = Constants.DEFAULT_DARKEN_PERCENTAGE,
+    val enableBlur: Boolean = false,
     val blurPercentage: Int = Constants.DEFAULT_BLUR_PERCENTAGE,
+    val enableDarken: Boolean = false,
+    val darkenPercentage: Int = Constants.DEFAULT_DARKEN_PERCENTAGE,
+    val enableVignette: Boolean = false,
     val vignettePercentage: Int = Constants.DEFAULT_VIGNETTE_PERCENTAGE,
-    val grayscale: Boolean = false
+    val enableGrayscale: Boolean = false,
+    val shuffle: Boolean = false,
+    val skipLandscape: Boolean = false,
+    val skipNonInteractive: Boolean = false
 ) {
     /**
      * Check if any effects are applied
      */
     val hasEffects: Boolean
-        get() = darkenPercentage > 0 || blurPercentage > 0 || vignettePercentage > 0 || grayscale
+        get() = (enableBlur && blurPercentage > 0) ||
+                (enableDarken && darkenPercentage != 0) ||
+                (enableVignette && vignettePercentage > 0) ||
+                enableGrayscale
 
     /**
      * Validate effect percentages
      */
     fun validate(): WallpaperEffects = copy(
-        darkenPercentage = darkenPercentage.coerceIn(
-            Constants.MIN_EFFECT_PERCENTAGE,
-            Constants.MAX_EFFECT_PERCENTAGE
-        ),
-        blurPercentage = blurPercentage.coerceIn(
-            Constants.MIN_EFFECT_PERCENTAGE,
-            Constants.MAX_EFFECT_PERCENTAGE
-        ),
-        vignettePercentage = vignettePercentage.coerceIn(
-            Constants.MIN_EFFECT_PERCENTAGE,
-            Constants.MAX_EFFECT_PERCENTAGE
-        )
+        darkenPercentage = darkenPercentage.coerceIn(-100, 100),
+        blurPercentage = blurPercentage.coerceIn(0, 100),
+        vignettePercentage = vignettePercentage.coerceIn(0, 100)
     )
 
     companion object {
+        fun default() = WallpaperEffects()
         fun none() = WallpaperEffects()
     }
 }

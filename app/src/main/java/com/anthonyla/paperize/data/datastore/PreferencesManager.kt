@@ -225,4 +225,52 @@ class PreferencesManager @Inject constructor(
     suspend fun clear() {
         dataStore.edit { it.clear() }
     }
+
+    // ============ Wallpaper Effects (Unified) ============
+
+    suspend fun getWallpaperEffects(): WallpaperEffects {
+        val prefs = dataStore.data.first()
+        return WallpaperEffects(
+            enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_BLUR)] ?: false,
+            blurPercentage = prefs[intPreferencesKey(PreferenceKeys.BLUR_PERCENTAGE)] ?: 0,
+            enableDarken = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_DARKEN)] ?: false,
+            darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.DARKEN_PERCENTAGE)] ?: 0,
+            enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_VIGNETTE)] ?: false,
+            vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.VIGNETTE_PERCENTAGE)] ?: 0,
+            enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_GRAYSCALE)] ?: false,
+            shuffle = prefs[booleanPreferencesKey(PreferenceKeys.SHUFFLE_ENABLED)] ?: false,
+            skipLandscape = prefs[booleanPreferencesKey(PreferenceKeys.SKIP_LANDSCAPE)] ?: false,
+            skipNonInteractive = prefs[booleanPreferencesKey(PreferenceKeys.SKIP_NON_INTERACTIVE)] ?: false
+        )
+    }
+
+    fun getWallpaperEffectsFlow(): Flow<WallpaperEffects> = dataStore.data.map { prefs ->
+        WallpaperEffects(
+            enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_BLUR)] ?: false,
+            blurPercentage = prefs[intPreferencesKey(PreferenceKeys.BLUR_PERCENTAGE)] ?: 0,
+            enableDarken = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_DARKEN)] ?: false,
+            darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.DARKEN_PERCENTAGE)] ?: 0,
+            enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_VIGNETTE)] ?: false,
+            vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.VIGNETTE_PERCENTAGE)] ?: 0,
+            enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_GRAYSCALE)] ?: false,
+            shuffle = prefs[booleanPreferencesKey(PreferenceKeys.SHUFFLE_ENABLED)] ?: false,
+            skipLandscape = prefs[booleanPreferencesKey(PreferenceKeys.SKIP_LANDSCAPE)] ?: false,
+            skipNonInteractive = prefs[booleanPreferencesKey(PreferenceKeys.SKIP_NON_INTERACTIVE)] ?: false
+        )
+    }
+
+    suspend fun updateWallpaperEffects(effects: WallpaperEffects) {
+        dataStore.edit { prefs ->
+            prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_BLUR)] = effects.enableBlur
+            prefs[intPreferencesKey(PreferenceKeys.BLUR_PERCENTAGE)] = effects.blurPercentage
+            prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_DARKEN)] = effects.enableDarken
+            prefs[intPreferencesKey(PreferenceKeys.DARKEN_PERCENTAGE)] = effects.darkenPercentage
+            prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_VIGNETTE)] = effects.enableVignette
+            prefs[intPreferencesKey(PreferenceKeys.VIGNETTE_PERCENTAGE)] = effects.vignettePercentage
+            prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_GRAYSCALE)] = effects.enableGrayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.SHUFFLE_ENABLED)] = effects.shuffle
+            prefs[booleanPreferencesKey(PreferenceKeys.SKIP_LANDSCAPE)] = effects.skipLandscape
+            prefs[booleanPreferencesKey(PreferenceKeys.SKIP_NON_INTERACTIVE)] = effects.skipNonInteractive
+        }
+    }
 }

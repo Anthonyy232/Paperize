@@ -90,16 +90,31 @@ object PreferenceKeys {
     const val LOCK_NEXT_CHANGE_TIME = "lock_next_change_time"
 
     // Effects - Home
-    const val HOME_DARKEN = "home_darken"
+    const val HOME_ENABLE_BLUR = "home_enable_blur"
     const val HOME_BLUR = "home_blur"
+    const val HOME_ENABLE_DARKEN = "home_enable_darken"
+    const val HOME_DARKEN = "home_darken"
+    const val HOME_ENABLE_VIGNETTE = "home_enable_vignette"
     const val HOME_VIGNETTE = "home_vignette"
     const val HOME_GRAYSCALE = "home_grayscale"
 
     // Effects - Lock
-    const val LOCK_DARKEN = "lock_darken"
+    const val LOCK_ENABLE_BLUR = "lock_enable_blur"
     const val LOCK_BLUR = "lock_blur"
+    const val LOCK_ENABLE_DARKEN = "lock_enable_darken"
+    const val LOCK_DARKEN = "lock_darken"
+    const val LOCK_ENABLE_VIGNETTE = "lock_enable_vignette"
     const val LOCK_VIGNETTE = "lock_vignette"
     const val LOCK_GRAYSCALE = "lock_grayscale"
+
+    // Unified Effects (for effects screen)
+    const val ENABLE_BLUR = "enable_blur"
+    const val BLUR_PERCENTAGE = "blur_percentage"
+    const val ENABLE_DARKEN = "enable_darken"
+    const val DARKEN_PERCENTAGE = "darken_percentage"
+    const val ENABLE_VIGNETTE = "enable_vignette"
+    const val VIGNETTE_PERCENTAGE = "vignette_percentage"
+    const val ENABLE_GRAYSCALE = "enable_grayscale"
 
     // Scaling
     const val HOME_SCALING_TYPE = "home_scaling_type"

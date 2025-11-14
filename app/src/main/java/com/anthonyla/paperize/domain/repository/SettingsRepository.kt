@@ -2,6 +2,7 @@ package com.anthonyla.paperize.domain.repository
 
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.WallpaperEffects
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -37,6 +38,21 @@ interface SettingsRepository {
      * Update schedule settings
      */
     suspend fun updateScheduleSettings(settings: ScheduleSettings)
+
+    /**
+     * Get wallpaper effects settings
+     */
+    suspend fun getWallpaperEffects(): WallpaperEffects
+
+    /**
+     * Get wallpaper effects as Flow
+     */
+    fun getWallpaperEffectsFlow(): Flow<WallpaperEffects>
+
+    /**
+     * Update wallpaper effects
+     */
+    suspend fun updateWallpaperEffects(effects: WallpaperEffects)
 
     /**
      * Clear all settings

@@ -3,6 +3,7 @@ package com.anthonyla.paperize.data.repository
 import com.anthonyla.paperize.data.datastore.PreferencesManager
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -33,6 +34,15 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateScheduleSettings(settings: ScheduleSettings) =
         preferencesManager.updateScheduleSettings(settings)
+
+    override suspend fun getWallpaperEffects(): WallpaperEffects =
+        preferencesManager.getWallpaperEffects()
+
+    override fun getWallpaperEffectsFlow(): Flow<WallpaperEffects> =
+        preferencesManager.getWallpaperEffectsFlow()
+
+    override suspend fun updateWallpaperEffects(effects: WallpaperEffects) =
+        preferencesManager.updateWallpaperEffects(effects)
 
     override suspend fun clearAllSettings() =
         preferencesManager.clear()
