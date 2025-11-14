@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.service.tile
 
 import android.content.Intent
-import android.os.Build
 import android.service.quicksettings.TileService
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
@@ -21,10 +20,7 @@ class WallpaperTileService : TileService() {
             putExtra(Constants.EXTRA_SCREEN_TYPE, ScreenType.BOTH.name)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
+        // minSdk is 31, so startForegroundService is always available
+        startForegroundService(intent)
     }
 }

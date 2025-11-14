@@ -46,16 +46,17 @@
 # Keep enums
 -keep class com.anthonyla.paperize.core.WallpaperSourceType { *; }
 -keep class com.anthonyla.paperize.core.ScreenType { *; }
--keep class com.anthonyla.paperize.core.ScalingConstants { *; }
--keep class com.anthonyla.paperize.core.DarkenPercentage { *; }
+-keep class com.anthonyla.paperize.core.ScalingType { *; }
 
 # Keep navigation routes for serialization
 -keep class com.anthonyla.paperize.presentation.common.navigation.** { *; }
 
-# Keep Hilt generated classes
--keep class dagger.hilt.** { *; }
+# Keep Hilt generated classes (more specific to avoid overly broad rules)
+-keep,allowobfuscation,allowshrinking @dagger.hilt.android.lifecycle.HiltViewModel class *
+-keep,allowobfuscation,allowshrinking class * extends androidx.lifecycle.ViewModel
+-keep class dagger.hilt.android.** { *; }
+-keep class dagger.hilt.internal.** { *; }
 -keep class javax.inject.** { *; }
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
 
 # Keep Room database
 -keep class * extends androidx.room.RoomDatabase
