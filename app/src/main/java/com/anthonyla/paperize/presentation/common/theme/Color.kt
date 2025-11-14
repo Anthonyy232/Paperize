@@ -28,6 +28,13 @@ val md_theme_light_onSurfaceVariant = Color(0xFF49454F)
 val md_theme_light_outline = Color(0xFF79747E)
 val md_theme_light_outlineVariant = Color(0xFFCAC4D0)
 
+// Additional light theme colors
+val md_theme_light_inverseSurface = Color(0xFF313033)
+val md_theme_light_inverseOnSurface = Color(0xFFF4EFF4)
+val md_theme_light_inversePrimary = Color(0xFFD0BCFF)
+val md_theme_light_surfaceTint = Color(0xFF6750A4)
+val md_theme_light_scrim = Color(0xFF000000)
+
 // Dark theme colors
 val md_theme_dark_primary = Color(0xFFD0BCFF)
 val md_theme_dark_onPrimary = Color(0xFF381E72)
@@ -53,6 +60,11 @@ val md_theme_dark_surfaceVariant = Color(0xFF49454F)
 val md_theme_dark_onSurfaceVariant = Color(0xFFCAC4D0)
 val md_theme_dark_outline = Color(0xFF938F99)
 val md_theme_dark_outlineVariant = Color(0xFF49454F)
+val md_theme_dark_inverseSurface = Color(0xFFE6E1E5)
+val md_theme_dark_inverseOnSurface = Color(0xFF313033)
+val md_theme_dark_inversePrimary = Color(0xFF6750A4)
+val md_theme_dark_surfaceTint = Color(0xFFD0BCFF)
+val md_theme_dark_scrim = Color(0xFF000000)
 
 // AMOLED theme (pure black background)
 val amoled_background = Color(0xFF000000)

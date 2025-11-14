@@ -48,9 +48,9 @@ class MainActivity : ComponentActivity() {
             var firstLaunch by remember { mutableStateOf(appSettings.firstLaunch) }
 
             PaperizeTheme(
-                darkTheme = appSettings.darkMode,
-                amoledTheme = appSettings.amoledTheme,
-                dynamicColor = appSettings.dynamicTheming
+                darkMode = appSettings.darkMode,
+                amoledMode = appSettings.amoledTheme,
+                dynamicTheming = appSettings.dynamicTheming
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

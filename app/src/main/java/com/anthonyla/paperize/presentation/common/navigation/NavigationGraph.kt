@@ -7,14 +7,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.anthonyla.paperize.presentation.screens.album.AlbumScreen
+import com.anthonyla.paperize.presentation.screens.album_view.AlbumViewScreen
 import com.anthonyla.paperize.presentation.screens.effects.WallpaperEffectsScreen
-import com.anthonyla.paperize.presentation.screens.folder.FolderScreen
+import com.anthonyla.paperize.presentation.screens.folder_view.FolderViewScreen
 import com.anthonyla.paperize.presentation.screens.home.HomeScreen
 import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
 import com.anthonyla.paperize.presentation.screens.settings.SettingsScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
-import com.anthonyla.paperize.presentation.screens.wallpaper.WallpaperScreen
+import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
 
 /**
  * Navigation graph for Paperize
@@ -59,32 +59,39 @@ fun NavigationGraph(
         }
 
         // Album screen
-        composable<AlbumRoute> {
-            AlbumScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToWallpaper = { wallpaperId ->
-                    navController.navigate(WallpaperRoute(wallpaperId))
-                },
+        composable<AlbumRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<AlbumRoute>()
+            AlbumViewScreen(
+                albumId = route.albumId,
+                onBackClick = { navController.popBackStack() },
                 onNavigateToFolder = { folderId ->
                     navController.navigate(FolderRoute(folderId))
+                },
+                onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
+                    navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
                 }
             )
         }
 
         // Folder screen
-        composable<FolderRoute> {
-            FolderScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToWallpaper = { wallpaperId ->
-                    navController.navigate(WallpaperRoute(wallpaperId))
+        composable<FolderRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<FolderRoute>()
+            FolderViewScreen(
+                folderId = route.folderId,
+                onBackClick = { navController.popBackStack() },
+                onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
+                    navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
                 }
             )
         }
 
         // Wallpaper preview screen
-        composable<WallpaperRoute> {
-            WallpaperScreen(
-                onNavigateBack = { navController.popBackStack() }
+        composable<WallpaperViewRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<WallpaperViewRoute>()
+            WallpaperViewScreen(
+                wallpaperUri = route.wallpaperUri,
+                wallpaperName = route.wallpaperName,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

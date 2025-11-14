@@ -59,6 +59,13 @@ class HomeViewModel @Inject constructor(
             initialValue = ScheduleSettings.default()
         )
 
+    val appSettings = settingsRepository.getAppSettingsFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = com.anthonyla.paperize.domain.model.AppSettings.default()
+        )
+
     fun createAlbum(name: String) {
         viewModelScope.launch {
             createAlbumUseCase(name)
