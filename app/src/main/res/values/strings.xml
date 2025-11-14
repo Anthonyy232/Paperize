@@ -198,4 +198,6 @@
   <string name="add_wallpapers">Add wallpapers</string>
   <string name="select_album">Select album</string>
   <string name="sort">Sort</string>
+  <string name="wallpaper_settings">Wallpaper Settings</string>
+  <string name="randomly_shuffle_the_wallpapers">Randomly shuffle the wallpapers</string>
 </resources>
