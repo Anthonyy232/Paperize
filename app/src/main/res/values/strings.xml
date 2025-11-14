@@ -200,4 +200,12 @@
   <string name="sort">Sort</string>
   <string name="wallpaper_settings">Wallpaper Settings</string>
   <string name="randomly_shuffle_the_wallpapers">Randomly shuffle the wallpapers</string>
+  <string name="notification_permission_title">Enable Notifications</string>
+  <string name="notification_permission_description">Allow Paperize to send notifications about wallpaper changes and when the app is running in the background. You can change this anytime in settings.</string>
+  <string name="skip">Skip</string>
+  <string name="permission_granted">Permission Granted</string>
+  <string name="storage_permission_title">Storage Access (Optional)</string>
+  <string name="storage_permission_description">Allow Paperize to access storage to preview your current wallpaper in the app.</string>
+  <string name="storage_permission_optional">This permission is optional. Paperize can still function normally without it, but you won\'t be able to see wallpaper previews.</string>
+  <string name="continue_without_storage">Continue Without Storage Access</string>
 </resources>

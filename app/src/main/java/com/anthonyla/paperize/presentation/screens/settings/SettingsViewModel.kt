@@ -55,6 +55,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateFirstLaunch(isFirstLaunch: Boolean) {
+        viewModelScope.launch {
+            val current = appSettings.value
+            settingsRepository.updateAppSettings(current.copy(firstLaunch = isFirstLaunch))
+        }
+    }
+
     fun resetAllData() {
         viewModelScope.launch {
             settingsRepository.clearAllSettings()

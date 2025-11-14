@@ -11,9 +11,11 @@ import com.anthonyla.paperize.presentation.screens.album_view.AlbumViewScreen
 import com.anthonyla.paperize.presentation.screens.effects.WallpaperEffectsScreen
 import com.anthonyla.paperize.presentation.screens.folder_view.FolderViewScreen
 import com.anthonyla.paperize.presentation.screens.home.HomeScreen
+import com.anthonyla.paperize.presentation.screens.notification.NotificationPermissionScreen
 import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
 import com.anthonyla.paperize.presentation.screens.settings.SettingsScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
+import com.anthonyla.paperize.presentation.screens.storage.StoragePermissionScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
 
 /**
@@ -35,9 +37,31 @@ fun NavigationGraph(
         composable<StartupRoute> {
             StartupScreen(
                 onAgree = {
+                    navController.navigate(NotificationRoute) {
+                        popUpTo<StartupRoute> { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Notification permission screen
+        composable<NotificationRoute> {
+            NotificationPermissionScreen(
+                onContinue = {
+                    navController.navigate(StoragePermissionRoute) {
+                        popUpTo<NotificationRoute> { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Storage permission screen
+        composable<StoragePermissionRoute> {
+            StoragePermissionScreen(
+                onContinue = {
                     onFirstLaunchComplete()
                     navController.navigate(HomeRoute) {
-                        popUpTo<StartupRoute> { inclusive = true }
+                        popUpTo<StoragePermissionRoute> { inclusive = true }
                     }
                 }
             )

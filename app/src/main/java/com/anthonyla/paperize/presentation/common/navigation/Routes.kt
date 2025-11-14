@@ -13,6 +13,9 @@ object StartupRoute
 object NotificationRoute
 
 @Serializable
+object StoragePermissionRoute
+
+@Serializable
 object HomeRoute
 
 @Serializable
