@@ -44,7 +44,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
 landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.5.2" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
-lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.7" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
 zoomable = { module = "net.engawapg.lib:zoomable", version = "2.8.1" }
