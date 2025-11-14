@@ -25,28 +25,39 @@
 -keep class kotlin.coroutines.Continuation
 -keep class androidx.datastore.*.** {*;}
 
--keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Album {
+# Keep domain models for serialization
+-keepclassmembers class com.anthonyla.paperize.domain.model.Album {
  !transient <fields>;
 }
--keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.AlbumWithWallpaperAndFolder {
+-keepclassmembers class com.anthonyla.paperize.domain.model.Wallpaper {
  !transient <fields>;
 }
--keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Wallpaper {
- !transient <fields>;
-}
--keepclassmembers class com.anthonyla.paperize.feature.wallpaper.domain.model.Folder {
+-keepclassmembers class com.anthonyla.paperize.domain.model.Folder {
  !transient <fields>;
 }
 
-# Keep wallpaper services and their action enums
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService { *; }
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.HomeWallpaperService$Actions { *; }
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService { *; }
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_service.LockWallpaperService$Actions { *; }
+# Keep database entities
+-keep class com.anthonyla.paperize.data.database.entities.** { *; }
 
-# Keep WallpaperAction classes
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAction { *; }
--keep class com.anthonyla.paperize.feature.wallpaper.wallpaper_alarmmanager.WallpaperAction$* { *; }
+# Keep wallpaper service
+-keep class com.anthonyla.paperize.service.wallpaper.WallpaperChangeService { *; }
+-keep class com.anthonyla.paperize.service.wallpaper.WallpaperChangeService$* { *; }
 
-# Keep Type enum
--keep class com.anthonyla.paperize.core.Type { *; }
+# Keep enums
+-keep class com.anthonyla.paperize.core.WallpaperSourceType { *; }
+-keep class com.anthonyla.paperize.core.ScreenType { *; }
+-keep class com.anthonyla.paperize.core.ScalingConstants { *; }
+-keep class com.anthonyla.paperize.core.DarkenPercentage { *; }
+
+# Keep navigation routes for serialization
+-keep class com.anthonyla.paperize.presentation.common.navigation.** { *; }
+
+# Keep Hilt generated classes
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+
+# Keep Room database
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-dontwarn androidx.room.paging.**
