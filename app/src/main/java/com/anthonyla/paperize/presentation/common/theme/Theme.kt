@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
+private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
@@ -29,8 +29,8 @@ private val LightColorScheme = lightColorScheme(
     tertiaryContainer = md_theme_light_tertiaryContainer,
     onTertiaryContainer = md_theme_light_onTertiaryContainer,
     error = md_theme_light_error,
-    onError = md_theme_light_onError,
     errorContainer = md_theme_light_errorContainer,
+    onError = md_theme_light_onError,
     onErrorContainer = md_theme_light_onErrorContainer,
     background = md_theme_light_background,
     onBackground = md_theme_light_onBackground,
@@ -39,15 +39,15 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
     outline = md_theme_light_outline,
-    outlineVariant = md_theme_light_outlineVariant,
-    inverseSurface = md_theme_light_inverseSurface,
     inverseOnSurface = md_theme_light_inverseOnSurface,
+    inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,
     surfaceTint = md_theme_light_surfaceTint,
-    scrim = md_theme_light_scrim
+    outlineVariant = md_theme_light_outlineVariant,
+    scrim = md_theme_light_scrim,
 )
 
-private val DarkColorScheme = darkColorScheme(
+private val DarkColors = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
     primaryContainer = md_theme_dark_primaryContainer,
@@ -61,8 +61,8 @@ private val DarkColorScheme = darkColorScheme(
     tertiaryContainer = md_theme_dark_tertiaryContainer,
     onTertiaryContainer = md_theme_dark_onTertiaryContainer,
     error = md_theme_dark_error,
-    onError = md_theme_dark_onError,
     errorContainer = md_theme_dark_errorContainer,
+    onError = md_theme_dark_onError,
     onErrorContainer = md_theme_dark_onErrorContainer,
     background = md_theme_dark_background,
     onBackground = md_theme_dark_onBackground,
@@ -71,15 +71,15 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = md_theme_dark_surfaceVariant,
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
     outline = md_theme_dark_outline,
-    outlineVariant = md_theme_dark_outlineVariant,
-    inverseSurface = md_theme_dark_inverseSurface,
     inverseOnSurface = md_theme_dark_inverseOnSurface,
+    inverseSurface = md_theme_dark_inverseSurface,
     inversePrimary = md_theme_dark_inversePrimary,
     surfaceTint = md_theme_dark_surfaceTint,
-    scrim = md_theme_dark_scrim
+    outlineVariant = md_theme_dark_outlineVariant,
+    scrim = md_theme_dark_scrim,
 )
 
-private val AmoledColorScheme = darkColorScheme(
+private val AmoledDarkColors = darkColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
@@ -108,15 +108,11 @@ private val AmoledColorScheme = darkColorScheme(
     inversePrimary = Color.White,
     surfaceTint = Color.Black,
     outlineVariant = md_theme_dark_outlineVariant,
-    scrim = md_theme_dark_scrim
+    scrim = md_theme_dark_scrim,
 )
 
 /**
- * Paperize theme with Material 3 support
- *
- * @param darkMode Whether to use dark theme (null = system default)
- * @param amoledMode Whether to use pure black AMOLED theme (only applies in dark mode)
- * @param dynamicTheming Whether to use dynamic theming (Android 12+)
+ * App theming for dynamic theming when supported and dark mode.
  */
 @Composable
 fun PaperizeTheme(
@@ -130,14 +126,15 @@ fun PaperizeTheme(
     val isDynamicTheming = isDynamicTheming(dynamicTheming = dynamicTheming)
     val dynamicThemingSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-    val colorScheme = when {
+    val colors = when {
         isDynamicTheming && dynamicThemingSupported && isDarkMode -> dynamicDarkColorScheme(context)
         isDynamicTheming && dynamicThemingSupported && !isDarkMode -> dynamicLightColorScheme(context)
-        isDarkMode && amoledMode -> AmoledColorScheme
-        isDarkMode && !amoledMode -> DarkColorScheme
-        else -> LightColorScheme
+        isDarkMode && amoledMode -> AmoledDarkColors
+        isDarkMode && !amoledMode -> DarkColors
+        else -> LightColors
     }
 
+    // Set the status bar color and system bar style to transparent
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -148,8 +145,8 @@ fun PaperizeTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = colors,
+        typography = MaterialTheme.typography,
         content = content,
         shapes = MaterialTheme.shapes
     )
@@ -157,7 +154,7 @@ fun PaperizeTheme(
 
 @Composable
 private fun isDarkMode(darkMode: Boolean?): Boolean =
-    when (darkMode) {
+    when(darkMode) {
         true -> true
         false -> false
         else -> isSystemInDarkTheme()
@@ -165,7 +162,7 @@ private fun isDarkMode(darkMode: Boolean?): Boolean =
 
 @Composable
 private fun isDynamicTheming(dynamicTheming: Boolean): Boolean =
-    when (dynamicTheming) {
+    when(dynamicTheming) {
         true -> true
         false -> false
     }
