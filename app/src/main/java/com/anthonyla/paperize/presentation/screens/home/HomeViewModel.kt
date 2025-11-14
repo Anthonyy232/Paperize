@@ -78,6 +78,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun selectHomeAlbum(album: Album) {
+        viewModelScope.launch {
+            val current = scheduleSettings.value
+            val updated = current.copy(homeAlbumId = album.id)
+            settingsRepository.updateScheduleSettings(updated)
+        }
+    }
+
+    fun selectLockAlbum(album: Album) {
+        viewModelScope.launch {
+            val current = scheduleSettings.value
+            val updated = current.copy(lockAlbumId = album.id)
+            settingsRepository.updateScheduleSettings(updated)
+        }
+    }
+
     fun toggleAlbumSelection(album: Album) {
         viewModelScope.launch {
             val isCurrentlySelected = selectedAlbums.value.any { it.id == album.id }

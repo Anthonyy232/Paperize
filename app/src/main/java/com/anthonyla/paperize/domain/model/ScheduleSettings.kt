@@ -10,6 +10,8 @@ data class ScheduleSettings(
     val enableChanger: Boolean = false,
     val separateSchedules: Boolean = false,
     val shuffleEnabled: Boolean = false,
+    val homeAlbumId: String? = null,
+    val lockAlbumId: String? = null,
     val homeIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val lockIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val scheduleStartTime: String? = null,
