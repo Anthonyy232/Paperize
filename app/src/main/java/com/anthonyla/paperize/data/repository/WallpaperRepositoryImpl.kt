@@ -29,7 +29,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class WallpaperRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val wallpaperDao: WallpaperDao,
     private val wallpaperQueueDao: WallpaperQueueDao
 ) : WallpaperRepository {

@@ -16,7 +16,7 @@ import javax.inject.Inject
  * Use case to scan a folder and add it to an album
  */
 class ScanFolderUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val wallpaperRepository: WallpaperRepository,
     private val albumRepository: AlbumRepository
 ) {

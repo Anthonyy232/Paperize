@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WallpaperViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val wallpaperRepository: WallpaperRepository
 ) : ViewModel() {
 

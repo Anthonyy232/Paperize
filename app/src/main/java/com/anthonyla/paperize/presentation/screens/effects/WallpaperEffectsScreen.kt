@@ -10,7 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.components.SettingSliderItem
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
@@ -98,7 +98,7 @@ fun WallpaperEffectsScreen(
                 onCheckedChange = { viewModel.updateGrayscaleEnabled(it) }
             )
 
-            Divider()
+            HorizontalDivider()
 
             // Additional settings
             Text(

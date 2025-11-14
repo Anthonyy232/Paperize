@@ -29,7 +29,7 @@ import javax.inject.Inject
  * 6. Refill queue if needed
  */
 class ChangeWallpaperUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val wallpaperRepository: WallpaperRepository,
     private val settingsRepository: SettingsRepository
 ) {

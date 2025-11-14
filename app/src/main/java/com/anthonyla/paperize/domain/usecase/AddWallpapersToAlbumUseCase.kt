@@ -16,7 +16,7 @@ import javax.inject.Inject
  * Use case to add wallpapers to an album
  */
 class AddWallpapersToAlbumUseCase @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val albumRepository: AlbumRepository
 ) {
     suspend operator fun invoke(albumId: String, uris: List<Uri>): Result<Unit> {

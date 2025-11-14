@@ -43,7 +43,7 @@ object AppModule {
             PaperizeDatabase::class.java,
             Constants.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration() // TODO: Implement proper migrations
+            .fallbackToDestructiveMigration(dropAllTables = true) // TODO: Implement proper migrations
             .build()
     }
 

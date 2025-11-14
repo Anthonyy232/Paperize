@@ -14,7 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.presentation.common.navigation.HomeRoute
 import com.anthonyla.paperize.presentation.common.navigation.NavigationGraph
 import com.anthonyla.paperize.presentation.common.navigation.StartupRoute
