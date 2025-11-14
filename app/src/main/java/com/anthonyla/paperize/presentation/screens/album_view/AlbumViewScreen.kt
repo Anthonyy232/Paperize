@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
 import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
@@ -103,14 +104,12 @@ fun AlbumViewScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { imagePickerLauncher.launch(arrayOf("image/*")) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.add_wallpapers)
-                )
-            }
+            AddAlbumAnimatedFab(
+                isLoading = false,
+                animate = true,
+                onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                onFolderClick = { folderPickerLauncher.launch(null) }
+            )
         }
     ) { paddingValues ->
         LazyVerticalGrid(
