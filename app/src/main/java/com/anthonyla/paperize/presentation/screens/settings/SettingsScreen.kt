@@ -58,11 +58,11 @@ fun SettingsScreen(
             SwitchListItem(
                 title = stringResource(R.string.dark_mode),
                 description = stringResource(R.string.easier_on_the_eyes),
-                checked = appSettings.darkMode,
+                checked = appSettings.darkMode ?: false,
                 onCheckedChange = { viewModel.updateDarkMode(it) }
             )
 
-            if (appSettings.darkMode) {
+            if (appSettings.darkMode == true) {
                 SwitchListItem(
                     title = stringResource(R.string.amoled_mode),
                     description = stringResource(R.string.full_dark_mode),

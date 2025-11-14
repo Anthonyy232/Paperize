@@ -68,7 +68,7 @@ class PreferencesManager @Inject constructor(
 
     suspend fun updateAppSettings(settings: AppSettings) {
         dataStore.edit { prefs ->
-            prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] = settings.darkMode
+            prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] = settings.darkMode ?: false
             prefs[booleanPreferencesKey(PreferenceKeys.AMOLED_THEME)] = settings.amoledTheme
             prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] = settings.dynamicTheming
             prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] = settings.animate
