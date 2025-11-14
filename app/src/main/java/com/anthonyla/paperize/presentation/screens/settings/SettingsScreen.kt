@@ -21,6 +21,7 @@ import com.anthonyla.paperize.R
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
+    onNavigateToEffects: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -86,20 +87,43 @@ fun SettingsScreen(
 
             Divider(modifier = Modifier.padding(vertical = 8.dp))
 
+            // Wallpaper section
+            ListItem(
+                headlineContent = { Text("Wallpaper") },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            Card(
+                onClick = onNavigateToEffects,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                ListItem(
+                    headlineContent = { Text("Wallpaper Effects") },
+                    supportingContent = { Text("Configure blur, brightness, vignette, and more") }
+                )
+            }
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
             // About section
             ListItem(
                 headlineContent = { Text(stringResource(R.string.about)) },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.privacy_policy)) },
-                supportingContent = { Text(stringResource(R.string.click_here_to_view_our_privacy_policy)) },
-                modifier = Modifier.padding(horizontal = 16.dp),
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+            Card(
+                onClick = onNavigateToPrivacy,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.privacy_policy)) },
+                    supportingContent = { Text(stringResource(R.string.click_here_to_view_our_privacy_policy)) }
                 )
-            )
+            }
 
             Divider(modifier = Modifier.padding(vertical = 8.dp))
 

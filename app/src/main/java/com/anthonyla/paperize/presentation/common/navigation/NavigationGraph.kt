@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.presentation.screens.album.AlbumScreen
+import com.anthonyla.paperize.presentation.screens.effects.WallpaperEffectsScreen
 import com.anthonyla.paperize.presentation.screens.folder.FolderScreen
 import com.anthonyla.paperize.presentation.screens.home.HomeScreen
 import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
@@ -87,17 +88,19 @@ fun NavigationGraph(
             )
         }
 
-        // Sort screen (TODO: Implement sort functionality)
-        composable<SortRoute> {
-            // SortScreen implementation coming soon
-            // For now, just navigate back
+        // Effects screen
+        composable<EffectsRoute> {
+            WallpaperEffectsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Settings screen
         composable<SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToPrivacy = { navController.navigate(PrivacyRoute) }
+                onNavigateToPrivacy = { navController.navigate(PrivacyRoute) },
+                onNavigateToEffects = { navController.navigate(EffectsRoute) }
             )
         }
 

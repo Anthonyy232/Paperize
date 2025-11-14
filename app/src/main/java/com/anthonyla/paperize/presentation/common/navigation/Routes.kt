@@ -32,3 +32,6 @@ object SettingsRoute
 
 @Serializable
 object PrivacyRoute
+
+@Serializable
+object EffectsRoute

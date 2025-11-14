@@ -15,6 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.anthonyla.paperize.R
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,10 +68,13 @@ fun WallpaperScreen(
             when {
                 isLoading -> CircularProgressIndicator()
                 bitmap != null -> {
+                    val zoomState = rememberZoomState()
                     Image(
                         bitmap = bitmap!!.asImageBitmap(),
                         contentDescription = wallpaper?.fileName,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zoomable(zoomState),
                         contentScale = ContentScale.Fit
                     )
                 }

@@ -23,6 +23,11 @@ interface AlbumRepository {
     fun getAlbumById(albumId: String): Flow<Album?>
 
     /**
+     * Get a specific folder by ID
+     */
+    fun getFolderById(folderId: String): Flow<Folder?>
+
+    /**
      * Get selected albums
      */
     fun getSelectedAlbums(): Flow<List<Album>>

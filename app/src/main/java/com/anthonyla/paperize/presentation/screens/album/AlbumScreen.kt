@@ -20,6 +20,8 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.DeleteAlbumDialog
 import com.anthonyla.paperize.presentation.common.components.EditAlbumNameDialog
+import com.anthonyla.paperize.presentation.common.components.rememberFolderPicker
+import com.anthonyla.paperize.presentation.common.components.rememberImagePicker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +38,16 @@ fun AlbumScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showFabMenu by remember { mutableStateOf(false) }
+
+    val imagePicker = rememberImagePicker { uris ->
+        viewModel.addWallpapers(uris)
+        showFabMenu = false
+    }
+
+    val folderPicker = rememberFolderPicker { uri ->
+        viewModel.addFolder(uri)
+        showFabMenu = false
+    }
 
     Scaffold(
         topBar = {
@@ -81,13 +93,13 @@ fun AlbumScreen(
             Column(horizontalAlignment = Alignment.End) {
                 if (showFabMenu) {
                     SmallFloatingActionButton(
-                        onClick = { /* TODO: Image picker */ },
+                        onClick = imagePicker,
                         modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         Icon(Icons.Default.Image, stringResource(R.string.add_images))
                     }
                     SmallFloatingActionButton(
-                        onClick = { /* TODO: Folder picker */ },
+                        onClick = folderPicker,
                         modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         Icon(Icons.Default.Folder, stringResource(R.string.add_folder))

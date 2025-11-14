@@ -164,8 +164,9 @@ class WallpaperChangeService : Service() {
     }
 
     private fun handleUpdateWallpaper(screenType: ScreenType) {
-        // TODO: Implement update wallpaper (re-apply effects to current wallpaper)
-        stopSelf()
+        // Re-apply effects to current wallpaper by triggering a change
+        // This will get the next wallpaper and apply current effects
+        handleChangeWallpaper(screenType)
     }
 
     private fun handleRefreshAlbum() {

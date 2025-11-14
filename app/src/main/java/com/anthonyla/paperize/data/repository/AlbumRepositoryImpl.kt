@@ -36,6 +36,9 @@ class AlbumRepositoryImpl @Inject constructor(
     override fun getAlbumById(albumId: String): Flow<Album?> =
         albumDao.getAlbumWithDetails(albumId).map { it?.toDomainModel() }
 
+    override fun getFolderById(folderId: String): Flow<Folder?> =
+        folderDao.getFolderWithWallpapers(folderId).map { it?.toDomainModel() }
+
     override fun getSelectedAlbums(): Flow<List<Album>> =
         albumDao.getSelectedAlbumsWithDetails().map { it.toDomainModelsFromRelations() }
 
