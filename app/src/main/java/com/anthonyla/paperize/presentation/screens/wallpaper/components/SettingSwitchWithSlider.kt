@@ -50,7 +50,7 @@ fun SettingSwitchWithSlider(
         shape = RoundedCornerShape(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .padding(PaddingValues(horizontal = 16.dp, vertical = 8.dp))
+            .padding(PaddingValues(horizontal = 8.dp, vertical = 4.dp))
     ) {
         Column(
             modifier = Modifier

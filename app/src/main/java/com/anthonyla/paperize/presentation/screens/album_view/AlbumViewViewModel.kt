@@ -3,6 +3,7 @@ package com.anthonyla.paperize.presentation.screens.album_view
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
@@ -51,7 +52,7 @@ class AlbumViewViewModel @Inject constructor(
         viewModelScope.launch {
             val wallpapers = uris.mapIndexed { index, uri ->
                 Wallpaper(
-                    id = "",
+                    id = generateId(),
                     albumId = albumId,
                     folderId = null,
                     uri = uri,
@@ -67,7 +68,7 @@ class AlbumViewViewModel @Inject constructor(
     fun addFolder(uri: String) {
         viewModelScope.launch {
             val folder = Folder(
-                id = "",
+                id = generateId(),
                 albumId = albumId,
                 uri = uri,
                 name = uri.substringAfterLast('/'),
