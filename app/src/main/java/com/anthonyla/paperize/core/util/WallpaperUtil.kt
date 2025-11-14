@@ -9,7 +9,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
-import android.graphics.HardwareBuffer
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -18,6 +17,7 @@ import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
 import android.graphics.Shader
+import android.hardware.HardwareBuffer
 import android.hardware.HardwareRenderer
 import android.media.ImageReader
 import android.net.Uri
