@@ -7,12 +7,11 @@ import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
-import com.anthonyla.paperize.domain.repository.FolderRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +20,6 @@ import javax.inject.Inject
 class AlbumViewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val albumRepository: AlbumRepository,
-    private val folderRepository: FolderRepository,
     private val wallpaperRepository: WallpaperRepository
 ) : ViewModel() {
 
@@ -34,14 +32,15 @@ class AlbumViewViewModel @Inject constructor(
             initialValue = null
         )
 
-    val folders: StateFlow<List<Folder>> = folderRepository.getFoldersByAlbumId(albumId)
+    val folders: StateFlow<List<Folder>> = album
+        .map { it?.folders ?: emptyList() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val wallpapers: StateFlow<List<Wallpaper>> = wallpaperRepository.getWallpapersByAlbumId(albumId)
+    val wallpapers: StateFlow<List<Wallpaper>> = wallpaperRepository.getWallpapersByAlbum(albumId)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -50,35 +49,34 @@ class AlbumViewViewModel @Inject constructor(
 
     fun addWallpapers(uris: List<String>) {
         viewModelScope.launch {
-            uris.forEach { uri ->
-                wallpaperRepository.createWallpaper(
-                    Wallpaper(
-                        id = "",
-                        albumId = albumId,
-                        folderId = null,
-                        uri = uri,
-                        name = uri.substringAfterLast('/'),
-                        dateAdded = System.currentTimeMillis(),
-                        order = 0
-                    )
+            val wallpapers = uris.mapIndexed { index, uri ->
+                Wallpaper(
+                    id = "",
+                    albumId = albumId,
+                    folderId = null,
+                    uri = uri,
+                    name = uri.substringAfterLast('/'),
+                    dateModified = System.currentTimeMillis(),
+                    displayOrder = index
                 )
             }
+            albumRepository.addWallpapersToAlbum(albumId, wallpapers)
         }
     }
 
     fun addFolder(uri: String) {
         viewModelScope.launch {
-            folderRepository.createFolder(
-                Folder(
-                    id = "",
-                    albumId = albumId,
-                    uri = uri,
-                    name = uri.substringAfterLast('/'),
-                    dateAdded = System.currentTimeMillis(),
-                    order = 0,
-                    wallpapers = emptyList()
-                )
+            val folder = Folder(
+                id = "",
+                albumId = albumId,
+                uri = uri,
+                name = uri.substringAfterLast('/'),
+                coverUri = null,
+                dateModified = System.currentTimeMillis(),
+                displayOrder = 0,
+                wallpapers = emptyList()
             )
+            albumRepository.addFolderToAlbum(albumId, folder)
         }
     }
 
