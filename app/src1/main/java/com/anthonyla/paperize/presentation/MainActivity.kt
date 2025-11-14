@@ -11,12 +11,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.anthonyla.paperize.presentation.common.navigation.HomeRoute
+import com.anthonyla.paperize.presentation.common.navigation.NavigationGraph
+import com.anthonyla.paperize.presentation.common.navigation.StartupRoute
 import com.anthonyla.paperize.presentation.common.theme.PaperizeTheme
+import com.anthonyla.paperize.presentation.screens.settings.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -40,22 +43,26 @@ class MainActivity : ComponentActivity() {
         requestPermissions()
 
         setContent {
-            // TODO: Get settings from ViewModel
-            val darkMode = false // TODO: From settings
-            val amoledTheme = false // TODO: From settings
-            val dynamicTheming = true // TODO: From settings
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val appSettings by settingsViewModel.appSettings.collectAsState()
+            var firstLaunch by remember { mutableStateOf(appSettings.firstLaunch) }
 
             PaperizeTheme(
-                darkTheme = darkMode,
-                amoledTheme = amoledTheme,
-                dynamicColor = dynamicTheming
+                darkTheme = appSettings.darkMode,
+                amoledTheme = appSettings.amoledTheme,
+                dynamicColor = appSettings.dynamicTheming
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // TODO: Navigation graph will go here
-                    // PaperizeApp()
+                    NavigationGraph(
+                        startDestination = if (firstLaunch) StartupRoute else HomeRoute,
+                        onFirstLaunchComplete = {
+                            firstLaunch = false
+                            // Update settings to mark first launch as complete
+                        }
+                    )
                 }
             }
         }
