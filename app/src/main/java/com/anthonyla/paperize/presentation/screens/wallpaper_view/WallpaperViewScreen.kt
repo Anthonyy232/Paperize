@@ -103,17 +103,7 @@ fun WallpaperViewScreen(
                     model = wallpaperUri.toUri(),
                     contentDescription = wallpaperName,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize(),
-                    onState = { state ->
-                        // Show loading indicator
-                        if (state is AsyncImagePainter.State.Loading) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        }
-                    }
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

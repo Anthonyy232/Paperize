@@ -78,7 +78,7 @@ fun FolderViewScreen(
 
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,
-                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.name) },
+                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName) },
                     modifier = itemModifier
                 )
             }

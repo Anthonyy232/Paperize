@@ -195,4 +195,7 @@
   <string name="changing_wallpaper">Changing wallpaper…</string>
   <string name="skip_landscape_mode">Skip in landscape mode</string>
   <string name="skip_non_interactive_state">Skip in non-interactive state</string>
+  <string name="add_wallpapers">Add wallpapers</string>
+  <string name="select_album">Select album</string>
+  <string name="sort">Sort</string>
 </resources>

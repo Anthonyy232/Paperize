@@ -151,7 +151,7 @@ fun AlbumViewScreen(
             ) { wallpaper ->
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,
-                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.name) },
+                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName) },
                     modifier = commonItemModifier
                         .then(
                             Modifier.animateItem(

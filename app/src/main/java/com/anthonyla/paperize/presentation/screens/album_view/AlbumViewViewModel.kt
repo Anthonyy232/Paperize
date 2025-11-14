@@ -55,7 +55,7 @@ class AlbumViewViewModel @Inject constructor(
                     albumId = albumId,
                     folderId = null,
                     uri = uri,
-                    name = uri.substringAfterLast('/'),
+                    fileName = uri.substringAfterLast('/'),
                     dateModified = System.currentTimeMillis(),
                     displayOrder = index
                 )
