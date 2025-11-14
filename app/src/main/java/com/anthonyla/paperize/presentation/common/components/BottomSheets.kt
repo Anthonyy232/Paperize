@@ -84,7 +84,7 @@ private fun AlbumSelectionItem(
     ListItem(
         headlineContent = { Text(album.name) },
         supportingContent = {
-            Text(stringResource(R.string.wallpaper_count, album.totalWallpaperCount))
+            Text(pluralStringResource(R.plurals.wallpaper_count, album.totalWallpaperCount, album.totalWallpaperCount))
         },
         leadingContent = {
             Icon(

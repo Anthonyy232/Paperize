@@ -364,7 +364,7 @@ private fun AlbumCard(
 
             Column {
                 Text(
-                    text = stringResource(R.string.wallpaper_count, album.totalWallpaperCount),
+                    text = pluralStringResource(R.plurals.wallpaper_count, album.totalWallpaperCount, album.totalWallpaperCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -72,6 +72,15 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteWallpapersByFolderId(folderId: String): Result<Unit> {
+        return try {
+            wallpaperDao.deleteWallpapersByFolder(folderId)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     override suspend fun updateWallpaperOrder(wallpaperId: String, order: Int): Result<Unit> {
         return try {
             wallpaperDao.updateWallpaperOrder(wallpaperId, order)

@@ -6,6 +6,7 @@ import com.anthonyla.paperize.data.database.dao.AlbumDao
 import com.anthonyla.paperize.data.database.dao.FolderDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
+import com.anthonyla.paperize.data.mapper.toDomainModel
 import com.anthonyla.paperize.data.mapper.toDomainModelsFromRelations
 import com.anthonyla.paperize.data.mapper.toEntities
 import com.anthonyla.paperize.data.mapper.toEntity

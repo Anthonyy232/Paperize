@@ -106,13 +106,13 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] ?: 0,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_BLUR)] ?: 0,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] ?: 0,
-                grayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false
             ),
             lockEffects = WallpaperEffects(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] ?: 0,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_BLUR)] ?: 0,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] ?: 0,
-                grayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false
             )
         )
     }
@@ -138,13 +138,13 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] ?: 0,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_BLUR)] ?: 0,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] ?: 0,
-                grayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false
             ),
             lockEffects = WallpaperEffects(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] ?: 0,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_BLUR)] ?: 0,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] ?: 0,
-                grayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false
             )
         )
     }
@@ -175,13 +175,13 @@ class PreferencesManager @Inject constructor(
             prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] = settings.homeEffects.darkenPercentage
             prefs[intPreferencesKey(PreferenceKeys.HOME_BLUR)] = settings.homeEffects.blurPercentage
             prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] = settings.homeEffects.vignettePercentage
-            prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] = settings.homeEffects.grayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] = settings.homeEffects.enableGrayscale
 
             // Lock effects
             prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] = settings.lockEffects.darkenPercentage
             prefs[intPreferencesKey(PreferenceKeys.LOCK_BLUR)] = settings.lockEffects.blurPercentage
             prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] = settings.lockEffects.vignettePercentage
-            prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] = settings.lockEffects.grayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] = settings.lockEffects.enableGrayscale
         }
     }
 

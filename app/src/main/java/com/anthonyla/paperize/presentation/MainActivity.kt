@@ -72,14 +72,13 @@ class MainActivity : ComponentActivity() {
         val permissionsToRequest = mutableListOf<String>()
 
         // SET_WALLPAPER permission (required)
+        // SET_WALLPAPER permission (always available since minSdk is 31)
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.SET_WALLPAPER
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            if (packageManager.hasSystemFeature(PackageManager.FEATURE_WALLPAPER)) {
-                permissionsToRequest.add(Manifest.permission.SET_WALLPAPER)
-            }
+            permissionsToRequest.add(Manifest.permission.SET_WALLPAPER)
         }
 
         // POST_NOTIFICATIONS permission (Android 13+)

@@ -41,6 +41,11 @@ interface WallpaperRepository {
     suspend fun deleteWallpaper(wallpaperId: String): Result<Unit>
 
     /**
+     * Delete all wallpapers in a folder
+     */
+    suspend fun deleteWallpapersByFolderId(folderId: String): Result<Unit>
+
+    /**
      * Update wallpaper order
      */
     suspend fun updateWallpaperOrder(wallpaperId: String, order: Int): Result<Unit>

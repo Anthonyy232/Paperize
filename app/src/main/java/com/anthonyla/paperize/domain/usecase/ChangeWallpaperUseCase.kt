@@ -76,7 +76,7 @@ class ChangeWallpaperUseCase @Inject constructor(
                 darkenPercent = effects.darkenPercentage,
                 blurPercent = effects.blurPercentage,
                 vignettePercent = effects.vignettePercentage,
-                grayscalePercent = if (effects.grayscale) 100 else 0
+                grayscalePercent = if (effects.enableGrayscale) 100 else 0
             )
 
             // Dequeue wallpaper

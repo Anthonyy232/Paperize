@@ -315,6 +315,7 @@ fun darkenBitmap(source: Bitmap, brightnessToRetainPercent: Int): Bitmap {
  * Blur the bitmap by a certain percentage using GPU acceleration
  * @param percent 0-100
  */
+@RequiresApi(Build.VERSION_CODES.S)
 fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
     val clampedPercent = percent.coerceIn(0, 100)
     if (clampedPercent == 0) {
