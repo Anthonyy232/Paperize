@@ -51,9 +51,6 @@ fun NavigationGraph(
                 },
                 onNavigateToAlbum = { albumId ->
                     navController.navigate(AlbumRoute(albumId))
-                },
-                onNavigateToFolder = { folderId ->
-                    navController.navigate(FolderRoute(folderId))
                 }
             )
         }
