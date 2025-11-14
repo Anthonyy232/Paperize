@@ -6,9 +6,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.components.DeleteAlbumDialog
+import com.anthonyla.paperize.presentation.common.components.EditAlbumNameDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +34,8 @@ fun AlbumScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditNameDialog by remember { mutableStateOf(false) }
+    var showFabMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -56,6 +58,14 @@ fun AlbumScreen(
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.change_name)) },
+                            onClick = {
+                                showMenu = false
+                                showEditNameDialog = true
+                            },
+                            leadingIcon = { Icon(Icons.Default.Edit, null) }
+                        )
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete_album)) },
                             onClick = {
                                 showMenu = false
@@ -66,6 +76,32 @@ fun AlbumScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                if (showFabMenu) {
+                    SmallFloatingActionButton(
+                        onClick = { /* TODO: Image picker */ },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        Icon(Icons.Default.Image, stringResource(R.string.add_images))
+                    }
+                    SmallFloatingActionButton(
+                        onClick = { /* TODO: Folder picker */ },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        Icon(Icons.Default.Folder, stringResource(R.string.add_folder))
+                    }
+                }
+                FloatingActionButton(
+                    onClick = { showFabMenu = !showFabMenu }
+                ) {
+                    Icon(
+                        if (showFabMenu) Icons.Default.Close else Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         album?.let { currentAlbum ->
@@ -132,25 +168,24 @@ fun AlbumScreen(
                 }
             }
 
+            if (showEditNameDialog) {
+                EditAlbumNameDialog(
+                    currentName = currentAlbum.name,
+                    onDismiss = { showEditNameDialog = false },
+                    onConfirm = { newName ->
+                        viewModel.updateAlbumName(newName)
+                        showEditNameDialog = false
+                    }
+                )
+            }
+
             if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    title = { Text(stringResource(R.string.delete_album_question)) },
-                    text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this)) },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                viewModel.deleteAlbum { onNavigateBack() }
-                                showDeleteDialog = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.delete_album))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text(stringResource(R.string.cancel))
-                        }
+                DeleteAlbumDialog(
+                    albumName = currentAlbum.name,
+                    onDismiss = { showDeleteDialog = false },
+                    onConfirm = {
+                        viewModel.deleteAlbum { onNavigateBack() }
+                        showDeleteDialog = false
                     }
                 )
             }
