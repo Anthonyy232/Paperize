@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.GetSelectedAlbumsUseCase
 import com.anthonyla.paperize.domain.usecase.RefreshAlbumUseCase
@@ -45,6 +46,9 @@ class WallpaperChangeService : Service() {
 
     @Inject
     lateinit var refreshAlbumUseCase: RefreshAlbumUseCase
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -97,23 +101,41 @@ class WallpaperChangeService : Service() {
     private fun handleChangeWallpaper(screenType: ScreenType) {
         serviceScope.launch {
             try {
-                // Get selected albums
-                val selectedAlbums = getSelectedAlbumsUseCase().first()
-                if (selectedAlbums.isEmpty()) {
-                    Log.w(TAG, "No selected albums")
-                    stopSelf()
-                    return@launch
-                }
-
-                // Use first selected album (can be extended to support multiple albums)
-                val album = selectedAlbums.first()
+                // Get schedule settings to determine which albums to use
+                val settings = settingsRepository.getScheduleSettings()
 
                 when (screenType) {
-                    ScreenType.HOME -> changeHomeWallpaper(album.id)
-                    ScreenType.LOCK -> changeLockWallpaper(album.id)
+                    ScreenType.HOME -> {
+                        val homeAlbumId = settings.homeAlbumId
+                        if (homeAlbumId != null) {
+                            changeHomeWallpaper(homeAlbumId)
+                        } else {
+                            Log.w(TAG, "No home album selected")
+                        }
+                    }
+                    ScreenType.LOCK -> {
+                        val lockAlbumId = settings.lockAlbumId
+                        if (lockAlbumId != null) {
+                            changeLockWallpaper(lockAlbumId)
+                        } else {
+                            Log.w(TAG, "No lock album selected")
+                        }
+                    }
                     ScreenType.BOTH -> {
-                        changeHomeWallpaper(album.id)
-                        changeLockWallpaper(album.id)
+                        val homeAlbumId = settings.homeAlbumId
+                        val lockAlbumId = settings.lockAlbumId
+
+                        if (homeAlbumId != null) {
+                            changeHomeWallpaper(homeAlbumId)
+                        } else {
+                            Log.w(TAG, "No home album selected")
+                        }
+
+                        if (lockAlbumId != null) {
+                            changeLockWallpaper(lockAlbumId)
+                        } else {
+                            Log.w(TAG, "No lock album selected")
+                        }
                     }
                 }
 

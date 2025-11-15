@@ -128,11 +128,8 @@ class HomeViewModel @Inject constructor(
 
     fun changeWallpaperNow(screenType: ScreenType) {
         val intent = Intent(context, WallpaperChangeService::class.java).apply {
-            action = when (screenType) {
-                ScreenType.HOME -> "ACTION_CHANGE_HOME"
-                ScreenType.LOCK -> "ACTION_CHANGE_LOCK"
-                ScreenType.BOTH -> "ACTION_CHANGE_BOTH"
-            }
+            action = WallpaperChangeService.ACTION_CHANGE_WALLPAPER
+            putExtra(WallpaperChangeService.EXTRA_SCREEN_TYPE, screenType.name)
         }
         context.startForegroundService(intent)
     }
