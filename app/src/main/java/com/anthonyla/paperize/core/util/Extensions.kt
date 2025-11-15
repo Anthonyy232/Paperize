@@ -58,6 +58,37 @@ fun Uri.getLastModified(context: Context): Long {
 }
 
 /**
+ * Scan a folder URI and return all image file URIs
+ */
+fun Uri.scanFolderForImages(context: Context): List<Uri> {
+    val documentFile = DocumentFile.fromTreeUri(context, this) ?: return emptyList()
+    if (!documentFile.isDirectory) return emptyList()
+
+    val imageUris = mutableListOf<Uri>()
+    val supportedTypes = setOf(
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "image/avif"
+    )
+
+    fun scanDirectory(directory: DocumentFile) {
+        directory.listFiles().forEach { file ->
+            when {
+                file.isDirectory -> scanDirectory(file) // Recursively scan subdirectories
+                file.isFile && file.type in supportedTypes -> {
+                    file.uri?.let { imageUris.add(it) }
+                }
+            }
+        }
+    }
+
+    scanDirectory(documentFile)
+    return imageUris.sortedBy { it.toString() } // Sort for consistency
+}
+
+/**
  * Long (timestamp) extensions
  */
 fun Long.toFormattedDate(pattern: String = "MMM dd, yyyy HH:mm"): String {

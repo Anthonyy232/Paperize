@@ -74,6 +74,34 @@ class HomeViewModel @Inject constructor(
 
     fun deleteAlbum(albumId: String) {
         viewModelScope.launch {
+            // Check if this album is currently selected
+            val current = scheduleSettings.value
+            var needsUpdate = false
+            var updated = current
+
+            // Unselect if this album was selected for home screen
+            if (current.homeAlbumId == albumId) {
+                updated = updated.copy(homeAlbumId = null)
+                needsUpdate = true
+            }
+
+            // Unselect if this album was selected for lock screen
+            if (current.lockAlbumId == albumId) {
+                updated = updated.copy(lockAlbumId = null)
+                needsUpdate = true
+            }
+
+            // Update settings if needed
+            if (needsUpdate) {
+                settingsRepository.updateScheduleSettings(updated)
+
+                // Disable changer if no albums are left selected
+                if (updated.homeAlbumId == null && updated.lockAlbumId == null) {
+                    toggleWallpaperChanger(false)
+                }
+            }
+
+            // Delete the album
             deleteAlbumUseCase(albumId)
         }
     }
