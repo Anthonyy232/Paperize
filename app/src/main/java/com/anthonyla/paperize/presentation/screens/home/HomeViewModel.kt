@@ -135,23 +135,52 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun scheduleAlarms(settings: ScheduleSettings) {
-        if (settings.separateSchedules) {
-            wallpaperAlarmScheduler.scheduleWallpaperChange(
-                ScreenType.HOME,
-                settings.homeIntervalMinutes,
-                if (settings.useStartTime) settings.scheduleStartTime else null
-            )
-            wallpaperAlarmScheduler.scheduleWallpaperChange(
-                ScreenType.LOCK,
-                settings.lockIntervalMinutes,
-                if (settings.useStartTime) settings.scheduleStartTime else null
-            )
-        } else {
-            wallpaperAlarmScheduler.scheduleWallpaperChange(
-                ScreenType.BOTH,
-                settings.homeIntervalMinutes,
-                if (settings.useStartTime) settings.scheduleStartTime else null
-            )
+        // Cancel all existing alarms first to avoid duplicates or stale alarms
+        wallpaperAlarmScheduler.cancelAllAlarms()
+
+        val homeActive = settings.homeEnabled && settings.homeAlbumId != null
+        val lockActive = settings.lockEnabled && settings.lockAlbumId != null
+
+        when {
+            homeActive && lockActive -> {
+                if (settings.separateSchedules) {
+                    // Separate schedules for home and lock
+                    wallpaperAlarmScheduler.scheduleWallpaperChange(
+                        ScreenType.HOME,
+                        settings.homeIntervalMinutes,
+                        if (settings.useStartTime) settings.scheduleStartTime else null
+                    )
+                    wallpaperAlarmScheduler.scheduleWallpaperChange(
+                        ScreenType.LOCK,
+                        settings.lockIntervalMinutes,
+                        if (settings.useStartTime) settings.scheduleStartTime else null
+                    )
+                } else {
+                    // Single schedule for both
+                    wallpaperAlarmScheduler.scheduleWallpaperChange(
+                        ScreenType.BOTH,
+                        settings.homeIntervalMinutes,
+                        if (settings.useStartTime) settings.scheduleStartTime else null
+                    )
+                }
+            }
+            homeActive -> {
+                // Only home screen enabled
+                wallpaperAlarmScheduler.scheduleWallpaperChange(
+                    ScreenType.HOME,
+                    settings.homeIntervalMinutes,
+                    if (settings.useStartTime) settings.scheduleStartTime else null
+                )
+            }
+            lockActive -> {
+                // Only lock screen enabled
+                wallpaperAlarmScheduler.scheduleWallpaperChange(
+                    ScreenType.LOCK,
+                    settings.lockIntervalMinutes,
+                    if (settings.useStartTime) settings.scheduleStartTime else null
+                )
+            }
+            // If neither active, alarms already cancelled above
         }
 
         // Schedule daily refresh

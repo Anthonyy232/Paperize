@@ -59,7 +59,8 @@ fun CurrentWallpaperPreview(
                 // Get lock screen wallpaper
                 lockWallpaper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     try {
-                        wallpaperManager.getDrawable(WallpaperManager.FLAG_LOCK)
+                        // Try to get lock screen wallpaper, fallback to home if null or exception
+                        wallpaperManager.getDrawable(WallpaperManager.FLAG_LOCK) ?: homeWallpaper
                     } catch (e: Exception) {
                         // Lock wallpaper might not be set separately, use home wallpaper
                         homeWallpaper

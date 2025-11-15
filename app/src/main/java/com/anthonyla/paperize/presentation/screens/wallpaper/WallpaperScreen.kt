@@ -91,10 +91,11 @@ fun WallpaperScreen(
         }
     }
 
-    // Auto-enable wallpaper changer when album is selected
-    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId) {
-        val hasAnyAlbum = scheduleSettings.homeAlbumId != null || scheduleSettings.lockAlbumId != null
-        if (hasAnyAlbum && !scheduleSettings.enableChanger) {
+    // Auto-enable wallpaper changer when album is selected for an enabled screen
+    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId, homeEnabled, lockEnabled) {
+        val hasEnabledAlbum = (homeEnabled && scheduleSettings.homeAlbumId != null) ||
+                             (lockEnabled && scheduleSettings.lockAlbumId != null)
+        if (hasEnabledAlbum && !scheduleSettings.enableChanger) {
             onToggleChanger(true)
         }
     }
