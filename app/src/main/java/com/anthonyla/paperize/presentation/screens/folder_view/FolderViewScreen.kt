@@ -63,8 +63,7 @@ fun FolderViewScreen(
         topBar = {
             FolderViewTopBar(
                 title = folder?.name ?: "",
-                onBackClick = onBackClick,
-                onSortClick = { showSortSheet = true }
+                onBackClick = onBackClick
             )
         }
     ) { paddingValues ->

@@ -75,7 +75,8 @@ fun CurrentWallpaperPreview(
         }
     }
 
-    if (!hasPermission) {
+    // Don't show if no permission or no wallpapers loaded
+    if (!hasPermission || (homeWallpaper == null && lockWallpaper == null)) {
         return
     }
 

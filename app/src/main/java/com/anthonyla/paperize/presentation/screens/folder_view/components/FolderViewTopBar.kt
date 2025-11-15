@@ -2,7 +2,6 @@ package com.anthonyla.paperize.presentation.screens.folder_view.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +18,6 @@ import com.anthonyla.paperize.R
 fun FolderViewTopBar(
     title: String,
     onBackClick: () -> Unit,
-    onSortClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
@@ -35,14 +33,6 @@ fun FolderViewTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.home_screen)
-                )
-            }
-        },
-        actions = {
-            IconButton(onClick = onSortClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Sort,
-                    contentDescription = stringResource(R.string.sort)
                 )
             }
         },

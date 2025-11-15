@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -119,81 +120,83 @@ fun WallpaperScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(8.dp),
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Current Wallpaper Preview
-        CurrentWallpaperPreview()
-
         // Home and Lock Screen Toggles
-        Surface(
-            tonalElevation = 10.dp,
-            shape = RoundedCornerShape(16.dp),
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.wallpaper_settings),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.W500
+            Card(
+                modifier = Modifier.weight(1f),
+                onClick = { homeEnabled = !homeEnabled },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Card(
-                        modifier = Modifier.weight(1f),
-                        onClick = { homeEnabled = !homeEnabled }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(Icons.Default.Home, contentDescription = null)
-                            Text(
-                                text = stringResource(R.string.home),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = if (homeEnabled) "Enabled" else "Disabled",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (homeEnabled)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+                    Icon(
+                        Icons.Default.Home,
+                        contentDescription = null,
+                        tint = if (homeEnabled)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Text(
+                        text = stringResource(R.string.home),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = if (homeEnabled) "Enabled" else "Disabled",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (homeEnabled)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
 
-                    Card(
-                        modifier = Modifier.weight(1f),
-                        onClick = { lockEnabled = !lockEnabled }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(Icons.Default.Lock, contentDescription = null)
-                            Text(
-                                text = stringResource(R.string.lock),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = if (lockEnabled) "Enabled" else "Disabled",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (lockEnabled)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+            Card(
+                modifier = Modifier.weight(1f),
+                onClick = { lockEnabled = !lockEnabled },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = if (lockEnabled)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Text(
+                        text = stringResource(R.string.lock),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = if (lockEnabled) "Enabled" else "Disabled",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (lockEnabled)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 }
             }
         }
@@ -372,6 +375,11 @@ fun WallpaperScreen(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+        // Current Wallpaper Preview
+        CurrentWallpaperPreview()
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
         // Effects Section Header
         Text(
             text = "Wallpaper Effects",
@@ -432,12 +440,16 @@ fun WallpaperScreen(
         SettingSwitchWithSlider(
             title = R.string.change_brightness,
             description = R.string.change_the_image_brightness,
-            checked = scheduleSettings.homeEffects.enableDarken,
+            checked = when {
+                homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableDarken && scheduleSettings.lockEffects.enableDarken
+                homeEnabled -> scheduleSettings.homeEffects.enableDarken
+                else -> scheduleSettings.lockEffects.enableDarken
+            },
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(enableDarken = enabled),
-                        lockEffects = scheduleSettings.lockEffects.copy(enableDarken = enabled)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableDarken = enabled) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableDarken = enabled) else scheduleSettings.lockEffects
                     )
                 )
             },
@@ -447,8 +459,8 @@ fun WallpaperScreen(
             onPercentageChange = { homePercent, lockPercent ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(darkenPercentage = homePercent),
-                        lockEffects = scheduleSettings.lockEffects.copy(darkenPercentage = lockPercent)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(darkenPercentage = homePercent) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(darkenPercentage = lockPercent) else scheduleSettings.lockEffects
                     )
                 )
             }
@@ -458,12 +470,16 @@ fun WallpaperScreen(
         SettingSwitchWithSlider(
             title = R.string.change_blur,
             description = R.string.add_blur_to_the_image,
-            checked = scheduleSettings.homeEffects.enableBlur,
+            checked = when {
+                homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableBlur && scheduleSettings.lockEffects.enableBlur
+                homeEnabled -> scheduleSettings.homeEffects.enableBlur
+                else -> scheduleSettings.lockEffects.enableBlur
+            },
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(enableBlur = enabled),
-                        lockEffects = scheduleSettings.lockEffects.copy(enableBlur = enabled)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableBlur = enabled) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableBlur = enabled) else scheduleSettings.lockEffects
                     )
                 )
             },
@@ -473,8 +489,8 @@ fun WallpaperScreen(
             onPercentageChange = { homePercent, lockPercent ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(blurPercentage = homePercent),
-                        lockEffects = scheduleSettings.lockEffects.copy(blurPercentage = lockPercent)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(blurPercentage = homePercent) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(blurPercentage = lockPercent) else scheduleSettings.lockEffects
                     )
                 )
             }
@@ -484,12 +500,16 @@ fun WallpaperScreen(
         SettingSwitchWithSlider(
             title = R.string.change_vignette,
             description = R.string.darken_the_edges_of_the_image,
-            checked = scheduleSettings.homeEffects.enableVignette,
+            checked = when {
+                homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableVignette && scheduleSettings.lockEffects.enableVignette
+                homeEnabled -> scheduleSettings.homeEffects.enableVignette
+                else -> scheduleSettings.lockEffects.enableVignette
+            },
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(enableVignette = enabled),
-                        lockEffects = scheduleSettings.lockEffects.copy(enableVignette = enabled)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableVignette = enabled) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableVignette = enabled) else scheduleSettings.lockEffects
                     )
                 )
             },
@@ -499,8 +519,8 @@ fun WallpaperScreen(
             onPercentageChange = { homePercent, lockPercent ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(vignettePercentage = homePercent),
-                        lockEffects = scheduleSettings.lockEffects.copy(vignettePercentage = lockPercent)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(vignettePercentage = homePercent) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(vignettePercentage = lockPercent) else scheduleSettings.lockEffects
                     )
                 )
             }
@@ -510,12 +530,16 @@ fun WallpaperScreen(
         SettingSwitch(
             title = R.string.gray_filter,
             description = R.string.make_the_colors_grayscale,
-            checked = scheduleSettings.homeEffects.enableGrayscale,
+            checked = when {
+                homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
+                homeEnabled -> scheduleSettings.homeEffects.enableGrayscale
+                else -> scheduleSettings.lockEffects.enableGrayscale
+            },
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(
                     scheduleSettings.copy(
-                        homeEffects = scheduleSettings.homeEffects.copy(enableGrayscale = enabled),
-                        lockEffects = scheduleSettings.lockEffects.copy(enableGrayscale = enabled)
+                        homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableGrayscale = enabled) else scheduleSettings.homeEffects,
+                        lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableGrayscale = enabled) else scheduleSettings.lockEffects
                     )
                 )
             }
