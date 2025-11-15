@@ -42,6 +42,7 @@ import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.AlbumSelectionBottomSheet
+import com.anthonyla.paperize.presentation.screens.wallpaper.components.CurrentWallpaperPreview
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitch
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
@@ -121,6 +122,9 @@ fun WallpaperScreen(
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Current Wallpaper Preview
+        CurrentWallpaperPreview()
+
         // Home and Lock Screen Toggles
         Surface(
             tonalElevation = 10.dp,
