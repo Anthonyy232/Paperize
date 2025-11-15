@@ -2,6 +2,7 @@ package com.anthonyla.paperize.presentation.screens.album_view
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -16,11 +17,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -32,10 +28,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
@@ -60,8 +54,19 @@ fun AlbumViewScreen(
     val folders by viewModel.folders.collectAsState()
     val wallpapers by viewModel.wallpapers.collectAsState()
 
+    // Selection state
+    val selectedWallpapers by viewModel.selectedWallpapers.collectAsState()
+    val selectedFolders by viewModel.selectedFolders.collectAsState()
+    val isSelectionMode by viewModel.isSelectionMode.collectAsState()
+    val selectedCount = selectedWallpapers.size + selectedFolders.size
+
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
+
+    // Handle back press when in selection mode
+    BackHandler(enabled = isSelectionMode) {
+        viewModel.clearSelection()
+    }
 
     // Sort wallpapers and folders
     val sortedFolders = remember(folders, sortOption) {
@@ -85,8 +90,6 @@ fun AlbumViewScreen(
             SortOption.DATE_MODIFIED_DESC -> wallpapers.sortedByDescending { it.dateModified }
         }
     }
-
-    val colorScheme = MaterialTheme.colorScheme
 
     val commonItemModifier = remember {
         Modifier
@@ -130,18 +133,26 @@ fun AlbumViewScreen(
         topBar = {
             AlbumViewTopBar(
                 title = album?.name ?: "",
+                isSelectionMode = isSelectionMode,
+                selectedCount = selectedCount,
                 onBackClick = onBackClick,
                 onSortClick = onNavigateToSort,
-                onDeleteAlbum = { viewModel.deleteAlbum(); onBackClick() }
+                onDeleteAlbum = { viewModel.deleteAlbum(); onBackClick() },
+                onSelectAll = { viewModel.selectAll() },
+                onDeleteSelected = { viewModel.deleteSelected() },
+                onClearSelection = { viewModel.clearSelection() }
             )
         },
         floatingActionButton = {
-            AddAlbumAnimatedFab(
-                isLoading = false,
-                animate = true,
-                onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                onFolderClick = { folderPickerLauncher.launch(null) }
-            )
+            // Hide FAB when in selection mode
+            if (!isSelectionMode) {
+                AddAlbumAnimatedFab(
+                    isLoading = false,
+                    animate = true,
+                    onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                    onFolderClick = { folderPickerLauncher.launch(null) }
+                )
+            }
         }
     ) { paddingValues ->
         LazyVerticalGrid(
@@ -161,7 +172,18 @@ fun AlbumViewScreen(
             ) { folder ->
                 FolderItem(
                     folder = folder,
-                    onClick = { onNavigateToFolder(folder.id) },
+                    isSelected = folder.id in selectedFolders,
+                    isSelectionMode = isSelectionMode,
+                    onClick = {
+                        if (isSelectionMode) {
+                            viewModel.toggleFolderSelection(folder.id)
+                        } else {
+                            onNavigateToFolder(folder.id)
+                        }
+                    },
+                    onLongClick = {
+                        viewModel.toggleFolderSelection(folder.id)
+                    },
                     modifier = commonItemModifier
                         .then(
                             Modifier.animateItem(
@@ -182,7 +204,18 @@ fun AlbumViewScreen(
             ) { wallpaper ->
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,
-                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName) },
+                    isSelected = wallpaper.id in selectedWallpapers,
+                    isSelectionMode = isSelectionMode,
+                    onClick = {
+                        if (isSelectionMode) {
+                            viewModel.toggleWallpaperSelection(wallpaper.id)
+                        } else {
+                            onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName)
+                        }
+                    },
+                    onLongClick = {
+                        viewModel.toggleWallpaperSelection(wallpaper.id)
+                    },
                     modifier = commonItemModifier
                         .then(
                             Modifier.animateItem(
