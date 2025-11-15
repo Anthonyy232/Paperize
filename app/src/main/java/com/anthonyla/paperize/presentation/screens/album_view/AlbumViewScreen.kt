@@ -49,6 +49,7 @@ fun AlbumViewScreen(
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
+    onNavigateToSort: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AlbumViewViewModel = hiltViewModel()
 ) {
@@ -130,7 +131,7 @@ fun AlbumViewScreen(
             AlbumViewTopBar(
                 title = album?.name ?: "",
                 onBackClick = onBackClick,
-                onSortClick = { showSortSheet = true },
+                onSortClick = onNavigateToSort,
                 onDeleteAlbum = { viewModel.deleteAlbum(); onBackClick() }
             )
         },

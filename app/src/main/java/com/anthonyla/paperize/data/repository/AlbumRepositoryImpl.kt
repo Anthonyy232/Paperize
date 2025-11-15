@@ -139,6 +139,15 @@ class AlbumRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateFolder(folder: Folder): Result<Unit> {
+        return try {
+            folderDao.updateFolder(folder.toEntity())
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     override suspend fun removeWallpaperFromAlbum(
         albumId: String,
         wallpaperId: String

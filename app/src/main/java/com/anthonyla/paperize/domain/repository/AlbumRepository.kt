@@ -81,6 +81,11 @@ interface AlbumRepository {
     suspend fun addFolderToAlbum(albumId: String, folder: Folder): Result<Unit>
 
     /**
+     * Update folder
+     */
+    suspend fun updateFolder(folder: Folder): Result<Unit>
+
+    /**
      * Remove wallpaper from album
      */
     suspend fun removeWallpaperFromAlbum(albumId: String, wallpaperId: String): Result<Unit>

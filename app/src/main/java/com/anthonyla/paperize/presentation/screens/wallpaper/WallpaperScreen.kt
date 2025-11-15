@@ -47,6 +47,10 @@ import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingS
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.TimeIntervalPicker
 
+enum class AlbumSelectionContext {
+    HOME, LOCK, BOTH
+}
+
 @Composable
 fun WallpaperScreen(
     albums: List<Album>,
@@ -55,24 +59,39 @@ fun WallpaperScreen(
     appSettings: AppSettings,
     onToggleChanger: (Boolean) -> Unit,
     onSelectAlbum: (Album) -> Unit,
+    onSelectHomeAlbum: (Album) -> Unit,
+    onSelectLockAlbum: (Album) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onChangeWallpaperNow: (ScreenType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
+    var albumSelectionContext by remember { mutableStateOf(AlbumSelectionContext.BOTH) }
     var homeEnabled by remember { mutableStateOf(true) }
     var lockEnabled by remember { mutableStateOf(true) }
 
-    // Auto-disable wallpaper changer when no albums selected
-    LaunchedEffect(selectedAlbums) {
-        if (selectedAlbums.isEmpty() && scheduleSettings.enableChanger) {
+    // Get currently selected albums by ID
+    val homeAlbum = remember(albums, scheduleSettings.homeAlbumId) {
+        scheduleSettings.homeAlbumId?.let { id -> albums.find { it.id == id } }
+    }
+    val lockAlbum = remember(albums, scheduleSettings.lockAlbumId) {
+        scheduleSettings.lockAlbumId?.let { id -> albums.find { it.id == id } }
+    }
+
+    // Auto-disable wallpaper changer when no albums selected for either screen
+    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId, homeEnabled, lockEnabled) {
+        val hasHomeAlbum = homeEnabled && scheduleSettings.homeAlbumId != null
+        val hasLockAlbum = lockEnabled && scheduleSettings.lockAlbumId != null
+
+        if (!hasHomeAlbum && !hasLockAlbum && scheduleSettings.enableChanger) {
             onToggleChanger(false)
         }
     }
 
     // Auto-enable wallpaper changer when album is selected
-    LaunchedEffect(selectedAlbums) {
-        if (selectedAlbums.isNotEmpty() && !scheduleSettings.enableChanger) {
+    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId) {
+        val hasAnyAlbum = scheduleSettings.homeAlbumId != null || scheduleSettings.lockAlbumId != null
+        if (hasAnyAlbum && !scheduleSettings.enableChanger) {
             onToggleChanger(true)
         }
     }
@@ -175,45 +194,122 @@ fun WallpaperScreen(
             }
         }
 
-        // Selected Album
-        Surface(
-            tonalElevation = 10.dp,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            onClick = { showAlbumSelectionSheet = true }
-        ) {
-            Row(
+        // Album Selection - Separate selectors when both home and lock enabled
+        if (homeEnabled && lockEnabled) {
+            // Home Screen Album
+            Surface(
+                tonalElevation = 10.dp,
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                onClick = {
+                    albumSelectionContext = AlbumSelectionContext.HOME
+                    showAlbumSelectionSheet = true
+                }
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (selectedAlbums.isEmpty()) {
-                            stringResource(R.string.no_album_selected)
-                        } else {
-                            selectedAlbums.first().name
-                        },
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = if (selectedAlbums.isNotEmpty()) {
-                            stringResource(R.string.currently_selected_album)
-                        } else {
-                            stringResource(R.string.click_to_select_a_different_album)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = homeAlbum?.name ?: stringResource(R.string.no_album_selected),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Home Screen Album",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            }
+
+            // Lock Screen Album
+            Surface(
+                tonalElevation = 10.dp,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                onClick = {
+                    albumSelectionContext = AlbumSelectionContext.LOCK
+                    showAlbumSelectionSheet = true
+                }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = lockAlbum?.name ?: stringResource(R.string.no_album_selected),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Lock Screen Album",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            // Single album selector when only one screen enabled
+            Surface(
+                tonalElevation = 10.dp,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                onClick = {
+                    albumSelectionContext = AlbumSelectionContext.BOTH
+                    showAlbumSelectionSheet = true
+                }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        val currentAlbum = if (homeEnabled) homeAlbum else lockAlbum
+                        Text(
+                            text = currentAlbum?.name ?: stringResource(R.string.no_album_selected),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = when {
+                                homeEnabled && !lockEnabled -> "Home Screen Album"
+                                !homeEnabled && lockEnabled -> "Lock Screen Album"
+                                else -> stringResource(R.string.currently_selected_album)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
 
@@ -435,8 +531,22 @@ fun WallpaperScreen(
     if (showAlbumSelectionSheet) {
         AlbumSelectionBottomSheet(
             albums = albums,
-            selectedAlbums = selectedAlbums,
-            onAlbumSelect = onSelectAlbum,
+            selectedAlbums = when (albumSelectionContext) {
+                AlbumSelectionContext.HOME -> homeAlbum?.let { listOf(it) } ?: emptyList()
+                AlbumSelectionContext.LOCK -> lockAlbum?.let { listOf(it) } ?: emptyList()
+                AlbumSelectionContext.BOTH -> selectedAlbums
+            },
+            onAlbumSelect = { album ->
+                when (albumSelectionContext) {
+                    AlbumSelectionContext.HOME -> onSelectHomeAlbum(album)
+                    AlbumSelectionContext.LOCK -> onSelectLockAlbum(album)
+                    AlbumSelectionContext.BOTH -> {
+                        // Set the same album for both when only one screen is enabled
+                        if (homeEnabled) onSelectHomeAlbum(album)
+                        if (lockEnabled) onSelectLockAlbum(album)
+                    }
+                }
+            },
             onDismiss = { showAlbumSelectionSheet = false }
         )
     }

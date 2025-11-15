@@ -13,6 +13,7 @@ import com.anthonyla.paperize.presentation.screens.home.HomeScreen
 import com.anthonyla.paperize.presentation.screens.notification.NotificationPermissionScreen
 import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
 import com.anthonyla.paperize.presentation.screens.settings.SettingsScreen
+import com.anthonyla.paperize.presentation.screens.sort.SortViewScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
 import com.anthonyla.paperize.presentation.screens.storage.StoragePermissionScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
@@ -89,7 +90,20 @@ fun NavigationGraph(
                 },
                 onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
                     navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
+                },
+                onNavigateToSort = {
+                    navController.navigate(SortRoute(route.albumId))
                 }
+            )
+        }
+
+        // Sort screen
+        composable<SortRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<SortRoute>()
+            SortViewScreen(
+                albumId = route.albumId,
+                onSaveClick = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
