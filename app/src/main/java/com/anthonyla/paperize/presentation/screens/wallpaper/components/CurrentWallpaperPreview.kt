@@ -105,54 +105,36 @@ fun CurrentWallpaperPreview(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Home wallpaper preview
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Home Screen",
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                // Lock wallpaper preview (on the left)
+                lockWallpaper?.let { drawable ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(drawable)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Current lock screen wallpaper",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(9f / 16f)
+                            .clip(RoundedCornerShape(8.dp))
                     )
-                    homeWallpaper?.let { drawable ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(drawable)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = "Current home screen wallpaper",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(9f / 16f)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
                 }
 
-                // Lock wallpaper preview
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Lock Screen",
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                // Home wallpaper preview (on the right)
+                homeWallpaper?.let { drawable ->
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(drawable)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Current home screen wallpaper",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(9f / 16f)
+                            .clip(RoundedCornerShape(8.dp))
                     )
-                    lockWallpaper?.let { drawable ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(drawable)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = "Current lock screen wallpaper",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(9f / 16f)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
                 }
             }
         }

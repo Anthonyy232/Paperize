@@ -82,6 +82,8 @@ object PreferenceKeys {
     const val ENABLE_CHANGER = "enable_changer"
     const val SEPARATE_SCHEDULES = "separate_schedules"
     const val SHUFFLE_ENABLED = "shuffle_enabled"
+    const val HOME_ENABLED = "home_enabled"
+    const val LOCK_ENABLED = "lock_enabled"
     const val HOME_ALBUM_ID = "home_album_id"
     const val LOCK_ALBUM_ID = "lock_album_id"
     const val HOME_INTERVAL_MINUTES = "home_interval_minutes"

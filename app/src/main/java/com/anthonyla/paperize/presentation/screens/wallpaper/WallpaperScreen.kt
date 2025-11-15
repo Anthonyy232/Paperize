@@ -61,16 +61,17 @@ fun WallpaperScreen(
     appSettings: AppSettings,
     onToggleChanger: (Boolean) -> Unit,
     onSelectAlbum: (Album) -> Unit,
-    onSelectHomeAlbum: (Album) -> Unit,
-    onSelectLockAlbum: (Album) -> Unit,
+    onSelectHomeAlbum: (Album?) -> Unit,
+    onSelectLockAlbum: (Album?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onChangeWallpaperNow: (ScreenType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
     var albumSelectionContext by remember { mutableStateOf(AlbumSelectionContext.BOTH) }
-    var homeEnabled by remember { mutableStateOf(true) }
-    var lockEnabled by remember { mutableStateOf(true) }
+
+    val homeEnabled = scheduleSettings.homeEnabled
+    val lockEnabled = scheduleSettings.lockEnabled
 
     // Get currently selected albums by ID
     val homeAlbum = remember(albums, scheduleSettings.homeAlbumId) {
@@ -132,7 +133,9 @@ fun WallpaperScreen(
         ) {
             Card(
                 modifier = Modifier.weight(1f),
-                onClick = { homeEnabled = !homeEnabled },
+                onClick = {
+                    onUpdateScheduleSettings(scheduleSettings.copy(homeEnabled = !homeEnabled))
+                },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 )
@@ -167,7 +170,9 @@ fun WallpaperScreen(
 
             Card(
                 modifier = Modifier.weight(1f),
-                onClick = { lockEnabled = !lockEnabled },
+                onClick = {
+                    onUpdateScheduleSettings(scheduleSettings.copy(lockEnabled = !lockEnabled))
+                },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 )
@@ -209,7 +214,7 @@ fun WallpaperScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 8.dp),
                 onClick = {
                     albumSelectionContext = AlbumSelectionContext.HOME
                     showAlbumSelectionSheet = true
@@ -246,7 +251,7 @@ fun WallpaperScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 8.dp),
                 onClick = {
                     albumSelectionContext = AlbumSelectionContext.LOCK
                     showAlbumSelectionSheet = true
@@ -283,7 +288,7 @@ fun WallpaperScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 8.dp),
                 onClick = {
                     albumSelectionContext = AlbumSelectionContext.BOTH
                     showAlbumSelectionSheet = true
@@ -566,12 +571,33 @@ fun WallpaperScreen(
             },
             onAlbumSelect = { album ->
                 when (albumSelectionContext) {
-                    AlbumSelectionContext.HOME -> onSelectHomeAlbum(album)
-                    AlbumSelectionContext.LOCK -> onSelectLockAlbum(album)
+                    AlbumSelectionContext.HOME -> {
+                        // Toggle selection: unselect if already selected
+                        if (homeAlbum?.id == album.id) {
+                            onSelectHomeAlbum(null)
+                        } else {
+                            onSelectHomeAlbum(album)
+                        }
+                    }
+                    AlbumSelectionContext.LOCK -> {
+                        // Toggle selection: unselect if already selected
+                        if (lockAlbum?.id == album.id) {
+                            onSelectLockAlbum(null)
+                        } else {
+                            onSelectLockAlbum(album)
+                        }
+                    }
                     AlbumSelectionContext.BOTH -> {
-                        // Set the same album for both when only one screen is enabled
-                        if (homeEnabled) onSelectHomeAlbum(album)
-                        if (lockEnabled) onSelectLockAlbum(album)
+                        // Toggle selection for the enabled screen(s)
+                        val isCurrentlySelected = (homeEnabled && homeAlbum?.id == album.id) ||
+                                                 (lockEnabled && lockAlbum?.id == album.id)
+                        if (isCurrentlySelected) {
+                            if (homeEnabled) onSelectHomeAlbum(null)
+                            if (lockEnabled) onSelectLockAlbum(null)
+                        } else {
+                            if (homeEnabled) onSelectHomeAlbum(album)
+                            if (lockEnabled) onSelectLockAlbum(album)
+                        }
                     }
                 }
             },
