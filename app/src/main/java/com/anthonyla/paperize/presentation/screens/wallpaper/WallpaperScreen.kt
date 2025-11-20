@@ -645,7 +645,11 @@ fun WallpaperScreen(
         // Grayscale
         SettingSwitch(
             title = R.string.gray_filter,
-            description = R.string.make_the_colors_grayscale,
+            description = if (when {
+                homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
+                homeEnabled -> scheduleSettings.homeEffects.enableGrayscale
+                else -> scheduleSettings.lockEffects.enableGrayscale
+            } && !scheduleSettings.separateSchedules) null else R.string.make_the_colors_grayscale,
             checked = when {
                 homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
                 homeEnabled -> scheduleSettings.homeEffects.enableGrayscale
@@ -664,7 +668,7 @@ fun WallpaperScreen(
         // Adaptive Brightness
         SettingSwitch(
             title = R.string.adaptive_brightness,
-            description = R.string.adjust_brightness_based_on_mode,
+            description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else R.string.adjust_brightness_based_on_mode,
             checked = scheduleSettings.adaptiveBrightness,
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(scheduleSettings.copy(adaptiveBrightness = enabled))
@@ -674,7 +678,7 @@ fun WallpaperScreen(
         // Shuffle
         SettingSwitch(
             title = R.string.shuffle,
-            description = R.string.randomly_shuffle_the_wallpapers,
+            description = if (scheduleSettings.shuffleEnabled && !scheduleSettings.separateSchedules) null else R.string.randomly_shuffle_the_wallpapers,
             checked = scheduleSettings.shuffleEnabled,
             onCheckedChange = { enabled ->
                 onUpdateScheduleSettings(scheduleSettings.copy(shuffleEnabled = enabled))

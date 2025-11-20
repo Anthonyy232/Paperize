@@ -29,7 +29,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 @Composable
 fun SettingSwitch(
     @StringRes title: Int,
-    @StringRes description: Int,
+    @StringRes description: Int?,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -61,14 +61,16 @@ fun SettingSwitch(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                Text(
-                    text = stringResource(description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+                description?.let {
+                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                    Text(
+                        text = stringResource(it),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(AppSpacing.large))
             Switch(
