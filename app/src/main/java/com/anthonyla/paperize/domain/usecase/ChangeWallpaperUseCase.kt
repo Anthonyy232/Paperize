@@ -56,14 +56,31 @@ class ChangeWallpaperUseCase @Inject constructor(
             // This prevents race conditions when multiple wallpaper changes happen simultaneously
             var wallpaper: Wallpaper? = null
             var maxRetries = MAX_VALIDATION_RETRIES // Prevent infinite loop
+            var queueRebuildAttempts = 0
 
             while (wallpaper == null && maxRetries > 0) {
                 // Atomically get and remove from queue in a single transaction
                 val candidate = wallpaperRepository.getAndDequeueWallpaper(albumId, screenType)
 
-                // If still null after building queue, no wallpapers exist in album
+                // If queue is empty (candidate is null), try rebuilding queue
                 if (candidate == null) {
-                    return Result.Error(Exception(context.getString(R.string.no_wallpapers_in_album)))
+                    queueRebuildAttempts++
+
+                    // Allow up to 2 rebuild attempts
+                    // First attempt: queue ran out due to invalid wallpapers being removed
+                    // Second attempt: confirms album truly has no valid wallpapers
+                    if (queueRebuildAttempts > 2) {
+                        return Result.Error(Exception(context.getString(R.string.no_wallpapers_in_album)))
+                    }
+
+                    // Try rebuilding queue
+                    val rebuildResult = wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
+                    if (rebuildResult is Result.Error) {
+                        return Result.Error(Exception(context.getString(R.string.error_failed_to_build_queue)))
+                    }
+
+                    // Continue loop to try getting wallpaper from rebuilt queue
+                    continue
                 }
 
                 // Validate URI
