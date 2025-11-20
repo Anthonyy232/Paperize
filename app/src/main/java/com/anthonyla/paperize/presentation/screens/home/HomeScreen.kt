@@ -137,7 +137,7 @@ fun HomeScreen(
                             albums = albums,
                             scheduleSettings = scheduleSettings,
                             appSettings = appSettings,
-                            onToggleChanger = { viewModel.toggleWallpaperChanger(it) },
+                            onToggleChanger = { viewModel.toggleWallpaperChanger(it, onlyIfNotScheduled = true) },
                             onSelectHomeAlbum = { album -> viewModel.selectHomeAlbum(album) },
                             onSelectLockAlbum = { album -> viewModel.selectLockAlbum(album) },
                             onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) },
