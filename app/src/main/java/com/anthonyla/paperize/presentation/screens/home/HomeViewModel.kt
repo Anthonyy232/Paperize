@@ -262,11 +262,25 @@ class HomeViewModel @Inject constructor(
 
     fun updateScheduleSettings(settings: ScheduleSettings) {
         viewModelScope.launch {
-            // Check if shuffle setting has changed before validation
+            // Check if settings have changed before validation
             val currentSettings = settingsRepository.getScheduleSettings()
             val shuffleChanged = currentSettings.shuffleEnabled != settings.shuffleEnabled
 
-            val validated = settings.validate()
+            // Check if screen toggles (homeEnabled/lockEnabled) have changed
+            val screenToggleChanged = currentSettings.homeEnabled != settings.homeEnabled ||
+                                     currentSettings.lockEnabled != settings.lockEnabled
+
+            // If screen toggles changed, clear all album selections
+            val settingsWithClearedAlbums = if (screenToggleChanged) {
+                settings.copy(
+                    homeAlbumId = null,
+                    lockAlbumId = null
+                )
+            } else {
+                settings
+            }
+
+            val validated = settingsWithClearedAlbums.validate()
 
             // Check what changed
             val schedulingChanged = validated.hasSchedulingChanges(currentSettings)
