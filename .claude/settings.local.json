@@ -6,7 +6,8 @@
       "Bash(git push:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(./gradlew assembleDebug:*)"
     ],
     "deny": [],
     "ask": []
