@@ -62,4 +62,9 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateFirstLaunch(isFirstLaunch: Boolean) =
         preferencesManager.updateFirstLaunch(isFirstLaunch)
+
+    // ============ Atomic ScheduleSettings Operations ============
+
+    override suspend fun updateEnableChanger(enabled: Boolean) =
+        preferencesManager.updateEnableChanger(enabled)
 }

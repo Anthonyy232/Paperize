@@ -102,26 +102,52 @@ class HomeViewModel @Inject constructor(
             if (album == null && updated.lockAlbumId == null) {
                 toggleWallpaperChanger(false)
             } else if (album != null && updated.enableChanger) {
-                // Immediately change wallpaper when selecting album
-                val screenType = if (
-                    updated.homeAlbumId == updated.lockAlbumId &&
-                    updated.homeAlbumId != null &&
-                    !updated.separateSchedules &&
-                    updated.homeEnabled &&
-                    updated.lockEnabled
-                ) {
-                    // Same album for both screens and not separately scheduled - use BOTH
-                    ScreenType.BOTH
-                } else {
-                    ScreenType.HOME
+                // Check if we have all required albums before triggering wallpaper change
+                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
+                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
+                val hasRequiredAlbums = when {
+                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
+                    updated.homeEnabled -> homeActive
+                    updated.lockEnabled -> lockActive
+                    else -> false
                 }
-                changeWallpaperNow(screenType)
 
-                // Then schedule future alarms
-                scheduleAlarms(updated)
+                // Only change wallpaper and schedule if all required albums are selected
+                if (hasRequiredAlbums) {
+                    val screenType = if (
+                        updated.homeAlbumId == updated.lockAlbumId &&
+                        updated.homeAlbumId != null &&
+                        !updated.separateSchedules &&
+                        updated.homeEnabled &&
+                        updated.lockEnabled
+                    ) {
+                        // Same album for both screens and not separately scheduled - use BOTH
+                        ScreenType.BOTH
+                    } else {
+                        ScreenType.HOME
+                    }
+                    changeWallpaperNow(screenType)
+                    scheduleAlarms(updated)
+                } else {
+                    // Not all required albums selected - cancel any existing schedules
+                    wallpaperScheduler.cancelAllWallpaperChanges()
+                }
             } else if (updated.enableChanger) {
-                // Just reschedule if changer is enabled but album was unselected
-                scheduleAlarms(updated)
+                // Album was unselected - check if we still have all required albums
+                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
+                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
+                val hasRequiredAlbums = when {
+                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
+                    updated.homeEnabled -> homeActive
+                    updated.lockEnabled -> lockActive
+                    else -> false
+                }
+
+                if (hasRequiredAlbums) {
+                    scheduleAlarms(updated)
+                } else {
+                    wallpaperScheduler.cancelAllWallpaperChanges()
+                }
             }
         }
     }
@@ -138,42 +164,77 @@ class HomeViewModel @Inject constructor(
             if (album == null && updated.homeAlbumId == null) {
                 toggleWallpaperChanger(false)
             } else if (album != null && updated.enableChanger) {
-                // Immediately change wallpaper when selecting album
-                val screenType = if (
-                    updated.homeAlbumId == updated.lockAlbumId &&
-                    updated.lockAlbumId != null &&
-                    !updated.separateSchedules &&
-                    updated.homeEnabled &&
-                    updated.lockEnabled
-                ) {
-                    // Same album for both screens and not separately scheduled - use BOTH
-                    ScreenType.BOTH
-                } else {
-                    ScreenType.LOCK
+                // Check if we have all required albums before triggering wallpaper change
+                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
+                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
+                val hasRequiredAlbums = when {
+                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
+                    updated.homeEnabled -> homeActive
+                    updated.lockEnabled -> lockActive
+                    else -> false
                 }
-                changeWallpaperNow(screenType)
 
-                // Then schedule future alarms
-                scheduleAlarms(updated)
+                // Only change wallpaper and schedule if all required albums are selected
+                if (hasRequiredAlbums) {
+                    val screenType = if (
+                        updated.homeAlbumId == updated.lockAlbumId &&
+                        updated.lockAlbumId != null &&
+                        !updated.separateSchedules &&
+                        updated.homeEnabled &&
+                        updated.lockEnabled
+                    ) {
+                        // Same album for both screens and not separately scheduled - use BOTH
+                        ScreenType.BOTH
+                    } else {
+                        ScreenType.LOCK
+                    }
+                    changeWallpaperNow(screenType)
+                    scheduleAlarms(updated)
+                } else {
+                    // Not all required albums selected - cancel any existing schedules
+                    wallpaperScheduler.cancelAllWallpaperChanges()
+                }
             } else if (updated.enableChanger) {
-                // Just reschedule if changer is enabled but album was unselected
-                scheduleAlarms(updated)
+                // Album was unselected - check if we still have all required albums
+                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
+                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
+                val hasRequiredAlbums = when {
+                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
+                    updated.homeEnabled -> homeActive
+                    updated.lockEnabled -> lockActive
+                    else -> false
+                }
+
+                if (hasRequiredAlbums) {
+                    scheduleAlarms(updated)
+                } else {
+                    wallpaperScheduler.cancelAllWallpaperChanges()
+                }
             }
         }
     }
 
     fun toggleWallpaperChanger(enabled: Boolean) {
         viewModelScope.launch {
-            val current = scheduleSettings.value
-            val updated = current.copy(enableChanger = enabled)
-            settingsRepository.updateScheduleSettings(updated)
+            // Use atomic update to prevent race conditions with album selection updates
+            settingsRepository.updateEnableChanger(enabled)
+
+            // Read updated settings after atomic write
+            val updated = settingsRepository.getScheduleSettings()
 
             if (enabled) {
-                // Immediately change wallpaper when enabling changer
+                // Check if we have all required albums before changing wallpaper
                 val homeActive = updated.homeEnabled && updated.homeAlbumId != null
                 val lockActive = updated.lockEnabled && updated.lockAlbumId != null
+                val hasRequiredAlbums = when {
+                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
+                    updated.homeEnabled -> homeActive
+                    updated.lockEnabled -> lockActive
+                    else -> false
+                }
 
-                if (homeActive || lockActive) {
+                // Only change wallpaper and schedule if all required albums are selected
+                if (hasRequiredAlbums) {
                     val screenType = when {
                         homeActive && lockActive && updated.homeAlbumId == updated.lockAlbumId && !updated.separateSchedules ->
                             ScreenType.BOTH
@@ -185,10 +246,11 @@ class HomeViewModel @Inject constructor(
                     }
 
                     screenType?.let { changeWallpaperNow(it) }
+                    scheduleAlarms(updated)
+                } else {
+                    // Not all required albums selected - cancel any existing schedules
+                    wallpaperScheduler.cancelAllWallpaperChanges()
                 }
-
-                // Then schedule future alarms
-                scheduleAlarms(updated)
             } else {
                 wallpaperScheduler.cancelAllWallpaperChanges()
             }
@@ -202,6 +264,11 @@ class HomeViewModel @Inject constructor(
             val shuffleChanged = currentSettings.shuffleEnabled != settings.shuffleEnabled
 
             val validated = settings.validate()
+
+            // Check what changed
+            val schedulingChanged = validated.hasSchedulingChanges(currentSettings)
+            val displayChanged = validated.hasDisplayChanges(currentSettings)
+
             settingsRepository.updateScheduleSettings(validated)
 
             // If shuffle setting changed, clear all queues to force rebuild with new mode
@@ -209,15 +276,38 @@ class HomeViewModel @Inject constructor(
                 wallpaperRepository.clearAllQueues()
             }
 
-            // Only reschedule if changer is enabled AND at least one album is selected
             val homeActive = validated.homeEnabled && validated.homeAlbumId != null
             val lockActive = validated.lockEnabled && validated.lockAlbumId != null
 
-            if (validated.enableChanger && (homeActive || lockActive)) {
+            // Determine if we have the required albums selected
+            val hasRequiredAlbums = when {
+                validated.homeEnabled && validated.lockEnabled -> homeActive && lockActive
+                validated.homeEnabled -> homeActive
+                validated.lockEnabled -> lockActive
+                else -> false
+            }
+
+            // Handle scheduling changes (interval, screen enable/disable, etc.)
+            if (validated.enableChanger && hasRequiredAlbums && schedulingChanged) {
                 scheduleAlarms(validated)
-            } else if (validated.enableChanger) {
-                // Changer enabled but no albums selected - cancel existing schedules
+            } else if (validated.enableChanger && !hasRequiredAlbums) {
+                // Changer enabled but required albums not selected - cancel existing schedules
                 wallpaperScheduler.cancelAllWallpaperChanges()
+            }
+
+            // Handle display changes (scaling, effects, adaptive brightness)
+            // Reapply current wallpaper immediately to show the effect
+            if (validated.enableChanger && hasRequiredAlbums && displayChanged) {
+                val screenType = when {
+                    homeActive && lockActive && validated.homeAlbumId == validated.lockAlbumId && !validated.separateSchedules ->
+                        ScreenType.BOTH
+                    homeActive && lockActive ->
+                        ScreenType.BOTH // Change both even if different albums
+                    homeActive -> ScreenType.HOME
+                    lockActive -> ScreenType.LOCK
+                    else -> null
+                }
+                screenType?.let { changeWallpaperNow(it) }
             }
         }
     }

@@ -113,19 +113,35 @@ fun WallpaperScreen(
     }
 
     // Auto-toggle wallpaper changer based on album selection state
-    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId, homeEnabled, lockEnabled) {
+    // IMPORTANT: Check if actual album OBJECTS exist, not just IDs
+    // IDs might be stale (album deleted) which would cause invalid state
+    LaunchedEffect(homeAlbum, lockAlbum, homeEnabled, lockEnabled, scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId, albums) {
+        // Clean up stale album IDs (ID exists but album doesn't)
+        // IMPORTANT: Only cleanup if albums list has loaded (not empty)
+        // Otherwise we might clear valid IDs during initial load race condition
+        if (albums.isNotEmpty()) {
+            if (homeEnabled && scheduleSettings.homeAlbumId != null && homeAlbum == null) {
+                // Home album ID is set but album doesn't exist in loaded list - clear it
+                onSelectHomeAlbum(null)
+            }
+            if (lockEnabled && scheduleSettings.lockAlbumId != null && lockAlbum == null) {
+                // Lock album ID is set but album doesn't exist in loaded list - clear it
+                onSelectLockAlbum(null)
+            }
+        }
+
         val allRequiredAlbumsSet = when {
             homeEnabled && lockEnabled -> {
-                // Both are enabled, require both albums to be set
-                scheduleSettings.homeAlbumId != null && scheduleSettings.lockAlbumId != null
+                // Both are enabled, require both album OBJECTS to exist
+                homeAlbum != null && lockAlbum != null
             }
             homeEnabled -> {
-                // Only home is enabled, require only home album
-                scheduleSettings.homeAlbumId != null
+                // Only home is enabled, require home album OBJECT to exist
+                homeAlbum != null
             }
             lockEnabled -> {
-                // Only lock is enabled, require only lock album
-                scheduleSettings.lockAlbumId != null
+                // Only lock is enabled, require lock album OBJECT to exist
+                lockAlbum != null
             }
             else -> false // Neither enabled, should be disabled
         }
@@ -550,7 +566,8 @@ fun WallpaperScreen(
                     )
                 )
             },
-            bothEnabled = homeEnabled && lockEnabled,
+            // Show separate sliders only when both enabled AND separate schedules is on
+            bothEnabled = homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
             homePercentage = scheduleSettings.homeEffects.darkenPercentage,
             lockPercentage = scheduleSettings.lockEffects.darkenPercentage,
             onPercentageChange = { homePercent, lockPercent ->
@@ -580,7 +597,8 @@ fun WallpaperScreen(
                     )
                 )
             },
-            bothEnabled = homeEnabled && lockEnabled,
+            // Show separate sliders only when both enabled AND separate schedules is on
+            bothEnabled = homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
             homePercentage = scheduleSettings.homeEffects.blurPercentage,
             lockPercentage = scheduleSettings.lockEffects.blurPercentage,
             onPercentageChange = { homePercent, lockPercent ->
@@ -610,7 +628,8 @@ fun WallpaperScreen(
                     )
                 )
             },
-            bothEnabled = homeEnabled && lockEnabled,
+            // Show separate sliders only when both enabled AND separate schedules is on
+            bothEnabled = homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
             homePercentage = scheduleSettings.homeEffects.vignettePercentage,
             lockPercentage = scheduleSettings.lockEffects.vignettePercentage,
             onPercentageChange = { homePercent, lockPercent ->

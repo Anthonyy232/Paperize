@@ -307,6 +307,17 @@ class PreferencesManager @Inject constructor(
         }
     }
 
+    // ============ Atomic ScheduleSettings Operations ============
+
+    /**
+     * Atomically update enableChanger setting without race conditions
+     */
+    suspend fun updateEnableChanger(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[booleanPreferencesKey(PreferenceKeys.ENABLE_CHANGER)] = enabled
+        }
+    }
+
     // ============ Individual Preference Operations ============
 
     suspend fun <T> setValue(key: String, value: T) {

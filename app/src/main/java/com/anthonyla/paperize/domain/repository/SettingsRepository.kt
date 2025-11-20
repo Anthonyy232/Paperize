@@ -69,4 +69,12 @@ interface SettingsRepository {
     suspend fun updateDynamicTheming(enabled: Boolean)
     suspend fun updateAnimate(enabled: Boolean)
     suspend fun updateFirstLaunch(isFirstLaunch: Boolean)
+
+    // ============ Atomic ScheduleSettings Operations ============
+
+    /**
+     * Atomically update enableChanger to prevent race conditions
+     * Use this instead of updateScheduleSettings when only toggling changer
+     */
+    suspend fun updateEnableChanger(enabled: Boolean)
 }
