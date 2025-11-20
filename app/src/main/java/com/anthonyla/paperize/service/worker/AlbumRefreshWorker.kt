@@ -73,9 +73,12 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     when (val scanResult = wallpaperRepository.scanFolderForWallpapers(android.net.Uri.parse(folder.uri))) {
                         is CoreResult.Success -> {
                             val scannedWallpapers = scanResult.data
-                            val existingUris = album.wallpapers.map { it.uri }.toSet()
 
-                            // Find new wallpapers not already in album
+                            // Get ALL existing URIs (direct wallpapers + folder wallpapers)
+                            val existingUris = (album.wallpapers.map { it.uri } +
+                                               album.folders.flatMap { it.wallpapers.map { w -> w.uri } }).toSet()
+
+                            // Find new wallpapers not already in album (anywhere)
                             val newWallpapers = scannedWallpapers.filter { it.uri !in existingUris }
 
                             // Add new wallpapers to album
@@ -87,6 +90,7 @@ class AlbumRefreshWorker @AssistedInject constructor(
                                     }
                                     is CoreResult.Error -> {
                                         Log.e(TAG, "Error adding wallpaper to album '${album.name}'")
+                                        failedCount++
                                     }
                                     is CoreResult.Loading -> {
                                         /* Loading state not used */
