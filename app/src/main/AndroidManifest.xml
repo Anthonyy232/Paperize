@@ -2,98 +2,90 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <!-- Features -->
+    <uses-feature
+        android:name="android.software.wallpaper"
+        android:required="false" />
 
     <application
+        android:name=".PaperizeApplication"
         android:allowBackup="false"
-        android:name=".App"
-        android:persistent="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
+        android:fullBackupContent="false"
         android:icon="@mipmap/app_icon"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/app_icon_round"
         android:supportsRtl="true"
-        android:enableOnBackInvokedCallback="true"
-        android:theme="@style/Theme.Paperize" tools:targetApi="tiramisu">
-        <activity
-            android:name=".feature.wallpaper.presentation.MainActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true"
-            android:theme="@style/Theme.Paperize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <meta-data android:resource="@xml/shortcuts" android:name="android.app.shortcuts" />
-        </activity>
-        <activity android:name=".feature.wallpaper.app_shortcut.BroadcastActivity"
-            android:theme="@android:style/Theme.NoDisplay">
-        </activity>
-        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperReceiver" />
-        <service android:name=".feature.wallpaper.wallpaper_service.HomeWallpaperService"
-            android:foregroundServiceType="dataSync|specialUse" />
-        <service android:name=".feature.wallpaper.wallpaper_service.LockWallpaperService"
-            android:foregroundServiceType="dataSync|specialUse" />
-        <service
-            android:name=".feature.wallpaper.wallpaper_tile.ChangeWallpaperTileService"
-            android:exported="true"
-            android:label="@string/change_wallpaper"
-            android:icon="@drawable/notification_icon"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <intent-filter> <action android:name="android.service.quicksettings.action.QS_TILE" /> </intent-filter>
-        </service>
-        <receiver android:name=".feature.wallpaper.wallpaper_alarmmanager.WallpaperBootAndChangeReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.TIME_SET" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="com.anthonyla.paperize.SHORTCUT" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name="com.anthonyla.paperize.feature.wallpaper.glance_widget.PaperizeWidgetReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/paperize_widget_info" />
-        </receiver>
+        android:theme="@style/Theme.Paperize">
+
+        <!-- Disable default WorkManager initialization (using custom Configuration.Provider) -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
 
+        <!-- Main Activity -->
         <activity
-            android:name=".feature.wallpaper.tasker_shortcut.ActivityConfigBasicAction"
+            android:name=".presentation.MainActivity"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="Change wallpaper">
+            android:configChanges="uiMode|density|orientation|screenSize|screenLayout|keyboardHidden|keyboard"
+            android:theme="@style/Theme.Paperize">
             <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".feature.wallpaper.tasker_shortcut.ActivityConfigBasicEvent"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="Change wallpaper event">
-            <intent-filter>
-                <action android:name="net.dinglisch.android.tasker.ACTION_EDIT_EVENT" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
 
+        <!-- Wallpaper Service -->
+        <service
+            android:name=".service.wallpaper.WallpaperChangeService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Wallpaper changer" />
+        </service>
+
+        <!-- Broadcast Receivers -->
+        <receiver
+            android:name=".service.alarm.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Quick Settings Tile -->
+        <service
+            android:name=".service.tile.WallpaperTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>
