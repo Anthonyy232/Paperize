@@ -83,7 +83,8 @@ class BootReceiver : BroadcastReceiver() {
                             wallpaperScheduler.scheduleWallpaperChanges(
                                 homeIntervalMinutes = homeInterval,
                                 lockIntervalMinutes = lockInterval,
-                                synchronized = shouldSync
+                                synchronized = shouldSync,
+                                onlyIfNotScheduled = true  // Don't reschedule if already scheduled
                             )
 
                             Log.d(TAG, "Wallpaper changes rescheduled successfully")

@@ -214,7 +214,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun toggleWallpaperChanger(enabled: Boolean) {
+    fun toggleWallpaperChanger(enabled: Boolean, onlyIfNotScheduled: Boolean = false) {
         viewModelScope.launch {
             // Use atomic update to prevent race conditions with album selection updates
             settingsRepository.updateEnableChanger(enabled)
@@ -245,8 +245,11 @@ class HomeViewModel @Inject constructor(
                         else -> null
                     }
 
-                    screenType?.let { changeWallpaperNow(it) }
-                    scheduleAlarms(updated)
+                    // Only change wallpaper now if this is not a "check if scheduled" call
+                    if (!onlyIfNotScheduled) {
+                        screenType?.let { changeWallpaperNow(it) }
+                    }
+                    scheduleAlarms(updated, onlyIfNotScheduled)
                 } else {
                     // Not all required albums selected - cancel any existing schedules
                     wallpaperScheduler.cancelAllWallpaperChanges()
@@ -320,7 +323,7 @@ class HomeViewModel @Inject constructor(
         context.startForegroundService(intent)
     }
 
-    private fun scheduleAlarms(settings: ScheduleSettings) {
+    private fun scheduleAlarms(settings: ScheduleSettings, onlyIfNotScheduled: Boolean = false) {
         val homeActive = settings.homeEnabled && settings.homeAlbumId != null
         val lockActive = settings.lockEnabled && settings.lockAlbumId != null
 
@@ -362,7 +365,8 @@ class HomeViewModel @Inject constructor(
         wallpaperScheduler.scheduleWallpaperChanges(
             homeIntervalMinutes = homeInterval,
             lockIntervalMinutes = lockInterval,
-            synchronized = shouldSync
+            synchronized = shouldSync,
+            onlyIfNotScheduled = onlyIfNotScheduled
         )
     }
 }
