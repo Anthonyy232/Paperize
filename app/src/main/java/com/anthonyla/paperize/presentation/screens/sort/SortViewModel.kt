@@ -71,6 +71,12 @@ class SortViewModel @Inject constructor(
                     is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
                 }
             }
+
+            // Clear queues for this album to force rebuild with new sort order
+            // This ensures the wallpaper changer respects the new order immediately
+            if (!hasError) {
+                wallpaperRepository.clearQueuesForAlbum(albumId)
+            }
         }
     }
 

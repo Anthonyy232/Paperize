@@ -97,6 +97,12 @@ interface WallpaperRepository {
     suspend fun clearAllQueues(): Result<Unit>
 
     /**
+     * Clear all queues for a specific album
+     * Used when sort order changes to force rebuild with new order
+     */
+    suspend fun clearQueuesForAlbum(albumId: String): Result<Unit>
+
+    /**
      * Normalize queue positions for all queues (HOME and LOCK) of an album
      * Fixes gaps in queue positions caused by CASCADE deletes when wallpapers are removed
      * Ensures positions are sequential (0, 1, 2, ...) without gaps

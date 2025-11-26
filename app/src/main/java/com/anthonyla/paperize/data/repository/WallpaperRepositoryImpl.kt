@@ -217,6 +217,15 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun clearQueuesForAlbum(albumId: String): Result<Unit> {
+        return try {
+            wallpaperQueueDao.clearAllQueues(albumId)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     override suspend fun normalizeAllQueuesForAlbum(albumId: String): Result<Unit> {
         return try {
             // Normalize both HOME and LOCK queues for this album

@@ -43,6 +43,12 @@ interface AlbumDao {
     suspend fun getAlbumById(albumId: String): AlbumEntity?
 
     /**
+     * Get a specific album by name
+     */
+    @Query("SELECT * FROM albums WHERE name = :name LIMIT 1")
+    suspend fun getAlbumByName(name: String): AlbumEntity?
+
+    /**
      * Get album count
      */
     @Query("SELECT COUNT(*) FROM albums")

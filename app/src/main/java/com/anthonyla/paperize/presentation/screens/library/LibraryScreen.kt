@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ fun LibraryScreen(
 ) {
     val lazyListState = rememberLazyGridState()
     var showAddAlbumDialog by rememberSaveable { mutableStateOf(false) }
+    var albumNameError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -117,10 +119,22 @@ fun LibraryScreen(
 
     if (showAddAlbumDialog) {
         AddAlbumDialog(
-            onDismiss = { },
+            onDismiss = { 
+                showAddAlbumDialog = false
+                albumNameError = null
+            },
             onConfirm = { name ->
-                onCreateAlbum(name)
-            }
+                // Check if album with this name already exists
+                val isDuplicate = albums.any { it.name.equals(name, ignoreCase = true) }
+                if (isDuplicate) {
+                    albumNameError = "Album with this name already exists"
+                } else {
+                    onCreateAlbum(name)
+                    showAddAlbumDialog = false
+                    albumNameError = null
+                }
+            },
+            errorMessage = albumNameError
         )
     }
 }
