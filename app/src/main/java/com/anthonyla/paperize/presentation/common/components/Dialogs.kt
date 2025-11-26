@@ -16,6 +16,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 fun AddAlbumDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
     var albumName by remember { mutableStateOf("") }
@@ -32,6 +33,10 @@ fun AddAlbumDialog(
                     onValueChange = { albumName = it },
                     label = { Text(stringResource(R.string.album_name)) },
                     singleLine = true,
+                    isError = errorMessage != null,
+                    supportingText = if (errorMessage != null) {
+                        { Text(errorMessage, color = MaterialTheme.colorScheme.error) }
+                    } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

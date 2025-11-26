@@ -83,7 +83,14 @@ class AlbumRefreshWorker @AssistedInject constructor(
 
                             // Add new wallpapers to album
                             newWallpapers.forEach { wallpaper ->
-                                when (wallpaperRepository.addWallpaper(wallpaper)) {
+                                // Fix: Create copy with correct albumId and folderId
+                                // scanFolderForWallpapers returns wallpapers with empty albumId/null folderId
+                                val wallpaperToAdd = wallpaper.copy(
+                                    albumId = album.id,
+                                    folderId = folder.id
+                                )
+                                
+                                when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
                                     is CoreResult.Success -> {
                                         totalAdded++
                                         albumHasNewWallpapers = true

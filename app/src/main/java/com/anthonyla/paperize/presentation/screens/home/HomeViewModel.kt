@@ -235,19 +235,17 @@ class HomeViewModel @Inject constructor(
 
                 // Only change wallpaper and schedule if all required albums are selected
                 if (hasRequiredAlbums) {
-                    val screenType = when {
-                        homeActive && lockActive && updated.homeAlbumId == updated.lockAlbumId && !updated.separateSchedules ->
-                            ScreenType.BOTH
-                        homeActive && lockActive ->
-                            ScreenType.BOTH // Change both even if different albums
-                        homeActive -> ScreenType.HOME
-                        lockActive -> ScreenType.LOCK
-                        else -> null
-                    }
-
                     // Only change wallpaper now if this is not a "check if scheduled" call
                     if (!onlyIfNotScheduled) {
-                        screenType?.let { changeWallpaperNow(it) }
+                        val isSynced = homeActive && lockActive && 
+                                       updated.homeAlbumId == updated.lockAlbumId && 
+                                       !updated.separateSchedules
+                        if (isSynced) {
+                            changeWallpaperNow(ScreenType.BOTH)
+                        } else {
+                            if (homeActive) changeWallpaperNow(ScreenType.HOME)
+                            if (lockActive) changeWallpaperNow(ScreenType.LOCK)
+                        }
                     }
                     scheduleAlarms(updated, onlyIfNotScheduled)
                 } else {
@@ -315,16 +313,15 @@ class HomeViewModel @Inject constructor(
             // Handle display changes (scaling, effects, adaptive brightness)
             // Reapply current wallpaper immediately to show the effect
             if (validated.enableChanger && hasRequiredAlbums && displayChanged) {
-                val screenType = when {
-                    homeActive && lockActive && validated.homeAlbumId == validated.lockAlbumId && !validated.separateSchedules ->
-                        ScreenType.BOTH
-                    homeActive && lockActive ->
-                        ScreenType.BOTH // Change both even if different albums
-                    homeActive -> ScreenType.HOME
-                    lockActive -> ScreenType.LOCK
-                    else -> null
+                val isSynced = homeActive && lockActive && 
+                               validated.homeAlbumId == validated.lockAlbumId && 
+                               !validated.separateSchedules
+                if (isSynced) {
+                    changeWallpaperNow(ScreenType.BOTH)
+                } else {
+                    if (homeActive) changeWallpaperNow(ScreenType.HOME)
+                    if (lockActive) changeWallpaperNow(ScreenType.LOCK)
                 }
-                screenType?.let { changeWallpaperNow(it) }
             }
         }
     }

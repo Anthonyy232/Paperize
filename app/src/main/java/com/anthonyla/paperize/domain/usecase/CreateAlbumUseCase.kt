@@ -15,6 +15,12 @@ class CreateAlbumUseCase @Inject constructor(
         if (name.isBlank()) {
             return Result.Error(IllegalArgumentException("Album name cannot be empty"))
         }
+
+        val existingAlbum = albumRepository.getAlbumByName(name)
+        if (existingAlbum != null) {
+            return Result.Error(IllegalArgumentException("Album with this name already exists"))
+        }
+
         return albumRepository.createAlbum(name, coverUri)
     }
 }
