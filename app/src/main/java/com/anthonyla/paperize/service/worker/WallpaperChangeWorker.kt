@@ -69,6 +69,11 @@ class WallpaperChangeWorker @AssistedInject constructor(
         val wallpaperManager = WallpaperManager.getInstance(context)
 
         when (screenType) {
+            ScreenType.LIVE -> {
+                // Live wallpaper changes are handled by the live wallpaper service itself
+                // WorkManager is not used for live wallpaper scheduling
+                Log.d(TAG, "Live wallpaper change - no action needed in worker")
+            }
             ScreenType.HOME -> {
                 val homeAlbumId = settings.homeAlbumId
                 if (homeAlbumId != null) {

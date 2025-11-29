@@ -92,6 +92,10 @@ class WallpaperChangeService : Service() {
                     val settings = settingsRepository.getScheduleSettings()
 
                 when (screenType) {
+                    ScreenType.LIVE -> {
+                        // Live wallpaper changes are handled by the live wallpaper service
+                        Log.d(TAG, "Live wallpaper - no action needed in service")
+                    }
                     ScreenType.HOME -> {
                         val homeAlbumId = settings.homeAlbumId
                         if (homeAlbumId != null) {

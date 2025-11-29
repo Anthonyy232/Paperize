@@ -20,6 +20,8 @@ data class ScheduleSettings(
     val lockScalingType: ScalingType = ScalingType.FILL,
     val homeEffects: WallpaperEffects = WallpaperEffects.none(),
     val lockEffects: WallpaperEffects = WallpaperEffects.none(),
+    val liveAlbumId: String? = null,
+    val liveEffects: WallpaperEffects = WallpaperEffects.none(),
     val adaptiveBrightness: Boolean = false
 ) {
     /**
@@ -29,7 +31,8 @@ data class ScheduleSettings(
         homeIntervalMinutes = homeIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
         lockIntervalMinutes = lockIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
         homeEffects = homeEffects.validate(),
-        lockEffects = lockEffects.validate()
+        lockEffects = lockEffects.validate(),
+        liveEffects = liveEffects.validate()
     )
 
     /**
@@ -62,6 +65,7 @@ data class ScheduleSettings(
                lockScalingType != other.lockScalingType ||
                homeEffects != other.homeEffects ||
                lockEffects != other.lockEffects ||
+               liveEffects != other.liveEffects ||
                adaptiveBrightness != other.adaptiveBrightness
     }
 

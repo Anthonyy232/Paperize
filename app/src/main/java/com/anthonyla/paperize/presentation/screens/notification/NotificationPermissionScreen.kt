@@ -46,25 +46,25 @@ fun NotificationPermissionScreen(
         )
     }
     var hasShownScreen by remember { mutableStateOf(false) }
+    var hasNavigated by remember { mutableStateOf(false) }  // Single-use navigation flag
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        permissionGranted = isGranted
-        if (isGranted) {
-            onContinue()
+        // Only update and navigate if we haven't navigated yet
+        if (!hasNavigated) {
+            permissionGranted = isGranted
+            if (isGranted) {
+                hasNavigated = true  // Mark as navigated BEFORE calling onContinue
+                onContinue()
+            }
         }
     }
 
-    // Mark screen as shown after first composition
-    LaunchedEffect(Unit) {
-        hasShownScreen = true
-    }
-
-    // Auto-skip if permission granted after screen has been shown
-    // This prevents immediate navigation on first render if permission is already granted
-    LaunchedEffect(permissionGranted, hasShownScreen) {
-        if (permissionGranted && hasShownScreen) {
+    // Auto-navigate if permission is already granted
+    LaunchedEffect(permissionGranted) {
+        if (permissionGranted && !hasNavigated) {
+            hasNavigated = true  // Mark as navigated BEFORE delay
             kotlinx.coroutines.delay(Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS)  // Brief delay for smooth transition
             onContinue()
         }

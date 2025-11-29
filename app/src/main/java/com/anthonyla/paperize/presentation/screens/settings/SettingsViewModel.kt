@@ -2,6 +2,7 @@ package com.anthonyla.paperize.presentation.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -31,17 +32,17 @@ class SettingsViewModel @Inject constructor(
             initialValue = AppSettings.default()
         )
 
+    val wallpaperMode: StateFlow<WallpaperMode> = settingsRepository.getWallpaperModeFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = WallpaperMode.STATIC
+        )
+
     fun updateDarkMode(enabled: Boolean) {
         viewModelScope.launch {
             // Use atomic update to prevent race conditions
             settingsRepository.updateDarkMode(enabled)
-        }
-    }
-
-    fun updateAmoledTheme(enabled: Boolean) {
-        viewModelScope.launch {
-            // Use atomic update to prevent race conditions
-            settingsRepository.updateAmoledTheme(enabled)
         }
     }
 
@@ -63,6 +64,31 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             // Use atomic update to prevent race conditions
             settingsRepository.updateFirstLaunch(isFirstLaunch)
+        }
+    }
+
+    /**
+     * Switch wallpaper mode and reset all data
+     * This is required because STATIC and LIVE modes have different capabilities
+     * and incompatible wallpaper types
+     */
+    fun switchWallpaperMode(newMode: WallpaperMode) {
+        viewModelScope.launch {
+            // Cancel all scheduled wallpaper changes first
+            wallpaperScheduler.cancelAllWallpaperChanges()
+
+            // Delete all albums (cascades to delete all wallpapers, folders, and queues)
+            when (albumRepository.deleteAllAlbums()) {
+                is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
+                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
+            }
+
+            // Reset schedule settings to default (clears effects, intervals, etc.)
+            settingsRepository.clearScheduleSettings()
+
+            // Set new wallpaper mode
+            settingsRepository.setWallpaperMode(newMode)
         }
     }
 

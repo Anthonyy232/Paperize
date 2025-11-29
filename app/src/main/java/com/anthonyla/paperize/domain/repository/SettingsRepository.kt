@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.domain.repository
 
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +25,22 @@ interface SettingsRepository {
     suspend fun updateAppSettings(settings: AppSettings)
 
     /**
+     * Get wallpaper mode (STATIC or LIVE)
+     */
+    suspend fun getWallpaperMode(): WallpaperMode
+
+    /**
+     * Get wallpaper mode as Flow
+     */
+    fun getWallpaperModeFlow(): Flow<WallpaperMode>
+
+    /**
+     * Update wallpaper mode
+     * IMPORTANT: Caller must handle data reset when switching modes
+     */
+    suspend fun updateWallpaperMode(mode: WallpaperMode)
+
+    /**
      * Get schedule settings
      */
     suspend fun getScheduleSettings(): ScheduleSettings
@@ -44,6 +61,17 @@ interface SettingsRepository {
     suspend fun clearAllSettings()
 
     /**
+     * Clear schedule settings (reset to defaults)
+     * Used when switching wallpaper modes to reset all scheduling configuration
+     */
+    suspend fun clearScheduleSettings()
+
+    /**
+     * Set wallpaper mode (wrapper for updateWallpaperMode)
+     */
+    suspend fun setWallpaperMode(mode: WallpaperMode) = updateWallpaperMode(mode)
+
+    /**
      * Atomically update home album ID to prevent race conditions
      * Use this instead of updateScheduleSettings when only changing home album
      */
@@ -56,6 +84,12 @@ interface SettingsRepository {
     suspend fun updateLockAlbumId(albumId: String?)
 
     /**
+     * Atomically update live album ID to prevent race conditions
+     * Use this instead of updateScheduleSettings when only changing live album
+     */
+    suspend fun updateLiveAlbumId(albumId: String?)
+
+    /**
      * Atomically clear album selections if they match the given album ID
      * Used when deleting an album to prevent race conditions
      * Returns true if any selections were cleared
@@ -65,7 +99,6 @@ interface SettingsRepository {
     // ============ Atomic AppSettings Operations ============
 
     suspend fun updateDarkMode(enabled: Boolean)
-    suspend fun updateAmoledTheme(enabled: Boolean)
     suspend fun updateDynamicTheming(enabled: Boolean)
     suspend fun updateAnimate(enabled: Boolean)
     suspend fun updateFirstLaunch(isFirstLaunch: Boolean)

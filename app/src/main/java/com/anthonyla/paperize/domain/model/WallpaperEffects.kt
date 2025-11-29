@@ -6,15 +6,22 @@ import com.anthonyla.paperize.core.constants.Constants
  * Domain model for Wallpaper Effects
  *
  * Represents the visual effects applied to wallpapers
+ * Includes both visual effects (blur, darken, etc.) and interactive effects (double-tap, parallax)
  */
 data class WallpaperEffects(
+    // Visual effects (available in both static and live modes)
     val enableBlur: Boolean = false,
     val blurPercentage: Int = Constants.DEFAULT_BLUR_PERCENTAGE,
     val enableDarken: Boolean = false,
     val darkenPercentage: Int = Constants.DEFAULT_DARKEN_PERCENTAGE,
     val enableVignette: Boolean = false,
     val vignettePercentage: Int = Constants.DEFAULT_VIGNETTE_PERCENTAGE,
-    val enableGrayscale: Boolean = false
+    val enableGrayscale: Boolean = false,
+
+    // Interactive effects (live wallpaper mode only)
+    val enableDoubleTap: Boolean = false,
+    val enableParallax: Boolean = false,
+    val parallaxIntensity: Int = Constants.DEFAULT_PARALLAX_INTENSITY
 ) {
     /**
      * Check if any effects are applied
@@ -31,7 +38,8 @@ data class WallpaperEffects(
     fun validate(): WallpaperEffects = copy(
         darkenPercentage = darkenPercentage.coerceIn(-100, 100),
         blurPercentage = blurPercentage.coerceIn(0, 100),
-        vignettePercentage = vignettePercentage.coerceIn(0, 100)
+        vignettePercentage = vignettePercentage.coerceIn(0, 100),
+        parallaxIntensity = parallaxIntensity.coerceIn(0, 100)
     )
 
     companion object {

@@ -33,7 +33,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @Composable
 fun FolderViewScreen(
-    folderId: String,
+    @Suppress("UNUSED_PARAMETER") folderId: String,
     onBackClick: () -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
     modifier: Modifier = Modifier,

@@ -7,7 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 
 /**
- * Image picker using Android Photo Picker
+ * Media picker using Android Photo Picker
+ * Supports images only
  */
 @Composable
 fun rememberImagePicker(
@@ -22,6 +23,7 @@ fun rememberImagePicker(
     }
 
     return {
+        // Allow images only
         launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 }

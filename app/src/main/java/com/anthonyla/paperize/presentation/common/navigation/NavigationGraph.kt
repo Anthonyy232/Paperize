@@ -60,8 +60,24 @@ fun NavigationGraph(
         ) {
             StartupScreen(
                 onAgree = {
-                    navController.navigate(NotificationRoute) {
+                    navController.navigate(WallpaperModeSelectionRoute) {
                         popUpTo<StartupRoute> { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Wallpaper mode selection screen
+        composable<WallpaperModeSelectionRoute>(
+            enterTransition = enterForward,
+            exitTransition = exitForward,
+            popEnterTransition = enterBackward,
+            popExitTransition = exitBackward
+        ) {
+            com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection.WallpaperModeSelectionScreen(
+                onModeSelected = {
+                    navController.navigate(NotificationRoute) {
+                        popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
                     }
                 }
             )

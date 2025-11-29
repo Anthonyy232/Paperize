@@ -65,7 +65,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SortViewScreen(
-    albumId: String,
+    @Suppress("UNUSED_PARAMETER") albumId: String,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,

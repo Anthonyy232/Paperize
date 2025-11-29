@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/live_wallpaper_description"
+    android:settingsActivity="com.anthonyla.paperize.presentation.MainActivity"
+    android:thumbnail="@mipmap/app_icon" />

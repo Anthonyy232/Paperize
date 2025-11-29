@@ -6,7 +6,7 @@ package com.anthonyla.paperize.core.constants
 object Constants {
     // Database
     const val DATABASE_NAME = "paperize_database"
-    const val DATABASE_VERSION = 1
+    const val DATABASE_VERSION = 2  // v2: Added mediaType and crop fields to WallpaperEntity
 
     // DataStore
     const val PREFERENCES_NAME = "paperize_preferences"
@@ -17,6 +17,9 @@ object Constants {
 
     // Services
     const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER"
+    const val ACTION_CHANGE_LIVE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_LIVE_WALLPAPER"
+    const val ACTION_UPDATE_LIVE_EFFECTS = "com.anthonyla.paperize.ACTION_UPDATE_LIVE_EFFECTS"
+    const val ACTION_RELOAD_WALLPAPER = "com.anthonyla.paperize.ACTION_RELOAD_WALLPAPER"
 
     // WorkManager
     const val WORK_NAME_HOME = "wallpaper_change_home"
@@ -37,6 +40,7 @@ object Constants {
     const val DEFAULT_BLUR_PERCENTAGE = 0
     const val DEFAULT_DARKEN_PERCENTAGE = 0
     const val DEFAULT_VIGNETTE_PERCENTAGE = 0
+    const val DEFAULT_PARALLAX_INTENSITY = 50
     const val MAX_EFFECT_PERCENTAGE = 100
     const val MIN_EFFECT_PERCENTAGE = 0
 
@@ -102,7 +106,6 @@ object Constants {
 object PreferenceKeys {
     // Theme
     const val DARK_MODE = "dark_mode"
-    const val AMOLED_THEME = "amoled_theme"
     const val DYNAMIC_THEMING = "dynamic_theming"
     const val ANIMATE = "animate"
 
@@ -135,6 +138,29 @@ object PreferenceKeys {
     const val LOCK_VIGNETTE = "lock_vignette"
     const val LOCK_GRAYSCALE = "lock_grayscale"
 
+    // Interactive Effects - Home (live wallpaper mode only)
+    const val HOME_ENABLE_DOUBLE_TAP = "home_enable_double_tap"
+    const val HOME_ENABLE_PARALLAX = "home_enable_parallax"
+    const val HOME_PARALLAX_INTENSITY = "home_parallax_intensity"
+
+    // Interactive Effects - Lock (live wallpaper mode only)
+    const val LOCK_ENABLE_DOUBLE_TAP = "lock_enable_double_tap"
+    const val LOCK_ENABLE_PARALLAX = "lock_enable_parallax"
+    const val LOCK_PARALLAX_INTENSITY = "lock_parallax_intensity"
+
+    // Live Wallpaper Mode Settings
+    const val LIVE_ALBUM_ID = "live_album_id"
+    const val LIVE_ENABLE_BLUR = "live_enable_blur"
+    const val LIVE_BLUR = "live_blur"
+    const val LIVE_ENABLE_DARKEN = "live_enable_darken"
+    const val LIVE_DARKEN = "live_darken"
+    const val LIVE_ENABLE_VIGNETTE = "live_enable_vignette"
+    const val LIVE_VIGNETTE = "live_vignette"
+    const val LIVE_GRAYSCALE = "live_grayscale"
+    const val LIVE_ENABLE_DOUBLE_TAP = "live_enable_double_tap"
+    const val LIVE_ENABLE_PARALLAX = "live_enable_parallax"
+    const val LIVE_PARALLAX_INTENSITY = "live_parallax_intensity"
+
     // Scaling
     const val HOME_SCALING_TYPE = "home_scaling_type"
     const val LOCK_SCALING_TYPE = "lock_scaling_type"
@@ -148,4 +174,7 @@ object PreferenceKeys {
 
     // First launch
     const val FIRST_LAUNCH = "first_launch"
+
+    // Wallpaper mode
+    const val WALLPAPER_MODE = "wallpaper_mode"
 }

@@ -16,6 +16,9 @@ object NotificationRoute
 object StoragePermissionRoute
 
 @Serializable
+object WallpaperModeSelectionRoute
+
+@Serializable
 object HomeRoute
 
 @Serializable

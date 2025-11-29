@@ -36,12 +36,16 @@ fun StoragePermissionScreen(
     val context = LocalContext.current
     var permissionGranted by remember { mutableStateOf(Environment.isExternalStorageManager()) }
     var hasShownScreen by remember { mutableStateOf(false) }
+    var hasNavigated by remember { mutableStateOf(false) }  // Single-use navigation flag
 
     // Check permission status on resume (when user returns from settings)
     DisposableEffect(Unit) {
         val listener = object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
-                permissionGranted = Environment.isExternalStorageManager()
+                // Only update if we haven't navigated yet
+                if (!hasNavigated) {
+                    permissionGranted = Environment.isExternalStorageManager()
+                }
             }
         }
         val lifecycleOwner = context as? LifecycleOwner
@@ -52,15 +56,10 @@ fun StoragePermissionScreen(
         }
     }
 
-    // Mark screen as shown after first composition
-    LaunchedEffect(Unit) {
-        hasShownScreen = true
-    }
-
-    // Auto-skip if permission granted after screen has been shown
-    // This prevents immediate navigation on first render if permission is already granted
-    LaunchedEffect(permissionGranted, hasShownScreen) {
-        if (permissionGranted && hasShownScreen) {
+    // Auto-navigate if permission is already granted
+    LaunchedEffect(permissionGranted) {
+        if (permissionGranted && !hasNavigated) {
+            hasNavigated = true  // Mark as navigated BEFORE delay
             kotlinx.coroutines.delay(Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS)  // Brief delay for smooth transition
             onContinue()
         }

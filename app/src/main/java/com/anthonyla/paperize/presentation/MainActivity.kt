@@ -56,7 +56,6 @@ class MainActivity : ComponentActivity() {
 
             PaperizeTheme(
                 darkMode = appSettings.darkMode,
-                amoledMode = appSettings.amoledTheme,
                 dynamicTheming = appSettings.dynamicTheming
             ) {
                 Surface(
