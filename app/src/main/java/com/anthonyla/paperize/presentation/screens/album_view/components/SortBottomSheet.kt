@@ -37,7 +37,7 @@ enum class SortOption {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortBottomSheet(
-    currentSort: SortOption,
+    @Suppress("UNUSED_PARAMETER") currentSort: SortOption,
     onSortSelected: (SortOption) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier

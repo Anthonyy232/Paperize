@@ -5,6 +5,7 @@ hilt = "2.57.2"
 ksp = "2.2.20-2.0.3"
 material = "1.13.0"
 coil = "3.3.0"
+media3 = "1.7.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
@@ -58,6 +59,8 @@ reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version =
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version = "1.1.1" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version = "1.1.1" }
 androidx-glance-material = { group = "androidx.glance", name = "glance-material", version = "1.1.1" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }

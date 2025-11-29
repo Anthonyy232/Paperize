@@ -41,7 +41,6 @@ import com.anthonyla.paperize.R
 @Composable
 fun AddAlbumAnimatedFab(
     isLoading: Boolean,
-    animate: Boolean,
     onImageClick: () -> Unit,
     onFolderClick: () -> Unit,
     modifier: Modifier = Modifier

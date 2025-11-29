@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.data.repository
 
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.data.datastore.PreferencesManager
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
@@ -25,6 +26,15 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateAppSettings(settings: AppSettings) =
         preferencesManager.updateAppSettings(settings)
 
+    override suspend fun getWallpaperMode(): WallpaperMode =
+        preferencesManager.getWallpaperMode()
+
+    override fun getWallpaperModeFlow(): Flow<WallpaperMode> =
+        preferencesManager.getWallpaperModeFlow()
+
+    override suspend fun updateWallpaperMode(mode: WallpaperMode) =
+        preferencesManager.updateWallpaperMode(mode)
+
     override suspend fun getScheduleSettings(): ScheduleSettings =
         preferencesManager.getScheduleSettings()
 
@@ -37,11 +47,17 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearAllSettings() =
         preferencesManager.clear()
 
+    override suspend fun clearScheduleSettings() =
+        preferencesManager.clearScheduleSettings()
+
     override suspend fun updateHomeAlbumId(albumId: String?) =
         preferencesManager.updateHomeAlbumId(albumId)
 
     override suspend fun updateLockAlbumId(albumId: String?) =
         preferencesManager.updateLockAlbumId(albumId)
+
+    override suspend fun updateLiveAlbumId(albumId: String?) =
+        preferencesManager.updateLiveAlbumId(albumId)
 
     override suspend fun clearAlbumSelectionsIfMatches(albumId: String): Boolean =
         preferencesManager.clearAlbumSelectionsIfMatches(albumId)
@@ -50,9 +66,6 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateDarkMode(enabled: Boolean) =
         preferencesManager.updateDarkMode(enabled)
-
-    override suspend fun updateAmoledTheme(enabled: Boolean) =
-        preferencesManager.updateAmoledTheme(enabled)
 
     override suspend fun updateDynamicTheming(enabled: Boolean) =
         preferencesManager.updateDynamicTheming(enabled)

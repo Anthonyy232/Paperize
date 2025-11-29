@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.anthonyla.paperize.core.WallpaperMediaType
 import com.anthonyla.paperize.core.WallpaperSourceType
 
 /**
@@ -49,5 +50,19 @@ data class WallpaperEntity(
     val dateModified: Long,
     val displayOrder: Int = 0,
     val sourceType: WallpaperSourceType = WallpaperSourceType.DIRECT,
-    val addedAt: Long = System.currentTimeMillis()
+    val addedAt: Long = System.currentTimeMillis(),
+
+    /**
+     * Media type (IMAGE)
+     * Added in database version 2 for live wallpaper support
+     */
+    val mediaType: WallpaperMediaType = WallpaperMediaType.IMAGE,
+
+    /**
+     * Manual crop parameters for live wallpaper rendering
+     * Added in database version 2
+     */
+    val cropOffsetX: Float? = null,
+    val cropOffsetY: Float? = null,
+    val cropScale: Float? = null
 )

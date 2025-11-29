@@ -58,17 +58,6 @@ interface WallpaperQueueDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQueueItems(items: List<WallpaperQueueEntity>)
 
-    /**
-     * Remove first item from queue and normalize positions
-     */
-    @Transaction
-    suspend fun dequeueWallpaper(albumId: String, screenType: ScreenType) {
-        // Delete the first item
-        deleteFirstQueueItem(albumId, screenType)
-        // Normalize positions to fix any gaps from CASCADE deletes
-        normalizeQueuePositions(albumId, screenType)
-    }
-
     @Query("""
         DELETE FROM wallpaper_queue
         WHERE albumId = :albumId AND screenType = :screenType

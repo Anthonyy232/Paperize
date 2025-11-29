@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +33,10 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val appSettings by viewModel.appSettings.collectAsState()
+    val wallpaperMode by viewModel.wallpaperMode.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
+    var showModeChangeDialog by remember { mutableStateOf(false) }
+    var pendingMode by remember { mutableStateOf<com.anthonyla.paperize.core.WallpaperMode?>(null) }
 
     Scaffold(
         topBar = {
@@ -58,6 +62,73 @@ fun SettingsScreen(
         ) {
             Spacer(modifier = Modifier.height(AppSpacing.medium))
 
+            // Wallpaper Mode Section
+            SectionHeader(
+                icon = Icons.Filled.Wallpaper,
+                title = "Wallpaper Mode"
+            )
+
+            Spacer(modifier = Modifier.height(AppSpacing.small))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(AppSpacing.large)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Current Mode",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                            Text(
+                                text = when (wallpaperMode) {
+                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> "Static"
+                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> "Live Wallpaper"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        FilledTonalButton(
+                            onClick = {
+                                pendingMode = when (wallpaperMode) {
+                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> com.anthonyla.paperize.core.WallpaperMode.LIVE
+                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> com.anthonyla.paperize.core.WallpaperMode.STATIC
+                                }
+                                showModeChangeDialog = true
+                            }
+                        ) {
+                            Text("Switch")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(AppSpacing.small))
+
+                    Text(
+                        text = "Switching modes will reset all albums, wallpapers, and settings. This cannot be undone.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(AppSpacing.large))
+
             // Appearance Section
             SectionHeader(
                 icon = Icons.Filled.Palette,
@@ -72,16 +143,6 @@ fun SettingsScreen(
                 checked = appSettings.darkMode ?: false,
                 onCheckedChange = { viewModel.updateDarkMode(it) }
             )
-
-            if (appSettings.darkMode == true) {
-                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                SettingSwitchItem(
-                    title = stringResource(R.string.amoled_mode),
-                    description = stringResource(R.string.full_dark_mode),
-                    checked = appSettings.amoledTheme,
-                    onCheckedChange = { viewModel.updateAmoledTheme(it) }
-                )
-            }
 
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
 
@@ -179,6 +240,41 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showResetDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+
+        if (showModeChangeDialog && pendingMode != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showModeChangeDialog = false
+                    pendingMode = null
+                },
+                title = { Text("Switch to ${if (pendingMode == com.anthonyla.paperize.core.WallpaperMode.LIVE) "Live Wallpaper" else "Static"} Mode?") },
+                text = {
+                    Text("This will reset all albums, wallpapers, and scheduling settings. This action cannot be undone.\n\nYou'll need to re-add your albums and configure your wallpaper settings.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            pendingMode?.let { viewModel.switchWallpaperMode(it) }
+                            showModeChangeDialog = false
+                            pendingMode = null
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Switch Mode")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showModeChangeDialog = false
+                        pendingMode = null
+                    }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }

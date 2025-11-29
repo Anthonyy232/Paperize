@@ -16,7 +16,8 @@ fun WallpaperEntity.toDomainModel(): Wallpaper = Wallpaper(
     dateModified = dateModified,
     displayOrder = displayOrder,
     sourceType = sourceType,
-    addedAt = addedAt
+    addedAt = addedAt,
+    mediaType = mediaType
 )
 
 fun Wallpaper.toEntity(): WallpaperEntity = WallpaperEntity(
@@ -28,7 +29,8 @@ fun Wallpaper.toEntity(): WallpaperEntity = WallpaperEntity(
     dateModified = dateModified,
     displayOrder = displayOrder,
     sourceType = sourceType,
-    addedAt = addedAt
+    addedAt = addedAt,
+    mediaType = mediaType
 )
 
 fun List<WallpaperEntity>.toDomainModels(): List<Wallpaper> = map { it.toDomainModel() }

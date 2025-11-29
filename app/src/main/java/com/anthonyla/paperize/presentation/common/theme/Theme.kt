@@ -92,38 +92,6 @@ private val DarkColors = darkColorScheme(
     surfaceContainerLowest = md_theme_dark_surfaceContainerLowest,
 )
 
-private val AmoledDarkColors = darkColorScheme(
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-    secondary = Color(0xFF1C1B1E),  // Near-black for OLED efficiency
-    onSecondary = Color(0xFFE6E1E5),  // Soft gray instead of pure white
-    secondaryContainer = Color(0xFF2B2930),  // Dark gray container
-    onSecondaryContainer = Color(0xFFE6E1E5),
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
-    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-    error = Color(0xFFFFB4AB),  // Softer error color from Material 3
-    errorContainer = md_theme_dark_errorContainer,
-    onError = md_theme_dark_onError,
-    onErrorContainer = md_theme_dark_onErrorContainer,
-    background = Color(0xFF000000),  // True black for OLED
-    onBackground = Color(0xFFE6E1E5),  // Soft gray for better readability
-    surface = Color(0xFF000000),  // True black for OLED
-    onSurface = Color(0xFFE6E1E5),  // Soft gray for better readability
-    surfaceVariant = Color(0xFF1C1B1E),  // Near-black variant
-    onSurfaceVariant = Color(0xFFC9C5CA),  // Softer gray for secondary text
-    outline = Color(0xFF938F94),  // Medium gray for outlines
-    inverseOnSurface = Color(0xFF1C1B1E),
-    inverseSurface = Color(0xFFE6E1E5),
-    inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = md_theme_dark_surfaceTint,
-    outlineVariant = Color(0xFF49454F),
-    scrim = Color(0xFF000000),
-)
-
 /**
  * App theming for dynamic theming when supported and dark mode.
  * Migrated to Material 3 Expressive design system with enhanced motion, typography, and shapes.
@@ -132,7 +100,6 @@ private val AmoledDarkColors = darkColorScheme(
 @Composable
 fun PaperizeTheme(
     darkMode: Boolean?,
-    amoledMode: Boolean,
     dynamicTheming: Boolean,
     content: @Composable () -> Unit
 ) {
@@ -144,8 +111,7 @@ fun PaperizeTheme(
     val colors = when {
         isDynamicTheming && isDarkMode -> dynamicDarkColorScheme(context)
         isDynamicTheming && !isDarkMode -> dynamicLightColorScheme(context)
-        isDarkMode && amoledMode -> AmoledDarkColors
-        isDarkMode && !amoledMode -> DarkColors
+        isDarkMode -> DarkColors
         else -> LightColors
     }
 

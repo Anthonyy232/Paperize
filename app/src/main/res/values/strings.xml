@@ -87,8 +87,7 @@
   <string name="paperize_is_running">Paperize is running</string>
   <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
   <string name="theme">Theme</string>
-  <string name="amoled_mode">AMOLED Mode</string>
-  <string name="full_dark_mode">Full dark mode</string>
+  <string name="wallpaper_changer">Wallpaper Changer</string>
   <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
   <string name="lock">Lock</string>
   <string name="change_vignette">Vignette Effect</string>
@@ -105,6 +104,13 @@
   <string name="add_blur_to_the_image">Add blur to the image</string>
   <string name="darken_the_edges_of_the_image">Darken the edges of the image</string>
   <string name="make_the_colors_grayscale">Make the colors grayscale</string>
+  <string name="double_tap_to_change">Double-Tap to Change</string>
+  <string name="double_tap_wallpaper_to_change_it">Double-tap wallpaper to change it</string>
+  <string name="parallax_effect">Parallax Effect</string>
+  <string name="wallpaper_moves_with_screen_scroll">Wallpaper moves with screen scroll</string>
+  <string name="live_wallpaper_name">Paperize Live Wallpaper</string>
+  <string name="live_wallpaper_description">Dynamic wallpapers with effects and interactive features</string>
+  <string name="visual_effects_note_live_mode">Note: Visual effects (blur, darken, vignette, grayscale) apply to all wallpapers in live mode.</string>
   <string name="adaptive_brightness">Adaptive Brightness</string>
   <string name="adjust_brightness_based_on_mode">Adjust brightness based on dark/light mode</string>
   <string name="randomly_shuffle_the_wallpapers">Randomly shuffle the wallpapers</string>
@@ -142,6 +148,8 @@
   <string name="home_album_label">Home Album</string>
   <string name="scaling">Scaling</string>
   <string name="wallpaper_effects_title">Wallpaper Effects</string>
+  <string name="visual_effects">Visual Effects</string>
+  <string name="interactive_effects">Interactive Effects</string>
   <string name="current_wallpapers">Current Wallpapers</string>
 
   <!-- Tab Titles -->

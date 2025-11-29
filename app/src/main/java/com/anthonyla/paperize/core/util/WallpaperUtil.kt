@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.core.util
 
+import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -28,6 +29,7 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.graphics.createBitmap
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.WallpaperMediaType
 
 /**
  * Wallpaper utility functions for bitmap processing and effects
@@ -431,7 +433,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
 /**
  * Blur bitmap using GPU acceleration
  */
-fun blurBitmap(context: Context, source: Bitmap, percent: Int): Bitmap {
+fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
     return blurBitmapHardware(source, percent)
 }
 
@@ -632,7 +634,7 @@ fun processBitmap(
 
     if (enableBlur && blurPercent > 0) {
         previous = result
-        result = blurBitmap(context, result, blurPercent)
+        result = blurBitmap(result, blurPercent)
         // Blur always creates a new bitmap, recycle the previous one if different
         if (result !== previous && previous !== source) {
             previous.recycle()
@@ -660,3 +662,82 @@ fun processBitmap(
     return result
 }
 
+/**
+ * Detect media type from URI
+ *
+ * Examines the file extension and MIME type to determine the media type.
+ * Returns null if the media type cannot be determined or is unsupported.
+ */
+fun Uri.detectMediaType(context: Context): WallpaperMediaType? {
+    try {
+        // First try to get file extension from path
+        val path = this.path
+        if (path != null) {
+            val extension = path.substringAfterLast('.', "")
+            if (extension.isNotEmpty()) {
+                val mediaType = WallpaperMediaType.fromExtension(extension)
+                if (mediaType != null) {
+                    return mediaType
+                }
+            }
+        }
+
+        // Fallback: Try to get MIME type from content resolver
+        val mimeType = context.contentResolver.getType(this)
+        if (mimeType != null) {
+            return when {
+                mimeType.startsWith("image/") -> WallpaperMediaType.IMAGE
+                else -> null
+            }
+        }
+
+        // If all else fails, assume IMAGE for backward compatibility
+        return WallpaperMediaType.IMAGE
+    } catch (e: Exception) {
+        Log.e(TAG, "Error detecting media type for URI: $this", e)
+        return WallpaperMediaType.IMAGE  // Default to IMAGE on error
+    }
+}
+
+/**
+ * Validate that media type is supported in the current wallpaper mode
+ */
+fun WallpaperMediaType.isSupportedInMode(mode: com.anthonyla.paperize.core.WallpaperMode): Boolean {
+    return when (mode) {
+        com.anthonyla.paperize.core.WallpaperMode.STATIC -> this.supportedInStaticMode
+        com.anthonyla.paperize.core.WallpaperMode.LIVE -> this.supportedInLiveMode
+    }
+}
+
+/**
+ * Check if Paperize live wallpaper is currently active/selected
+ * Returns true if the Paperize live wallpaper service is the current wallpaper
+ */
+fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
+    return try {
+        // If we are checking from within the service itself (e.g. preview mode), we are active
+        if (context is com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService) {
+            return true
+        }
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        val wallpaperInfo = wallpaperManager.wallpaperInfo
+
+        // If wallpaperInfo is null, user has a static wallpaper (not a live wallpaper)
+        if (wallpaperInfo == null) {
+            return false
+        }
+
+        // Check if the service component matches Paperize live wallpaper
+        val expectedComponent = android.content.ComponentName(
+            context.packageName,
+            "com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService"
+        )
+        val isPaperize = wallpaperInfo.component == expectedComponent
+
+        isPaperize
+    } catch (e: Exception) {
+        Log.e("WallpaperUtil", "Error checking live wallpaper status", e)
+        false
+    }
+}

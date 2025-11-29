@@ -86,11 +86,6 @@ interface WallpaperRepository {
     ): Result<Unit>
 
     /**
-     * Dequeue wallpaper (remove first from queue)
-     */
-    suspend fun dequeueWallpaper(albumId: String, screenType: ScreenType): Result<Unit>
-
-    /**
      * Clear all queues for all albums
      * Used when shuffle setting changes to force rebuild with new mode
      */

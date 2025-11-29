@@ -42,7 +42,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @Composable
 fun AlbumViewScreen(
-    albumId: String,
+    @Suppress("UNUSED_PARAMETER") albumId: String,
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
@@ -156,7 +156,6 @@ fun AlbumViewScreen(
             if (!isSelectionMode) {
                 AddAlbumAnimatedFab(
                     isLoading = false,
-                    animate = true,
                     onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
                     onFolderClick = { folderPickerLauncher.launch(null) }
                 )

@@ -271,6 +271,7 @@ class WallpaperScheduler @Inject constructor(
             ScreenType.HOME -> Constants.WORK_NAME_HOME
             ScreenType.LOCK -> Constants.WORK_NAME_LOCK
             ScreenType.BOTH -> Constants.WORK_NAME_BOTH
+            ScreenType.LIVE -> "wallpaper_change_live"  // Not used in WorkManager scheduling
         }
     }
 
@@ -279,6 +280,7 @@ class WallpaperScheduler @Inject constructor(
             ScreenType.HOME -> Constants.WORK_TAG_HOME
             ScreenType.LOCK -> Constants.WORK_TAG_LOCK
             ScreenType.BOTH -> Constants.WORK_TAG_BOTH
+            ScreenType.LIVE -> "wallpaper_live"  // Not used in WorkManager scheduling
         }
     }
 

@@ -6,9 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.anthonyla.paperize.core.util.detectMediaType
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.core.util.getFileName
 import com.anthonyla.paperize.core.util.scanFolderForImages
+import com.anthonyla.paperize.core.WallpaperMediaType
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
@@ -75,14 +77,18 @@ class AlbumViewViewModel @Inject constructor(
     fun addWallpapers(uris: List<String>) {
         viewModelScope.launch {
             val wallpapers = uris.mapIndexed { index, uri ->
+                val parsedUri = uri.toUri()
+                val mediaType = parsedUri.detectMediaType(context) ?: WallpaperMediaType.IMAGE
+
                 Wallpaper(
                     id = generateId(),
                     albumId = albumId,
                     folderId = null,
                     uri = uri,
-                    fileName = uri.toUri().getFileName(context) ?: uri.substringAfterLast('/'),
+                    fileName = parsedUri.getFileName(context) ?: uri.substringAfterLast('/'),
                     dateModified = System.currentTimeMillis(),
-                    displayOrder = index
+                    displayOrder = index,
+                    mediaType = mediaType
                 )
             }
             when (albumRepository.addWallpapersToAlbum(albumId, wallpapers)) {
@@ -103,6 +109,8 @@ class AlbumViewViewModel @Inject constructor(
             // Create folder with scanned wallpapers
             val folderId = generateId()
             val wallpapers = imageUris.mapIndexed { index, imageUri ->
+                val mediaType = imageUri.detectMediaType(context) ?: WallpaperMediaType.IMAGE
+
                 Wallpaper(
                     id = generateId(),
                     albumId = albumId,
@@ -110,7 +118,8 @@ class AlbumViewViewModel @Inject constructor(
                     uri = imageUri.toString(),
                     fileName = imageUri.getFileName(context) ?: imageUri.lastPathSegment ?: imageUri.toString().substringAfterLast('/'),
                     dateModified = System.currentTimeMillis(),
-                    displayOrder = index
+                    displayOrder = index,
+                    mediaType = mediaType
                 )
             }
 

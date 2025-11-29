@@ -159,6 +159,7 @@ class WallpaperRepositoryImpl @Inject constructor(
                         ScreenType.HOME -> ScreenType.LOCK
                         ScreenType.LOCK -> ScreenType.HOME
                         ScreenType.BOTH -> null
+                        ScreenType.LIVE -> null
                     }
 
                     val existingQueueIds = otherScreenType?.let {
@@ -199,15 +200,6 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun dequeueWallpaper(albumId: String, screenType: ScreenType): Result<Unit> {
-        return try {
-            wallpaperQueueDao.dequeueWallpaper(albumId, screenType)
-            Result.Success(Unit)
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
     override suspend fun clearAllQueues(): Result<Unit> {
         return try {
             wallpaperQueueDao.deleteAllQueueItems()
@@ -232,6 +224,7 @@ class WallpaperRepositoryImpl @Inject constructor(
             // This fixes gaps in queue positions caused by CASCADE deletes
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.HOME)
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LOCK)
+            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LIVE)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)

@@ -6,7 +6,8 @@ package com.anthonyla.paperize.core
 enum class ScreenType {
     HOME,
     LOCK,
-    BOTH;
+    BOTH,
+    LIVE;
 
     companion object {
         fun fromString(value: String?): ScreenType {

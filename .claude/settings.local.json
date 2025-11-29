@@ -7,7 +7,12 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(dir:*)",
-      "Bash(./gradlew assembleDebug:*)"
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew.bat assembleDebug)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew compileDebugKotlin:*)",
+      "Bash(./gradlew clean:*)"
     ],
     "deny": [],
     "ask": []
