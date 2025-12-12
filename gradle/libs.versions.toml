@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.11.1"
+androidGradlePlugin = "8.13.2"
 kotlin = "2.2.20"
 hilt = "2.57.1"
 ksp = "2.2.20-2.0.3"
