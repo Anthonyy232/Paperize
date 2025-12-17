@@ -42,7 +42,7 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 junit = { module = "junit:junit", version = "4.13.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
-landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.5.2" }
+landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version = "2.6.2" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.7" }
 taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
