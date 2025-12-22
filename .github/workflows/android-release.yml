@@ -54,7 +54,7 @@ jobs:
         run: ./gradlew test
 
       - name: Upload test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: test-reports
@@ -121,7 +121,7 @@ jobs:
       - name: Upload APK as a build artifact
         # Archives the generated APK with a dynamic, versioned name. This artifact is essential
         # for passing the APK file to the subsequent `release` job.
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: paperize-${{ steps.get_version.outputs.VERSION_NAME }}
           path: app/build/outputs/apk/release/paperize-v*.apk
@@ -142,7 +142,7 @@ jobs:
       - name: Download signed APK artifact
         # Downloads the versioned artifact produced by the `build` job. The pattern ensures
         # it finds the correct artifact regardless of the specific version number.
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           pattern: paperize-v*
           path: ./apk-artifact
