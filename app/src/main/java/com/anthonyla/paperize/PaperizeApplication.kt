@@ -12,6 +12,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.service.worker.AlbumRefreshWorker
+import com.anthonyla.paperize.core.util.DataResetManager
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -29,6 +30,10 @@ class PaperizeApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Perform one-time data reset for major version upgrades (e.g., v3 -> v4)
+        // Must run before any other initialization that accesses DB/preferences
+        DataResetManager.performResetIfNeeded(this)
 
         // Create notification channel (minSdk is 31, so always supported)
         createNotificationChannel()

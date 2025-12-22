@@ -10,10 +10,22 @@ import java.util.UUID
  * URI extensions
  */
 fun Uri.isValid(contentResolver: ContentResolver): Boolean {
+    // Basic scheme check - we only handle content URIs
+    if (scheme != "content") return false
+    
     return try {
-        contentResolver.openInputStream(this)?.use { true } ?: false
+        // Optimization: Use query to check existence/accessibility without opening the file
+        // This is significantly faster and less likely to hang on slow cloud providers
+        contentResolver.query(this, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            cursor.moveToFirst()
+        } ?: false
     } catch (e: Exception) {
-        false
+        // Fallback to opening the stream if the provider doesn't support the specific query
+        try {
+            contentResolver.openFileDescriptor(this, "r")?.use { true } ?: false
+        } catch (e2: Exception) {
+            false
+        }
     }
 }
 

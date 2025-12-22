@@ -3,9 +3,11 @@ package com.anthonyla.paperize.service.livewallpaper.renderer
 import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.anthonyla.paperize.core.constants.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -21,7 +23,7 @@ abstract class PaperizeRenderController(
 
     companion object {
         private const val TAG = "PaperizeRenderController"
-        private const val RELOAD_THROTTLE_MS = 250L
+        private const val RELOAD_THROTTLE_MS = Constants.RELOAD_THROTTLE_MS
     }
 
     /**
@@ -99,9 +101,34 @@ abstract class PaperizeRenderController(
     }
 
     /**
-     * Execute wallpaper reload.
+     * Force reload the current wallpaper, bypassing visibility check.
+     * Used for screen-off wallpaper changes where we want to load
+     * the next wallpaper while the screen is dark.
+     * Skips crossfade animation since screen is off and animation wouldn't be visible.
      */
-    private fun executeReload() {
+    fun forceReloadCurrentArtwork() {
+        Log.d(TAG, "forceReloadCurrentArtwork: visible=$visible, loading=$isLoading")
+
+        // Clear any pending reload since we're forcing a reload now
+        hasPendingReload = false
+
+        // If already loading, skip
+        if (isLoading) {
+            Log.d(TAG, "Already loading, skipping force reload")
+            return
+        }
+
+        throttleJob?.cancel()
+        // Skip crossfade since screen is off - wallpaper will appear instantly when screen turns on
+        executeReload(skipCrossfade = true)
+    }
+
+    /**
+     * Execute wallpaper reload.
+     *
+     * @param skipCrossfade If true, skip crossfade animation and instantly swap wallpaper
+     */
+    private fun executeReload(skipCrossfade: Boolean = false) {
         isLoading = true
 
         controllerScope.launch {
@@ -109,12 +136,17 @@ abstract class PaperizeRenderController(
                 // Get image loader from service
                 val loader = openDownloadedCurrentArtwork()
 
+                // Check for cancellation before passing to renderer
+                if (!isActive) return@launch
+
                 // Queue wallpaper loading on renderer
                 // Renderer will load bitmap in background and upload to GPU on GL thread
-                renderer.queueWallpaper(loader)
+                renderer.queueWallpaper(loader, skipCrossfade)
 
             } catch (e: Exception) {
-                Log.e(TAG, "Error reloading wallpaper", e)
+                if (isActive) {
+                    Log.e(TAG, "Error reloading wallpaper", e)
+                }
             } finally {
                 isLoading = false
             }

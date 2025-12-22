@@ -1,16 +1,14 @@
 package com.anthonyla.paperize.presentation.screens.home
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -41,11 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.screens.home.components.HomeTopBar
 import com.anthonyla.paperize.presentation.screens.home.components.getTabItems
 import com.anthonyla.paperize.presentation.screens.library.LibraryScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper.WallpaperScreen
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,8 +63,8 @@ fun HomeScreen(
     val context = LocalContext.current
 
     val tabItems = getTabItems(
-        wallpaperTitle = stringResource(R.string.tab_wallpaper),
-        libraryTitle = stringResource(R.string.tab_library)
+        wallpaperTitle = stringResource(R.string.wallpaper),
+        libraryTitle = stringResource(R.string.library)
     )
 
     // Persist the initial tab index across navigation
@@ -78,48 +76,17 @@ fun HomeScreen(
         initialTab.intValue = pagerState.currentPage
     }
 
-    // Smooth entry animation state (persisted across navigation)
-    var showContent by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        // Only animate on first composition, not when navigating back
-        if (!showContent) {
-            // Small delay to ensure smooth appearance (respects animation setting)
-            if (appSettings.animate) {
-                delay(50)  // Minimal delay for smooth entry
-            }
-            showContent = true
-        }
-    }
 
     Scaffold(
         topBar = {
             HomeTopBar(
                 showSelectionModeAppBar = false,
-                selectionCount = 0,
                 onSettingsClick = onNavigateToSettings
             )
         }
     ) { paddingValues ->
-        AnimatedVisibility(
-            visible = showContent,
-            enter = if (appSettings.animate) {
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + slideInVertically(
-                    animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
-                    ),
-                    initialOffsetY = { it / 20 }  // Small slide from bottom (5%)
-                )
-            } else {
-                fadeIn(animationSpec = tween(durationMillis = 0))
-            }
-        ) {
+
             Column(modifier = modifier.padding(paddingValues)) {
                 PrimaryTabRow(
                     selectedTabIndex = pagerState.currentPage
@@ -148,18 +115,23 @@ fun HomeScreen(
                     beyondViewportPageCount = 1
                 ) { index ->
                     when (index.coerceIn(tabItems.indices)) {
-                        0 -> WallpaperScreen(
-                            albums = albums,
-                            scheduleSettings = scheduleSettings,
-                            appSettings = appSettings,
-                            wallpaperMode = wallpaperMode,
-                            onToggleChanger = { viewModel.toggleWallpaperChanger(it, onlyIfNotScheduled = true) },
-                            onSelectHomeAlbum = { album -> viewModel.selectHomeAlbum(album) },
-                            onSelectLockAlbum = { album -> viewModel.selectLockAlbum(album) },
-                            onSelectLiveAlbum = { album -> viewModel.selectLiveAlbum(album) },
-                            onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) },
-                            onChangeWallpaperNow = { viewModel.changeWallpaperNow(it) }
-                        )
+                        0 -> {
+                            if (wallpaperMode == null) {
+                                Box(modifier = Modifier.fillMaxSize())
+                            } else {
+                                WallpaperScreen(
+                                    albums = albums,
+                                    scheduleSettings = scheduleSettings,
+                                    appSettings = appSettings,
+                                    wallpaperMode = wallpaperMode!!,
+                                    onToggleChanger = { viewModel.toggleWallpaperChanger(it, onlyIfNotScheduled = true) },
+                                    onSelectHomeAlbum = { album -> viewModel.selectHomeAlbum(album) },
+                                    onSelectLockAlbum = { album -> viewModel.selectLockAlbum(album) },
+                                    onSelectLiveAlbum = { album -> viewModel.selectLiveAlbum(album) },
+                                    onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) }
+                                )
+                            }
+                        }
                         else -> LibraryScreen(
                             albums = albums,
                             onViewAlbum = onNavigateToAlbum,
@@ -169,26 +141,26 @@ fun HomeScreen(
                 }
             }
         }
-    }
+
 
     // Live Wallpaper Selection Prompt
-    if (showLiveWallpaperPrompt && wallpaperMode == WallpaperMode.LIVE) {
+    if (wallpaperMode != null && showLiveWallpaperPrompt && wallpaperMode == WallpaperMode.LIVE) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLiveWallpaperPrompt() },
             title = {
                 Text(
-                    text = "Select Live Wallpaper",
+                    text = stringResource(R.string.select_live_wallpaper),
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Column {
                     Text(
-                        text = "To use Paperize in Live Wallpaper mode, you need to select it as your live wallpaper from the system settings.",
+                        text = stringResource(R.string.select_live_wallpaper_instruction),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "\nTap 'Open Wallpaper Picker' below to select Paperize from the list of available live wallpapers.",
+                        text = stringResource(R.string.open_wallpaper_picker_instruction_newline),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -222,12 +194,12 @@ fun HomeScreen(
                         }
                     }
                 ) {
-                    Text("Open Wallpaper Picker")
+                    Text(stringResource(R.string.open_wallpaper_picker))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissLiveWallpaperPrompt() }) {
-                    Text("Later")
+                    Text(stringResource(R.string.later))
                 }
             }
         )

@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.anthonyla.paperize.core.util.PermissionUtil
 import com.anthonyla.paperize.presentation.common.navigation.util.enterTransitionBackward
 import com.anthonyla.paperize.presentation.common.navigation.util.enterTransitionForward
 import com.anthonyla.paperize.presentation.common.navigation.util.exitTransitionBackward
@@ -46,6 +47,9 @@ fun NavigationGraph(
         if (animate) { { enterTransitionBackward() } } else { { EnterTransition.None } }
     val exitBackward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
         if (animate) { { exitTransitionBackward() } } else { { ExitTransition.None } }
+    // Helper functions for permission checks
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -76,8 +80,19 @@ fun NavigationGraph(
         ) {
             com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection.WallpaperModeSelectionScreen(
                 onModeSelected = {
-                    navController.navigate(NotificationRoute) {
-                        popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
+                    if (!PermissionUtil.hasNotificationPermission(context)) {
+                        navController.navigate(NotificationRoute) {
+                            popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
+                        }
+                    } else if (!PermissionUtil.hasStoragePermission()) {
+                        navController.navigate(StoragePermissionRoute) {
+                            popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
+                        }
+                    } else {
+                        onFirstLaunchComplete()
+                        navController.navigate(HomeRoute) {
+                            popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
+                        }
                     }
                 }
             )
@@ -92,8 +107,15 @@ fun NavigationGraph(
         ) {
             NotificationPermissionScreen(
                 onContinue = {
-                    navController.navigate(StoragePermissionRoute) {
-                        popUpTo<NotificationRoute> { inclusive = true }
+                    if (!PermissionUtil.hasStoragePermission()) {
+                        navController.navigate(StoragePermissionRoute) {
+                            popUpTo<NotificationRoute> { inclusive = true }
+                        }
+                    } else {
+                        onFirstLaunchComplete()
+                        navController.navigate(HomeRoute) {
+                            popUpTo<NotificationRoute> { inclusive = true }
+                        }
                     }
                 }
             )
@@ -142,7 +164,6 @@ fun NavigationGraph(
         ) { backStackEntry ->
             val route = backStackEntry.toRoute<AlbumRoute>()
             AlbumViewScreen(
-                albumId = route.albumId,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToFolder = { folderId ->
                     navController.navigate(FolderRoute(folderId))
@@ -163,9 +184,8 @@ fun NavigationGraph(
             popEnterTransition = enterBackward,
             popExitTransition = exitBackward
         ) { backStackEntry ->
-            val route = backStackEntry.toRoute<SortRoute>()
+            backStackEntry.toRoute<SortRoute>()
             SortViewScreen(
-                albumId = route.albumId,
                 onSaveClick = { navController.popBackStack() },
                 onBackClick = { navController.popBackStack() }
             )
@@ -178,9 +198,8 @@ fun NavigationGraph(
             popEnterTransition = enterBackward,
             popExitTransition = exitBackward
         ) { backStackEntry ->
-            val route = backStackEntry.toRoute<FolderRoute>()
+            backStackEntry.toRoute<FolderRoute>()
             FolderViewScreen(
-                folderId = route.folderId,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
                     navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))

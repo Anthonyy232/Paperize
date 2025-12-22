@@ -5,13 +5,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,6 +27,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.core.util.BatteryOptimizationUtil
+import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.isIgnoringBatteryOptimizations
+import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.requestIgnoreBatteryOptimizations
 
 /**
  * Settings screen with Material 3 Expressive design
@@ -37,6 +47,25 @@ fun SettingsScreen(
     var showResetDialog by remember { mutableStateOf(false) }
     var showModeChangeDialog by remember { mutableStateOf(false) }
     var pendingMode by remember { mutableStateOf<com.anthonyla.paperize.core.WallpaperMode?>(null) }
+    val context = LocalContext.current
+
+    var isIgnoringBatteryOptimizations by remember {
+        mutableStateOf(BatteryOptimizationUtil.isIgnoringBatteryOptimizations(context))
+    }
+
+    // Refresh battery optimization status when returning to the screen
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isIgnoringBatteryOptimizations = BatteryOptimizationUtil.isIgnoringBatteryOptimizations(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -60,15 +89,15 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.large)
         ) {
-            Spacer(modifier = Modifier.height(AppSpacing.medium))
+            Spacer(modifier = Modifier.height(AppSpacing.large))
 
             // Wallpaper Mode Section
             SectionHeader(
                 icon = Icons.Filled.Wallpaper,
-                title = "Wallpaper Mode"
+                title = stringResource(R.string.wallpaper_mode_setting)
             )
 
-            Spacer(modifier = Modifier.height(AppSpacing.small))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -87,7 +116,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Current Mode",
+                                text = stringResource(R.string.current_mode),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -95,8 +124,8 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                             Text(
                                 text = when (wallpaperMode) {
-                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> "Static"
-                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> "Live Wallpaper"
+                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> stringResource(R.string.mode_static)
+                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> stringResource(R.string.mode_live_wallpaper)
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.primary,
@@ -113,21 +142,21 @@ fun SettingsScreen(
                                 showModeChangeDialog = true
                             }
                         ) {
-                            Text("Switch")
+                            Text(stringResource(R.string.switch_button))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(AppSpacing.small))
 
                     Text(
-                        text = "Switching modes will reset all albums, wallpapers, and settings. This cannot be undone.",
+                        text = stringResource(R.string.mode_switch_warning),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(AppSpacing.large))
+            Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
             // Appearance Section
             SectionHeader(
@@ -135,12 +164,12 @@ fun SettingsScreen(
                 title = stringResource(R.string.appearance)
             )
 
-            Spacer(modifier = Modifier.height(AppSpacing.small))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             SettingSwitchItem(
                 title = stringResource(R.string.dark_mode),
                 description = stringResource(R.string.easier_on_the_eyes),
-                checked = appSettings.darkMode ?: false,
+                checked = appSettings?.darkMode ?: false,
                 onCheckedChange = { viewModel.updateDarkMode(it) }
             )
 
@@ -149,7 +178,7 @@ fun SettingsScreen(
             SettingSwitchItem(
                 title = stringResource(R.string.dynamic_theming),
                 description = stringResource(R.string.material_you),
-                checked = appSettings.dynamicTheming,
+                checked = appSettings?.dynamicTheming ?: true,
                 onCheckedChange = { viewModel.updateDynamicTheming(it) }
             )
 
@@ -158,11 +187,89 @@ fun SettingsScreen(
             SettingSwitchItem(
                 title = stringResource(R.string.animation),
                 description = stringResource(R.string.increase_visual_appeal),
-                checked = appSettings.animate,
+                checked = appSettings?.animate ?: true,
                 onCheckedChange = { viewModel.updateAnimate(it) }
             )
 
-            Spacer(modifier = Modifier.height(AppSpacing.large))
+            Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
+
+            // Reliability Section
+            SectionHeader(
+                icon = Icons.Default.Build,
+                title = stringResource(R.string.reliability)
+            )
+
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(AppSpacing.large)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.battery_optimization),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = if (isIgnoringBatteryOptimizations) 
+                                        Icons.Default.BatteryFull else Icons.Default.BatteryAlert,
+                                    contentDescription = null,
+                                    tint = if (isIgnoringBatteryOptimizations) 
+                                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (isIgnoringBatteryOptimizations)
+                                        stringResource(R.string.ignoring)
+                                    else
+                                        stringResource(R.string.optimizing),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (isIgnoringBatteryOptimizations)
+                                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        if (!isIgnoringBatteryOptimizations) {
+                            Button(
+                                onClick = { 
+                                    BatteryOptimizationUtil.requestIgnoreBatteryOptimizations(context)
+                                }
+                            ) {
+                                Text(stringResource(R.string.check_status))
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(AppSpacing.small))
+
+                    Text(
+                        text = stringResource(R.string.battery_optimization_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
             // About Section
             SectionHeader(
@@ -170,7 +277,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.about)
             )
 
-            Spacer(modifier = Modifier.height(AppSpacing.small))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             // Privacy Policy Card with enhanced styling
             Card(
@@ -252,9 +359,15 @@ fun SettingsScreen(
                     showModeChangeDialog = false
                     pendingMode = null
                 },
-                title = { Text("Switch to ${if (pendingMode == com.anthonyla.paperize.core.WallpaperMode.LIVE) "Live Wallpaper" else "Static"} Mode?") },
+                title = { 
+                    val modeName = if (pendingMode == com.anthonyla.paperize.core.WallpaperMode.LIVE) 
+                        stringResource(R.string.mode_live_wallpaper) 
+                    else 
+                        stringResource(R.string.mode_static)
+                    Text(stringResource(R.string.switch_mode_dialog_title, modeName)) 
+                },
                 text = {
-                    Text("This will reset all albums, wallpapers, and scheduling settings. This action cannot be undone.\n\nYou'll need to re-add your albums and configure your wallpaper settings.")
+                    Text(stringResource(R.string.switch_mode_dialog_description))
                 },
                 confirmButton = {
                     TextButton(
@@ -267,7 +380,7 @@ fun SettingsScreen(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Switch Mode")
+                        Text(stringResource(R.string.switch_mode_button))
                     }
                 },
                 dismissButton = {
@@ -292,24 +405,35 @@ private fun SectionHeader(
     title: String,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        )
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        Row(
+            modifier = Modifier.padding(
+                horizontal = AppSpacing.large,
+                vertical = AppSpacing.medium
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

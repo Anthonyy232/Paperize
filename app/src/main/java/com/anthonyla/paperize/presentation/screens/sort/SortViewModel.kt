@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.sort
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -30,7 +31,7 @@ class SortViewModel @Inject constructor(
     private val _state = MutableStateFlow(SortState())
     val state = _state.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
         initialValue = SortState()
     )
 

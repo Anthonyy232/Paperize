@@ -88,8 +88,9 @@ object AppModule {
         database: PaperizeDatabase,
         albumDao: AlbumDao,
         wallpaperDao: WallpaperDao,
-        folderDao: FolderDao
-    ): AlbumRepository = AlbumRepositoryImpl(context, database, albumDao, wallpaperDao, folderDao)
+        folderDao: FolderDao,
+        wallpaperRepository: dagger.Lazy<WallpaperRepository>
+    ): AlbumRepository = AlbumRepositoryImpl(context, database, albumDao, wallpaperDao, folderDao, wallpaperRepository)
 
     @Provides
     @Singleton

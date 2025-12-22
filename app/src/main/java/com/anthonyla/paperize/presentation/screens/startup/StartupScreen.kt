@@ -1,4 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.startup
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,88 +27,73 @@ fun StartupScreen(
     onAgree: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppSpacing.extraLarge)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // App branding with icon
-        Icon(
-            imageVector = Icons.Default.Wallpaper,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.small))
-
-        Text(
-            text = stringResource(R.string.welcome),
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-        // Privacy notice card with enhanced styling
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
+    OnboardingLayout(
+        icon = Icons.Default.Wallpaper,
+        title = stringResource(R.string.app_name),
+        modifier = modifier,
+        content = {
             Column(
-                modifier = Modifier.padding(AppSpacing.extraLarge)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
                 Text(
-                    text = stringResource(R.string.privacy_notice),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    text = stringResource(R.string.welcome),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
                 )
-
+                
                 Spacer(modifier = Modifier.height(AppSpacing.small))
 
-                Text(
-                    text = stringResource(
-                        R.string.please_read_and_agree_to_the_following_privacy_notice_to_use_the_app
+                // Cleaner privacy notice
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(AppSpacing.large)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.privacy_notice),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.height(AppSpacing.small))
+
+                        Text(
+                            text = stringResource(
+                                R.string.please_read_and_agree_to_the_following_privacy_notice_to_use_the_app
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        },
+        actions = {
+            Button(
+                onClick = onAgree,
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text(
+                    text = stringResource(R.string.agree),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(vertical = AppSpacing.small)
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-        // Enhanced button with better styling
-        Button(
-            onClick = onAgree,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Text(
-                text = stringResource(R.string.agree),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(vertical = AppSpacing.small)
-            )
-        }
-    }
+    )
 }

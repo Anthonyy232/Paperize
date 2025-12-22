@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.sort
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
 
 import android.os.Build
 import android.view.HapticFeedbackConstants
@@ -65,7 +66,6 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SortViewScreen(
-    @Suppress("UNUSED_PARAMETER") albumId: String,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -292,7 +292,7 @@ fun SortViewScreen(
                                                 contentDescription = wallpaper.displayFileName,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier
-                                                    .size(48.dp)
+                                                    .size(AppIconSizes.large)
                                                     .border(
                                                         BorderStroke(
                                                             1.dp,
@@ -329,7 +329,7 @@ fun SortViewScreen(
                                                 contentDescription = currentFolder.name,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier
-                                                    .size(48.dp)
+                                                    .size(AppIconSizes.large)
                                                     .clip(AppShapes.imageShape)
                                             )
                                         },
@@ -415,7 +415,7 @@ fun SortViewScreen(
                                                     contentDescription = wallpaper.displayFileName,
                                                     contentScale = ContentScale.Crop,
                                                     modifier = Modifier
-                                                        .size(48.dp)
+                                                        .size(AppIconSizes.large)
                                                         .clip(CircleShape)
                                                         .border(
                                                             BorderStroke(

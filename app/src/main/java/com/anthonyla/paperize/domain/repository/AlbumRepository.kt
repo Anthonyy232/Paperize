@@ -2,6 +2,7 @@ package com.anthonyla.paperize.domain.repository
 
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.model.Folder
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,11 @@ import kotlinx.coroutines.flow.Flow
  * Clean interface following repository pattern - implementation in data layer
  */
 interface AlbumRepository {
+    /**
+     * Get all album summaries (lightweight metadata + counts)
+     */
+    fun getAlbumSummaries(): Flow<List<AlbumSummary>>
+
     /**
      * Get all albums with their wallpapers and folders
      */

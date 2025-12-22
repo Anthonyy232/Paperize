@@ -1,48 +1,49 @@
 [versions]
-androidGradlePlugin = "8.11.1"
-kotlin = "2.2.21"
+androidGradlePlugin = "8.13.2"
+kotlin = "2.3.0"
 hilt = "2.57.2"
 ksp = "2.2.20-2.0.3"
 material = "1.13.0"
 coil = "3.3.0"
-media3 = "1.7.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.11.0" }
-androidx-animation = { module = "androidx.compose.animation:animation", version = "1.9.4" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.11.00" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.2" }
+androidx-animation = { module = "androidx.compose.animation:animation", version = "1.10.0" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.7" }
-androidx-datastore = { module = "androidx.datastore:datastore", version = "1.1.7" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.0" }
+androidx-datastore = { module = "androidx.datastore:datastore", version = "1.2.0" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
-androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.1" }
-androidx-foundation = { module = "androidx.compose.foundation:foundation", version = "1.9.4" }
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.2" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation", version = "1.10.0" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version = "1.3.0" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version = "1.3.0" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version = "1.3.0" }
 androidx-junit = { module = "androidx.test.ext:junit", version = "1.3.0" }
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version = "2.9.4" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version = "2.9.4" }
-androidx-material = { module = "androidx.compose.material:material", version = "1.9.4" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version = "2.10.0" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version = "2.10.0" }
+androidx-material = { module = "androidx.compose.material:material", version = "1.10.0" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version = "1.7.8" }
-androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha08" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha11" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.6" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.3" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.8.3" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version = "2.8.3" }
-androidx-ui = { module = "androidx.compose.ui:ui", version = "1.9.4" }
-androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.9.4" }
-androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version = "1.9.4" }
-androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.9.4" }
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.9.4" }
-androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version = "1.9.4" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.4" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.8.4" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version = "2.8.4" }
+androidx-ui = { module = "androidx.compose.ui:ui", version = "1.10.0" }
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.10.0" }
+androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version = "1.10.0" }
+androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.10.0" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.10.0" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version = "1.10.0" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
+coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 dfc = { module = "com.lazygeniouz:dfc", version = "1.2" }
 google-material = { module = "com.google.android.material:material", version.ref = "material" }
 gson = { module = "com.google.code.gson:gson", version = "2.13.2" }
@@ -52,15 +53,9 @@ junit = { module = "junit:junit", version = "4.13.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
-taskerpluginlibrary = { module = "com.joaomgcd:taskerpluginlibrary", version = "0.4.10" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
 zoomable = { module = "net.engawapg.lib:zoomable", version = "2.9.0" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "3.0.0" }
-androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version = "1.1.1" }
-androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version = "1.1.1" }
-androidx-glance-material = { group = "androidx.glance", name = "glance-material", version = "1.1.1" }
-androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
-androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }

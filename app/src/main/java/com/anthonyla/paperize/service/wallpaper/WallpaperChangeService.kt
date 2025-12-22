@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.app.WallpaperManager
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -68,22 +70,30 @@ class WallpaperChangeService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Start foreground service
-        startForeground(Constants.NOTIFICATION_ID, createNotification())
+        // Start foreground service. Android 14+ requires specifying the service type.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                Constants.NOTIFICATION_ID,
+                createNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(Constants.NOTIFICATION_ID, createNotification())
+        }
 
         when (intent?.action) {
             ACTION_CHANGE_WALLPAPER -> {
                 val screenType = intent.getStringExtra(EXTRA_SCREEN_TYPE)?.let {
                     ScreenType.fromString(it)
                 } ?: ScreenType.BOTH
-                handleChangeWallpaper(screenType)
+                handleChangeWallpaper(screenType, startId)
             }
         }
 
         return START_NOT_STICKY
     }
 
-    private fun handleChangeWallpaper(screenType: ScreenType) {
+    private fun handleChangeWallpaper(screenType: ScreenType, startId: Int) {
         serviceScope.launch {
             // Use mutex to prevent concurrent wallpaper changes
             wallpaperChangeMutex.withLock {
@@ -177,10 +187,10 @@ class WallpaperChangeService : Service() {
                     }
                 }
 
-                    stopSelf()
+                    stopSelf(startId)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error changing wallpaper", e)
-                    stopSelf()
+                    stopSelf(startId)
                 }
             }
         }
@@ -204,13 +214,12 @@ class WallpaperChangeService : Service() {
                     true,
                     WallpaperManager.FLAG_SYSTEM
                 )
-
-                // Recycle bitmap after setting to free memory
-                bitmap.recycle()
-
                 Log.d(TAG, "Home wallpaper changed successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting home wallpaper", e)
+            } finally {
+                // Always recycle bitmap to prevent memory leaks
+                bitmap.recycle()
             }
         }.onError { error ->
             if (error.message?.contains("No wallpapers available in album") == true) {
@@ -239,13 +248,12 @@ class WallpaperChangeService : Service() {
                     true,
                     WallpaperManager.FLAG_LOCK
                 )
-
-                // Recycle bitmap after setting to free memory
-                bitmap.recycle()
-
                 Log.d(TAG, "Lock wallpaper changed successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting lock wallpaper", e)
+            } finally {
+                // Always recycle bitmap to prevent memory leaks
+                bitmap.recycle()
             }
         }.onError { error ->
             if (error.message?.contains("No wallpapers available in album") == true) {

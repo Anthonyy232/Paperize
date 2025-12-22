@@ -57,9 +57,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    @Suppress("DEPRECATION")
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
     }
 
     buildFeatures {
@@ -103,6 +104,8 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.svg)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.material.icons.extended)
@@ -120,12 +123,8 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.foundation)
     implementation(libs.lazycolumnscrollbar)
-    implementation(libs.taskerpluginlibrary)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.reorderable)
-    implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.glance.material3)
-    implementation(libs.androidx.glance.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

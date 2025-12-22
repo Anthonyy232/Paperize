@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.service.livewallpaper.gl
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.graphics.Bitmap
 import android.opengl.GLES20
@@ -12,17 +13,33 @@ import kotlin.math.min
 
 /**
  * Represents a picture as a collection of OpenGL textures (tiles).
- * Large images are subdivided into 512x512 tiles to avoid texture size limits.
- * Based on Muzei's GLPicture implementation.
+ * Large images are subdivided into tiles to avoid texture size limits.
+ * Optimized for modern devices (API 31+) with larger tile sizes and pre-allocated buffers.
  *
  * @property width Original bitmap width
  * @property height Original bitmap height
  */
-class GLPicture(bitmap: Bitmap) {
+class GLPicture(
+    bitmap: Bitmap,
+    val brightnessFactor: Float = 1.0f
+) {
 
     companion object {
         private const val TAG = "GLPicture"
-        private const val TILE_SIZE = 512
+        // Use larger tiles for modern devices - reduces draw calls significantly
+        private const val PREFERRED_TILE_SIZE = 4096
+
+        // Cache max texture size to avoid repeated GL queries
+        @Volatile
+        private var cachedMaxTextureSize = 0
+
+        private fun getOptimalTileSize(): Int {
+            if (cachedMaxTextureSize == 0) {
+                cachedMaxTextureSize = GLUtil.getMaxTextureSize()
+            }
+            // Use up to 4096 for good memory/performance balance
+            return min(cachedMaxTextureSize, PREFERRED_TILE_SIZE)
+        }
     }
 
     val width = bitmap.width
@@ -33,8 +50,14 @@ class GLPicture(bitmap: Bitmap) {
     private val rows: Int
 
     init {
-        val maxTextureSize = min(GLUtil.getMaxTextureSize(), 2048)
-        val tileSize = min(TILE_SIZE, maxTextureSize)
+        // Validate bitmap before processing
+        require(!bitmap.isRecycled) { "Cannot create GLPicture from recycled bitmap" }
+        require(bitmap.width > 0 && bitmap.height > 0) { 
+            "Cannot create GLPicture from bitmap with invalid dimensions: ${bitmap.width}x${bitmap.height}" 
+        }
+        
+        val maxTextureSize = min(getOptimalTileSize(), Constants.GL_TEXTURE_SIZE_LIMIT)
+        val tileSize = maxTextureSize
 
         cols = ceil(width.toFloat() / tileSize).toInt()
         rows = ceil(height.toFloat() / tileSize).toInt()
@@ -50,59 +73,12 @@ class GLPicture(bitmap: Bitmap) {
             val tileWidth = min(tileSize, width - tileX)
             val tileHeight = min(tileSize, height - tileY)
 
-            // Extract tile bitmap
-            val tileBitmap = Bitmap.createBitmap(bitmap, tileX, tileY, tileWidth, tileHeight)
+            // Calculate geometry once at creation time (not per-frame)
+            val left = -1f + (tileX.toFloat() / width) * 2f
+            val right = -1f + ((tileX + tileWidth).toFloat() / width) * 2f
+            val bottom = 1f - ((tileY + tileHeight).toFloat() / height) * 2f
+            val top = 1f - (tileY.toFloat() / height) * 2f
 
-            // Upload to GPU
-            val textureId = loadTexture(tileBitmap)
-
-            // Recycle tile bitmap (no longer needed after GPU upload)
-            tileBitmap.recycle()
-
-            Tile(
-                textureId = textureId,
-                x = tileX,
-                y = tileY,
-                width = tileWidth,
-                height = tileHeight
-            )
-        }
-    }
-
-    /**
-     * Draw all tiles to cover the full picture.
-     *
-     * @param program Shader program to use
-     * @param aPositionHandle Attribute location for vertex positions
-     * @param aTexCoordHandle Attribute location for texture coordinates
-     * @param surfaceWidth Surface width for coordinate mapping
-     * @param surfaceHeight Surface height for coordinate mapping
-     */
-    fun draw(
-        program: Int,
-        aPositionHandle: Int,
-        aTexCoordHandle: Int,
-        @Suppress("UNUSED_PARAMETER") surfaceWidth: Int,
-        @Suppress("UNUSED_PARAMETER") surfaceHeight: Int
-    ) {
-        GLES20.glUseProgram(program)
-
-        // Enable vertex attribute arrays
-        GLES20.glEnableVertexAttribArray(aPositionHandle)
-        GLES20.glEnableVertexAttribArray(aTexCoordHandle)
-
-        // Draw each tile
-        for (tile in tiles) {
-            // Bind texture
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.textureId)
-
-            // Calculate normalized device coordinates for this tile
-            val left = -1f + (tile.x.toFloat() / width) * 2f
-            val right = -1f + ((tile.x + tile.width).toFloat() / width) * 2f
-            val bottom = 1f - ((tile.y + tile.height).toFloat() / height) * 2f
-            val top = 1f - (tile.y.toFloat() / height) * 2f
-
-            // Vertex positions (clip space)
             val vertices = floatArrayOf(
                 left, bottom,   // Bottom-left
                 right, bottom,  // Bottom-right
@@ -110,7 +86,6 @@ class GLPicture(bitmap: Bitmap) {
                 right, top      // Top-right
             )
 
-            // Texture coordinates (full tile)
             val texCoords = floatArrayOf(
                 0f, 1f,  // Bottom-left
                 1f, 1f,  // Bottom-right
@@ -118,15 +93,62 @@ class GLPicture(bitmap: Bitmap) {
                 1f, 0f   // Top-right
             )
 
+            // Pre-allocate buffers (reused every frame)
             val vertexBuffer = createFloatBuffer(vertices)
             val texCoordBuffer = createFloatBuffer(texCoords)
 
-            // Set vertex data
+            // Extract and upload tile bitmap
+            val tileBitmap = Bitmap.createBitmap(bitmap, tileX, tileY, tileWidth, tileHeight)
+            val textureId = loadTexture(tileBitmap)
+            tileBitmap.recycle()
+
+            Tile(
+                textureId = textureId,
+                x = tileX,
+                y = tileY,
+                width = tileWidth,
+                height = tileHeight,
+                vertexBuffer = vertexBuffer,
+                texCoordBuffer = texCoordBuffer
+            )
+        }
+    }
+
+    /**
+     * Draw all tiles to cover the full picture.
+     * Uses pre-allocated buffers for optimal performance (zero allocations per frame).
+     *
+     * @param program Shader program to use
+     * @param aPositionHandle Attribute location for vertex positions
+     * @param aTexCoordHandle Attribute location for texture coordinates
+     */
+    fun draw(
+        program: Int,
+        aPositionHandle: Int,
+        aTexCoordHandle: Int,
+        mvpMatrix: FloatArray,
+        uMvpMatrixHandle: Int
+    ) {
+        GLES20.glUseProgram(program)
+
+        // Enable vertex attribute arrays
+        GLES20.glEnableVertexAttribArray(aPositionHandle)
+        GLES20.glEnableVertexAttribArray(aTexCoordHandle)
+
+        // Pass MVP matrix
+        GLES20.glUniformMatrix4fv(uMvpMatrixHandle, 1, false, mvpMatrix, 0)
+
+        // Draw each tile using pre-allocated buffers (no per-frame allocation)
+        for (tile in tiles) {
+            // Bind texture
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.textureId)
+
+            // Use pre-allocated buffers - no allocation here!
             GLES20.glVertexAttribPointer(
-                aPositionHandle, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer
+                aPositionHandle, 2, GLES20.GL_FLOAT, false, 0, tile.vertexBuffer
             )
             GLES20.glVertexAttribPointer(
-                aTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, texCoordBuffer
+                aTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, tile.texCoordBuffer
             )
 
             // Draw quad
@@ -194,14 +216,16 @@ class GLPicture(bitmap: Bitmap) {
     }
 
     /**
-     * Represents a single tile of the picture.
+     * Represents a single tile of the picture with pre-allocated GPU buffers.
      */
     private data class Tile(
         val textureId: Int,
         val x: Int,
         val y: Int,
         val width: Int,
-        val height: Int
+        val height: Int,
+        val vertexBuffer: FloatBuffer,
+        val texCoordBuffer: FloatBuffer
     )
 
     override fun toString(): String {

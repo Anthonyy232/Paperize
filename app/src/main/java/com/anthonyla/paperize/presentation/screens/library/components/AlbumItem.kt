@@ -1,4 +1,8 @@
 package com.anthonyla.paperize.presentation.screens.library.components
+import com.anthonyla.paperize.presentation.theme.AppRadii
+import com.anthonyla.paperize.presentation.theme.AppElevation
+import com.anthonyla.paperize.presentation.theme.AppShapes
+import com.anthonyla.paperize.presentation.theme.AppBorderWidths
 
 import android.content.Context
 import android.net.Uri
@@ -36,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Size
-import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.InteractiveCard
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
@@ -45,7 +49,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
  */
 @Composable
 fun AlbumItem(
-    album: Album,
+    album: AlbumSummary,
     onAlbumViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -57,9 +61,9 @@ fun AlbumItem(
     InteractiveCard(
         onClick = onAlbumViewClick,
         modifier = modifier.fillMaxSize(),
-        defaultRadius = 20.dp,
-        pressedRadius = 36.dp,
-        elevation = 1.dp
+        defaultRadius = AppRadii.large,
+        pressedRadius = AppRadii.huge,
+        elevation = AppElevation.level1
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.medium),
@@ -71,10 +75,10 @@ fun AlbumItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(AppShapes.smallCardShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                     .border(
-                        width = 2.dp,
+                        width = AppBorderWidths.medium,
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(12.dp)
                     ),

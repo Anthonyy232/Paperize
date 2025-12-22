@@ -1,4 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -32,75 +34,64 @@ fun WallpaperModeSelectionScreen(
 ) {
     var selectedMode by remember { mutableStateOf<WallpaperMode?>(null) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppSpacing.extraLarge)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Choose Wallpaper Mode",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+    OnboardingLayout(
+        icon = Icons.Default.Wallpaper,
+        title = stringResource(R.string.choose_wallpaper_mode),
+        modifier = modifier,
+        content = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+            ) {
+                Text(
+                    text = stringResource(R.string.change_later_in_settings),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-        Spacer(modifier = Modifier.height(AppSpacing.small))
+                Spacer(modifier = Modifier.height(AppSpacing.small))
 
-        Text(
-            text = "You can change this later in settings",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+                // Static Mode Card
+                ModeSelectionCard(
+                    title = stringResource(R.string.static_mode),
+                    description = stringResource(R.string.static_mode_description),
+                    icon = Icons.Default.Wallpaper,
+                    isSelected = selectedMode == WallpaperMode.STATIC,
+                    onClick = { selectedMode = WallpaperMode.STATIC }
+                )
 
-        Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-        // Static Mode Card
-        ModeSelectionCard(
-            title = "Static Mode",
-            description = "Classic wallpaper changing using the system wallpaper manager. Simple and battery-efficient. Supports images only.",
-            icon = Icons.Default.Wallpaper,
-            isSelected = selectedMode == WallpaperMode.STATIC,
-            onClick = { selectedMode = WallpaperMode.STATIC }
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-
-        // Live Mode Card
-        ModeSelectionCard(
-            title = "Live Wallpaper Mode",
-            description = "Advanced live wallpaper with hardware-accelerated effects and interactive features (double-tap, parallax).",
-            icon = Icons.Default.LiveTv,
-            isSelected = selectedMode == WallpaperMode.LIVE,
-            onClick = { selectedMode = WallpaperMode.LIVE }
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-        // Continue button
-        Button(
-            onClick = {
-                selectedMode?.let { mode ->
-                    viewModel.setWallpaperMode(mode)
-                    onModeSelected()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            enabled = selectedMode != null
-        ) {
-            Text(
-                text = stringResource(R.string.continue_button),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(vertical = AppSpacing.small)
-            )
+                // Live Mode Card
+                ModeSelectionCard(
+                    title = stringResource(R.string.live_wallpaper_mode),
+                    description = stringResource(R.string.live_wallpaper_mode_description),
+                    icon = Icons.Default.LiveTv,
+                    isSelected = selectedMode == WallpaperMode.LIVE,
+                    onClick = { selectedMode = WallpaperMode.LIVE }
+                )
+            }
+        },
+        actions = {
+            Button(
+                onClick = {
+                    selectedMode?.let { mode ->
+                        viewModel.setWallpaperMode(mode)
+                        onModeSelected()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                enabled = selectedMode != null
+            ) {
+                Text(
+                    text = stringResource(R.string.continue_button),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(vertical = AppSpacing.small)
+                )
+            }
         }
-    }
+    )
 }
 
 @Composable
@@ -136,7 +127,7 @@ private fun ModeSelectionCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(AppIconSizes.large),
                 tint = if (isSelected)
                     MaterialTheme.colorScheme.primary
                 else

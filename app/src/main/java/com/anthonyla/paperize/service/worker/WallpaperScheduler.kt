@@ -8,9 +8,17 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.flow.first
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,6 +38,8 @@ class WallpaperScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     private val workManager = WorkManager.getInstance(context)
+    private val schedulerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val mutex = Mutex()
 
     companion object {
         private const val TAG = "WallpaperScheduler"
@@ -105,73 +115,85 @@ class WallpaperScheduler @Inject constructor(
         requireCharging: Boolean = false,
         onlyIfNotScheduled: Boolean = false
     ) {
-        // Don't cancel all first - let UPDATE policy handle existing work
-        // This prevents immediate wallpaper change when just updating intervals
+        schedulerScope.launch {
+            mutex.withLock {
+                // Don't cancel all first - let UPDATE policy handle existing work
+                // This prevents immediate wallpaper change when just updating intervals
 
-        // Check if both should be synchronized (same interval, synchronized flag set)
-        val shouldSync = synchronized &&
-                        homeIntervalMinutes > 0 &&
-                        lockIntervalMinutes > 0 &&
-                        homeIntervalMinutes == lockIntervalMinutes
+                // Check if both should be synchronized (same interval, synchronized flag set)
+                val shouldSync = synchronized &&
+                                homeIntervalMinutes > 0 &&
+                                lockIntervalMinutes > 0 &&
+                                homeIntervalMinutes == lockIntervalMinutes
 
-        if (shouldSync) {
-            // When synchronized, schedule a single BOTH job that sets both screens
-            // This ensures both screens always show the same wallpaper
-            if (!onlyIfNotScheduled || !isWorkScheduled(ScreenType.BOTH)) {
-                scheduleWallpaperChange(
-                    ScreenType.BOTH,
-                    homeIntervalMinutes,
-                    networkRequired,
-                    requireCharging
-                )
-                // Cancel any existing separate HOME/LOCK jobs
-                cancelWallpaperChange(ScreenType.HOME)
-                cancelWallpaperChange(ScreenType.LOCK)
-                Log.d(TAG, "Scheduled synchronized wallpaper changes (BOTH) every $homeIntervalMinutes minutes")
-            } else {
-                Log.d(TAG, "Skipped scheduling BOTH wallpaper changes - already scheduled")
-            }
-        } else {
-            // Independent schedules - schedule or cancel each separately
-            // Cancel BOTH job if it exists (switching from sync to separate mode)
-            cancelWallpaperChange(ScreenType.BOTH)
-
-            if (homeIntervalMinutes > 0) {
-                if (!onlyIfNotScheduled || !isWorkScheduled(ScreenType.HOME)) {
-                    scheduleWallpaperChange(
-                        ScreenType.HOME,
-                        homeIntervalMinutes,
-                        networkRequired,
-                        requireCharging
-                    )
+                if (shouldSync) {
+                    // When synchronized, schedule a single BOTH job that sets both screens
+                    // This ensures both screens always show the same wallpaper
+                    if (!onlyIfNotScheduled || !isWorkScheduled(ScreenType.BOTH)) {
+                        scheduleWallpaperChange(
+                            ScreenType.BOTH,
+                            homeIntervalMinutes,
+                            networkRequired,
+                            requireCharging
+                        )
+                        // Cancel any existing separate HOME/LOCK jobs
+                        cancelWallpaperChange(ScreenType.HOME)
+                        cancelWallpaperChange(ScreenType.LOCK)
+                        Log.d(TAG, "Scheduled synchronized wallpaper changes (BOTH) every $homeIntervalMinutes minutes")
+                    } else {
+                        Log.d(TAG, "Skipped scheduling BOTH wallpaper changes - already scheduled")
+                    }
                 } else {
-                    Log.d(TAG, "Skipped scheduling HOME wallpaper changes - already scheduled")
-                }
-            } else {
-                cancelWallpaperChange(ScreenType.HOME)
-            }
+                    // Independent schedules - schedule or cancel each separately
+                    // Check if BOTH was scheduled BEFORE cancelling it
+                    // This is needed to force schedule HOME/LOCK when switching from sync mode
+                    val wasBothScheduled = isWorkScheduled(ScreenType.BOTH)
+                    
+                    // Cancel BOTH job if it exists (switching from sync to separate mode)
+                    cancelWallpaperChange(ScreenType.BOTH)
+                    
+                    // When switching away from sync mode, we must ensure HOME/LOCK are scheduled
+                    // even if onlyIfNotScheduled is true, because they were previously suppressed
+                    val forceSchedule = wasBothScheduled
 
-            if (lockIntervalMinutes > 0) {
-                if (!onlyIfNotScheduled || !isWorkScheduled(ScreenType.LOCK)) {
-                    scheduleWallpaperChange(
-                        ScreenType.LOCK,
-                        lockIntervalMinutes,
-                        networkRequired,
-                        requireCharging
-                    )
+                    if (homeIntervalMinutes > 0) {
+                        if (!onlyIfNotScheduled || forceSchedule || !isWorkScheduled(ScreenType.HOME)) {
+                            scheduleWallpaperChange(
+                                ScreenType.HOME,
+                                homeIntervalMinutes,
+                                networkRequired,
+                                requireCharging
+                            )
+                        } else {
+                            Log.d(TAG, "Skipped scheduling HOME wallpaper changes - already scheduled")
+                        }
+                    } else {
+                        cancelWallpaperChange(ScreenType.HOME)
+                    }
+
+                    if (lockIntervalMinutes > 0) {
+                        if (!onlyIfNotScheduled || forceSchedule || !isWorkScheduled(ScreenType.LOCK)) {
+                            scheduleWallpaperChange(
+                                ScreenType.LOCK,
+                                lockIntervalMinutes,
+                                networkRequired,
+                                requireCharging
+                            )
+                        } else {
+                            Log.d(TAG, "Skipped scheduling LOCK wallpaper changes - already scheduled")
+                        }
+                    } else {
+                        cancelWallpaperChange(ScreenType.LOCK)
+                    }
+                }
+
+                // Schedule daily album refresh to validate all albums
+                if (!onlyIfNotScheduled || !isAlbumRefreshScheduled()) {
+                    scheduleAlbumRefresh()
                 } else {
-                    Log.d(TAG, "Skipped scheduling LOCK wallpaper changes - already scheduled")
+                    Log.d(TAG, "Skipped scheduling album refresh - already scheduled")
                 }
-            } else {
-                cancelWallpaperChange(ScreenType.LOCK)
             }
-        }
-
-        // Schedule daily album refresh to validate all albums
-        if (!onlyIfNotScheduled || !isAlbumRefreshScheduled()) {
-            scheduleAlbumRefresh()
-        } else {
-            Log.d(TAG, "Skipped scheduling album refresh - already scheduled")
         }
     }
 
@@ -204,9 +226,17 @@ class WallpaperScheduler @Inject constructor(
         workManager.cancelUniqueWork(Constants.WORK_NAME_HOME)
         workManager.cancelUniqueWork(Constants.WORK_NAME_LOCK)
         workManager.cancelUniqueWork(Constants.WORK_NAME_BOTH)
+        workManager.cancelUniqueWork(Constants.WORK_NAME_LIVE)
         cancelAlbumRefresh()
         Log.d(TAG, "Cancelled all wallpaper change schedules")
     }
+    
+    // ... scheduleAlbumRefresh and cancelAlbumRefresh omitted as they were not targeted for change ...
+    // Wait, I should not delete them. I'll use the proper range.
+
+    // I will target up to cancelAllWallpaperChanges for this call.
+    // The next tool call will fix triggerImmediateChange.
+
 
     /**
      * Schedule daily album refresh worker
@@ -221,11 +251,26 @@ class WallpaperScheduler @Inject constructor(
             .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
             .build()
 
+        // Calculate initial delay to target 3 AM
+        val calendar = Calendar.getInstance()
+        val nowMillis = calendar.timeInMillis
+        
+        if (calendar.get(Calendar.HOUR_OF_DAY) >= 3) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 3)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        
+        val initialDelay = calendar.timeInMillis - nowMillis
+
         val workRequest = PeriodicWorkRequestBuilder<AlbumRefreshWorker>(
             1,
             TimeUnit.DAYS
         )
             .setConstraints(constraints)
+            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
             .addTag(Constants.WORK_TAG_REFRESH)
             .build()
 
@@ -262,7 +307,13 @@ class WallpaperScheduler @Inject constructor(
             .addTag("${Constants.WORK_TAG_IMMEDIATE}_${screenType.name.lowercase()}")
             .build()
 
-        workManager.enqueue(workRequest)
+        val uniqueWorkName = "${Constants.WORK_TAG_IMMEDIATE}_${screenType.name.lowercase()}"
+
+        workManager.enqueueUniqueWork(
+            uniqueWorkName,
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
         Log.d(TAG, "Triggered immediate $screenType wallpaper change")
     }
 
@@ -271,7 +322,7 @@ class WallpaperScheduler @Inject constructor(
             ScreenType.HOME -> Constants.WORK_NAME_HOME
             ScreenType.LOCK -> Constants.WORK_NAME_LOCK
             ScreenType.BOTH -> Constants.WORK_NAME_BOTH
-            ScreenType.LIVE -> "wallpaper_change_live"  // Not used in WorkManager scheduling
+            ScreenType.LIVE -> Constants.WORK_NAME_LIVE
         }
     }
 
@@ -280,7 +331,7 @@ class WallpaperScheduler @Inject constructor(
             ScreenType.HOME -> Constants.WORK_TAG_HOME
             ScreenType.LOCK -> Constants.WORK_TAG_LOCK
             ScreenType.BOTH -> Constants.WORK_TAG_BOTH
-            ScreenType.LIVE -> "wallpaper_live"  // Not used in WorkManager scheduling
+            ScreenType.LIVE -> Constants.WORK_TAG_LIVE
         }
     }
 
@@ -290,9 +341,16 @@ class WallpaperScheduler @Inject constructor(
      * @param screenType Screen type to check
      * @return true if work is scheduled (ENQUEUED or RUNNING), false otherwise
      */
-    private fun isWorkScheduled(screenType: ScreenType): Boolean {
+    private suspend fun isWorkScheduled(screenType: ScreenType): Boolean {
         val workName = getWorkName(screenType)
-        val workInfos = workManager.getWorkInfosForUniqueWork(workName).get()
+        val workInfos = try {
+            workManager.getWorkInfosForUniqueWorkFlow(workName).first()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking work status", e)
+            return false
+        }
+
+        if (workInfos.isEmpty()) return false
 
         return workInfos.any { workInfo ->
             workInfo.state == androidx.work.WorkInfo.State.ENQUEUED ||
@@ -305,8 +363,15 @@ class WallpaperScheduler @Inject constructor(
      *
      * @return true if work is scheduled (ENQUEUED or RUNNING), false otherwise
      */
-    private fun isAlbumRefreshScheduled(): Boolean {
-        val workInfos = workManager.getWorkInfosForUniqueWork(Constants.WORK_NAME_REFRESH).get()
+    private suspend fun isAlbumRefreshScheduled(): Boolean {
+        val workInfos = try {
+            workManager.getWorkInfosForUniqueWorkFlow(Constants.WORK_NAME_REFRESH).first()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking refresh status", e)
+            return false
+        }
+
+        if (workInfos.isEmpty()) return false
 
         return workInfos.any { workInfo ->
             workInfo.state == androidx.work.WorkInfo.State.ENQUEUED ||

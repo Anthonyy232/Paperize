@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
@@ -24,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 import kotlin.math.roundToInt
 
@@ -128,7 +128,7 @@ fun SettingSwitchWithSlider(
                                 onPercentageChange(homeValue.roundToInt(), it.roundToInt())
                             },
                             valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = 99
+                            steps = Constants.SLIDER_EFFECT_STEPS
                         )
                     }
 
@@ -161,7 +161,7 @@ fun SettingSwitchWithSlider(
                                 onPercentageChange(it.roundToInt(), lockValue.roundToInt())
                             },
                             valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = 99
+                            steps = Constants.SLIDER_EFFECT_STEPS
                         )
                     }
                 } else {
@@ -174,13 +174,17 @@ fun SettingSwitchWithSlider(
                             Text(
                                 text = stringResource(description),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = "${homeValue.roundToInt()}%",
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(start = AppSpacing.medium)
                             )
                         }
                         Slider(
@@ -190,7 +194,7 @@ fun SettingSwitchWithSlider(
                                 onPercentageChange(it.roundToInt(), it.roundToInt())
                             },
                             valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = 99
+                            steps = Constants.SLIDER_EFFECT_STEPS
                         )
                     }
                 }

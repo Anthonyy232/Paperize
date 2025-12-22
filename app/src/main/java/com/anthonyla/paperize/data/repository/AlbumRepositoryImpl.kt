@@ -13,9 +13,11 @@ import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.mapper.toDomainModel
 import com.anthonyla.paperize.data.mapper.toDomainModelsFromRelations
+import com.anthonyla.paperize.data.mapper.toDomainModelsFromSummaries
 import com.anthonyla.paperize.data.mapper.toEntities
 import com.anthonyla.paperize.data.mapper.toEntity
 import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
@@ -37,8 +39,12 @@ class AlbumRepositoryImpl @Inject constructor(
     private val database: PaperizeDatabase,
     private val albumDao: AlbumDao,
     private val wallpaperDao: WallpaperDao,
-    private val folderDao: FolderDao
+    private val folderDao: FolderDao,
+    private val wallpaperRepository: dagger.Lazy<com.anthonyla.paperize.domain.repository.WallpaperRepository>
 ) : AlbumRepository {
+
+    override fun getAlbumSummaries(): Flow<List<AlbumSummary>> =
+        albumDao.getAlbumSummaries().map { it.toDomainModelsFromSummaries() }
 
     override fun getAllAlbums(): Flow<List<Album>> =
         albumDao.getAllAlbumsWithDetails().map { it.toDomainModelsFromRelations() }
@@ -79,7 +85,10 @@ class AlbumRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAlbum(albumId: String): Result<Unit> {
         return try {
-            albumDao.deleteAlbumById(albumId)
+            database.withTransaction {
+                albumDao.deleteAlbumById(albumId)
+                wallpaperRepository.get().clearQueuesForAlbum(albumId)
+            }
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
@@ -226,7 +235,10 @@ class AlbumRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAllAlbums(): Result<Unit> {
         return try {
-            albumDao.deleteAllAlbums()
+            database.withTransaction {
+                albumDao.deleteAllAlbums()
+                wallpaperRepository.get().clearAllQueues()
+            }
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)

@@ -37,26 +37,12 @@ class MainActivity : ComponentActivity() {
 
             // Track if DataStore has loaded at least once
             // This prevents the loading screen from showing again if the composable is recomposed
-            var hasLoadedDataStore by remember { mutableStateOf(false) }
-
             val appSettings by settingsViewModel.appSettings.collectAsStateWithLifecycle()
 
-            // Wait for the first real DataStore emission (not the default value)
-            // This prevents flickering to onboarding screen on app start
-            LaunchedEffect(Unit) {
-                snapshotFlow { appSettings }
-                    .collect { settings ->
-                        // Mark as loaded once we get a value different from the default
-                        // OR if we've already marked it as loaded (prevents reset on recomposition)
-                        if (settings != AppSettings.default() || hasLoadedDataStore) {
-                            hasLoadedDataStore = true
-                        }
-                    }
-            }
 
             PaperizeTheme(
-                darkMode = appSettings.darkMode,
-                dynamicTheming = appSettings.dynamicTheming
+                darkMode = appSettings?.darkMode ?: false,
+                dynamicTheming = appSettings?.dynamicTheming ?: true
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -64,10 +50,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // Only render navigation once DataStore has loaded
                     // After first load, always show navigation even during updates
-                    if (hasLoadedDataStore) {
+                    val currentSettings = appSettings
+                    if (currentSettings != null) {
                         NavigationGraph(
-                            startDestination = if (appSettings.firstLaunch) StartupRoute else HomeRoute,
-                            animate = appSettings.animate,
+                            startDestination = if (currentSettings.firstLaunch) StartupRoute else HomeRoute,
+                            animate = currentSettings.animate,
                             onFirstLaunchComplete = {
                                 settingsViewModel.updateFirstLaunch(false)
                             }
