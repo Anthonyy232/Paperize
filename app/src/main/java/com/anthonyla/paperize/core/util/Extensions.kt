@@ -19,11 +19,11 @@ fun Uri.isValid(contentResolver: ContentResolver): Boolean {
         contentResolver.query(this, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
             cursor.moveToFirst()
         } ?: false
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         // Fallback to opening the stream if the provider doesn't support the specific query
         try {
             contentResolver.openFileDescriptor(this, "r")?.use { true } ?: false
-        } catch (e2: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -54,7 +54,7 @@ fun Uri.scanFolderForImages(context: Context): List<Uri> {
             when {
                 file.isDirectory -> scanDirectory(file) // Recursively scan subdirectories
                 file.isFile && file.type in supportedTypes -> {
-                    file.uri?.let { imageUris.add(it) }
+                    imageUris.add(file.uri)
                 }
             }
         }

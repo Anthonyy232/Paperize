@@ -17,8 +17,6 @@ object Constants {
 
     // Services
     const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER"
-    const val ACTION_CHANGE_LIVE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_LIVE_WALLPAPER"
-    const val ACTION_UPDATE_LIVE_EFFECTS = "com.anthonyla.paperize.ACTION_UPDATE_LIVE_EFFECTS"
     const val ACTION_RELOAD_WALLPAPER = "com.anthonyla.paperize.ACTION_RELOAD_WALLPAPER"
 
     // WorkManager
@@ -32,7 +30,6 @@ object Constants {
     const val WORK_TAG_BOTH = "wallpaper_change_both_tag"
     const val WORK_TAG_LIVE = "wallpaper_change_live_tag"
     const val WORK_TAG_REFRESH = "album_refresh_tag"
-    const val WORK_TAG_IMMEDIATE = "immediate_change"
     const val MAX_WORK_RETRY_ATTEMPTS = 3
 
     // Intents
@@ -46,9 +43,6 @@ object Constants {
     const val DEFAULT_GRAYSCALE_PERCENTAGE = 0
     const val MAX_EFFECT_PERCENTAGE = 100
     const val SLIDER_EFFECT_STEPS = 99
-    const val HOME_SCREEN_ENTRY_DELAY_MS = 50L
-    const val HOME_SCREEN_SLIDE_OFFSET_DIVISOR = 20
-    const val GL_TEXTURE_SIZE_LIMIT = 4096  // Safe for API 31+ (all support at least 4096)
     const val DIALOG_MESSAGE_MAX_LINES = 10
     const val MIN_EFFECT_PERCENTAGE = 0
     const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
@@ -77,7 +71,6 @@ object Constants {
 
     // Image processing
     const val MAX_BLUR_RADIUS = 25.0f
-    const val RGB_MAX_VALUE = 255.0
     const val BRIGHTNESS_SAMPLE_SIZE = 10  // Pixel sample size for brightness calculation
     const val DEFAULT_BRIGHTNESS = 0.5f  // Default brightness fallback
 
@@ -100,18 +93,21 @@ object Constants {
     val VIGNETTE_GRADIENT_POSITIONS = floatArrayOf(0f, 0.7f, 1f)  // Vignette gradient positions
 
     // Wallpaper loading retry
-    const val WALLPAPER_READ_MAX_ATTEMPTS = 4  // Maximum retry attempts for wallpaper loading
     const val WALLPAPER_READ_INITIAL_DELAY_MS = 500L  // Initial retry delay (with linear backoff)
-
-    // Render nodes
-    const val RENDER_NODE_BLUR = "BlurEffect"  // Identifier for blur render node
 
     // Input validation
     const val MAX_DAYS_INPUT_LENGTH = 3
     const val MAX_HOURS_MINUTES_INPUT_LENGTH = 2
 
     // File types
-    val SUPPORTED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp", "avif")
+    val SUPPORTED_IMAGE_EXTENSIONS = setOf(
+        "jpg", "jpeg", "png", "webp", "avif",
+        "heic", "heif",  // HEIC/HEIF - Apple's high efficiency format
+        "bmp",           // Bitmap - legacy but still used
+        "gif",           // GIF - mostly for static images (first frame used)
+        "tiff", "tif",   // TIFF - high quality archival format
+        "svg"            // SVG - vector graphics (rasterized for wallpaper)
+    )
 
     // Renderer
     /** Crossfade animation duration in milliseconds - consistent across all refresh rates */

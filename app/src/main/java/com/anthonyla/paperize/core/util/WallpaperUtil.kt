@@ -27,7 +27,6 @@ import android.util.Size
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.compose.ui.util.fastRoundToInt
-import androidx.core.graphics.createBitmap
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.WallpaperMediaType
@@ -44,7 +43,6 @@ import com.anthonyla.paperize.core.WallpaperMediaType
  */
 
 private const val TAG = "WallpaperUtil"
-private val SharedPaintFilterAntiAlias = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
 
 /**
  * Get the dimensions of the image from the URI
@@ -272,128 +270,8 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
     }
 }
 
-/**
- * Scale a bitmap using the fit method
- * The bitmap will fit into the given dimensions while maintaining aspect ratio
- */
-/**
- * Scale a bitmap using the fit method
- * The bitmap will fit into the given dimensions while maintaining aspect ratio
- */
-fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
-        Log.w(TAG, "Invalid dimensions for fitBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
-        return source
-    }
-    if (source.width == width && source.height == height) {
-        return source
-    }
 
-    return try {
-        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val scaleX = width.toFloat() / source.width
-        val scaleY = height.toFloat() / source.height
-        // Use the smaller scale factor to ensure the entire image fits within the target dimensions
-        val scale = minOf(scaleX, scaleY)
-        
-        val scaledSourceWidth = source.width * scale
-        val scaledSourceHeight = source.height * scale
-        
-        val xOffset = (width - scaledSourceWidth) / 2f
-        val yOffset = (height - scaledSourceHeight) / 2f
-        
-        val matrix = Matrix().apply {
-            postScale(scale, scale)
-            postTranslate(xOffset, yOffset)
-        }
-        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
-        bitmap
-    } catch (e: Exception) {
-        Log.e(TAG, "Error fitting bitmap: $e")
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM fitting bitmap: $e")
-        source
-    }
-}
 
-/**
- * Scale a bitmap using the fill method (crop to fill dimensions)
- */
-fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
-        Log.w(TAG, "Invalid dimensions for fillBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
-        return source
-    }
-    if (source.width == width && source.height == height) {
-        return source
-    }
-    return try {
-        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val sourceAspect = source.width.toFloat() / source.height.toFloat()
-        val targetAspect = width.toFloat() / height.toFloat()
-
-        val scale: Float
-        val xOffset: Float
-        val yOffset: Float
-
-        if (sourceAspect >= targetAspect) {
-            scale = height.toFloat() / source.height.toFloat()
-            xOffset = (width - source.width * scale) / 2f
-            yOffset = 0f
-        } else {
-            scale = width.toFloat() / source.width.toFloat()
-            xOffset = 0f
-            yOffset = (height - source.height * scale) / 2f
-        }
-
-        val matrix = Matrix().apply {
-            postScale(scale, scale)
-            postTranslate(xOffset, yOffset)
-        }
-        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
-        bitmap
-    } catch (e: Exception) {
-        Log.e(TAG, "Error filling bitmap: $e")
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM filling bitmap: $e")
-        source
-    }
-}
-
-/**
- * Stretch the bitmap to fit the given dimensions
- */
-fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
-        Log.w(TAG, "Invalid dimensions for stretchBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
-        return source
-    }
-    if (source.width == width && source.height == height) {
-        return source
-    }
-    return try {
-        val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val matrix = Matrix().apply {
-            setScale(
-                width.toFloat() / source.width,
-                height.toFloat() / source.height
-            )
-        }
-        canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
-        bitmap
-    } catch (e: Exception) {
-        Log.e(TAG, "Error stretching bitmap: $e")
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM stretching bitmap: $e")
-        source
-    }
-}
 
 /**
  * Darken the bitmap by a certain percentage
@@ -444,7 +322,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
     val renderNode = RenderNode("BlurEffect")
     val hardwareRenderer = HardwareRenderer()
 
-    var resultBitmap: Bitmap? = null
+    var resultBitmap: Bitmap?
     try {
         hardwareRenderer.setSurface(imageReader.surface)
         hardwareRenderer.setContentRoot(renderNode)
@@ -491,7 +369,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
         imageReader.close()
     }
 
-    return resultBitmap ?: throw IllegalStateException("Blur operation failed - resultBitmap is null")
+    return resultBitmap
 }
 
 /**
@@ -573,30 +451,7 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
  * Uses luminance calculation based on RGB values
  */
 fun calculateBitmapBrightness(bitmap: Bitmap): Float {
-    // Sample pixels to estimate brightness (sampling for performance)
-    val sampleSize = Constants.BRIGHTNESS_SAMPLE_SIZE
-    var totalLuminance = 0.0
-    var pixelCount = 0
-
-    for (x in 0 until bitmap.width step sampleSize) {
-        for (y in 0 until bitmap.height step sampleSize) {
-            val pixel = bitmap.getPixel(x, y)
-            val r = Color.red(pixel) / 255.0
-            val g = Color.green(pixel) / 255.0
-            val b = Color.blue(pixel) / 255.0
-
-            // Calculate relative luminance using ITU-R BT.709 standard
-            val luminance = Constants.LUMINANCE_RED * r + Constants.LUMINANCE_GREEN * g + Constants.LUMINANCE_BLUE * b
-            totalLuminance += luminance
-            pixelCount++
-        }
-    }
-
-    return if (pixelCount > 0) {
-        (totalLuminance / pixelCount).toFloat()
-    } else {
-        0.5f
-    }
+    return BrightnessCalculator.calculateBitmapBrightness(bitmap)
 }
 
 /**
@@ -621,15 +476,7 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
     return source
 }
 
-/**
- * Adaptive brightness adjustment based on system dark/light mode
- * In dark mode: darkens bright images for better viewing
- * In light mode: brightens dark images for better visibility
- *
- * @param context Application context
- * @param source Source bitmap
- * @return Adjusted bitmap (or original if no adjustment needed)
- */
+
 /**
  * Get adaptive brightness multiplier factor based on system dark/light mode
  * 
@@ -639,74 +486,24 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
  */
 fun getAdaptiveBrightnessMultiplier(context: Context, brightness: Float): Float {
     val isDarkMode = (context.resources.configuration.uiMode and
-        android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-    val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
-    val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
-    val targetBrightnessDark = Constants.TARGET_BRIGHTNESS_DARK
-    val targetBrightnessLight = Constants.TARGET_BRIGHTNESS_LIGHT
-
-    // Avoid issues with very dark items
-    if (brightness < 0.01f) return 1.0f
-
-    return when {
-        // In dark mode with very bright image: darken it
-        isDarkMode && brightness > lightBrightnessMin -> targetBrightnessDark / brightness
-        // In light mode with very dark image: brighten it
-        !isDarkMode && brightness < darkBrightnessMax -> targetBrightnessLight / brightness
-        // No adjustment needed
-        else -> 1.0f
-    }
+        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    
+    return BrightnessCalculator.getAdaptiveMultiplier(isDarkMode, brightness)
 }
 
 fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {
     val isDarkMode = (context.resources.configuration.uiMode and
         Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
-    val currentBrightness = calculateBitmapBrightness(source)
+    val currentBrightness = BrightnessCalculator.calculateBitmapBrightness(source)
+    val adjustmentFactor = BrightnessCalculator.getAdaptiveMultiplier(isDarkMode, currentBrightness)
 
-// Thresholds from WallYou
-    val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
-    val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
-    val targetBrightnessDark = Constants.TARGET_BRIGHTNESS_DARK
-    val targetBrightnessLight = Constants.TARGET_BRIGHTNESS_LIGHT
-
-    // Avoid division by zero or very small numbers
-    if (currentBrightness < 0.01f) {
-        Log.d(TAG, "Image is too dark for adaptive brightness adjustment (brightness: $currentBrightness)")
-        return source
-    }
-
-    return when {
-        // In dark mode with very bright image: darken it
-        isDarkMode && currentBrightness > lightBrightnessMin -> {
-            val adjustmentFactor = targetBrightnessDark / currentBrightness
-            Log.d(TAG, "Dark mode: Darkening bright image from $currentBrightness to $targetBrightnessDark")
-            adjustBitmapBrightness(source, adjustmentFactor)
-        }
-        // In light mode with very dark image: brighten it
-        !isDarkMode && currentBrightness < darkBrightnessMax -> {
-            val adjustmentFactor = targetBrightnessLight / currentBrightness
-            Log.d(TAG, "Light mode: Brightening dark image from $currentBrightness to $targetBrightnessLight")
-            adjustBitmapBrightness(source, adjustmentFactor)
-        }
-        // No adjustment needed
-        else -> {
-            Log.d(TAG, "No adaptive brightness adjustment needed (brightness: $currentBrightness, dark mode: $isDarkMode)")
-            source
-        }
-    }
-}
-
-/**
- * Apply scaling to bitmap based on ScalingType
- */
-fun scaleBitmap(source: Bitmap, width: Int, height: Int, scaling: ScalingType): Bitmap {
-    return when (scaling) {
-        ScalingType.FILL -> fillBitmap(source, width, height)
-        ScalingType.FIT -> fitBitmap(source, width, height)
-        ScalingType.STRETCH -> stretchBitmap(source, width, height)
-        ScalingType.NONE -> source
+    return if (adjustmentFactor != 1.0f) {
+        Log.d(TAG, "Adaptive brightness adjustment factor: $adjustmentFactor (brightness: $currentBrightness, dark mode: $isDarkMode)")
+        adjustBitmapBrightness(source, adjustmentFactor)
+    } else {
+        Log.d(TAG, "No adaptive brightness adjustment needed (brightness: $currentBrightness, dark mode: $isDarkMode)")
+        source
     }
 }
 
@@ -715,7 +512,6 @@ fun scaleBitmap(source: Bitmap, width: Int, height: Int, scaling: ScalingType): 
  * Properly manages bitmap lifecycle by recycling intermediate results
  */
 fun processBitmap(
-    context: Context,
     source: Bitmap,
     enableDarken: Boolean = false,
     darkenPercent: Int = 0,
@@ -802,16 +598,6 @@ fun Uri.detectMediaType(context: Context): WallpaperMediaType? {
     } catch (e: Exception) {
         Log.e(TAG, "Error detecting media type for URI: $this", e)
         return WallpaperMediaType.IMAGE  // Default to IMAGE on error
-    }
-}
-
-/**
- * Validate that media type is supported in the current wallpaper mode
- */
-fun WallpaperMediaType.isSupportedInMode(mode: com.anthonyla.paperize.core.WallpaperMode): Boolean {
-    return when (mode) {
-        com.anthonyla.paperize.core.WallpaperMode.STATIC -> this.supportedInStaticMode
-        com.anthonyla.paperize.core.WallpaperMode.LIVE -> this.supportedInLiveMode
     }
 }
 

@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.service.livewallpaper.gl
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.graphics.Bitmap
 import android.opengl.GLES20
@@ -56,7 +55,7 @@ class GLPicture(
             "Cannot create GLPicture from bitmap with invalid dimensions: ${bitmap.width}x${bitmap.height}" 
         }
         
-        val maxTextureSize = min(getOptimalTileSize(), Constants.GL_TEXTURE_SIZE_LIMIT)
+        val maxTextureSize = GLCompatibility.getSafeMaxTextureSize(getOptimalTileSize())
         val tileSize = maxTextureSize
 
         cols = ceil(width.toFloat() / tileSize).toInt()

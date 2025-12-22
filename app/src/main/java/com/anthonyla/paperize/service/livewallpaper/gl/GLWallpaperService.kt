@@ -54,12 +54,6 @@ abstract class GLWallpaperService : WallpaperService() {
             this.eglContextClientVersion = version
         }
 
-        /**
-         * Set the EGL config chooser.
-         */
-        fun setEGLConfigChooser(configChooser: EGLConfigChooser) {
-            this.eglConfigChooser = configChooser
-        }
 
         /**
          * Simplified EGL config chooser for RGB888 with no depth/stencil.
@@ -156,6 +150,7 @@ abstract class GLWallpaperService : WallpaperService() {
         @Volatile var renderMode = RENDERMODE_WHEN_DIRTY
 
         private val eventQueue = mutableListOf<Runnable>()
+        @Suppress("UseKotlinAny")
         private val lock = Object()
 
         @Volatile private var shouldExit = false
@@ -372,7 +367,9 @@ abstract class GLWallpaperService : WallpaperService() {
     }
 
     /**
-     * Simple EGL config chooser that picks the first config matching the requirements.
+     * Enhanced EGL config chooser with multiple fallback options.
+     * Tries progressively simpler configurations to maximize compatibility
+     * across different GPU vendors (Adreno, Mali, PowerVR, etc.)
      */
     private class SimpleEGLConfigChooser(
         private val redSize: Int,
@@ -391,8 +388,14 @@ abstract class GLWallpaperService : WallpaperService() {
                 0x0004 // EGL_OPENGL_ES2_BIT
             }
 
-            // Try with EGL_RENDERABLE_TYPE
-            var configSpec = intArrayOf(
+            // Log device info for debugging
+            GLCompatibility.logDeviceInfo()
+
+            // Build list of configs to try in order of preference
+            val configSpecs = mutableListOf<IntArray>()
+
+            // Config 1: Full spec with EGL_RENDERABLE_TYPE (most common/preferred)
+            configSpecs.add(intArrayOf(
                 EGL10.EGL_RED_SIZE, redSize,
                 EGL10.EGL_GREEN_SIZE, greenSize,
                 EGL10.EGL_BLUE_SIZE, blueSize,
@@ -401,36 +404,58 @@ abstract class GLWallpaperService : WallpaperService() {
                 EGL10.EGL_STENCIL_SIZE, stencilSize,
                 0x3142, renderableType, // EGL_RENDERABLE_TYPE
                 EGL10.EGL_NONE
-            )
+            ))
+
+            // Config 2: Without EGL_RENDERABLE_TYPE (older devices)
+            configSpecs.add(intArrayOf(
+                EGL10.EGL_RED_SIZE, redSize,
+                EGL10.EGL_GREEN_SIZE, greenSize,
+                EGL10.EGL_BLUE_SIZE, blueSize,
+                EGL10.EGL_ALPHA_SIZE, alphaSize,
+                EGL10.EGL_DEPTH_SIZE, depthSize,
+                EGL10.EGL_STENCIL_SIZE, stencilSize,
+                EGL10.EGL_NONE
+            ))
+
+            // Config 3: RGB565 (no alpha) - Mali GPU fallback
+            if (GLCompatibility.isLowEndGPU()) {
+                configSpecs.add(intArrayOf(
+                    EGL10.EGL_RED_SIZE, 5,
+                    EGL10.EGL_GREEN_SIZE, 6,
+                    EGL10.EGL_BLUE_SIZE, 5,
+                    EGL10.EGL_ALPHA_SIZE, 0,
+                    EGL10.EGL_DEPTH_SIZE, 0,
+                    EGL10.EGL_STENCIL_SIZE, 0,
+                    EGL10.EGL_NONE
+                ))
+                Log.d(TAG, "Added RGB565 fallback config for low-end GPU")
+            }
+
+            // Config 4: Minimal config (last resort)
+            configSpecs.add(intArrayOf(
+                EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
+                EGL10.EGL_NONE
+            ))
 
             val numConfig = IntArray(1)
-            if (!egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
-                Log.w(TAG, "eglChooseConfig failed with EGL_RENDERABLE_TYPE, retrying without it")
-                // Fallback: Try without EGL_RENDERABLE_TYPE
-                configSpec = intArrayOf(
-                    EGL10.EGL_RED_SIZE, redSize,
-                    EGL10.EGL_GREEN_SIZE, greenSize,
-                    EGL10.EGL_BLUE_SIZE, blueSize,
-                    EGL10.EGL_ALPHA_SIZE, alphaSize,
-                    EGL10.EGL_DEPTH_SIZE, depthSize,
-                    EGL10.EGL_STENCIL_SIZE, stencilSize,
-                    EGL10.EGL_NONE
-                )
-                if (!egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
-                    throw RuntimeException("eglChooseConfig failed")
+            
+            for ((index, configSpec) in configSpecs.withIndex()) {
+                if (egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
+                    if (numConfig[0] > 0) {
+                        val configs = arrayOfNulls<EGLConfig>(numConfig[0])
+                        if (egl.eglChooseConfig(display, configSpec, configs, numConfig[0], numConfig)) {
+                            val config = configs[0]
+                            if (config != null) {
+                                Log.d(TAG, "EGL config chosen using fallback level $index")
+                                return config
+                            }
+                        }
+                    }
                 }
+                Log.w(TAG, "EGL config fallback $index failed, trying next...")
             }
 
-            if (numConfig[0] <= 0) {
-                throw RuntimeException("No EGL configs match")
-            }
-
-            val configs = arrayOfNulls<EGLConfig>(numConfig[0])
-            if (!egl.eglChooseConfig(display, configSpec, configs, numConfig[0], numConfig)) {
-                throw RuntimeException("eglChooseConfig failed")
-            }
-
-            return configs[0] ?: throw RuntimeException("No config chosen")
+            throw RuntimeException("No compatible EGL config found after all fallbacks")
         }
     }
 }

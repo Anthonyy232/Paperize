@@ -2,7 +2,6 @@ package com.anthonyla.paperize.domain.usecase
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.Result
@@ -12,7 +11,6 @@ import com.anthonyla.paperize.core.util.getDeviceScreenSize
 import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.core.util.processBitmap
 import com.anthonyla.paperize.core.util.retrieveBitmap
-import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.core.constants.Constants
@@ -94,7 +92,6 @@ class ChangeWallpaperUseCase @Inject constructor(
                             // Apply effects directly to the retrieved bitmap
 
                             var processedBitmap = processBitmap(
-                                context = context,
                                 source = bitmap,
                                 enableDarken = effects.enableDarken,
                                 darkenPercent = effects.darkenPercentage,
@@ -125,7 +122,7 @@ class ChangeWallpaperUseCase @Inject constructor(
                             wallpaperRepository.deleteWallpaper(candidate.id)
                             maxRetries--
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // Error during processing, skip this wallpaper
                         wallpaperRepository.deleteWallpaper(candidate.id)
                         maxRetries--

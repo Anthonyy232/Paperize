@@ -3,6 +3,7 @@ package com.anthonyla.paperize.data.repository
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
@@ -123,7 +124,7 @@ class WallpaperRepositoryImpl @Inject constructor(
             for (offset in 0 until totalCount step batchSize) {
                 val wallpapers = wallpaperDao.getWallpapersByAlbumPaged(albumId, batchSize, offset)
                 val invalidUris = wallpapers
-                    .filter { !Uri.parse(it.uri).isValid(contentResolver) }
+                    .filter { !it.uri.toUri().isValid(contentResolver) }
                     .map { it.uri }
 
                 if (invalidUris.isNotEmpty()) {
@@ -160,44 +161,29 @@ class WallpaperRepositoryImpl @Inject constructor(
 
                 // If shuffle is enabled, check if there's an existing queue for another screen type
                 // with the same album to maintain synchronized order
-                val wallpaperIds = if (shuffle) {
-                    // Check other screen types for existing queue with same album
-                    val otherScreenType = when (screenType) {
+                val otherScreenType = if (shuffle) {
+                    when (screenType) {
                         ScreenType.HOME -> ScreenType.LOCK
                         ScreenType.LOCK -> ScreenType.HOME
                         ScreenType.BOTH -> null
                         ScreenType.LIVE -> null
                     }
+                } else null
 
-                    val existingQueueIds = otherScreenType?.let {
-                        try {
-                            wallpaperQueueDao.getQueueItems(albumId, it)
-                                .map { queueItem -> queueItem.wallpaperId }
-                        } catch (e: Exception) {
-                            null
-                        }
+                val otherScreenQueueIds = otherScreenType?.let {
+                    try {
+                        wallpaperQueueDao.getQueueItems(albumId, it)
+                            .map { queueItem -> queueItem.wallpaperId }
+                    } catch (_: Exception) {
+                        null
                     }
-
-                    // If another screen type has a queue for the same album, use that order
-                    // Otherwise, create a new shuffled order
-                    if (existingQueueIds != null && existingQueueIds.isNotEmpty()) {
-                        // Filter to only include IDs that still exist in the current wallpaper list
-                        val currentWallpaperIds = wallpapers.map { it.id }.toSet()
-                        val filteredIds = existingQueueIds.filter { it in currentWallpaperIds }
-
-                        // Add any new wallpapers that aren't in the existing queue
-                        val newWallpaperIds = wallpapers
-                            .map { it.id }
-                            .filter { it !in existingQueueIds }
-                            .shuffled()
-
-                        filteredIds + newWallpaperIds
-                    } else {
-                        wallpapers.map { it.id }.shuffled()
-                    }
-                } else {
-                    wallpapers.sortedBy { it.displayOrder }.map { it.id }
                 }
+
+                val wallpaperIds = com.anthonyla.paperize.core.util.QueueBuilder.buildQueue(
+                    wallpapers = wallpapers.toDomainModels(),
+                    shuffle = shuffle,
+                    otherScreenQueue = otherScreenQueueIds
+                )
 
                 wallpaperQueueDao.rebuildQueue(albumId, screenType, wallpaperIds)
                 Result.Success(Unit)
@@ -281,7 +267,7 @@ class WallpaperRepositoryImpl @Inject constructor(
                             sourceType = WallpaperSourceType.FOLDER
                         )
                     )
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Skip failed items
                 }
             }

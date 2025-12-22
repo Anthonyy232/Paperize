@@ -91,50 +91,31 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.ShiftFolder -> {
-                val currentFolders = state.value.folders.toMutableList()
-                val fromIndex = currentFolders.indexOfFirst { it.uri == event.from.key }
-                val toIndex = currentFolders.indexOfFirst { it.uri == event.to.key }
-                val movedFolder = currentFolders.removeAt(fromIndex)
-                currentFolders.add(toIndex, movedFolder)
-                currentFolders.forEachIndexed { index, folder ->
-                    currentFolders[index] = folder.copy(displayOrder = index)
-                }
-                _state.value = state.value.copy(folders = currentFolders)
+                val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftFolder(
+                    folders = state.value.folders,
+                    fromUri = event.from.key as String,
+                    toUri = event.to.key as String
+                )
+                _state.value = state.value.copy(folders = updatedFolders)
             }
 
             is SortEvent.ShiftFolderWallpaper -> {
-                val folder = state.value.folders.find { it.id == event.folderId }
-                val currentWallpapers = folder?.wallpapers?.toMutableList() ?: return
-                val fromIndex = currentWallpapers.indexOfFirst { it.uri == event.from.key }
-                val toIndex = currentWallpapers.indexOfFirst { it.uri == event.to.key }
-                val movedWallpaper = currentWallpapers.removeAt(fromIndex)
-                currentWallpapers.add(toIndex, movedWallpaper)
-                currentWallpapers.forEachIndexed { index, wallpaper ->
-                    currentWallpapers[index] = wallpaper.copy(displayOrder = index)
-                }
-                val updatedFolders = state.value.folders.map { folder ->
-                    if (folder.id == event.folderId) {
-                        folder.copy(
-                            wallpapers = currentWallpapers,
-                            coverUri = currentWallpapers.firstOrNull()?.uri ?: folder.coverUri
-                        )
-                    } else {
-                        folder
-                    }
-                }
+                val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaperInFolder(
+                    folders = state.value.folders,
+                    folderId = event.folderId,
+                    fromUri = event.from.key as String,
+                    toUri = event.to.key as String
+                )
                 _state.value = state.value.copy(folders = updatedFolders)
             }
 
             is SortEvent.ShiftWallpaper -> {
-                val currentWallpapers = state.value.wallpapers.toMutableList()
-                val fromIndex = currentWallpapers.indexOfFirst { it.uri == event.from.key }
-                val toIndex = currentWallpapers.indexOfFirst { it.uri == event.to.key }
-                val movedWallpaper = currentWallpapers.removeAt(fromIndex)
-                currentWallpapers.add(toIndex, movedWallpaper)
-                currentWallpapers.forEachIndexed { index, wallpaper ->
-                    currentWallpapers[index] = wallpaper.copy(displayOrder = index)
-                }
-                _state.value = state.value.copy(wallpapers = currentWallpapers)
+                val updatedWallpapers = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaper(
+                    wallpapers = state.value.wallpapers,
+                    fromUri = event.from.key as String,
+                    toUri = event.to.key as String
+                )
+                _state.value = state.value.copy(wallpapers = updatedWallpapers)
             }
 
             is SortEvent.Reset -> {
@@ -142,26 +123,11 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortAlphabetically -> {
-                val sortedFolders = state.value.folders
-                    .map { folder ->
-                        val sortedFolderWallpapers = folder.wallpapers
-                            .sortedBy { it.fileName }
-                            .mapIndexed { index, wallpaper ->
-                                wallpaper.copy(displayOrder = index)
-                            }
-                        folder.copy(wallpapers = sortedFolderWallpapers)
-                    }
-                    .sortedBy { it.name }
-                    .mapIndexed { index, folder ->
-                        folder.copy(displayOrder = index)
-                    }
-
-                val sortedWallpapers = state.value.wallpapers
-                    .sortedBy { it.fileName }
-                    .mapIndexed { index, wallpaper ->
-                        wallpaper.copy(displayOrder = index)
-                    }
-
+                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllAlphabetically(
+                    folders = state.value.folders,
+                    wallpapers = state.value.wallpapers,
+                    ascending = true
+                )
                 _state.value = state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
@@ -169,26 +135,11 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortAlphabeticallyReverse -> {
-                val sortedFolders = state.value.folders
-                    .map { folder ->
-                        val sortedFolderWallpapers = folder.wallpapers
-                            .sortedByDescending { it.fileName }
-                            .mapIndexed { index, wallpaper ->
-                                wallpaper.copy(displayOrder = index)
-                            }
-                        folder.copy(wallpapers = sortedFolderWallpapers)
-                    }
-                    .sortedByDescending { it.name }
-                    .mapIndexed { index, folder ->
-                        folder.copy(displayOrder = index)
-                    }
-
-                val sortedWallpapers = state.value.wallpapers
-                    .sortedByDescending { it.fileName }
-                    .mapIndexed { index, wallpaper ->
-                        wallpaper.copy(displayOrder = index)
-                    }
-
+                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllAlphabetically(
+                    folders = state.value.folders,
+                    wallpapers = state.value.wallpapers,
+                    ascending = false
+                )
                 _state.value = state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
@@ -196,26 +147,11 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortByLastModified -> {
-                val sortedFolders = state.value.folders
-                    .map { folder ->
-                        val sortedFolderWallpapers = folder.wallpapers
-                            .sortedBy { it.dateModified }
-                            .mapIndexed { index, wallpaper ->
-                                wallpaper.copy(displayOrder = index)
-                            }
-                        folder.copy(wallpapers = sortedFolderWallpapers)
-                    }
-                    .sortedBy { it.dateModified }
-                    .mapIndexed { index, folder ->
-                        folder.copy(displayOrder = index)
-                    }
-
-                val sortedWallpapers = state.value.wallpapers
-                    .sortedBy { it.dateModified }
-                    .mapIndexed { index, wallpaper ->
-                        wallpaper.copy(displayOrder = index)
-                    }
-
+                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllByDateModified(
+                    folders = state.value.folders,
+                    wallpapers = state.value.wallpapers,
+                    ascending = true
+                )
                 _state.value = state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
@@ -223,26 +159,11 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortByLastModifiedReverse -> {
-                val sortedFolders = state.value.folders
-                    .map { folder ->
-                        val sortedFolderWallpapers = folder.wallpapers
-                            .sortedByDescending { it.dateModified }
-                            .mapIndexed { index, wallpaper ->
-                                wallpaper.copy(displayOrder = index)
-                            }
-                        folder.copy(wallpapers = sortedFolderWallpapers)
-                    }
-                    .sortedByDescending { it.dateModified }
-                    .mapIndexed { index, folder ->
-                        folder.copy(displayOrder = index)
-                    }
-
-                val sortedWallpapers = state.value.wallpapers
-                    .sortedByDescending { it.dateModified }
-                    .mapIndexed { index, wallpaper ->
-                        wallpaper.copy(displayOrder = index)
-                    }
-
+                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllByDateModified(
+                    folders = state.value.folders,
+                    wallpapers = state.value.wallpapers,
+                    ascending = false
+                )
                 _state.value = state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers

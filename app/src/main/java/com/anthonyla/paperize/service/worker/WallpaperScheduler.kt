@@ -198,19 +198,6 @@ class WallpaperScheduler @Inject constructor(
     }
 
     /**
-     * Update existing wallpaper change schedule
-     * Uses UPDATE policy to modify the existing work
-     */
-    fun updateWallpaperChange(
-        screenType: ScreenType,
-        intervalMinutes: Int,
-        networkRequired: Boolean = false,
-        requireCharging: Boolean = false
-    ) {
-        scheduleWallpaperChange(screenType, intervalMinutes, networkRequired, requireCharging)
-    }
-
-    /**
      * Cancel wallpaper change schedule for specific screen
      */
     fun cancelWallpaperChange(screenType: ScreenType) {
@@ -230,13 +217,6 @@ class WallpaperScheduler @Inject constructor(
         cancelAlbumRefresh()
         Log.d(TAG, "Cancelled all wallpaper change schedules")
     }
-    
-    // ... scheduleAlbumRefresh and cancelAlbumRefresh omitted as they were not targeted for change ...
-    // Wait, I should not delete them. I'll use the proper range.
-
-    // I will target up to cancelAllWallpaperChanges for this call.
-    // The next tool call will fix triggerImmediateChange.
-
 
     /**
      * Schedule daily album refresh worker
@@ -289,32 +269,6 @@ class WallpaperScheduler @Inject constructor(
     fun cancelAlbumRefresh() {
         workManager.cancelUniqueWork(Constants.WORK_NAME_REFRESH)
         Log.d(TAG, "Cancelled daily album refresh")
-    }
-
-    /**
-     * Trigger immediate wallpaper change (one-time work)
-     * Does not affect the periodic schedule
-     *
-     * @param screenType HOME, LOCK, or BOTH (for synchronized immediate change)
-     */
-    fun triggerImmediateChange(screenType: ScreenType) {
-        val inputData = Data.Builder()
-            .putString(Constants.EXTRA_SCREEN_TYPE, screenType.name)
-            .build()
-
-        val workRequest = androidx.work.OneTimeWorkRequestBuilder<WallpaperChangeWorker>()
-            .setInputData(inputData)
-            .addTag("${Constants.WORK_TAG_IMMEDIATE}_${screenType.name.lowercase()}")
-            .build()
-
-        val uniqueWorkName = "${Constants.WORK_TAG_IMMEDIATE}_${screenType.name.lowercase()}"
-
-        workManager.enqueueUniqueWork(
-            uniqueWorkName,
-            androidx.work.ExistingWorkPolicy.REPLACE,
-            workRequest
-        )
-        Log.d(TAG, "Triggered immediate $screenType wallpaper change")
     }
 
     private fun getWorkName(screenType: ScreenType): String {

@@ -1,7 +1,5 @@
 package com.anthonyla.paperize.service.livewallpaper
 
-import android.content.ContentResolver
-import android.net.Uri
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -43,6 +41,11 @@ import androidx.core.net.toUri
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.service.livewallpaper.gl.GLCompatibility
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
+import com.anthonyla.paperize.R
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -99,6 +102,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
         private lateinit var renderController: PaperizeRenderController
         private val engineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         private var currentAlbumId: String? = null
+        private var hasShownParallaxWarning = false
 
         private val gestureDetector = GestureDetector(
             this@PaperizeLiveWallpaperService,
@@ -283,6 +287,18 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                     renderer.updateEffects(effects)
                     renderer.updateScalingType(scalingType)
                     renderer.updateAdaptiveBrightness(settings.adaptiveBrightness)
+                    
+                    // Show Toast warning if parallax is enabled but device has offset issues
+                    if (effects.enableParallax && !hasShownParallaxWarning && GLCompatibility.shouldWarnAboutParallax()) {
+                        hasShownParallaxWarning = true
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                applicationContext,
+                                R.string.parallax_may_not_work,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                     
                     // Reload if album changed
                     if (albumId != currentAlbumId) {

@@ -184,6 +184,9 @@
   <string name="error_no_valid_wallpaper_after_retries">Could not find a valid wallpaper after retries</string>
   <string name="error_failed_to_load_bitmap">Failed to load wallpaper image</string>
 
+  <!-- OEM Compatibility Warnings -->
+  <string name="parallax_may_not_work">Parallax effect may not work with your OEM or launcher.</string>
+
   <!-- Plurals -->
   <plurals name="items_count">
     <item quantity="one">%d item</item>
