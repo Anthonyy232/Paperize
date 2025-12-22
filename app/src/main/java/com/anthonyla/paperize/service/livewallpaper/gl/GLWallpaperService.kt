@@ -98,10 +98,6 @@ abstract class GLWallpaperService : WallpaperService() {
             glThread?.queueEvent(runnable)
         }
 
-        override fun onCreate(surfaceHolder: SurfaceHolder) {
-            super.onCreate(surfaceHolder)
-        }
-
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
 
@@ -395,7 +391,8 @@ abstract class GLWallpaperService : WallpaperService() {
                 0x0004 // EGL_OPENGL_ES2_BIT
             }
 
-            val configSpec = intArrayOf(
+            // Try with EGL_RENDERABLE_TYPE
+            var configSpec = intArrayOf(
                 EGL10.EGL_RED_SIZE, redSize,
                 EGL10.EGL_GREEN_SIZE, greenSize,
                 EGL10.EGL_BLUE_SIZE, blueSize,
@@ -408,7 +405,20 @@ abstract class GLWallpaperService : WallpaperService() {
 
             val numConfig = IntArray(1)
             if (!egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
-                throw RuntimeException("eglChooseConfig failed")
+                Log.w(TAG, "eglChooseConfig failed with EGL_RENDERABLE_TYPE, retrying without it")
+                // Fallback: Try without EGL_RENDERABLE_TYPE
+                configSpec = intArrayOf(
+                    EGL10.EGL_RED_SIZE, redSize,
+                    EGL10.EGL_GREEN_SIZE, greenSize,
+                    EGL10.EGL_BLUE_SIZE, blueSize,
+                    EGL10.EGL_ALPHA_SIZE, alphaSize,
+                    EGL10.EGL_DEPTH_SIZE, depthSize,
+                    EGL10.EGL_STENCIL_SIZE, stencilSize,
+                    EGL10.EGL_NONE
+                )
+                if (!egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
+                    throw RuntimeException("eglChooseConfig failed")
+                }
             }
 
             if (numConfig[0] <= 0) {

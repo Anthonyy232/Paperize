@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -28,14 +29,14 @@ class FolderViewViewModel @Inject constructor(
     val folder: StateFlow<Folder?> = albumRepository.getFolderById(folderId)
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = null
         )
 
     val wallpapers: StateFlow<List<Wallpaper>> = wallpaperRepository.getWallpapersByFolder(folderId)
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = emptyList()
         )
 }

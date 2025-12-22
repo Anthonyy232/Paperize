@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.album_view
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
 import androidx.core.net.toUri
@@ -44,7 +45,7 @@ class AlbumViewViewModel @Inject constructor(
     val album: StateFlow<Album?> = albumRepository.getAlbumById(albumId)
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = null
         )
 
@@ -52,7 +53,7 @@ class AlbumViewViewModel @Inject constructor(
         .map { it?.folders ?: emptyList() }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = emptyList()
         )
 
@@ -60,7 +61,7 @@ class AlbumViewViewModel @Inject constructor(
     val wallpapers: StateFlow<List<Wallpaper>> = wallpaperRepository.getDirectWallpapersByAlbum(albumId)
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = emptyList()
         )
 

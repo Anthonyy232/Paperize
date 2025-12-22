@@ -10,7 +10,7 @@ package com.anthonyla.paperize.core
  */
 enum class WallpaperMediaType {
     /**
-     * Image files: JPEG, PNG, WEBP, AVIF
+     * Image files: JPEG, PNG, WEBP, AVIF, HEIC, HEIF, BMP, GIF, TIFF
      * Supported in both static and live wallpaper modes
      */
     IMAGE;
@@ -20,7 +20,14 @@ enum class WallpaperMediaType {
      */
     val supportedExtensions: Set<String>
         get() = when (this) {
-            IMAGE -> setOf("jpg", "jpeg", "png", "webp", "avif")
+            IMAGE -> setOf(
+                "jpg", "jpeg", "png", "webp", "avif",
+                "heic", "heif", // HEIC/HEIF - Apple's high efficiency format
+                "bmp",          // Bitmap - legacy but still used
+                "gif",          // GIF - mostly for static images (first frame used)
+                "tiff", "tif",  // TIFF - high quality archival format
+                "svg"           // SVG - vector graphics (rasterized for wallpaper)
+            )
         }
 
     /**

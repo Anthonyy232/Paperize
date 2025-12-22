@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.settings
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,17 +26,17 @@ class SettingsViewModel @Inject constructor(
     private val wallpaperScheduler: WallpaperScheduler
 ) : ViewModel() {
 
-    val appSettings: StateFlow<AppSettings> = settingsRepository.getAppSettingsFlow()
+    val appSettings: StateFlow<AppSettings?> = settingsRepository.getAppSettingsFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,  // Start loading immediately to prevent onboarding flicker
-            initialValue = AppSettings.default()
+            initialValue = null
         )
 
     val wallpaperMode: StateFlow<WallpaperMode> = settingsRepository.getWallpaperModeFlow()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = WallpaperMode.STATIC
         )
 

@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.album_view.components
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -71,7 +72,7 @@ fun WallpaperItem(
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(wallpaperUri.toUri())
-                    .size(Size(300, 500))  // Limit size for performance - suitable for grid thumbnails
+                    .size(Size(Constants.GRID_THUMBNAIL_WIDTH, Constants.GRID_THUMBNAIL_HEIGHT))  // Limit size for performance - suitable for grid thumbnails
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,

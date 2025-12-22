@@ -15,7 +15,6 @@ import com.anthonyla.paperize.R
 @Composable
 fun HomeTopBar(
     showSelectionModeAppBar: Boolean,
-    @Suppress("UNUSED_PARAMETER") selectionCount: Int,
     onSettingsClick: () -> Unit
 ) {
     if (!showSelectionModeAppBar) {

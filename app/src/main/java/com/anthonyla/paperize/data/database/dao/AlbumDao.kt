@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
+import com.anthonyla.paperize.data.database.entities.AlbumSummaryEntity
 import com.anthonyla.paperize.data.database.relations.AlbumWithDetails
 import kotlinx.coroutines.flow.Flow
 
@@ -16,6 +17,24 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface AlbumDao {
+    /**
+     * Get all album summaries (lightweight metadata + counts)
+     * Efficiently handles large libraries by avoiding loading all wallpaper objects
+     */
+    @Query("""
+        SELECT 
+            a.id, 
+            a.name, 
+            a.coverUri, 
+            a.createdAt, 
+            a.modifiedAt,
+            (SELECT COUNT(*) FROM wallpapers w WHERE w.albumId = a.id) as wallpaperCount,
+            (SELECT COUNT(*) FROM folders f WHERE f.albumId = a.id) as folderCount
+        FROM albums a
+        ORDER BY a.modifiedAt DESC
+    """)
+    fun getAlbumSummaries(): Flow<List<AlbumSummaryEntity>>
+
     /**
      * Get all albums with their wallpapers and folders
      */

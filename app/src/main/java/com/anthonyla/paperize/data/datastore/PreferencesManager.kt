@@ -127,8 +127,11 @@ class PreferencesManager @Inject constructor(
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
             lockIntervalMinutes = prefs[intPreferencesKey(PreferenceKeys.LOCK_INTERVAL_MINUTES)]
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
+            liveIntervalMinutes = prefs[intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES)]
+                ?: Constants.DEFAULT_INTERVAL_MINUTES,
             homeScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)]),
             lockScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)]),
+            liveScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)]),
             homeEffects = WallpaperEffects(
                 enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR)] ?: false,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_BLUR)] ?: 0,
@@ -136,7 +139,8 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] ?: 0,
                 enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_VIGNETTE)] ?: false,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] ?: 0,
-                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_DOUBLE_TAP)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.HOME_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
@@ -148,10 +152,25 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] ?: 0,
                 enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_VIGNETTE)] ?: false,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] ?: 0,
-                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_DOUBLE_TAP)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LOCK_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
+            ),
+            liveEffects = WallpaperEffects(
+                enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_BLUR)] ?: false,
+                blurPercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_BLUR)] ?: 0,
+                enableDarken = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DARKEN)] ?: false,
+                darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_DARKEN)] ?: 0,
+                enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_VIGNETTE)] ?: false,
+                vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_VIGNETTE)] ?: 0,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] ?: 0,
+                enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] ?: false,
+                enableChangeOnScreenOn = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] ?: false,
+                enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] ?: false,
+                parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
             ),
             adaptiveBrightness = prefs[booleanPreferencesKey(PreferenceKeys.ADAPTIVE_BRIGHTNESS)] ?: false
         )
@@ -171,8 +190,11 @@ class PreferencesManager @Inject constructor(
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
             lockIntervalMinutes = prefs[intPreferencesKey(PreferenceKeys.LOCK_INTERVAL_MINUTES)]
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
+            liveIntervalMinutes = prefs[intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES)]
+                ?: Constants.DEFAULT_INTERVAL_MINUTES,
             homeScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)]),
             lockScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)]),
+            liveScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)]),
             homeEffects = WallpaperEffects(
                 enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR)] ?: false,
                 blurPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_BLUR)] ?: 0,
@@ -180,7 +202,8 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] ?: 0,
                 enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_VIGNETTE)] ?: false,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] ?: 0,
-                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: false,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_DOUBLE_TAP)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.HOME_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
@@ -192,7 +215,8 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] ?: 0,
                 enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_VIGNETTE)] ?: false,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] ?: 0,
-                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: false,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_DOUBLE_TAP)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LOCK_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
@@ -204,8 +228,10 @@ class PreferencesManager @Inject constructor(
                 darkenPercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_DARKEN)] ?: 0,
                 enableVignette = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_VIGNETTE)] ?: false,
                 vignettePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_VIGNETTE)] ?: 0,
-                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] ?: false,
+                enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] ?: false,
+                grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] ?: false,
+                enableChangeOnScreenOn = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
             ),
@@ -237,8 +263,10 @@ class PreferencesManager @Inject constructor(
             }
             prefs[intPreferencesKey(PreferenceKeys.HOME_INTERVAL_MINUTES)] = settings.homeIntervalMinutes
             prefs[intPreferencesKey(PreferenceKeys.LOCK_INTERVAL_MINUTES)] = settings.lockIntervalMinutes
+            prefs[intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES)] = settings.liveIntervalMinutes
             prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)] = settings.homeScalingType.name
             prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)] = settings.lockScalingType.name
+            prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)] = settings.liveScalingType.name
 
             // Home effects
             prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR)] = settings.homeEffects.enableBlur
@@ -247,7 +275,8 @@ class PreferencesManager @Inject constructor(
             prefs[intPreferencesKey(PreferenceKeys.HOME_DARKEN)] = settings.homeEffects.darkenPercentage
             prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_VIGNETTE)] = settings.homeEffects.enableVignette
             prefs[intPreferencesKey(PreferenceKeys.HOME_VIGNETTE)] = settings.homeEffects.vignettePercentage
-            prefs[booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] = settings.homeEffects.enableGrayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_GRAYSCALE)] = settings.homeEffects.enableGrayscale
+            prefs[intPreferencesKey(PreferenceKeys.HOME_GRAYSCALE)] = settings.homeEffects.grayscalePercentage
             prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_DOUBLE_TAP)] = settings.homeEffects.enableDoubleTap
             prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_PARALLAX)] = settings.homeEffects.enableParallax
             prefs[intPreferencesKey(PreferenceKeys.HOME_PARALLAX_INTENSITY)] = settings.homeEffects.parallaxIntensity
@@ -259,13 +288,11 @@ class PreferencesManager @Inject constructor(
             prefs[intPreferencesKey(PreferenceKeys.LOCK_DARKEN)] = settings.lockEffects.darkenPercentage
             prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_VIGNETTE)] = settings.lockEffects.enableVignette
             prefs[intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE)] = settings.lockEffects.vignettePercentage
-            prefs[booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] = settings.lockEffects.enableGrayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_GRAYSCALE)] = settings.lockEffects.enableGrayscale
+            prefs[intPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE)] = settings.lockEffects.grayscalePercentage
             prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_DOUBLE_TAP)] = settings.lockEffects.enableDoubleTap
             prefs[booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_PARALLAX)] = settings.lockEffects.enableParallax
             prefs[intPreferencesKey(PreferenceKeys.LOCK_PARALLAX_INTENSITY)] = settings.lockEffects.parallaxIntensity
-
-            // Note: Don't clear live effects here - they're written below and clearing them causes data loss
-            // Live effects are now written atomically below
 
             // Live effects
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_BLUR)] = settings.liveEffects.enableBlur
@@ -274,8 +301,10 @@ class PreferencesManager @Inject constructor(
             prefs[intPreferencesKey(PreferenceKeys.LIVE_DARKEN)] = settings.liveEffects.darkenPercentage
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_VIGNETTE)] = settings.liveEffects.enableVignette
             prefs[intPreferencesKey(PreferenceKeys.LIVE_VIGNETTE)] = settings.liveEffects.vignettePercentage
-            prefs[booleanPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] = settings.liveEffects.enableGrayscale
+            prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] = settings.liveEffects.enableGrayscale
+            prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] = settings.liveEffects.grayscalePercentage
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] = settings.liveEffects.enableDoubleTap
+            prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] = settings.liveEffects.enableChangeOnScreenOn
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] = settings.liveEffects.enableParallax
             prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] = settings.liveEffects.parallaxIntensity
 
@@ -337,6 +366,7 @@ class PreferencesManager @Inject constructor(
         dataStore.edit { prefs ->
             val homeAlbumId = prefs[stringPreferencesKey(PreferenceKeys.HOME_ALBUM_ID)]
             val lockAlbumId = prefs[stringPreferencesKey(PreferenceKeys.LOCK_ALBUM_ID)]
+            val liveAlbumId = prefs[stringPreferencesKey(PreferenceKeys.LIVE_ALBUM_ID)]
 
             // Clear home album if it matches
             if (homeAlbumId == albumId) {
@@ -347,6 +377,12 @@ class PreferencesManager @Inject constructor(
             // Clear lock album if it matches
             if (lockAlbumId == albumId) {
                 prefs.remove(stringPreferencesKey(PreferenceKeys.LOCK_ALBUM_ID))
+                wasCleared = true
+            }
+
+            // Clear live album if it matches
+            if (liveAlbumId == albumId) {
+                prefs.remove(stringPreferencesKey(PreferenceKeys.LIVE_ALBUM_ID))
                 wasCleared = true
             }
         }
@@ -456,6 +492,7 @@ class PreferencesManager @Inject constructor(
             prefs.remove(stringPreferencesKey(PreferenceKeys.LIVE_ALBUM_ID))
             prefs.remove(intPreferencesKey(PreferenceKeys.HOME_INTERVAL_MINUTES))
             prefs.remove(intPreferencesKey(PreferenceKeys.LOCK_INTERVAL_MINUTES))
+            prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES))
 
             // Clear home effects
             prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR))
@@ -464,7 +501,8 @@ class PreferencesManager @Inject constructor(
             prefs.remove(intPreferencesKey(PreferenceKeys.HOME_DARKEN))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_VIGNETTE))
             prefs.remove(intPreferencesKey(PreferenceKeys.HOME_VIGNETTE))
-            prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_GRAYSCALE))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_GRAYSCALE))
+            prefs.remove(intPreferencesKey(PreferenceKeys.HOME_GRAYSCALE))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_DOUBLE_TAP))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_PARALLAX))
             prefs.remove(intPreferencesKey(PreferenceKeys.HOME_PARALLAX_INTENSITY))
@@ -476,7 +514,8 @@ class PreferencesManager @Inject constructor(
             prefs.remove(intPreferencesKey(PreferenceKeys.LOCK_DARKEN))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_VIGNETTE))
             prefs.remove(intPreferencesKey(PreferenceKeys.LOCK_VIGNETTE))
-            prefs.remove(booleanPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_GRAYSCALE))
+            prefs.remove(intPreferencesKey(PreferenceKeys.LOCK_GRAYSCALE))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_DOUBLE_TAP))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LOCK_ENABLE_PARALLAX))
             prefs.remove(intPreferencesKey(PreferenceKeys.LOCK_PARALLAX_INTENSITY))
@@ -488,14 +527,17 @@ class PreferencesManager @Inject constructor(
             prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_DARKEN))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_VIGNETTE))
             prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_VIGNETTE))
-            prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE))
+            prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX))
             prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY))
 
             // Clear scaling
             prefs.remove(stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE))
             prefs.remove(stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE))
+            prefs.remove(stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE))
 
             // Clear current wallpapers
             prefs.remove(stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID))

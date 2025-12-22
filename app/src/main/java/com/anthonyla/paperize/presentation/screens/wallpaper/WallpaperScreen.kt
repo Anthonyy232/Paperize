@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,8 +45,8 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
@@ -63,16 +64,15 @@ enum class AlbumSelectionContext {
 
 @Composable
 fun WallpaperScreen(
-    albums: List<Album>,
+    albums: List<AlbumSummary>,
     scheduleSettings: ScheduleSettings,
     appSettings: AppSettings,
     wallpaperMode: WallpaperMode,
     onToggleChanger: (Boolean) -> Unit,
-    onSelectHomeAlbum: (Album?) -> Unit,
-    onSelectLockAlbum: (Album?) -> Unit,
-    onSelectLiveAlbum: (Album?) -> Unit,
+    onSelectHomeAlbum: (AlbumSummary?) -> Unit,
+    onSelectLockAlbum: (AlbumSummary?) -> Unit,
+    onSelectLiveAlbum: (AlbumSummary?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
-    @Suppress("UNUSED_PARAMETER") onChangeWallpaperNow: (ScreenType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
@@ -167,7 +167,7 @@ fun WallpaperScreen(
 
     var selectedScalingIndex by rememberSaveable {
         mutableIntStateOf(
-            when (scheduleSettings.homeScalingType) {
+            when (if (wallpaperMode == WallpaperMode.LIVE) scheduleSettings.liveScalingType else scheduleSettings.homeScalingType) {
                 ScalingType.FILL -> 0
                 ScalingType.FIT -> 1
                 ScalingType.STRETCH -> 2
@@ -293,7 +293,6 @@ fun WallpaperScreen(
         }
 
         // Album Selection - Enhanced with better card styling
-        // Album Selection - Enhanced with better card styling
         if (wallpaperMode == WallpaperMode.STATIC) {
             if (homeEnabled && lockEnabled) {
                 // Lock Screen Album
@@ -320,7 +319,7 @@ fun WallpaperScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = lockAlbum?.name ?: if (scheduleSettings.lockAlbumId != null) {
-                                    "..." // Loading placeholder
+                                    stringResource(R.string.loading_placeholder)
                                 } else {
                                     stringResource(R.string.no_album_selected)
                                 },
@@ -369,7 +368,7 @@ fun WallpaperScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = homeAlbum?.name ?: if (scheduleSettings.homeAlbumId != null) {
-                                    "..." // Loading placeholder
+                                    stringResource(R.string.loading_placeholder)
                                 } else {
                                     stringResource(R.string.no_album_selected)
                                 },
@@ -416,7 +415,7 @@ fun WallpaperScreen(
                             val currentAlbumId = if (homeEnabled) scheduleSettings.homeAlbumId else scheduleSettings.lockAlbumId
                             Text(
                                 text = currentAlbum?.name ?: if (currentAlbumId != null) {
-                                    "..." // Loading placeholder
+                                    stringResource(R.string.loading_placeholder)
                                 } else {
                                     stringResource(R.string.no_album_selected)
                                 },
@@ -466,7 +465,7 @@ fun WallpaperScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = liveAlbum?.name ?: if (scheduleSettings.liveAlbumId != null) {
-                                "..." // Loading placeholder
+                                stringResource(R.string.loading_placeholder)
                             } else {
                                 stringResource(R.string.no_album_selected)
                             },
@@ -557,13 +556,10 @@ fun WallpaperScreen(
                 // Live Mode: Single Interval Picker
                 TimeIntervalPicker(
                     title = stringResource(R.string.interval_text),
-                    minutes = scheduleSettings.homeIntervalMinutes, // Reuse home interval for Live
+                    minutes = scheduleSettings.liveIntervalMinutes,
                     onMinutesChange = { minutes ->
                         onUpdateScheduleSettings(
-                            scheduleSettings.copy(
-                                homeIntervalMinutes = minutes,
-                                lockIntervalMinutes = minutes
-                            )
+                            scheduleSettings.copy(liveIntervalMinutes = minutes)
                         )
                     }
                 )
@@ -625,10 +621,14 @@ fun WallpaperScreen(
                                     else -> ScalingType.NONE
                                 }
                                 onUpdateScheduleSettings(
-                                    scheduleSettings.copy(
-                                        homeScalingType = scalingType,
-                                        lockScalingType = scalingType
-                                    )
+                                    if (wallpaperMode == WallpaperMode.LIVE) {
+                                        scheduleSettings.copy(liveScalingType = scalingType)
+                                    } else {
+                                        scheduleSettings.copy(
+                                            homeScalingType = scalingType,
+                                            lockScalingType = scalingType
+                                        )
+                                    }
                                 )
                             },
                             selected = index == selectedScalingIndex
@@ -846,17 +846,9 @@ fun WallpaperScreen(
                 )
 
                 // Grayscale
-                SettingSwitch(
+                SettingSwitchWithSlider(
                     title = R.string.gray_filter,
-                    description = if ((if (wallpaperMode == WallpaperMode.STATIC) {
-                        when {
-                            homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
-                            homeEnabled -> scheduleSettings.homeEffects.enableGrayscale
-                            else -> scheduleSettings.lockEffects.enableGrayscale
-                        }
-                    } else {
-                        scheduleSettings.liveEffects.enableGrayscale
-                    }) && !scheduleSettings.separateSchedules) null else R.string.make_the_colors_grayscale,
+                    description = R.string.make_the_colors_grayscale,
                     checked = if (wallpaperMode == WallpaperMode.STATIC) {
                         when {
                             homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
@@ -878,6 +870,26 @@ fun WallpaperScreen(
                             updateSettingsImmediate(
                                 scheduleSettings.copy(
                                     liveEffects = scheduleSettings.liveEffects.copy(enableGrayscale = enabled)
+                                )
+                            )
+                        }
+                    },
+                    // Show separate sliders only when both enabled AND separate schedules is on (Static only)
+                    bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
+                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) scheduleSettings.homeEffects.grayscalePercentage else scheduleSettings.liveEffects.grayscalePercentage,
+                    lockPercentage = scheduleSettings.lockEffects.grayscalePercentage,
+                    onPercentageChange = { homePercent, lockPercent ->
+                        if (wallpaperMode == WallpaperMode.STATIC) {
+                            updateSettingsDebounced(
+                                scheduleSettings.copy(
+                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(grayscalePercentage = homePercent) else scheduleSettings.homeEffects,
+                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(grayscalePercentage = lockPercent) else scheduleSettings.lockEffects
+                                )
+                            )
+                        } else {
+                            updateSettingsDebounced(
+                                scheduleSettings.copy(
+                                    liveEffects = scheduleSettings.liveEffects.copy(grayscalePercentage = homePercent)
                                 )
                             )
                         }
@@ -934,6 +946,20 @@ fun WallpaperScreen(
                         }
                     )
 
+                    // Change wallpaper on screen off
+                    SettingSwitch(
+                        title = R.string.change_on_screen_off,
+                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOn) null else R.string.change_wallpaper_when_screen_turns_off,
+                        checked = scheduleSettings.liveEffects.enableChangeOnScreenOn,
+                        onCheckedChange = { enabled ->
+                            updateSettingsImmediate(
+                                scheduleSettings.copy(
+                                    liveEffects = scheduleSettings.liveEffects.copy(enableChangeOnScreenOn = enabled)
+                                )
+                            )
+                        }
+                    )
+
                     // Parallax effect
                     SettingSwitchWithSlider(
                         title = R.string.parallax_effect,
@@ -971,7 +997,7 @@ fun WallpaperScreen(
                     scheduleSettings.liveAlbumId?.let { id ->
                         // Try to find full album, or create stub with ID for selection marking
                         albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(Album(id = id, name = "", coverUri = null))
+                            ?: listOf(AlbumSummary.empty(id = id))
                     } ?: emptyList()
                 }
                 AlbumSelectionContext.HOME -> {
@@ -979,7 +1005,7 @@ fun WallpaperScreen(
                     scheduleSettings.homeAlbumId?.let { id ->
                         // Try to find full album, or create stub with ID for selection marking
                         albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(Album(id = id, name = "", coverUri = null))
+                            ?: listOf(AlbumSummary.empty(id = id))
                     } ?: emptyList()
                 }
                 AlbumSelectionContext.LOCK -> {
@@ -987,7 +1013,7 @@ fun WallpaperScreen(
                     scheduleSettings.lockAlbumId?.let { id ->
                         // Try to find full album, or create stub with ID for selection marking
                         albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(Album(id = id, name = "", coverUri = null))
+                            ?: listOf(AlbumSummary.empty(id = id))
                     } ?: emptyList()
                 }
                 AlbumSelectionContext.BOTH -> {
@@ -996,13 +1022,13 @@ fun WallpaperScreen(
                         homeEnabled -> {
                             scheduleSettings.homeAlbumId?.let { id ->
                                 albums.find { it.id == id }?.let { listOf(it) }
-                                    ?: listOf(Album(id = id, name = "", coverUri = null))
+                                    ?: listOf(AlbumSummary.empty(id = id))
                             } ?: emptyList()
                         }
                         lockEnabled -> {
                             scheduleSettings.lockAlbumId?.let { id ->
                                 albums.find { it.id == id }?.let { listOf(it) }
-                                    ?: listOf(Album(id = id, name = "", coverUri = null))
+                                    ?: listOf(AlbumSummary.empty(id = id))
                             } ?: emptyList()
                         }
                         else -> emptyList()
@@ -1011,7 +1037,7 @@ fun WallpaperScreen(
             },
             onAlbumSelect = { album ->
                 // Check if album is empty (has 0 wallpapers)
-                if (album.totalWallpaperCount == 0) {
+                if (album.wallpaperCount == 0) {
                     showEmptyAlbumWarning = true
                 } else {
                     when (albumSelectionContext) {
@@ -1076,7 +1102,7 @@ fun WallpaperScreen(
             text = {
                 Text(
                     text = stringResource(R.string.empty_album_message),
-                    maxLines = 10,
+                    maxLines = Constants.DIALOG_MESSAGE_MAX_LINES,
                     overflow = TextOverflow.Ellipsis
                 )
             },

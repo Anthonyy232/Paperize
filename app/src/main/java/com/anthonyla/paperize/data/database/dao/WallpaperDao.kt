@@ -33,6 +33,12 @@ interface WallpaperDao {
     suspend fun getWallpapersByAlbumSync(albumId: String): List<WallpaperEntity>
 
     /**
+     * Get wallpapers for an album (paginated for memory-intensive operations)
+     */
+    @Query("SELECT * FROM wallpapers WHERE albumId = :albumId ORDER BY displayOrder ASC LIMIT :limit OFFSET :offset")
+    suspend fun getWallpapersByAlbumPaged(albumId: String, limit: Int, offset: Int): List<WallpaperEntity>
+
+    /**
      * Get direct wallpapers for an album (synchronous for transactions)
      */
     @Query("SELECT * FROM wallpapers WHERE albumId = :albumId AND folderId IS NULL ORDER BY displayOrder ASC")
@@ -109,4 +115,10 @@ interface WallpaperDao {
      */
     @Query("DELETE FROM wallpapers WHERE uri IN (:uris)")
     suspend fun deleteWallpapersByUris(uris: List<String>)
+
+    /**
+     * Get total wallpaper count for an album
+     */
+    @Query("SELECT COUNT(*) FROM wallpapers WHERE albumId = :albumId")
+    suspend fun getWallpaperCountByAlbum(albumId: String): Int
 }

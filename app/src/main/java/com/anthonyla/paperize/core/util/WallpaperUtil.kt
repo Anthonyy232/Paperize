@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.core.util
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.app.WallpaperManager
 import android.content.Context
@@ -203,7 +204,26 @@ fun retrieveBitmap(
     val bitmap = try {
         val source = ImageDecoder.createSource(context.contentResolver, wallpaperUri)
         ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-            decoder.setTargetSampleSize(sampleSize)
+            val (targetWidth, targetHeight) = when (scaling) {
+                ScalingType.FILL -> {
+                    // Calculate scale to cover target dimensions
+                    val widthRatio = width.toFloat() / imageSize.width
+                    val heightRatio = height.toFloat() / imageSize.height
+                    val scale = maxOf(widthRatio, heightRatio)
+                    Pair((imageSize.width * scale).fastRoundToInt(), (imageSize.height * scale).fastRoundToInt())
+                }
+                ScalingType.FIT -> {
+                    // Calculate scale to fit inside target dimensions
+                    val widthRatio = width.toFloat() / imageSize.width
+                    val heightRatio = height.toFloat() / imageSize.height
+                    val scale = minOf(widthRatio, heightRatio)
+                    Pair((imageSize.width * scale).fastRoundToInt(), (imageSize.height * scale).fastRoundToInt())
+                }
+                ScalingType.STRETCH -> Pair(width, height)
+                ScalingType.NONE -> Pair(imageSize.width, imageSize.height)
+            }
+
+            decoder.setTargetSize(targetWidth, targetHeight)
             decoder.isMutableRequired = true
             // Use high quality when possible
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
@@ -218,6 +238,9 @@ fun retrieveBitmap(
             }
             BitmapFactory.decodeStream(inputStream, null, options)
         }
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM during retrieveBitmap for $wallpaperUri: $e")
+        null
     }
 
     // Handle EXIF orientation
@@ -243,6 +266,9 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
     } catch (e: Exception) {
         Log.e(TAG, "Error applying EXIF orientation: $e")
         source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM applying EXIF orientation: $e")
+        source
     }
 }
 
@@ -250,29 +276,44 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
  * Scale a bitmap using the fit method
  * The bitmap will fit into the given dimensions while maintaining aspect ratio
  */
+/**
+ * Scale a bitmap using the fit method
+ * The bitmap will fit into the given dimensions while maintaining aspect ratio
+ */
 fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
-    if (source.width == width && source.height == height) {
+    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
+        Log.w(TAG, "Invalid dimensions for fitBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
         return source
     }
-    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
-        Log.w(TAG, "Invalid dimensions for fitBitmap, returning source.")
+    if (source.width == width && source.height == height) {
         return source
     }
 
     return try {
         val bitmap = createBitmap(width, height, source.config ?: Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val scale = width.toFloat() / source.width
+        val scaleX = width.toFloat() / source.width
+        val scaleY = height.toFloat() / source.height
+        // Use the smaller scale factor to ensure the entire image fits within the target dimensions
+        val scale = minOf(scaleX, scaleY)
+        
+        val scaledSourceWidth = source.width * scale
         val scaledSourceHeight = source.height * scale
+        
+        val xOffset = (width - scaledSourceWidth) / 2f
         val yOffset = (height - scaledSourceHeight) / 2f
+        
         val matrix = Matrix().apply {
             postScale(scale, scale)
-            postTranslate(0f, yOffset)
+            postTranslate(xOffset, yOffset)
         }
         canvas.drawBitmap(source, matrix, SharedPaintFilterAntiAlias)
         bitmap
     } catch (e: Exception) {
         Log.e(TAG, "Error fitting bitmap: $e")
+        source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM fitting bitmap: $e")
         source
     }
 }
@@ -281,6 +322,10 @@ fun fitBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Scale a bitmap using the fill method (crop to fill dimensions)
  */
 fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
+    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
+        Log.w(TAG, "Invalid dimensions for fillBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
+        return source
+    }
     if (source.width == width && source.height == height) {
         return source
     }
@@ -313,6 +358,9 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
     } catch (e: Exception) {
         Log.e(TAG, "Error filling bitmap: $e")
         source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM filling bitmap: $e")
+        source
     }
 }
 
@@ -320,6 +368,10 @@ fun fillBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
  * Stretch the bitmap to fit the given dimensions
  */
 fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
+    if (source.width <= 0 || source.height <= 0 || width <= 0 || height <= 0) {
+        Log.w(TAG, "Invalid dimensions for stretchBitmap: source=${source.width}x${source.height}, target=${width}x${height}")
+        return source
+    }
     if (source.width == width && source.height == height) {
         return source
     }
@@ -337,21 +389,26 @@ fun stretchBitmap(source: Bitmap, width: Int, height: Int): Bitmap {
     } catch (e: Exception) {
         Log.e(TAG, "Error stretching bitmap: $e")
         source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM stretching bitmap: $e")
+        source
     }
 }
 
 /**
  * Darken the bitmap by a certain percentage
- * @param brightnessToRetainPercent 0-100 (0 is darkest, 100 is original)
+ * @param darkenPercent 0-100 (0 is original brightness, 100 is completely dark/black)
  */
-fun darkenBitmap(source: Bitmap, brightnessToRetainPercent: Int): Bitmap {
+fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap {
     if (!source.isMutable) {
-        Log.w(TAG, "darkenBitmap received an immutable bitmap. Returning a copy.")
+        Log.w(TAG, "darkenBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        return darkenBitmap(mutableCopy, brightnessToRetainPercent)
+        source.recycle()
+        return darkenBitmap(mutableCopy, darkenPercent)
     }
 
-    val targetBrightnessFactor = brightnessToRetainPercent.coerceIn(0, 100) / 100f
+    // Convert darkenPercent to brightness factor (invert)
+    val targetBrightnessFactor = (100 - darkenPercent.coerceIn(0, 100)) / 100f
     if (targetBrightnessFactor >= 1.0f) {
         return source
     }
@@ -375,7 +432,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
         return source
     }
 
-    val maxBlurRadius = 25.0f
+    val maxBlurRadius = Constants.MAX_BLUR_RADIUS
     val radius = (clampedPercent / 100.0f) * maxBlurRadius
 
     val imageReader = ImageReader.newInstance(
@@ -387,7 +444,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
     val renderNode = RenderNode("BlurEffect")
     val hardwareRenderer = HardwareRenderer()
 
-    var resultBitmap: Bitmap?
+    var resultBitmap: Bitmap? = null
     try {
         hardwareRenderer.setSurface(imageReader.surface)
         hardwareRenderer.setContentRoot(renderNode)
@@ -418,16 +475,23 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
         resultBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, true)
             ?: throw IllegalStateException("Failed to copy hardware bitmap to software bitmap")
 
+        hardwareBitmap.recycle()
         hardwareBuffer.close()
         image.close()
 
+    } catch (e: Exception) {
+        Log.e(TAG, "Error blurring bitmap: $e")
+        return source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM blurring bitmap: $e")
+        return source
     } finally {
         hardwareRenderer.destroy()
         renderNode.discardDisplayList()
         imageReader.close()
     }
 
-    return resultBitmap
+    return resultBitmap ?: throw IllegalStateException("Blur operation failed - resultBitmap is null")
 }
 
 /**
@@ -444,24 +508,25 @@ fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
 fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return source
     if (!source.isMutable) {
-        Log.w(TAG, "vignetteBitmap received an immutable bitmap. Returning a copy.")
+        Log.w(TAG, "vignetteBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+        source.recycle()
         return vignetteBitmap(mutableCopy, percent)
     }
 
     return try {
         val canvas = Canvas(source)
         val dim = if (source.width < source.height) source.height else source.width
-        val rad = (dim * (1 - (percent.coerceIn(0, 100) / 150f))).coerceAtLeast(0.1f)
+        val rad = (dim * (1 - (percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))).coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
         val centerX = source.width / 2f
         val centerY = source.height / 2f
 
         val colors = intArrayOf(
             Color.TRANSPARENT,
-            Color.argb((0.1f * 255).toInt(), 0, 0, 0),
-            Color.argb((0.8f * 255).toInt(), 0, 0, 0)
+            Color.argb((Constants.VIGNETTE_INNER_ALPHA * 255).toInt(), 0, 0, 0),
+            Color.argb((Constants.VIGNETTE_OUTER_ALPHA * 255).toInt(), 0, 0, 0)
         )
-        val pos = floatArrayOf(0f, 0.7f, 1f)
+        val pos = Constants.VIGNETTE_GRADIENT_POSITIONS
 
         val vignettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = RadialGradient(
@@ -474,6 +539,9 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     } catch (e: Exception) {
         Log.e(TAG, "Error applying vignette: $e")
         source
+    } catch (e: OutOfMemoryError) {
+        Log.e(TAG, "OOM applying vignette: $e")
+        source
     }
 }
 
@@ -484,8 +552,9 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
 fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
     if (percent <= 0) return source
     if (!source.isMutable) {
-        Log.w(TAG, "grayscaleBitmap received an immutable bitmap. Returning a copy.")
+        Log.w(TAG, "grayscaleBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+        source.recycle()
         return grayscaleBitmap(mutableCopy, percent)
     }
 
@@ -505,7 +574,7 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
  */
 fun calculateBitmapBrightness(bitmap: Bitmap): Float {
     // Sample pixels to estimate brightness (sampling for performance)
-    val sampleSize = 10
+    val sampleSize = Constants.BRIGHTNESS_SAMPLE_SIZE
     var totalLuminance = 0.0
     var pixelCount = 0
 
@@ -517,7 +586,7 @@ fun calculateBitmapBrightness(bitmap: Bitmap): Float {
             val b = Color.blue(pixel) / 255.0
 
             // Calculate relative luminance using ITU-R BT.709 standard
-            val luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            val luminance = Constants.LUMINANCE_RED * r + Constants.LUMINANCE_GREEN * g + Constants.LUMINANCE_BLUE * b
             totalLuminance += luminance
             pixelCount++
         }
@@ -539,6 +608,7 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
     if (!source.isMutable) {
         Log.w(TAG, "adjustBitmapBrightness received an immutable bitmap. Returning a copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+        source.recycle() // Recycle source to prevent memory leak
         return adjustBitmapBrightness(mutableCopy, brightnessFactor)
     }
 
@@ -560,17 +630,52 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
  * @param source Source bitmap
  * @return Adjusted bitmap (or original if no adjustment needed)
  */
+/**
+ * Get adaptive brightness multiplier factor based on system dark/light mode
+ * 
+ * @param context Application context
+ * @param brightness Current image brightness (0.0 to 1.0)
+ * @return Multiplier factor to apply to colors
+ */
+fun getAdaptiveBrightnessMultiplier(context: Context, brightness: Float): Float {
+    val isDarkMode = (context.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
+    val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
+    val targetBrightnessDark = Constants.TARGET_BRIGHTNESS_DARK
+    val targetBrightnessLight = Constants.TARGET_BRIGHTNESS_LIGHT
+
+    // Avoid issues with very dark items
+    if (brightness < 0.01f) return 1.0f
+
+    return when {
+        // In dark mode with very bright image: darken it
+        isDarkMode && brightness > lightBrightnessMin -> targetBrightnessDark / brightness
+        // In light mode with very dark image: brighten it
+        !isDarkMode && brightness < darkBrightnessMax -> targetBrightnessLight / brightness
+        // No adjustment needed
+        else -> 1.0f
+    }
+}
+
 fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {
     val isDarkMode = (context.resources.configuration.uiMode and
         Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
     val currentBrightness = calculateBitmapBrightness(source)
 
-    // Thresholds from WallYou
-    val lightBrightnessMin = 0.8f
-    val darkBrightnessMax = 0.3f
-    val targetBrightnessDark = 0.7f
-    val targetBrightnessLight = 0.4f
+// Thresholds from WallYou
+    val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
+    val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
+    val targetBrightnessDark = Constants.TARGET_BRIGHTNESS_DARK
+    val targetBrightnessLight = Constants.TARGET_BRIGHTNESS_LIGHT
+
+    // Avoid division by zero or very small numbers
+    if (currentBrightness < 0.01f) {
+        Log.d(TAG, "Image is too dark for adaptive brightness adjustment (brightness: $currentBrightness)")
+        return source
+    }
 
     return when {
         // In dark mode with very bright image: darken it
@@ -622,27 +727,28 @@ fun processBitmap(
     grayscalePercent: Int = 0
 ): Bitmap {
     var result = source
-    var previous: Bitmap
 
     // Apply effects in order, respecting enable flags
     // Recycle intermediate bitmaps to prevent memory leaks
+    
+    // Darken modifies in-place for mutable bitmaps, no need to track previous
     if (enableDarken && darkenPercent > 0) {
-        previous = result
-        result = darkenBitmap(result, 100 - darkenPercent)
-        // Darken modifies in-place for mutable bitmaps, no need to recycle
+        result = darkenBitmap(result, darkenPercent)
     }
 
+    // Blur always creates a new bitmap
     if (enableBlur && blurPercent > 0) {
-        previous = result
+        val previous = result
         result = blurBitmap(result, blurPercent)
-        // Blur always creates a new bitmap, recycle the previous one if different
+        // Recycle the previous one if different from source
         if (result !== previous && previous !== source) {
             previous.recycle()
         }
     }
 
+
     if (enableVignette && vignettePercent > 0) {
-        previous = result
+        val previous = result
         result = vignetteBitmap(result, vignettePercent)
         // Vignette modifies in-place for mutable bitmaps, may create copy for immutable
         if (result !== previous && previous !== source) {
@@ -651,7 +757,7 @@ fun processBitmap(
     }
 
     if (enableGrayscale && grayscalePercent > 0) {
-        previous = result
+        val previous = result
         result = grayscaleBitmap(result, grayscalePercent)
         // Grayscale modifies in-place for mutable bitmaps, may create copy for immutable
         if (result !== previous && previous !== source) {
@@ -717,6 +823,7 @@ fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
     return try {
         // If we are checking from within the service itself (e.g. preview mode), we are active
         if (context is com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService) {
+            Log.d(TAG, "isPaperizeLiveWallpaperActive: called from service context, returning true")
             return true
         }
 
@@ -725,6 +832,7 @@ fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
 
         // If wallpaperInfo is null, user has a static wallpaper (not a live wallpaper)
         if (wallpaperInfo == null) {
+            Log.d(TAG, "isPaperizeLiveWallpaperActive: wallpaperInfo is null (static wallpaper), returning false")
             return false
         }
 
@@ -735,9 +843,10 @@ fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
         )
         val isPaperize = wallpaperInfo.component == expectedComponent
 
+        Log.d(TAG, "isPaperizeLiveWallpaperActive: current=${wallpaperInfo.component}, expected=$expectedComponent, match=$isPaperize")
         isPaperize
     } catch (e: Exception) {
-        Log.e("WallpaperUtil", "Error checking live wallpaper status", e)
+        Log.e(TAG, "Error checking live wallpaper status", e)
         false
     }
 }

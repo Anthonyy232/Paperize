@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.library
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.AddAlbumDialog
 import com.anthonyla.paperize.presentation.screens.library.components.AlbumItem
 import com.anthonyla.paperize.presentation.theme.AppGrid
@@ -39,7 +40,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @Composable
 fun LibraryScreen(
-    albums: List<Album>,
+    albums: List<AlbumSummary>,
     onViewAlbum: (String) -> Unit,
     onCreateAlbum: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -60,7 +61,7 @@ fun LibraryScreen(
                 Icon(
                     Icons.Filled.Add,
                     contentDescription = stringResource(R.string.add_album),
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(AppIconSizes.medium)
                 )
             }
         }
@@ -79,7 +80,7 @@ fun LibraryScreen(
                     Icon(
                         imageVector = Icons.Default.PhotoLibrary,
                         contentDescription = null,
-                        modifier = Modifier.size(80.dp),
+                        modifier = Modifier.size(AppIconSizes.huge),
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                     )
                     Text(
@@ -118,6 +119,7 @@ fun LibraryScreen(
     }
 
     if (showAddAlbumDialog) {
+        val errorMessageString = stringResource(R.string.album_name_exists_error)
         AddAlbumDialog(
             onDismiss = { 
                 showAddAlbumDialog = false
@@ -127,7 +129,7 @@ fun LibraryScreen(
                 // Check if album with this name already exists
                 val isDuplicate = albums.any { it.name.equals(name, ignoreCase = true) }
                 if (isDuplicate) {
-                    albumNameError = "Album with this name already exists"
+                    albumNameError = errorMessageString
                 } else {
                     onCreateAlbum(name)
                     showAddAlbumDialog = false

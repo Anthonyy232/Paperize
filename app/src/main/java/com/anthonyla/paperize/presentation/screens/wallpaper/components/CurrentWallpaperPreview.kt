@@ -1,4 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
+import com.anthonyla.paperize.presentation.theme.AppMaxWidths
+import com.anthonyla.paperize.presentation.theme.AppBorderWidths
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.app.WallpaperManager
 import android.graphics.drawable.Drawable
@@ -44,7 +47,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.theme.AppShapes
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 import coil3.compose.AsyncImage
@@ -71,7 +73,7 @@ import kotlin.math.min
  */
 private suspend fun <T> retryWallpaperRead(
     maxAttempts: Int = 4,
-    delayMs: Long = 500,
+    delayMs: Long = Constants.WALLPAPER_READ_INITIAL_DELAY_MS,
     block: suspend () -> T
 ): T? {
     var lastException: Exception? = null
@@ -179,33 +181,21 @@ fun CurrentWallpaperPreview(
                 // API 34+ has getDrawable(int which), earlier versions use getDrawable()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     // Get home screen wallpaper with retry logic
-                    // Android's WallpaperManager writes wallpapers asynchronously to disk
-                    // We need to retry with increasing delays to allow encoding to complete
-                    val homeDrawable = retryWallpaperRead(
-                        maxAttempts = 4,
-                        delayMs = 500
-                    ) {
+                    val homeDrawable = retryWallpaperRead {
                         wallpaperManager.getDrawable(WallpaperManager.FLAG_SYSTEM)
                     }
 
                     // Get lock screen wallpaper with retry logic
-                    val lockDrawable = retryWallpaperRead(
-                        maxAttempts = 4,
-                        delayMs = 500
-                    ) {
+                    val lockDrawable = retryWallpaperRead {
                         wallpaperManager.getDrawable(WallpaperManager.FLAG_LOCK)
                     } ?: homeDrawable
 
                     Triple(homeDrawable, lockDrawable, true)
                 } else {
-                    // For API < 34, use getDrawable() without flags (gets current wallpaper)
-                    val drawable = retryWallpaperRead(
-                        maxAttempts = 4,
-                        delayMs = 500
-                    ) {
-                        wallpaperManager.getDrawable()
+                    // For API [31-33], use getDrawable() which returns the current wallpaper
+                    val drawable = retryWallpaperRead {
+                        wallpaperManager.drawable
                     }
-                    // Lock screen wallpaper not separately accessible on older APIs
                     Triple(drawable, drawable, true)
                 }
             } catch (e: SecurityException) {
@@ -232,7 +222,7 @@ fun CurrentWallpaperPreview(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .widthIn(max = 600.dp)  // Material 3 guideline: max content width on large screens
+            .widthIn(max = AppMaxWidths.contentMaxWidth)  // Material 3 guideline: max content width on large screens
             .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
         shape = AppShapes.cardShape,
         colors = CardDefaults.cardColors(
@@ -302,7 +292,7 @@ private fun WallpaperPreviewBox(
         modifier = modifier
             .aspectRatio(aspectRatio)
             .border(
-                width = 3.dp,
+                width = AppBorderWidths.thick,
                 color = Color.Black,
                 shape = AppShapes.imageShape
             )
@@ -312,12 +302,12 @@ private fun WallpaperPreviewBox(
         AnimatedVisibility(
             visible = !isLoading && wallpaper != null,
             enter = if (animate) {
-                fadeIn(animationSpec = tween(300))
+                fadeIn(animationSpec = tween(Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS.toInt()))
             } else {
                 fadeIn(animationSpec = tween(0))
             },
             exit = if (animate) {
-                fadeOut(animationSpec = tween(300))
+                fadeOut(animationSpec = tween(Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS.toInt()))
             } else {
                 fadeOut(animationSpec = tween(0))
             }
@@ -326,8 +316,10 @@ private fun WallpaperPreviewBox(
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(drawable)
-                        .size(Size(600, 1200))  // Limit size for performance - suitable for preview
+                        .size(Size(Constants.PREVIEW_THUMBNAIL_WIDTH, Constants.PREVIEW_THUMBNAIL_HEIGHT))  // Limit size for performance - suitable for preview
                         .crossfade(true)
+                        .memoryCachePolicy(coil3.request.CachePolicy.DISABLED)  // Don't cache in memory (already in drawable)
+                        .diskCachePolicy(coil3.request.CachePolicy.DISABLED)    // Don't cache on disk (already system-managed)
                         .build(),
                     contentDescription = contentDescription,
                     contentScale = ContentScale.Crop,

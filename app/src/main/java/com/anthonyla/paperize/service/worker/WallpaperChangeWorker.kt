@@ -70,9 +70,11 @@ class WallpaperChangeWorker @AssistedInject constructor(
 
         when (screenType) {
             ScreenType.LIVE -> {
-                // Live wallpaper changes are handled by the live wallpaper service itself
-                // WorkManager is not used for live wallpaper scheduling
-                Log.d(TAG, "Live wallpaper change - no action needed in worker")
+                // Send broadcast to trigger live wallpaper reload
+                val intent = android.content.Intent(Constants.ACTION_RELOAD_WALLPAPER)
+                intent.setPackage(context.packageName)
+                context.sendBroadcast(intent)
+                Log.d(TAG, "Sent reload broadcast to live wallpaper service")
             }
             ScreenType.HOME -> {
                 val homeAlbumId = settings.homeAlbumId
@@ -93,7 +95,8 @@ class WallpaperChangeWorker @AssistedInject constructor(
             ScreenType.BOTH -> {
                 // Synchronized mode: set both screens to the same wallpaper
                 // This ensures both HOME and LOCK show identical wallpapers
-                val albumId = settings.homeAlbumId  // Use home album (should be same as lock when synced)
+                // Use home album, fallback to lock album (they should be the same when synced)
+                val albumId = settings.homeAlbumId ?: settings.lockAlbumId
 
                 if (albumId != null) {
                     val result = changeWallpaperUseCase(albumId, ScreenType.HOME)

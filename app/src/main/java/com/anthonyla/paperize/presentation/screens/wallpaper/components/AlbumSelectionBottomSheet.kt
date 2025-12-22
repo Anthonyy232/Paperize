@@ -1,4 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.theme.AppBorderWidths
+import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
 import android.net.Uri
@@ -46,16 +49,16 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Size
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.theme.AppShapes
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumSelectionBottomSheet(
-    albums: List<Album>,
-    selectedAlbums: List<Album>,
-    onAlbumSelect: (Album) -> Unit,
+    albums: List<AlbumSummary>,
+    selectedAlbums: List<AlbumSummary>,
+    onAlbumSelect: (AlbumSummary) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -109,7 +112,7 @@ fun AlbumSelectionBottomSheet(
 
 @Composable
 private fun AlbumSelectionItem(
-    album: Album,
+    album: AlbumSummary,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -130,10 +133,10 @@ private fun AlbumSelectionItem(
         // Album cover thumbnail
         Box(
             modifier = Modifier
-                .size(56.dp)
+                .size(AppIconSizes.extraLarge)
                 .aspectRatio(1f)
                 .border(
-                    width = 1.dp,
+                    width = AppBorderWidths.thin,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
                     shape = AppShapes.imageShape
                 )
@@ -144,17 +147,17 @@ private fun AlbumSelectionItem(
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(Uri.parse(album.coverUri))
-                        .size(Size(150, 150))  // Small thumbnail for list item
+                        .size(Size(Constants.LIST_THUMBNAIL_SIZE, Constants.LIST_THUMBNAIL_SIZE))  // Small thumbnail for list item
                         .build(),
                     contentDescription = album.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(AppIconSizes.extraLarge)
                 )
             } else {
                 Icon(
                     imageVector = Icons.Filled.PhotoAlbum,
                     contentDescription = album.name,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(AppIconSizes.medium),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                 )
             }
@@ -171,7 +174,7 @@ private fun AlbumSelectionItem(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = pluralStringResource(R.plurals.wallpaper_count, album.totalWallpaperCount, album.totalWallpaperCount),
+                text = pluralStringResource(R.plurals.wallpaper_count, album.wallpaperCount, album.wallpaperCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

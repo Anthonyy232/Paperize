@@ -37,11 +37,8 @@ interface WallpaperQueueDao {
     suspend fun getAndDequeueWallpaper(albumId: String, screenType: ScreenType): WallpaperEntity? {
         val wallpaper = getNextWallpaperInQueue(albumId, screenType)
         if (wallpaper != null) {
-            // Delete the first item
-            deleteFirstQueueItem(albumId, screenType)
-            // Normalize positions to fix any gaps from CASCADE deletes
-            // This ensures positions are always 0, 1, 2, 3... without gaps
-            normalizeQueuePositions(albumId, screenType)
+            // Delete specifically the item we just retrieved to ensure atomicity
+            deleteQueueItem(albumId, screenType, wallpaper.id)
         }
         return wallpaper
     }
@@ -57,6 +54,18 @@ interface WallpaperQueueDao {
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQueueItems(items: List<WallpaperQueueEntity>)
+
+    @Query("""
+        DELETE FROM wallpaper_queue
+        WHERE albumId = :albumId AND screenType = :screenType
+        AND wallpaperId = :wallpaperId
+        AND queuePosition = (
+            SELECT MIN(queuePosition)
+            FROM wallpaper_queue
+            WHERE albumId = :albumId AND screenType = :screenType
+        )
+    """)
+    suspend fun deleteQueueItem(albumId: String, screenType: ScreenType, wallpaperId: String)
 
     @Query("""
         DELETE FROM wallpaper_queue

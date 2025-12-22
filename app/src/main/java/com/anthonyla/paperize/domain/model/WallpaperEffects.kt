@@ -17,9 +17,11 @@ data class WallpaperEffects(
     val enableVignette: Boolean = false,
     val vignettePercentage: Int = Constants.DEFAULT_VIGNETTE_PERCENTAGE,
     val enableGrayscale: Boolean = false,
+    val grayscalePercentage: Int = Constants.DEFAULT_GRAYSCALE_PERCENTAGE,
 
     // Interactive effects (live wallpaper mode only)
     val enableDoubleTap: Boolean = false,
+    val enableChangeOnScreenOn: Boolean = false,
     val enableParallax: Boolean = false,
     val parallaxIntensity: Int = Constants.DEFAULT_PARALLAX_INTENSITY
 ) {
@@ -28,17 +30,18 @@ data class WallpaperEffects(
      */
     val hasEffects: Boolean
         get() = (enableBlur && blurPercentage > 0) ||
-                (enableDarken && darkenPercentage != 0) ||
+                (enableDarken && darkenPercentage > 0) ||
                 (enableVignette && vignettePercentage > 0) ||
-                enableGrayscale
+                (enableGrayscale && grayscalePercentage > 0)
 
     /**
      * Validate effect percentages
      */
     fun validate(): WallpaperEffects = copy(
-        darkenPercentage = darkenPercentage.coerceIn(-100, 100),
+        darkenPercentage = darkenPercentage.coerceIn(0, 100),
         blurPercentage = blurPercentage.coerceIn(0, 100),
         vignettePercentage = vignettePercentage.coerceIn(0, 100),
+        grayscalePercentage = grayscalePercentage.coerceIn(0, 100),
         parallaxIntensity = parallaxIntensity.coerceIn(0, 100)
     )
 

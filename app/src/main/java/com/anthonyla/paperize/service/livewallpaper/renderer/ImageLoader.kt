@@ -54,6 +54,19 @@ class ContentUriImageLoader(
     override suspend fun load(targetWidth: Int, targetHeight: Int): Bitmap? {
         return withContext(Dispatchers.IO) {
             try {
+                // First verify the URI is accessible
+                val isAccessible = try {
+                    contentResolver.openInputStream(uri)?.use { true } ?: false
+                } catch (e: Exception) {
+                    Log.w(TAG, "URI not accessible: $uri", e)
+                    false
+                }
+                
+                if (!isAccessible) {
+                    Log.w(TAG, "Image not accessible or doesn't exist: $uri")
+                    return@withContext null
+                }
+                
                 // Get image dimensions without loading pixel data
                 val dimensions = getImageDimensions() ?: return@withContext null
 
@@ -71,13 +84,25 @@ class ContentUriImageLoader(
 
                 // Load bitmap with sampling
                 val source = ImageDecoder.createSource(contentResolver, uri)
-                ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                val bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
                     decoder.setTargetSampleSize(sampleSize)
                     decoder.isMutableRequired = false  // Immutable for GPU upload
                     decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
                 }
+                
+                // Validate loaded bitmap
+                if (bitmap.width <= 0 || bitmap.height <= 0) {
+                    Log.e(TAG, "Loaded bitmap has invalid dimensions: ${bitmap.width}x${bitmap.height}")
+                    bitmap.recycle()
+                    return@withContext null
+                }
+                
+                bitmap
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load image from $uri", e)
+                null
+            } catch (e: OutOfMemoryError) {
+                Log.e(TAG, "OOM loading image from $uri", e)
                 null
             }
         }
@@ -85,23 +110,18 @@ class ContentUriImageLoader(
 
     /**
      * Get image dimensions without loading the full bitmap.
+     * Uses BitmapFactory with inJustDecodeBounds to avoid allocating pixel data.
      */
     private fun getImageDimensions(): Pair<Int, Int>? {
         return try {
-            val source = ImageDecoder.createSource(contentResolver, uri)
-            var width = 0
-            var height = 0
-
-            ImageDecoder.decodeDrawable(source) { decoder, info, _ ->
-                width = info.size.width
-                height = info.size.height
-                decoder.setTargetSampleSize(Int.MAX_VALUE) // Don't load pixel data
-            }
-
-            if (width > 0 && height > 0) {
-                Pair(width, height)
-            } else {
-                null
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                val options = android.graphics.BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                android.graphics.BitmapFactory.decodeStream(inputStream, null, options)
+                val width = options.outWidth
+                val height = options.outHeight
+                if (width > 0 && height > 0) Pair(width, height) else null
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get image dimensions for $uri", e)
@@ -133,7 +153,7 @@ class ContentUriImageLoader(
         }
 
         // Guard against invalid source dimensions
-        if (width <=0 || height <= 0) {
+        if (width <= 0 || height <= 0) {
             Log.w(TAG, "Invalid source dimensions: ${width}x${height}")
             return 1
         }
@@ -152,7 +172,8 @@ class ContentUriImageLoader(
             }
         }
 
-        // Ensure we don't downsample below target size
-        return max(1, sampleSize / 2)
+        // Return the calculated sample size (it is already the largest power-of-2
+        // that keeps dimensions larger than or equal to target)
+        return max(1, sampleSize)
     }
 }

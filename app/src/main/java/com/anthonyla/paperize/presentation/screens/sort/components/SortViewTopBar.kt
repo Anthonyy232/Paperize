@@ -57,7 +57,7 @@ fun SortViewTopBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.content_desc_back),
+                    contentDescription = stringResource(R.string.back),
                 )
             }
         },

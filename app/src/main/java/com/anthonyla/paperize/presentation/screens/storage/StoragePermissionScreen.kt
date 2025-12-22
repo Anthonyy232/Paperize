@@ -1,4 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.storage
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
+import com.anthonyla.paperize.core.util.PermissionUtil
 
 import android.content.Intent
 import android.net.Uri
@@ -34,18 +37,12 @@ fun StoragePermissionScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var permissionGranted by remember { mutableStateOf(Environment.isExternalStorageManager()) }
-    var hasShownScreen by remember { mutableStateOf(false) }
-    var hasNavigated by remember { mutableStateOf(false) }  // Single-use navigation flag
-
+    var permissionGranted by remember { mutableStateOf(PermissionUtil.hasStoragePermission()) }
     // Check permission status on resume (when user returns from settings)
     DisposableEffect(Unit) {
         val listener = object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
-                // Only update if we haven't navigated yet
-                if (!hasNavigated) {
-                    permissionGranted = Environment.isExternalStorageManager()
-                }
+                permissionGranted = PermissionUtil.hasStoragePermission()
             }
         }
         val lifecycleOwner = context as? LifecycleOwner
@@ -56,116 +53,102 @@ fun StoragePermissionScreen(
         }
     }
 
-    // Auto-navigate if permission is already granted
+    // Automatically continue when permission is granted
     LaunchedEffect(permissionGranted) {
-        if (permissionGranted && !hasNavigated) {
-            hasNavigated = true  // Mark as navigated BEFORE delay
-            kotlinx.coroutines.delay(Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS)  // Brief delay for smooth transition
+        if (permissionGranted) {
             onContinue()
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppSpacing.extraLarge)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Enhanced icon with larger size
-        Icon(
-            imageVector = Icons.Default.Folder,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.large))
-
-        Text(
-            text = stringResource(R.string.storage_permission_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-
-        // Enhanced card with better styling
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-            )
-        ) {
+    OnboardingLayout(
+        icon = Icons.Default.Folder,
+        title = stringResource(R.string.storage_permission_title),
+        modifier = modifier,
+        content = {
             Column(
-                modifier = Modifier.padding(AppSpacing.large),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.small),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+            ) {
+                // Cleaner explanation card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(AppSpacing.large),
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.small),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.storage_permission_description),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+
+                        Text(
+                            text = stringResource(R.string.storage_permission_optional),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
+                            textAlign = TextAlign.Center,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        },
+        actions = {
+            // Allow button
+            Button(
+                onClick = {
+                    if (!PermissionUtil.hasStoragePermission()) {
+                        val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        onContinue()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large
             ) {
                 Text(
-                    text = stringResource(R.string.storage_permission_description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    text = if (permissionGranted) {
+                        stringResource(R.string.permission_granted)
+                    } else {
+                        stringResource(R.string.allow)
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    modifier = Modifier.padding(vertical = AppSpacing.small)
                 )
+            }
 
+            // Continue without permission button
+            FilledTonalButton(
+                onClick = onContinue,
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
                 Text(
-                    text = stringResource(R.string.storage_permission_optional),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    text = stringResource(R.string.continue_without_storage),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = AppSpacing.small)
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-        // Enhanced allow button
-        Button(
-            onClick = {
-                if (!Environment.isExternalStorageManager()) {
-                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                    }
-                    context.startActivity(intent)
-                } else {
-                    onContinue()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Text(
-                text = if (permissionGranted) {
-                    stringResource(R.string.permission_granted)
-                } else {
-                    stringResource(R.string.allow)
-                },
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                modifier = Modifier.padding(vertical = AppSpacing.small)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-
-        // Enhanced continue without permission button
-        FilledTonalButton(
-            onClick = onContinue,
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Text(
-                text = stringResource(R.string.continue_without_storage),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                modifier = Modifier.padding(vertical = AppSpacing.small)
-            )
-        }
-    }
+    )
 }

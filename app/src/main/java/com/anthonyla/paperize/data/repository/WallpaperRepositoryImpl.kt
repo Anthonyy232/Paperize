@@ -116,16 +116,23 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun validateAndRemoveInvalidWallpapers(albumId: String): Result<Int> {
         return try {
-            val wallpapers = wallpaperDao.getWallpapersByAlbum(albumId).first()
-            val invalidUris = wallpapers
-                .filter { !Uri.parse(it.uri).isValid(contentResolver) }
-                .map { it.uri }
+            val totalCount = wallpaperDao.getWallpaperCountByAlbum(albumId)
+            var totalRemoved = 0
+            val batchSize = 100 // Process in smaller batches to avoid memory spikes
 
-            if (invalidUris.isNotEmpty()) {
-                wallpaperDao.deleteWallpapersByUris(invalidUris)
+            for (offset in 0 until totalCount step batchSize) {
+                val wallpapers = wallpaperDao.getWallpapersByAlbumPaged(albumId, batchSize, offset)
+                val invalidUris = wallpapers
+                    .filter { !Uri.parse(it.uri).isValid(contentResolver) }
+                    .map { it.uri }
+
+                if (invalidUris.isNotEmpty()) {
+                    wallpaperDao.deleteWallpapersByUris(invalidUris)
+                    totalRemoved += invalidUris.size
+                }
             }
 
-            Result.Success(invalidUris.size)
+            Result.Success(totalRemoved)
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -212,6 +219,13 @@ class WallpaperRepositoryImpl @Inject constructor(
     override suspend fun clearQueuesForAlbum(albumId: String): Result<Unit> {
         return try {
             wallpaperQueueDao.clearAllQueues(albumId)
+            
+            // Prune mutexes for this album to prevent memory leak
+            // Keys are either albumId (shuffled) or $albumId:$screenType (sequential)
+            queueRebuildMutexes.keys.filter { it.startsWith(albumId) }.forEach { 
+                queueRebuildMutexes.remove(it)
+            }
+            
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
@@ -220,11 +234,12 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun normalizeAllQueuesForAlbum(albumId: String): Result<Unit> {
         return try {
-            // Normalize both HOME and LOCK queues for this album
+            // Normalize all queue types for this album
             // This fixes gaps in queue positions caused by CASCADE deletes
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.HOME)
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LOCK)
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LIVE)
+            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.BOTH)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
@@ -236,27 +251,8 @@ class WallpaperRepositoryImpl @Inject constructor(
             val documentFile = DocumentFile.fromTreeUri(context, folderUri)
                 ?: return Result.Error(Exception("Invalid folder URI"))
 
-            val wallpapers = documentFile.listFiles()
-                .filter { it.isFile && it.name?.let { name -> isImageFile(name) } == true }
-                .mapNotNull { file ->
-                    try {
-                        val uri = file.uri.toString()
-                        val fileName = file.name ?: return@mapNotNull null
-                        val dateModified = file.lastModified()
-
-                        Wallpaper(
-                            id = generateId(),
-                            albumId = "", // Will be set when adding to album
-                            folderId = null, // Will be set when adding to folder
-                            uri = uri,
-                            fileName = fileName,
-                            dateModified = dateModified,
-                            sourceType = WallpaperSourceType.FOLDER
-                        )
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
+            val wallpapers = mutableListOf<Wallpaper>()
+            scanDirectoryRecursive(documentFile, wallpapers)
 
             Result.Success(wallpapers)
         } catch (e: Exception) {
@@ -264,8 +260,39 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun scanDirectoryRecursive(directory: DocumentFile, result: MutableList<Wallpaper>) {
+        directory.listFiles().forEach { file ->
+            if (file.isDirectory) {
+                scanDirectoryRecursive(file, result)
+            } else if (file.isFile && file.name?.let { name -> isImageFile(name) } == true) {
+                try {
+                    val uri = file.uri.toString()
+                    val fileName = file.name ?: return@forEach
+                    val dateModified = file.lastModified()
+
+                    result.add(
+                        Wallpaper(
+                            id = generateId(),
+                            albumId = "", 
+                            folderId = null,
+                            uri = uri,
+                            fileName = fileName,
+                            dateModified = dateModified,
+                            sourceType = WallpaperSourceType.FOLDER
+                        )
+                    )
+                } catch (e: Exception) {
+                    // Skip failed items
+                }
+            }
+        }
+    }
+
     private fun isImageFile(fileName: String): Boolean {
         val extension = fileName.substringAfterLast('.', "").lowercase()
         return extension in Constants.SUPPORTED_IMAGE_EXTENSIONS
     }
+
+    override suspend fun isWallpaperInAlbum(albumId: String, uri: String): Boolean =
+        wallpaperDao.getWallpaperByUri(uri)?.let { it.albumId == albumId } ?: false
 }

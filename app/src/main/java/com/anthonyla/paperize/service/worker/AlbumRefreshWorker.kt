@@ -10,6 +10,8 @@ import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.RefreshAlbumUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 
 /**
@@ -68,54 +70,44 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     }
                 }
 
-                // Step 2: Rescan all folders for new wallpapers
-                album.folders.forEach { folder ->
-                    when (val scanResult = wallpaperRepository.scanFolderForWallpapers(android.net.Uri.parse(folder.uri))) {
-                        is CoreResult.Success -> {
-                            val scannedWallpapers = scanResult.data
+                // Step 2: Rescan all folders for new wallpapers (Parallelized)
+                coroutineScope {
+                    album.folders.map { folder ->
+                        async {
+                            when (val scanResult = wallpaperRepository.scanFolderForWallpapers(android.net.Uri.parse(folder.uri))) {
+                                is CoreResult.Success -> {
+                                    val scannedWallpapers = scanResult.data
 
-                            // Get ALL existing URIs (direct wallpapers + folder wallpapers)
-                            val existingUris = (album.wallpapers.map { it.uri } +
-                                               album.folders.flatMap { it.wallpapers.map { w -> w.uri } }).toSet()
-
-                            // Find new wallpapers not already in album (anywhere)
-                            val newWallpapers = scannedWallpapers.filter { it.uri !in existingUris }
-
-                            // Add new wallpapers to album
-                            newWallpapers.forEach { wallpaper ->
-                                // Fix: Create copy with correct albumId and folderId
-                                // scanFolderForWallpapers returns wallpapers with empty albumId/null folderId
-                                val wallpaperToAdd = wallpaper.copy(
-                                    albumId = album.id,
-                                    folderId = folder.id
-                                )
-                                
-                                when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
-                                    is CoreResult.Success -> {
-                                        totalAdded++
-                                        albumHasNewWallpapers = true
-                                    }
-                                    is CoreResult.Error -> {
-                                        Log.e(TAG, "Error adding wallpaper to album '${album.name}'")
-                                        failedCount++
-                                    }
-                                    is CoreResult.Loading -> {
-                                        /* Loading state not used */
+                                    // Find and add new wallpapers not already in album
+                                    scannedWallpapers.forEach { wallpaper ->
+                                        // Memory-efficient check: check database for existing URI in this album
+                                        if (!wallpaperRepository.isWallpaperInAlbum(album.id, wallpaper.uri)) {
+                                            val wallpaperToAdd = wallpaper.copy(
+                                                albumId = album.id,
+                                                folderId = folder.id
+                                            )
+                                            
+                                            when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
+                                                is CoreResult.Success -> {
+                                                    totalAdded++
+                                                    albumHasNewWallpapers = true
+                                                }
+                                                is CoreResult.Error -> {
+                                                    Log.e(TAG, "Error adding wallpaper to album '${album.name}'")
+                                                    failedCount++
+                                                }
+                                                is CoreResult.Loading -> { /* Not used */ }
+                                            }
+                                        }
                                     }
                                 }
+                                is CoreResult.Error -> {
+                                    Log.e(TAG, "Error scanning folder '${folder.name}' in album '${album.name}'", scanResult.exception)
+                                }
+                                is CoreResult.Loading -> { /* Not used */ }
                             }
-
-                            if (newWallpapers.isNotEmpty()) {
-                                Log.d(TAG, "Album '${album.name}': added ${newWallpapers.size} new wallpapers from folder '${folder.name}'")
-                            }
                         }
-                        is CoreResult.Error -> {
-                            Log.e(TAG, "Error scanning folder '${folder.name}' in album '${album.name}'", scanResult.exception)
-                        }
-                        is CoreResult.Loading -> {
-                            /* Loading state not used */
-                        }
-                    }
+                    }.forEach { it.await() }
                 }
 
                 // Step 3: Refresh folder covers if new wallpapers were added

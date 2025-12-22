@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
+import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -33,7 +34,6 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @Composable
 fun FolderViewScreen(
-    @Suppress("UNUSED_PARAMETER") folderId: String,
     onBackClick: () -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
     modifier: Modifier = Modifier,
@@ -90,7 +90,7 @@ fun FolderViewScreen(
                         .then(
                             Modifier.animateItem(
                                 placementSpec = tween(
-                                    durationMillis = 800,
+                                    durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
                                     delayMillis = 0,
                                     easing = FastOutSlowInEasing
                                 )
@@ -113,7 +113,6 @@ fun FolderViewScreen(
     // Sort Bottom Sheet
     if (showSortSheet) {
         SortBottomSheet(
-            currentSort = sortOption,
             onSortSelected = { sortOption = it },
             onDismiss = { showSortSheet = false }
         )

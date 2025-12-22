@@ -108,4 +108,10 @@ interface WallpaperRepository {
      * Scan folder for wallpapers
      */
     suspend fun scanFolderForWallpapers(folderUri: Uri): Result<List<Wallpaper>>
+
+    /**
+     * Check if a wallpaper with the given URI already exists in the album
+     * Optimized for checking duplicates during folder sync
+     */
+    suspend fun isWallpaperInAlbum(albumId: String, uri: String): Boolean
 }

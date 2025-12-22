@@ -2,9 +2,9 @@
 <resources>
   <string name="app_name">Paperize</string>
   <string name="home">Home</string>
-  <string name="wallpaper_screen">Wallpaper</string>
-  <string name="library_screen">Library</string>
   <string name="settings_screen">Settings</string>
+  <string name="wallpaper">Wallpaper</string>
+  <string name="library">Library</string>
   <string name="back">Back</string>
   <string name="add_images">Add images</string>
   <string name="add_folder">Add folder</string>
@@ -106,6 +106,8 @@
   <string name="make_the_colors_grayscale">Make the colors grayscale</string>
   <string name="double_tap_to_change">Double-Tap to Change</string>
   <string name="double_tap_wallpaper_to_change_it">Double-tap wallpaper to change it</string>
+  <string name="change_on_screen_off">Change on Screen Off</string>
+  <string name="change_wallpaper_when_screen_turns_off">Change wallpaper when screen turns off</string>
   <string name="parallax_effect">Parallax Effect</string>
   <string name="wallpaper_moves_with_screen_scroll">Wallpaper moves with screen scroll</string>
   <string name="live_wallpaper_name">Paperize Live Wallpaper</string>
@@ -133,7 +135,6 @@
   <string name="content_desc_delete_selected">Delete selected</string>
   <string name="content_desc_expand">Expand</string>
   <string name="content_desc_collapse">Collapse</string>
-  <string name="content_desc_back">Back</string>
   <string name="content_desc_sort_items">Sort items</string>
   <string name="content_desc_save">Save</string>
   <string name="content_desc_current_lock_wallpaper">Current lock screen wallpaper</string>
@@ -153,8 +154,6 @@
   <string name="current_wallpapers">Current Wallpapers</string>
 
   <!-- Tab Titles -->
-  <string name="tab_wallpaper">Wallpaper</string>
-  <string name="tab_library">Library</string>
 
   <!-- Sort Options -->
   <string name="sort_name_asc">Name (A-Z)</string>
@@ -204,4 +203,39 @@
 
   <!-- Album Labels -->
   <string name="album_suffix"> Album</string>
+  <!-- Wallpaper Mode Selection -->
+  <string name="choose_wallpaper_mode">Choose Wallpaper Mode</string>
+  <string name="change_later_in_settings">You can change this later in settings</string>
+  <string name="static_mode">Static Mode</string>
+  <string name="static_mode_description">Classic wallpaper changing using the system wallpaper manager. Simple and battery-efficient. Supports images only.</string>
+  <string name="live_wallpaper_mode">Live Wallpaper Mode</string>
+  <string name="live_wallpaper_mode_description">Advanced live wallpaper with hardware-accelerated effects and interactive features (double-tap, parallax).</string>
+
+  <!-- Live Wallpaper Selection Dialog -->
+  <string name="select_live_wallpaper">Select Live Wallpaper</string>
+  <string name="select_live_wallpaper_instruction">To use Paperize in Live Wallpaper mode, you need to select it as your live wallpaper from the system settings.</string>
+  <string name="open_wallpaper_picker_instruction">\nTap \'Open Wallpaper Picker\' below to select Paperize from the list of available live wallpapers.</string>
+  <string name="open_wallpaper_picker">Open Wallpaper Picker</string>
+  <string name="later">Later</string>
+
+  <!-- Settings Mode Switcher -->
+  <string name="wallpaper_mode_setting">Wallpaper Mode</string>
+  <string name="current_mode">Current Mode</string>
+  <string name="mode_static">Static</string>
+  <string name="mode_live_wallpaper">Live Wallpaper</string>
+  <string name="switch_button">Switch</string>
+  <string name="mode_switch_warning">Switching modes will reset all albums, wallpapers, and settings. This cannot be undone.</string>
+  <string name="switch_mode_dialog_title">Switch to %1$s Mode?</string>
+  <string name="switch_mode_dialog_description">This will reset all albums, wallpapers, and scheduling settings. This action cannot be undone.\n\nYou\'ll need to re-add your albums and configure your wallpaper settings.</string>
+  <string name="switch_mode_button">Switch Mode</string>
+  <string name="open_wallpaper_picker_instruction_newline">\nTap \'Open Wallpaper Picker\' below to select Paperize from the list of available live wallpapers.</string>
+  <string name="loading_placeholder">…</string>
+  <string name="album_name_exists_error">Album with this name already exists</string>
+  <string name="battery_optimization">Battery Optimization</string>
+  <string name="battery_optimization_description">Disable battery optimization to ensure reliable wallpaper changes in the background.</string>
+  <string name="check_status">Check Status</string>
+  <string name="ignoring">Ignoring (Recommended)</string>
+  <string name="optimizing">Optimizing (May delay changes)</string>
+  <string name="reliability">Reliability</string>
+
 </resources>

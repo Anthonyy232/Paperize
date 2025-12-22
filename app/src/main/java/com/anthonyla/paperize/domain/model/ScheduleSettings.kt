@@ -16,11 +16,13 @@ data class ScheduleSettings(
     val lockAlbumId: String? = null,
     val homeIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val lockIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
+    val liveIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val homeScalingType: ScalingType = ScalingType.FILL,
     val lockScalingType: ScalingType = ScalingType.FILL,
     val homeEffects: WallpaperEffects = WallpaperEffects.none(),
     val lockEffects: WallpaperEffects = WallpaperEffects.none(),
     val liveAlbumId: String? = null,
+    val liveScalingType: ScalingType = ScalingType.FILL,
     val liveEffects: WallpaperEffects = WallpaperEffects.none(),
     val adaptiveBrightness: Boolean = false
 ) {
@@ -30,6 +32,7 @@ data class ScheduleSettings(
     fun validate(): ScheduleSettings = copy(
         homeIntervalMinutes = homeIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
         lockIntervalMinutes = lockIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
+        liveIntervalMinutes = liveIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
         homeEffects = homeEffects.validate(),
         lockEffects = lockEffects.validate(),
         liveEffects = liveEffects.validate()
@@ -51,7 +54,8 @@ data class ScheduleSettings(
                lockEnabled != other.lockEnabled ||
                homeIntervalMinutes != other.homeIntervalMinutes ||
                lockIntervalMinutes != other.lockIntervalMinutes ||
-               separateSchedules != other.separateSchedules
+               separateSchedules != other.separateSchedules ||
+               liveIntervalMinutes != other.liveIntervalMinutes
     }
 
     /**
@@ -66,6 +70,7 @@ data class ScheduleSettings(
                homeEffects != other.homeEffects ||
                lockEffects != other.lockEffects ||
                liveEffects != other.liveEffects ||
+               liveScalingType != other.liveScalingType ||
                adaptiveBrightness != other.adaptiveBrightness
     }
 

@@ -42,7 +42,6 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 @Composable
 fun AlbumViewScreen(
-    @Suppress("UNUSED_PARAMETER") albumId: String,
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
@@ -241,7 +240,6 @@ fun AlbumViewScreen(
     // Sort Bottom Sheet
     if (showSortSheet) {
         SortBottomSheet(
-            currentSort = sortOption,
             onSortSelected = { sortOption = it },
             onDismiss = { showSortSheet = false }
         )
