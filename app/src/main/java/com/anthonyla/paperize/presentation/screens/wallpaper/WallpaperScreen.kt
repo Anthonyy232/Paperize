@@ -293,7 +293,8 @@ fun WallpaperScreen(
         }
 
         // Album Selection - Enhanced with better card styling
-        if (wallpaperMode == WallpaperMode.STATIC) {
+        // Only show album selection when at least one screen is enabled
+        if (wallpaperMode == WallpaperMode.STATIC && (homeEnabled || lockEnabled)) {
             if (homeEnabled && lockEnabled) {
                 // Lock Screen Album
                 Card(
