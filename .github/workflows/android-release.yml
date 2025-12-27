@@ -53,14 +53,6 @@ jobs:
       - name: Run unit tests
         run: ./gradlew clean test
 
-      - name: Upload test reports
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: test-reports
-          path: app/build/reports/tests/
-          retention-days: 7
-
   # ===================================================================
   # JOB: build
   #
