@@ -444,7 +444,7 @@ fun WallpaperScreen(
                     }
                 }
             }
-        } else {
+        } else if (wallpaperMode == WallpaperMode.LIVE) {
             // Live Mode: Single Album Selector
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLow,

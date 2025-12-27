@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
@@ -61,9 +62,16 @@ fun StoragePermissionScreen(
     }
 
     OnboardingLayout(
-        icon = Icons.Default.Folder,
         title = stringResource(R.string.storage_permission_title),
         modifier = modifier,
+        iconContent = {
+            Icon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(AppIconSizes.huge),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         content = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,

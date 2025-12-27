@@ -2,4 +2,4 @@
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/live_wallpaper_description"
     android:settingsActivity="com.anthonyla.paperize.presentation.MainActivity"
-    android:thumbnail="@mipmap/app_icon" />
+    android:thumbnail="@mipmap/ic_launcher" />

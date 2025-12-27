@@ -46,7 +46,7 @@ class PreferencesManager @Inject constructor(
         val prefs = dataStore.data.first()
         return AppSettings(
             darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] ?: false,
-            dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: true,
+            dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
             firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
             currentHomeWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID)],
@@ -57,7 +57,7 @@ class PreferencesManager @Inject constructor(
     fun getAppSettingsFlow(): Flow<AppSettings> = dataStore.data.map { prefs ->
         AppSettings(
             darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] ?: false,
-            dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: true,
+            dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
             firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
             currentHomeWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID)],

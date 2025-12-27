@@ -3,6 +3,7 @@ package com.anthonyla.paperize.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -42,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
             PaperizeTheme(
                 darkMode = appSettings?.darkMode ?: false,
-                dynamicTheming = appSettings?.dynamicTheming ?: true
+                dynamicTheming = appSettings?.dynamicTheming ?: false
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

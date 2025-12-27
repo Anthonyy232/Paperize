@@ -178,7 +178,7 @@ fun SettingsScreen(
             SettingSwitchItem(
                 title = stringResource(R.string.dynamic_theming),
                 description = stringResource(R.string.material_you),
-                checked = appSettings?.dynamicTheming ?: true,
+                checked = appSettings?.dynamicTheming ?: false,
                 onCheckedChange = { viewModel.updateDynamicTheming(it) }
             )
 

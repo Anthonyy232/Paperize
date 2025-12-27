@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
@@ -35,9 +36,16 @@ fun WallpaperModeSelectionScreen(
     var selectedMode by remember { mutableStateOf<WallpaperMode?>(null) }
 
     OnboardingLayout(
-        icon = Icons.Default.Wallpaper,
         title = stringResource(R.string.choose_wallpaper_mode),
         modifier = modifier,
+        iconContent = {
+            Icon(
+                imageVector = Icons.Default.Wallpaper,
+                contentDescription = null,
+                modifier = Modifier.size(AppIconSizes.huge),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         content = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
