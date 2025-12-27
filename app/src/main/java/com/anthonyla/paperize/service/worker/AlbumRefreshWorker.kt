@@ -13,6 +13,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Background worker that validates and refreshes all albums daily
@@ -45,12 +47,12 @@ class AlbumRefreshWorker @AssistedInject constructor(
             }
 
             var totalRemoved = 0
-            var totalAdded = 0
-            var failedCount = 0
+            val totalAdded = AtomicInteger(0)
+            val failedCount = AtomicInteger(0)
 
             // Refresh each album
             albums.forEach { album ->
-                var albumHasNewWallpapers = false
+                val albumHasNewWallpapers = AtomicBoolean(false)
 
                 // Step 1: Validate and remove invalid URIs
                 when (val result = refreshAlbumUseCase(album.id)) {
@@ -63,7 +65,7 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     }
                     is CoreResult.Error -> {
                         Log.e(TAG, "Error validating album '${album.name}'", result.exception)
-                        failedCount++
+                        failedCount.incrementAndGet()
                     }
                     is CoreResult.Loading -> {
                         /* Loading state not used */
@@ -89,12 +91,12 @@ class AlbumRefreshWorker @AssistedInject constructor(
                                             
                                             when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
                                                 is CoreResult.Success -> {
-                                                    totalAdded++
-                                                    albumHasNewWallpapers = true
+                                                    totalAdded.incrementAndGet()
+                                                    albumHasNewWallpapers.set(true)
                                                 }
                                                 is CoreResult.Error -> {
                                                     Log.e(TAG, "Error adding wallpaper to album '${album.name}'")
-                                                    failedCount++
+                                                    failedCount.incrementAndGet()
                                                 }
                                                 is CoreResult.Loading -> { /* Not used */ }
                                             }
@@ -110,8 +112,10 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     }.forEach { it.await() }
                 }
 
-                // Step 3: Refresh folder covers if new wallpapers were added
-                if (albumHasNewWallpapers) {
+                // Step 3: Normalize queues and refresh covers if new wallpapers were added
+                if (albumHasNewWallpapers.get()) {
+                    // Normalize queues so new wallpapers appear in rotation
+                    wallpaperRepository.normalizeAllQueuesForAlbum(album.id)
                     when (albumRepository.refreshFolderCovers(album.id)) {
                         is CoreResult.Success -> {
                             Log.d(TAG, "Album '${album.name}': folder covers refreshed")
@@ -126,7 +130,7 @@ class AlbumRefreshWorker @AssistedInject constructor(
                 }
             }
 
-            Log.d(TAG, "Daily album refresh completed: removed $totalRemoved items, added $totalAdded new wallpapers across ${albums.size} albums ($failedCount failures)")
+            Log.d(TAG, "Daily album refresh completed: removed $totalRemoved items, added ${totalAdded.get()} new wallpapers across ${albums.size} albums (${failedCount.get()} failures)")
 
             // Return success even if some albums failed (partial success)
             androidx.work.ListenableWorker.Result.success()

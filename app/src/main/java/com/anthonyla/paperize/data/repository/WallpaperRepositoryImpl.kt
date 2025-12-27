@@ -117,12 +117,16 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun validateAndRemoveInvalidWallpapers(albumId: String): Result<Int> {
         return try {
-            val totalCount = wallpaperDao.getWallpaperCountByAlbum(albumId)
             var totalRemoved = 0
             val batchSize = 100 // Process in smaller batches to avoid memory spikes
+            var offset = 0
 
-            for (offset in 0 until totalCount step batchSize) {
+            // Use while loop to handle deletions correctly
+            // When items are deleted, we don't advance offset since indices shift
+            while (true) {
                 val wallpapers = wallpaperDao.getWallpapersByAlbumPaged(albumId, batchSize, offset)
+                if (wallpapers.isEmpty()) break
+
                 val invalidUris = wallpapers
                     .filter { !it.uri.toUri().isValid(contentResolver) }
                     .map { it.uri }
@@ -130,6 +134,10 @@ class WallpaperRepositoryImpl @Inject constructor(
                 if (invalidUris.isNotEmpty()) {
                     wallpaperDao.deleteWallpapersByUris(invalidUris)
                     totalRemoved += invalidUris.size
+                    // Don't advance offset when deleting - remaining items shift down
+                } else {
+                    // Only advance offset if no deletions (all items in batch were valid)
+                    offset += batchSize
                 }
             }
 
@@ -208,7 +216,8 @@ class WallpaperRepositoryImpl @Inject constructor(
             
             // Prune mutexes for this album to prevent memory leak
             // Keys are either albumId (shuffled) or $albumId:$screenType (sequential)
-            queueRebuildMutexes.keys.filter { it.startsWith(albumId) }.forEach { 
+            // Use exact match or prefix with colon to avoid false positives (e.g., album1 vs album10)
+            queueRebuildMutexes.keys.filter { it == albumId || it.startsWith("$albumId:") }.forEach { 
                 queueRebuildMutexes.remove(it)
             }
             

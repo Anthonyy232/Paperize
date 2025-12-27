@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.sort
 import com.anthonyla.paperize.core.constants.Constants
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,11 @@ class SortViewModel @Inject constructor(
     private val albumRepository: AlbumRepository,
     private val wallpaperRepository: WallpaperRepository
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "SortViewModel"
+    }
+
     private val sortRoute = savedStateHandle.toRoute<SortRoute>()
     private val albumId: String = sortRoute.albumId
 
@@ -57,18 +63,24 @@ class SortViewModel @Inject constructor(
 
             // Update folders with new display orders
             state.value.folders.forEach { folder ->
-                when (albumRepository.updateFolder(folder)) {
+                when (val result = albumRepository.updateFolder(folder)) {
                     is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                    is com.anthonyla.paperize.core.Result.Error -> hasError = true
+                    is com.anthonyla.paperize.core.Result.Error -> {
+                        hasError = true
+                        Log.e(TAG, "Error updating folder", result.exception)
+                    }
                     is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
                 }
             }
 
             // Update wallpapers with new display orders
             state.value.wallpapers.forEach { wallpaper ->
-                when (wallpaperRepository.updateWallpaper(wallpaper)) {
+                when (val result = wallpaperRepository.updateWallpaper(wallpaper)) {
                     is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                    is com.anthonyla.paperize.core.Result.Error -> hasError = true
+                    is com.anthonyla.paperize.core.Result.Error -> {
+                        hasError = true
+                        Log.e(TAG, "Error updating wallpaper", result.exception)
+                    }
                     is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
                 }
             }

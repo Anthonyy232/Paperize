@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.settings
 import com.anthonyla.paperize.core.constants.Constants
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.WallpaperMode
@@ -25,6 +26,10 @@ class SettingsViewModel @Inject constructor(
     private val albumRepository: AlbumRepository,
     private val wallpaperScheduler: WallpaperScheduler
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "SettingsViewModel"
+    }
 
     val appSettings: StateFlow<AppSettings?> = settingsRepository.getAppSettingsFlow()
         .stateIn(
@@ -79,9 +84,11 @@ class SettingsViewModel @Inject constructor(
             wallpaperScheduler.cancelAllWallpaperChanges()
 
             // Delete all albums (cascades to delete all wallpapers, folders, and queues)
-            when (albumRepository.deleteAllAlbums()) {
+            when (val result = albumRepository.deleteAllAlbums()) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error deleting albums during mode switch", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
 
@@ -103,9 +110,11 @@ class SettingsViewModel @Inject constructor(
             wallpaperScheduler.cancelAllWallpaperChanges()
 
             // Delete all albums (cascades to delete all wallpapers, folders, and queues)
-            when (albumRepository.deleteAllAlbums()) {
+            when (val result = albumRepository.deleteAllAlbums()) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error deleting albums during reset", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
 

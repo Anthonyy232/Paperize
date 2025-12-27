@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -156,15 +157,15 @@ class WallpaperChangeService : Service() {
                                         WallpaperManager.FLAG_LOCK
                                     )
 
-                                    // Recycle bitmap after setting to free memory
-                                    bitmap.recycle()
-
                                     Log.d(TAG, "Same wallpaper set for both screens")
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Error setting wallpaper for both screens", e)
+                                } finally {
+                                    // Always recycle bitmap to prevent memory leaks
+                                    bitmap.recycle()
                                 }
                             }.onError { error ->
-                                if (error.message?.contains("No wallpapers available in album") == true) {
+                                if (error is EmptyAlbumException) {
                                     handleEmptyAlbumError()
                                 } else {
                                     Log.e(TAG, "Error getting wallpaper bitmap", error)
@@ -222,7 +223,7 @@ class WallpaperChangeService : Service() {
                 bitmap.recycle()
             }
         }.onError { error ->
-            if (error.message?.contains("No wallpapers available in album") == true) {
+            if (error is EmptyAlbumException) {
                 handleEmptyAlbumError()
             } else {
                 Log.e(TAG, "Error getting home wallpaper bitmap", error)
@@ -256,7 +257,7 @@ class WallpaperChangeService : Service() {
                 bitmap.recycle()
             }
         }.onError { error ->
-            if (error.message?.contains("No wallpapers available in album") == true) {
+            if (error is EmptyAlbumException) {
                 handleEmptyAlbumError()
             } else {
                 Log.e(TAG, "Error getting lock wallpaper bitmap", error)

@@ -89,7 +89,8 @@ interface WallpaperQueueDao {
         if (items.isEmpty()) return
 
         // Check if normalization is needed (positions should be 0, 1, 2, ...)
-        val needsNormalization = items.any { it.queuePosition != items.indexOf(it) }
+        // Use indexed access instead of indexOf() for O(n) instead of O(n²)
+        val needsNormalization = items.indices.any { items[it].queuePosition != it }
         if (!needsNormalization) return
 
         // Rebuild queue with normalized positions

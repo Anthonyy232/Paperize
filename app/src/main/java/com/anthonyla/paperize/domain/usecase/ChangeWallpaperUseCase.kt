@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.EmptyAlbumException
+import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
@@ -73,7 +75,7 @@ class ChangeWallpaperUseCase @Inject constructor(
                 if (candidate == null) {
                     queueRebuildAttempts++
                     if (queueRebuildAttempts > 2) {
-                        return Result.Error(Exception(context.getString(R.string.no_wallpapers_in_album)))
+                        return Result.Error(EmptyAlbumException(context.getString(R.string.no_wallpapers_in_album)))
                     }
                     val rebuildResult = wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
                     if (rebuildResult is Result.Error) {
@@ -135,7 +137,7 @@ class ChangeWallpaperUseCase @Inject constructor(
             }
 
             if (finalBitmap == null) {
-                return Result.Error(Exception(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
+                return Result.Error(NoValidWallpaperException(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
             }
 
             // Check if queue needs refilling

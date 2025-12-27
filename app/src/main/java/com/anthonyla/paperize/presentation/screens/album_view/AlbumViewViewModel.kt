@@ -2,6 +2,7 @@ package com.anthonyla.paperize.presentation.screens.album_view
 import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -38,6 +39,10 @@ class AlbumViewViewModel @Inject constructor(
     private val wallpaperRepository: WallpaperRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "AlbumViewViewModel"
+    }
 
     private val albumRoute = savedStateHandle.toRoute<AlbumRoute>()
     private val albumId: String = albumRoute.albumId
@@ -92,9 +97,11 @@ class AlbumViewViewModel @Inject constructor(
                     mediaType = mediaType
                 )
             }
-            when (albumRepository.addWallpapersToAlbum(albumId, wallpapers)) {
+            when (val result = albumRepository.addWallpapersToAlbum(albumId, wallpapers)) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error adding wallpapers to album", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
         }
@@ -135,9 +142,11 @@ class AlbumViewViewModel @Inject constructor(
                 wallpapers = wallpapers
             )
 
-            when (albumRepository.addFolderToAlbum(albumId, folder)) {
+            when (val result = albumRepository.addFolderToAlbum(albumId, folder)) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error adding folder to album", result.exception) 
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
         }
@@ -145,9 +154,11 @@ class AlbumViewViewModel @Inject constructor(
 
     fun deleteAlbum() {
         viewModelScope.launch {
-            when (albumRepository.deleteAlbum(albumId)) {
+            when (val result = albumRepository.deleteAlbum(albumId)) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error deleting album", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
         }

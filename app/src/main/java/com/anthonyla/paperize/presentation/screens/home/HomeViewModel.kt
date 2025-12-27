@@ -117,9 +117,11 @@ class HomeViewModel @Inject constructor(
 
     fun createAlbum(name: String) {
         viewModelScope.launch {
-            when (createAlbumUseCase(name)) {
+            when (val result = createAlbumUseCase(name)) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error creating album", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
         }
@@ -145,9 +147,11 @@ class HomeViewModel @Inject constructor(
             }
 
             // Delete the album
-            when (deleteAlbumUseCase(albumId)) {
+            when (val result = deleteAlbumUseCase(albumId)) {
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { /* Handle error */ }
+                is com.anthonyla.paperize.core.Result.Error -> { 
+                    Log.e(TAG, "Error deleting album", result.exception)
+                }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
         }
