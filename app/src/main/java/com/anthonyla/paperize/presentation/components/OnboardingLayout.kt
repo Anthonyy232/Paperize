@@ -5,13 +5,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -50,87 +53,101 @@ fun OnboardingLayout(
         visible = true
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppSpacing.extraLarge)
-    ) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val maxHeight = maxHeight
+        
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(AppSpacing.extraLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(500)) + 
-                        slideInVertically(
-                            animationSpec = tween(500),
-                            initialOffsetY = { 50 }
-                        )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp) // Larger container for the icon background
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    iconContent()
-                }
-            }
-
-            Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(500, delayMillis = 100)) + 
-                        slideInVertically(
-                            animationSpec = tween(500, delayMillis = 100),
-                            initialOffsetY = { 50 }
-                        )
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Spacer(modifier = Modifier.height(AppSpacing.large))
-
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(500, delayMillis = 200)) + 
-                        slideInVertically(
-                            animationSpec = tween(500, delayMillis = 200),
-                            initialOffsetY = { 50 }
-                        )
-            ) {
-                content()
-            }
-        }
-
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-
-        // Actions pinned to bottom
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(animationSpec = tween(500, delayMillis = 300)) + 
-                    slideInVertically(
-                        animationSpec = tween(500, delayMillis = 300),
-                        initialOffsetY = { 100 }
-                    )
+            verticalArrangement = Arrangement.Top // Top here, centering happens in inner Column
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = maxHeight - (AppSpacing.extraLarge * 2)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                actions()
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(500)) + 
+                                slideInVertically(
+                                    animationSpec = tween(500),
+                                    initialOffsetY = { 50 }
+                                )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp) // Larger container for the icon background
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            iconContent()
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
+
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(500, delayMillis = 100)) + 
+                                slideInVertically(
+                                    animationSpec = tween(500, delayMillis = 100),
+                                    initialOffsetY = { 50 }
+                                )
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(AppSpacing.large))
+
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(500, delayMillis = 200)) + 
+                                slideInVertically(
+                                    animationSpec = tween(500, delayMillis = 200),
+                                    initialOffsetY = { 50 }
+                                )
+                    ) {
+                        content()
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
+
+                // Actions now part of the scrollable content to handle small heights (landscape)
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(animationSpec = tween(500, delayMillis = 300)) + 
+                            slideInVertically(
+                                animationSpec = tween(500, delayMillis = 300),
+                                initialOffsetY = { 100 }
+                            )
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+                    ) {
+                        actions()
+                    }
+                }
             }
         }
     }

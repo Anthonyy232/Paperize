@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +40,20 @@ class MainActivity : ComponentActivity() {
 
             // Track if DataStore has loaded at least once
             // This prevents the loading screen from showing again if the composable is recomposed
-            val appSettings by settingsViewModel.appSettings.collectAsStateWithLifecycle()
+            val appSettingsState by settingsViewModel.appSettings.collectAsStateWithLifecycle()
+            
+            // Remember if we've ever loaded settings to prevent losing NavigationGraph during recreation
+            var settingsLoadedOnce by rememberSaveable { mutableStateOf(false) }
+            val currentSettings = appSettingsState
+            
+            if (currentSettings != null) {
+                settingsLoadedOnce = true
+            }
 
 
             PaperizeTheme(
-                darkMode = appSettings?.darkMode ?: false,
-                dynamicTheming = appSettings?.dynamicTheming ?: false
+                darkMode = currentSettings?.darkMode ?: false,
+                dynamicTheming = currentSettings?.dynamicTheming ?: false
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -52,11 +61,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // Only render navigation once DataStore has loaded
                     // After first load, always show navigation even during updates
-                    val currentSettings = appSettings
-                    if (currentSettings != null) {
+                    if (settingsLoadedOnce) {
                         NavigationGraph(
-                            startDestination = if (currentSettings.firstLaunch) StartupRoute else HomeRoute,
-                            animate = currentSettings.animate,
+                            startDestination = if (currentSettings?.firstLaunch != false) StartupRoute else HomeRoute,
+                            animate = currentSettings?.animate ?: true,
                             onFirstLaunchComplete = {
                                 settingsViewModel.updateFirstLaunch(false)
                             }

@@ -6,16 +6,21 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.anthonyla.paperize.presentation.components.OnboardingLayout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +43,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 @Composable
 fun StartupScreen(
     onAgree: () -> Unit,
+    onPrivacyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -78,7 +84,9 @@ fun StartupScreen(
 
                 // Cleaner privacy notice
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onPrivacyClick() },
                     shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -88,24 +96,36 @@ fun StartupScreen(
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
                 ) {
-                    Column(
-                        modifier = Modifier.padding(AppSpacing.large)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(AppSpacing.large),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(R.string.privacy_notice),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.privacy_notice),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
 
-                        Spacer(modifier = Modifier.height(AppSpacing.small))
+                            Spacer(modifier = Modifier.height(AppSpacing.small))
 
-                        Text(
-                            text = stringResource(
-                                R.string.please_read_and_agree_to_the_following_privacy_notice_to_use_the_app
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Text(
+                                text = stringResource(
+                                    R.string.please_read_and_agree_to_the_following_privacy_notice_to_use_the_app
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = AppSpacing.small)
                         )
                     }
                 }

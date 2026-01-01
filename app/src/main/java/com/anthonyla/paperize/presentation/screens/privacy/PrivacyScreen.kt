@@ -25,7 +25,7 @@ fun PrivacyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.privacy_screen)) },
+                title = { Text(stringResource(R.string.privacy_policy)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

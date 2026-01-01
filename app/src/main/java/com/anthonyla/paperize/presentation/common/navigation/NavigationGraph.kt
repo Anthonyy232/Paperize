@@ -67,6 +67,9 @@ fun NavigationGraph(
                     navController.navigate(WallpaperModeSelectionRoute) {
                         popUpTo<StartupRoute> { inclusive = true }
                     }
+                },
+                onPrivacyClick = {
+                    navController.navigate(PrivacyRoute)
                 }
             )
         }
