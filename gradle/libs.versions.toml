@@ -52,7 +52,7 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version = "1.14.7" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.10.0" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
