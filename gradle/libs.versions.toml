@@ -50,7 +50,7 @@ gson = { module = "com.google.code.gson:gson", version = "2.13.2" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 junit = { module = "junit:junit", version = "4.13.2" }
-mockk = { module = "io.mockk:mockk", version = "1.14.7" }
+mockk = { module = "io.mockk:mockk", version = "1.14.9" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.10.0" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
