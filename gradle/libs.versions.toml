@@ -39,7 +39,7 @@ androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", versi
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.10.2" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.10.2" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version = "1.10.2" }
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
