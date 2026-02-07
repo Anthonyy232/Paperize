@@ -56,7 +56,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version = "2.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
-zoomable = { module = "net.engawapg.lib:zoomable", version = "2.9.1-test01" }
+zoomable = { module = "net.engawapg.lib:zoomable", version = "2.11.0" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "3.0.0" }
 
 [plugins]
