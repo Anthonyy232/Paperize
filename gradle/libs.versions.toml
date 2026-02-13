@@ -44,7 +44,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
-dfc = { module = "com.lazygeniouz:dfc", version = "1.2" }
+dfc = { module = "com.lazygeniouz:dfc", version = "1.3" }
 google-material = { module = "com.google.android.material:material", version.ref = "material" }
 gson = { module = "com.google.code.gson:gson", version = "2.13.2" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
