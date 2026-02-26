@@ -34,7 +34,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.4" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.8.4" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version = "2.8.4" }
 androidx-ui = { module = "androidx.compose.ui:ui", version = "1.10.3" }
-androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.10.3" }
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version = "1.10.4" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version = "1.10.3" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.10.3" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.10.3" }
