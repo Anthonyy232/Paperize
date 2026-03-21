@@ -14,7 +14,7 @@ androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "202
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.0" }
-androidx-datastore = { module = "androidx.datastore:datastore", version = "1.2.0" }
+androidx-datastore = { module = "androidx.datastore:datastore", version = "1.2.1" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
 androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.2" }
