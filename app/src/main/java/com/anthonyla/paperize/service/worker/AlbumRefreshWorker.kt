@@ -112,10 +112,10 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     }.forEach { it.await() }
                 }
 
-                // Step 3: Normalize queues and refresh covers if new wallpapers were added
+                // Step 3: Clear and rebuild queues and refresh covers if new wallpapers were added
                 if (albumHasNewWallpapers.get()) {
-                    // Normalize queues so new wallpapers appear in rotation
-                    wallpaperRepository.normalizeAllQueuesForAlbum(album.id)
+                    // Clear queues so they are rebuilt on next change, including new wallpapers
+                    wallpaperRepository.clearQueuesForAlbum(album.id)
                     when (albumRepository.refreshFolderCovers(album.id)) {
                         is CoreResult.Success -> {
                             Log.d(TAG, "Album '${album.name}': folder covers refreshed")

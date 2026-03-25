@@ -48,9 +48,9 @@ class SortViewModel @Inject constructor(
     private fun loadAlbumData() {
         viewModelScope.launch {
             val album = albumRepository.getAlbumById(albumId).first()
-            val wallpapers = wallpaperRepository.getWallpapersByAlbum(albumId).first()
+            val wallpapers = wallpaperRepository.getDirectWallpapersByAlbum(albumId).first()
 
-            _state.value = state.value.copy(
+            _state.value = _state.value.copy(
                 folders = album?.folders ?: emptyList(),
                 wallpapers = wallpapers
             )
@@ -62,7 +62,7 @@ class SortViewModel @Inject constructor(
             var hasError = false
 
             // Update folders with new display orders
-            state.value.folders.forEach { folder ->
+            _state.value.folders.forEach { folder ->
                 when (val result = albumRepository.updateFolder(folder)) {
                     is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
                     is com.anthonyla.paperize.core.Result.Error -> {
@@ -74,7 +74,7 @@ class SortViewModel @Inject constructor(
             }
 
             // Update wallpapers with new display orders
-            state.value.wallpapers.forEach { wallpaper ->
+            _state.value.wallpapers.forEach { wallpaper ->
                 when (val result = wallpaperRepository.updateWallpaper(wallpaper)) {
                     is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
                     is com.anthonyla.paperize.core.Result.Error -> {
@@ -96,38 +96,44 @@ class SortViewModel @Inject constructor(
     fun onEvent(event: SortEvent) {
         when (event) {
             is SortEvent.LoadSortView -> {
-                _state.value = state.value.copy(
+                _state.value = _state.value.copy(
                     folders = event.folders,
                     wallpapers = event.wallpapers
                 )
             }
 
             is SortEvent.ShiftFolder -> {
+                val fromUri = event.from.key as? String ?: return
+                val toUri = event.to.key as? String ?: return
                 val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftFolder(
                     folders = state.value.folders,
-                    fromUri = event.from.key as String,
-                    toUri = event.to.key as String
+                    fromUri = fromUri,
+                    toUri = toUri
                 )
-                _state.value = state.value.copy(folders = updatedFolders)
+                _state.value = _state.value.copy(folders = updatedFolders)
             }
 
             is SortEvent.ShiftFolderWallpaper -> {
+                val fromUri = event.from.key as? String ?: return
+                val toUri = event.to.key as? String ?: return
                 val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaperInFolder(
                     folders = state.value.folders,
                     folderId = event.folderId,
-                    fromUri = event.from.key as String,
-                    toUri = event.to.key as String
+                    fromUri = fromUri,
+                    toUri = toUri
                 )
-                _state.value = state.value.copy(folders = updatedFolders)
+                _state.value = _state.value.copy(folders = updatedFolders)
             }
 
             is SortEvent.ShiftWallpaper -> {
+                val fromUri = event.from.key as? String ?: return
+                val toUri = event.to.key as? String ?: return
                 val updatedWallpapers = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaper(
                     wallpapers = state.value.wallpapers,
-                    fromUri = event.from.key as String,
-                    toUri = event.to.key as String
+                    fromUri = fromUri,
+                    toUri = toUri
                 )
-                _state.value = state.value.copy(wallpapers = updatedWallpapers)
+                _state.value = _state.value.copy(wallpapers = updatedWallpapers)
             }
 
             is SortEvent.Reset -> {
@@ -140,7 +146,7 @@ class SortViewModel @Inject constructor(
                     wallpapers = state.value.wallpapers,
                     ascending = true
                 )
-                _state.value = state.value.copy(
+                _state.value = _state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
                 )
@@ -152,7 +158,7 @@ class SortViewModel @Inject constructor(
                     wallpapers = state.value.wallpapers,
                     ascending = false
                 )
-                _state.value = state.value.copy(
+                _state.value = _state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
                 )
@@ -164,7 +170,7 @@ class SortViewModel @Inject constructor(
                     wallpapers = state.value.wallpapers,
                     ascending = true
                 )
-                _state.value = state.value.copy(
+                _state.value = _state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
                 )
@@ -176,7 +182,7 @@ class SortViewModel @Inject constructor(
                     wallpapers = state.value.wallpapers,
                     ascending = false
                 )
-                _state.value = state.value.copy(
+                _state.value = _state.value.copy(
                     folders = sortedFolders,
                     wallpapers = sortedWallpapers
                 )

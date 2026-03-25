@@ -95,8 +95,8 @@ class WallpaperChangeWorker @AssistedInject constructor(
             ScreenType.BOTH -> {
                 // Synchronized mode: set both screens to the same wallpaper
                 // This ensures both HOME and LOCK show identical wallpapers
-                // Use home album, fallback to lock album (they should be the same when synced)
-                val albumId = settings.homeAlbumId ?: settings.lockAlbumId
+                // Both screens must use the same album in sync mode
+                val albumId = settings.homeAlbumId
 
                 if (albumId != null) {
                     val result = changeWallpaperUseCase(albumId, ScreenType.HOME)
@@ -126,12 +126,12 @@ class WallpaperChangeWorker @AssistedInject constructor(
                                 WallpaperManager.FLAG_LOCK
                             )
 
-                            bitmap.recycle()
-
                             Log.d(TAG, "Both screens wallpaper changed successfully")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting wallpaper for both screens", e)
                             throw e
+                        } finally {
+                            bitmap.recycle()
                         }
                     }.onError { error ->
                         Log.e(TAG, "Error getting wallpaper bitmap for both screens", error)
@@ -165,13 +165,12 @@ class WallpaperChangeWorker @AssistedInject constructor(
                     WallpaperManager.FLAG_SYSTEM
                 )
 
-                // Recycle bitmap after setting to free memory
-                bitmap.recycle()
-
                 Log.d(TAG, "Home wallpaper changed successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting home wallpaper", e)
                 throw e
+            } finally {
+                bitmap.recycle()
             }
         }.onError { error ->
             Log.e(TAG, "Error getting home wallpaper bitmap", error)
@@ -200,13 +199,12 @@ class WallpaperChangeWorker @AssistedInject constructor(
                     WallpaperManager.FLAG_LOCK
                 )
 
-                // Recycle bitmap after setting to free memory
-                bitmap.recycle()
-
                 Log.d(TAG, "Lock wallpaper changed successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting lock wallpaper", e)
                 throw e
+            } finally {
+                bitmap.recycle()
             }
         }.onError { error ->
             Log.e(TAG, "Error getting lock wallpaper bitmap", error)

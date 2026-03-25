@@ -4,6 +4,7 @@ import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.SurfaceHolder
+import java.util.concurrent.LinkedBlockingQueue
 import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
@@ -149,7 +150,11 @@ abstract class GLWallpaperService : WallpaperService() {
 
         @Volatile var renderMode = RENDERMODE_WHEN_DIRTY
 
-        private val eventQueue = mutableListOf<Runnable>()
+        // LinkedBlockingQueue is thread-safe — no explicit synchronization needed.
+        // Using a single lock for render signalling eliminates the previous AB-BA deadlock
+        // where the GL thread held `lock` while acquiring `eventQueue`, and callers held
+        // `eventQueue` while trying to acquire `lock` in requestRender().
+        private val eventQueue = LinkedBlockingQueue<Runnable>()
         @Suppress("UseKotlinAny")
         private val lock = Object()
 
@@ -175,9 +180,7 @@ abstract class GLWallpaperService : WallpaperService() {
         }
 
         fun queueEvent(runnable: Runnable) {
-            synchronized(eventQueue) {
-                eventQueue.add(runnable)
-            }
+            eventQueue.add(runnable)
             requestRender()
         }
 
@@ -232,12 +235,11 @@ abstract class GLWallpaperService : WallpaperService() {
                                 return
                             }
 
-                            // Process events
-                            synchronized(eventQueue) {
-                                if (eventQueue.isNotEmpty()) {
-                                    event = eventQueue.removeAt(0)
-                                    break
-                                }
+                            // Process events — LinkedBlockingQueue.poll() is non-blocking and thread-safe
+                            val polled = eventQueue.poll()
+                            if (polled != null) {
+                                event = polled
+                                break
                             }
 
                             // Check if we should render

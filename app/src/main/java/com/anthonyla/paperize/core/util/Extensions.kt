@@ -41,20 +41,16 @@ fun Uri.scanFolderForImages(context: Context): List<Uri> {
     if (!documentFile.isDirectory) return emptyList()
 
     val imageUris = mutableListOf<Uri>()
-    val supportedTypes = setOf(
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-        "image/avif"
-    )
 
     fun scanDirectory(directory: DocumentFile) {
         directory.listFiles().forEach { file ->
             when {
                 file.isDirectory -> scanDirectory(file) // Recursively scan subdirectories
-                file.isFile && file.type in supportedTypes -> {
-                    imageUris.add(file.uri)
+                file.isFile -> {
+                    val ext = file.name?.substringAfterLast('.', "")?.lowercase() ?: ""
+                    if (ext in com.anthonyla.paperize.core.constants.Constants.SUPPORTED_IMAGE_EXTENSIONS) {
+                        imageUris.add(file.uri)
+                    }
                 }
             }
         }

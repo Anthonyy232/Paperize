@@ -121,8 +121,6 @@ class WallpaperRepositoryImpl @Inject constructor(
             val batchSize = 100 // Process in smaller batches to avoid memory spikes
             var offset = 0
 
-            // Use while loop to handle deletions correctly
-            // When items are deleted, we don't advance offset since indices shift
             while (true) {
                 val wallpapers = wallpaperDao.getWallpapersByAlbumPaged(albumId, batchSize, offset)
                 if (wallpapers.isEmpty()) break
@@ -130,13 +128,15 @@ class WallpaperRepositoryImpl @Inject constructor(
                 val invalidUris = wallpapers
                     .filter { !it.uri.toUri().isValid(contentResolver) }
                     .map { it.uri }
+                    .toSet()
 
                 if (invalidUris.isNotEmpty()) {
-                    wallpaperDao.deleteWallpapersByUris(invalidUris)
+                    wallpaperDao.deleteWallpapersByUris(invalidUris.toList())
                     totalRemoved += invalidUris.size
-                    // Don't advance offset when deleting - remaining items shift down
+                    // Advance offset only by the number of valid items in this batch,
+                    // so valid items already checked are not re-fetched next iteration
+                    offset += wallpapers.size - invalidUris.size
                 } else {
-                    // Only advance offset if no deletions (all items in batch were valid)
                     offset += batchSize
                 }
             }
@@ -229,12 +229,12 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun normalizeAllQueuesForAlbum(albumId: String): Result<Unit> {
         return try {
-            // Normalize all queue types for this album
+            // Normalize queue positions for each active screen type
             // This fixes gaps in queue positions caused by CASCADE deletes
+            // Note: BOTH queue is intentionally excluded — it is never populated or consumed
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.HOME)
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LOCK)
             wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LIVE)
-            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.BOTH)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)

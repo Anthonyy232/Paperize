@@ -87,7 +87,7 @@ object Constants {
 
     // Vignette effect
     const val VIGNETTE_DIVISOR = 150f  // Radius calculation divisor
-    const val VIGNETTE_MIN_RADIUS = 0.1f  // Minimum vignette radius
+    const val VIGNETTE_MIN_RADIUS = 1f  // Minimum vignette radius (guards against zero-radius RadialGradient crash)
     const val VIGNETTE_INNER_ALPHA = 0.1f  // Inner alpha for vignette gradient
     const val VIGNETTE_OUTER_ALPHA = 0.8f  // Outer alpha for vignette gradient
     val VIGNETTE_GRADIENT_POSITIONS = floatArrayOf(0f, 0.7f, 1f)  // Vignette gradient positions
@@ -117,6 +117,7 @@ object Constants {
     const val PERCENTAGE_DIVISOR = 100f
     const val GL_ES_VERSION = 2
     const val SURFACE_POLL_INTERVAL_MS = 50L
+    const val SURFACE_WAIT_TIMEOUT_MS = 1000L  // Max wait for GL surface dimensions before falling back to display metrics
 
     // Wallpaper loading
     const val MAX_WALLPAPER_LOAD_RETRIES = 10

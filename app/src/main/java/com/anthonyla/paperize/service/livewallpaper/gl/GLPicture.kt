@@ -139,7 +139,8 @@ class GLPicture(
 
         // Draw each tile using pre-allocated buffers (no per-frame allocation)
         for (tile in tiles) {
-            // Bind texture
+            // Bind texture to unit 0 (must set active unit explicitly to avoid relying on GL state)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tile.textureId)
 
             // Use pre-allocated buffers - no allocation here!

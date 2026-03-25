@@ -173,7 +173,11 @@ object WallpaperSorter {
     ): Pair<List<Folder>, List<Wallpaper>> {
         val sortedFolders = folders.map { folder ->
             val sortedWallpapers = sortWallpapersByName(folder.wallpapers, ascending)
-            folder.copy(wallpapers = applyDisplayOrder(sortedWallpapers))
+            val orderedWallpapers = applyDisplayOrder(sortedWallpapers)
+            folder.copy(
+                wallpapers = orderedWallpapers,
+                coverUri = orderedWallpapers.firstOrNull()?.uri ?: folder.coverUri
+            )
         }
         
         val finalFolders = if (ascending) {
@@ -200,7 +204,11 @@ object WallpaperSorter {
     ): Pair<List<Folder>, List<Wallpaper>> {
         val sortedFolders = folders.map { folder ->
             val sortedWallpapers = sortWallpapersByDateModified(folder.wallpapers, ascending)
-            folder.copy(wallpapers = applyDisplayOrder(sortedWallpapers))
+            val orderedWallpapers = applyDisplayOrder(sortedWallpapers)
+            folder.copy(
+                wallpapers = orderedWallpapers,
+                coverUri = orderedWallpapers.firstOrNull()?.uri ?: folder.coverUri
+            )
         }
         
         val finalFolders = if (ascending) {

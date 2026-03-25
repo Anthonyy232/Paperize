@@ -140,10 +140,14 @@ class ChangeWallpaperUseCase @Inject constructor(
                 return Result.Error(NoValidWallpaperException(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
             }
 
-            // Check if queue needs refilling
-            val nextItem = wallpaperRepository.getNextWallpaperInQueue(albumId, screenType)
-            if (nextItem == null) {
-                wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
+            // Best-effort queue refill — do not propagate failure, the bitmap is already ready
+            try {
+                val nextItem = wallpaperRepository.getNextWallpaperInQueue(albumId, screenType)
+                if (nextItem == null) {
+                    wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("ChangeWallpaperUseCase", "Queue refill failed, will rebuild on next change", e)
             }
 
             Result.Success(finalBitmap)

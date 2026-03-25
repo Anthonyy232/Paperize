@@ -634,7 +634,7 @@ class PaperizeWallpaperRenderer(
      * @return Pair of (width, height)
      */
     private suspend fun waitForSurfaceDimensions(): Pair<Int, Int> {
-        val maxWaitMs = Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS
+        val maxWaitMs = Constants.SURFACE_WAIT_TIMEOUT_MS
         val pollIntervalMs = Constants.SURFACE_POLL_INTERVAL_MS
         var waitedMs = 0L
 
@@ -683,6 +683,7 @@ class PaperizeWallpaperRenderer(
             if (skipCrossfade) {
                 // Instant swap - no animation (used for screen-off changes)
                 currentPicture?.recycle()
+                nextPicture?.recycle() // Recycle any in-flight crossfade target
                 currentPicture = picture
                 nextPicture = null
                 crossfadeProgress = 0f
@@ -690,6 +691,7 @@ class PaperizeWallpaperRenderer(
                 Log.d(TAG, "Wallpaper instantly swapped (no crossfade): $picture")
             } else {
                 // Start crossfade with time-based animation
+                nextPicture?.recycle() // Recycle interrupted crossfade target if any
                 nextPicture = picture
                 crossfadeProgress = 0f
                 crossfadeStartTimeNanos = System.nanoTime()

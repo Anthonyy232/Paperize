@@ -166,7 +166,7 @@ class WallpaperChangeService : Service() {
                                 }
                             }.onError { error ->
                                 if (error is EmptyAlbumException) {
-                                    handleEmptyAlbumError()
+                                    handleEmptyAlbumError(ScreenType.BOTH)
                                 } else {
                                     Log.e(TAG, "Error getting wallpaper bitmap", error)
                                 }
@@ -224,7 +224,7 @@ class WallpaperChangeService : Service() {
             }
         }.onError { error ->
             if (error is EmptyAlbumException) {
-                handleEmptyAlbumError()
+                handleEmptyAlbumError(ScreenType.HOME)
             } else {
                 Log.e(TAG, "Error getting home wallpaper bitmap", error)
             }
@@ -258,7 +258,7 @@ class WallpaperChangeService : Service() {
             }
         }.onError { error ->
             if (error is EmptyAlbumException) {
-                handleEmptyAlbumError()
+                handleEmptyAlbumError(ScreenType.LOCK)
             } else {
                 Log.e(TAG, "Error getting lock wallpaper bitmap", error)
             }
@@ -277,7 +277,7 @@ class WallpaperChangeService : Service() {
         return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.changing_wallpaper))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
@@ -298,7 +298,7 @@ class WallpaperChangeService : Service() {
         val notification = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -308,16 +308,39 @@ class WallpaperChangeService : Service() {
     }
 
     /**
-     * Handle empty album error by showing notification and disabling wallpaper changer
+     * Handle empty album error scoped to the specific screen that failed.
+     * Only disables the changer globally if all active screens have empty albums.
      */
-    private suspend fun handleEmptyAlbumError() {
-        Log.w(TAG, "Album is empty, disabling wallpaper changer")
+    private suspend fun handleEmptyAlbumError(screenType: ScreenType) {
+        Log.w(TAG, "Album is empty for $screenType")
 
-        // Disable wallpaper changer
         val settings = settingsRepository.getScheduleSettings()
-        settingsRepository.updateScheduleSettings(settings.copy(enableChanger = false))
 
-        // Show notification to user
+        val updatedSettings = when (screenType) {
+            ScreenType.HOME -> {
+                // Disable home screen; only disable changer globally if lock is also inactive
+                val lockStillActive = settings.lockEnabled && settings.lockAlbumId != null
+                settings.copy(
+                    homeAlbumId = null,
+                    enableChanger = if (lockStillActive) settings.enableChanger else false
+                )
+            }
+            ScreenType.LOCK -> {
+                // Disable lock screen; only disable changer globally if home is also inactive
+                val homeStillActive = settings.homeEnabled && settings.homeAlbumId != null
+                settings.copy(
+                    lockAlbumId = null,
+                    enableChanger = if (homeStillActive) settings.enableChanger else false
+                )
+            }
+            ScreenType.BOTH, ScreenType.LIVE -> {
+                // Both screens or live — disable entirely
+                settings.copy(enableChanger = false)
+            }
+        }
+
+        settingsRepository.updateScheduleSettings(updatedSettings)
+
         showErrorNotification(
             getString(R.string.no_wallpapers_in_album),
             getString(R.string.wallpaper_changer_disabled_empty_album)

@@ -82,6 +82,7 @@ class AlbumViewViewModel @Inject constructor(
 
     fun addWallpapers(uris: List<String>) {
         viewModelScope.launch {
+            val existingCount = wallpapers.value.size
             val wallpapers = uris.mapIndexed { index, uri ->
                 val parsedUri = uri.toUri()
                 val mediaType = parsedUri.detectMediaType(context) ?: WallpaperMediaType.IMAGE
@@ -93,7 +94,7 @@ class AlbumViewViewModel @Inject constructor(
                     uri = uri,
                     fileName = parsedUri.getFileName(context) ?: uri.substringAfterLast('/'),
                     dateModified = System.currentTimeMillis(),
-                    displayOrder = index,
+                    displayOrder = existingCount + index,
                     mediaType = mediaType
                 )
             }
@@ -138,7 +139,7 @@ class AlbumViewViewModel @Inject constructor(
                 name = uri.toUri().getFileName(context) ?: uri.substringAfterLast('/'),
                 coverUri = wallpapers.firstOrNull()?.uri, // Use first image as cover
                 dateModified = System.currentTimeMillis(),
-                displayOrder = 0,
+                displayOrder = folders.value.size,
                 wallpapers = wallpapers
             )
 
@@ -199,13 +200,14 @@ class AlbumViewViewModel @Inject constructor(
         viewModelScope.launch {
             val wallpaperIds = _selectedWallpapers.value.toList()
             val folderIds = _selectedFolders.value.toList()
-            var hasError = false
 
             // Batch delete wallpapers from album (includes timestamp update and cover refresh)
             if (wallpaperIds.isNotEmpty()) {
                 when (albumRepository.removeWallpapersFromAlbum(albumId, wallpaperIds)) {
-                    is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                    is com.anthonyla.paperize.core.Result.Error -> hasError = true
+                    is com.anthonyla.paperize.core.Result.Success -> {
+                        _selectedWallpapers.value = _selectedWallpapers.value - wallpaperIds.toSet()
+                    }
+                    is com.anthonyla.paperize.core.Result.Error -> { /* Leave failed items selected */ }
                     is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
                 }
             }
@@ -214,17 +216,16 @@ class AlbumViewViewModel @Inject constructor(
             if (folderIds.isNotEmpty()) {
                 folderIds.forEach { folderId ->
                     when (albumRepository.removeFolderFromAlbum(albumId, folderId)) {
-                        is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                        is com.anthonyla.paperize.core.Result.Error -> hasError = true
+                        is com.anthonyla.paperize.core.Result.Success -> {
+                            _selectedFolders.value = _selectedFolders.value - folderId
+                        }
+                        is com.anthonyla.paperize.core.Result.Error -> { /* Leave failed item selected */ }
                         is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
                     }
                 }
             }
 
-            // Only clear selection if all operations succeeded
-            if (!hasError) {
-                clearSelection()
-            }
+            updateSelectionMode()
         }
     }
 

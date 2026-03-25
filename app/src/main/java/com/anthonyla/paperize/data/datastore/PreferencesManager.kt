@@ -45,7 +45,7 @@ class PreferencesManager @Inject constructor(
     suspend fun getAppSettings(): AppSettings {
         val prefs = dataStore.data.first()
         return AppSettings(
-            darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] ?: false,
+            darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)],
             dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
             firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
@@ -56,7 +56,7 @@ class PreferencesManager @Inject constructor(
 
     fun getAppSettingsFlow(): Flow<AppSettings> = dataStore.data.map { prefs ->
         AppSettings(
-            darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] ?: false,
+            darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)],
             dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
             firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
@@ -67,7 +67,11 @@ class PreferencesManager @Inject constructor(
 
     suspend fun updateAppSettings(settings: AppSettings) {
         dataStore.edit { prefs ->
-            prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] = settings.darkMode ?: false
+            if (settings.darkMode != null) {
+                prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)] = settings.darkMode
+            } else {
+                prefs.remove(booleanPreferencesKey(PreferenceKeys.DARK_MODE))
+            }
             prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] = settings.dynamicTheming
             prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] = settings.animate
             prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] = settings.firstLaunch

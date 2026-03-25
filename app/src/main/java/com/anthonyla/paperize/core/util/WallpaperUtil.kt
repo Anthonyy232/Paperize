@@ -15,6 +15,8 @@ import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PixelFormat
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
@@ -199,50 +201,67 @@ fun retrieveBitmap(
         calculateInSampleSize(imageSize, width, height)
     }
 
+    // ImageDecoder auto-applies EXIF orientation and its info.size returns post-EXIF dimensions.
+    // We must NOT call applyExifOrientation on the ImageDecoder result — it would double-rotate.
+    // BitmapFactory does NOT auto-apply EXIF, so applyExifOrientation is needed only for that path.
+    var decodedWithImageDecoder = false
     val bitmap = try {
         val source = ImageDecoder.createSource(context.contentResolver, wallpaperUri)
-        ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+        val result = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+            // info.size is the post-EXIF (display) size — use it for correct aspect-ratio math
+            val srcWidth = info.size.width
+            val srcHeight = info.size.height
             val (targetWidth, targetHeight) = when (scaling) {
                 ScalingType.FILL -> {
-                    // Calculate scale to cover target dimensions
-                    val widthRatio = width.toFloat() / imageSize.width
-                    val heightRatio = height.toFloat() / imageSize.height
-                    val scale = maxOf(widthRatio, heightRatio)
-                    Pair((imageSize.width * scale).fastRoundToInt(), (imageSize.height * scale).fastRoundToInt())
+                    val scale = maxOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
+                    Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
                 }
                 ScalingType.FIT -> {
-                    // Calculate scale to fit inside target dimensions
-                    val widthRatio = width.toFloat() / imageSize.width
-                    val heightRatio = height.toFloat() / imageSize.height
-                    val scale = minOf(widthRatio, heightRatio)
-                    Pair((imageSize.width * scale).fastRoundToInt(), (imageSize.height * scale).fastRoundToInt())
+                    val scale = minOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
+                    Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
                 }
                 ScalingType.STRETCH -> Pair(width, height)
-                ScalingType.NONE -> Pair(imageSize.width, imageSize.height)
+                ScalingType.NONE -> {
+                    // Cap at 2× screen size to prevent OOM on very large source images
+                    val maxWidth = width * 2
+                    val maxHeight = height * 2
+                    if (srcWidth > maxWidth || srcHeight > maxHeight) {
+                        val scale = minOf(maxWidth.toFloat() / srcWidth, maxHeight.toFloat() / srcHeight)
+                        Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
+                    } else {
+                        Pair(srcWidth, srcHeight)
+                    }
+                }
             }
 
             decoder.setTargetSize(targetWidth, targetHeight)
             decoder.isMutableRequired = true
-            // Use high quality when possible
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }
+        decodedWithImageDecoder = true
+        result
     } catch (e: Exception) {
         Log.w(TAG, "ImageDecoder failed, falling back to BitmapFactory: $e")
-        context.contentResolver.openInputStream(wallpaperUri)?.use { inputStream ->
-            val options = BitmapFactory.Options().apply {
-                inSampleSize = sampleSize
-                inMutable = true
-                inPreferredConfig = Bitmap.Config.ARGB_8888
+        try {
+            context.contentResolver.openInputStream(wallpaperUri)?.use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inSampleSize = sampleSize
+                    inMutable = true
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
             }
-            BitmapFactory.decodeStream(inputStream, null, options)
+        } catch (e: OutOfMemoryError) {
+            Log.e(TAG, "OOM during BitmapFactory fallback for $wallpaperUri: $e")
+            null
         }
     } catch (e: OutOfMemoryError) {
         Log.e(TAG, "OOM during retrieveBitmap for $wallpaperUri: $e")
         null
     }
 
-    // Handle EXIF orientation
-    return bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
+    // Only apply EXIF orientation for the BitmapFactory path — ImageDecoder already handles it
+    return if (decodedWithImageDecoder) bitmap else bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
 }
 
 /**
@@ -281,7 +300,7 @@ fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap {
     if (!source.isMutable) {
         Log.w(TAG, "darkenBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        source.recycle()
+        // Do not recycle source here — caller owns the lifecycle and handles recycling
         return darkenBitmap(mutableCopy, darkenPercent)
     }
 
@@ -295,6 +314,7 @@ fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap {
         colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
             setScale(targetBrightnessFactor, targetBrightnessFactor, targetBrightnessFactor, 1f)
         })
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
     }
     Canvas(source).drawBitmap(source, 0f, 0f, paint)
     return source
@@ -328,7 +348,7 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
         hardwareRenderer.setContentRoot(renderNode)
         renderNode.setPosition(0, 0, source.width, source.height)
 
-        val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.MIRROR)
+        val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
         renderNode.setRenderEffect(blurEffect)
 
         val canvas = renderNode.beginRecording()
@@ -342,20 +362,26 @@ fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
         val image = imageReader.acquireNextImage()
             ?: throw IllegalStateException("Failed to acquire blurred image")
 
-        val hardwareBuffer = image.hardwareBuffer
-            ?: throw IllegalStateException("Failed to acquire hardware buffer")
+        try {
+            val hardwareBuffer = image.hardwareBuffer
+                ?: throw IllegalStateException("Failed to acquire hardware buffer")
 
-        val hardwareBitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, null)
-            ?: throw IllegalStateException("Failed to create bitmap from hardware buffer")
+            try {
+                val hardwareBitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, null)
+                    ?: throw IllegalStateException("Failed to create bitmap from hardware buffer")
 
-        // Convert hardware bitmap to regular bitmap for further processing
-        // Use mutable=true to allow subsequent effects to modify in-place
-        resultBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, true)
-            ?: throw IllegalStateException("Failed to copy hardware bitmap to software bitmap")
+                // Convert hardware bitmap to regular bitmap for further processing
+                // Use mutable=true to allow subsequent effects to modify in-place
+                resultBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                    ?: throw IllegalStateException("Failed to copy hardware bitmap to software bitmap")
 
-        hardwareBitmap.recycle()
-        hardwareBuffer.close()
-        image.close()
+                hardwareBitmap.recycle()
+            } finally {
+                hardwareBuffer.close()
+            }
+        } finally {
+            image.close()
+        }
 
     } catch (e: Exception) {
         Log.e(TAG, "Error blurring bitmap: $e")
@@ -388,14 +414,17 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     if (!source.isMutable) {
         Log.w(TAG, "vignetteBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        source.recycle()
+        // Do not recycle source here — caller owns the lifecycle and handles recycling
         return vignetteBitmap(mutableCopy, percent)
     }
 
     return try {
         val canvas = Canvas(source)
-        val dim = if (source.width < source.height) source.height else source.width
-        val rad = (dim * (1 - (percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))).coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
+        // Use corner-to-center diagonal so the vignette darkens uniformly in all directions
+        val halfW = source.width / 2f
+        val halfH = source.height / 2f
+        val diagonal = kotlin.math.sqrt(halfW * halfW + halfH * halfH)
+        val rad = (diagonal * (1 - (percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))).coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
         val centerX = source.width / 2f
         val centerY = source.height / 2f
 
@@ -432,7 +461,7 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
     if (!source.isMutable) {
         Log.w(TAG, "grayscaleBitmap received an immutable bitmap. Creating a mutable copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        source.recycle()
+        // Do not recycle source here — caller owns the lifecycle and handles recycling
         return grayscaleBitmap(mutableCopy, percent)
     }
 
@@ -440,7 +469,10 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
     if (factor <= 0f) return source
 
     val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
-    val paint = Paint().apply { colorFilter = ColorMatrixColorFilter(colorMatrix) }
+    val paint = Paint().apply {
+        colorFilter = ColorMatrixColorFilter(colorMatrix)
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+    }
 
     Canvas(source).drawBitmap(source, 0f, 0f, paint)
     return source
@@ -463,7 +495,7 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
     if (!source.isMutable) {
         Log.w(TAG, "adjustBitmapBrightness received an immutable bitmap. Returning a copy.")
         val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        source.recycle() // Recycle source to prevent memory leak
+        // Do not recycle source here — caller owns the lifecycle and handles recycling
         return adjustBitmapBrightness(mutableCopy, brightnessFactor)
     }
 
@@ -471,6 +503,7 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
         colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
             setScale(brightnessFactor, brightnessFactor, brightnessFactor, 1f)
         })
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
     }
     Canvas(source).drawBitmap(source, 0f, 0f, paint)
     return source

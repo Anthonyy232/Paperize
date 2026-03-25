@@ -221,7 +221,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
 
                     try {
                         val uri = wallpaper.uri.toUri()
-                        ContentUriImageLoader(contentResolver, uri)
+                        ContentUriImageLoader(contentResolver, uri, settings.liveScalingType)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error creating image loader", e)
                         EmptyImageLoader

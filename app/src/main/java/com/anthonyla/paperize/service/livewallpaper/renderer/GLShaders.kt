@@ -40,8 +40,9 @@ object GLShaders {
 
     /**
      * Fragment shader for horizontal Gaussian blur pass.
-     * Uses 9-tap kernel with branchless design for optimal GPU performance.
-     * Weights are pre-computed for sigma ~= 2.0.
+     * Uses 17-tap kernel (half-integer steps) to eliminate banding/ghosting at high blur radii.
+     * Weights are pre-computed for sigma ~= 1.815 sampled at {0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4} steps.
+     * Branchless: when blurRadius is 0, all offsets are 0 so all samples collapse to center.
      */
     const val BLUR_HORIZONTAL_FRAGMENT_SHADER = """
         precision mediump float;
@@ -52,23 +53,28 @@ object GLShaders {
 
         void main() {
             vec2 pixelSize = 1.0 / u_resolution;
-
-            // Sample center pixel
-            vec4 center = texture2D(u_texture, v_texCoord);
-
-            // 9-tap Gaussian blur (branchless - when radius is 0, offsets are 0)
-            vec4 color = center * 0.2210;
-
-            // Symmetric pairs for efficiency
             float r = u_blurRadius;
-            color += (texture2D(u_texture, v_texCoord + vec2(-4.0 * pixelSize.x * r, 0.0)) +
-                      texture2D(u_texture, v_texCoord + vec2( 4.0 * pixelSize.x * r, 0.0))) * 0.0204;
-            color += (texture2D(u_texture, v_texCoord + vec2(-3.0 * pixelSize.x * r, 0.0)) +
-                      texture2D(u_texture, v_texCoord + vec2( 3.0 * pixelSize.x * r, 0.0))) * 0.0577;
-            color += (texture2D(u_texture, v_texCoord + vec2(-2.0 * pixelSize.x * r, 0.0)) +
-                      texture2D(u_texture, v_texCoord + vec2( 2.0 * pixelSize.x * r, 0.0))) * 0.1215;
+
+            // 17-tap Gaussian (half-integer steps: 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0)
+            // Doubles sampling density vs 9-tap to eliminate aliasing at high blur radii
+            vec4 color = texture2D(u_texture, v_texCoord) * 0.1120;
+
+            color += (texture2D(u_texture, v_texCoord + vec2(-0.5 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 0.5 * pixelSize.x * r, 0.0))) * 0.1078;
             color += (texture2D(u_texture, v_texCoord + vec2(-1.0 * pixelSize.x * r, 0.0)) +
-                      texture2D(u_texture, v_texCoord + vec2( 1.0 * pixelSize.x * r, 0.0))) * 0.1899;
+                      texture2D(u_texture, v_texCoord + vec2( 1.0 * pixelSize.x * r, 0.0))) * 0.0962;
+            color += (texture2D(u_texture, v_texCoord + vec2(-1.5 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 1.5 * pixelSize.x * r, 0.0))) * 0.0796;
+            color += (texture2D(u_texture, v_texCoord + vec2(-2.0 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 2.0 * pixelSize.x * r, 0.0))) * 0.0610;
+            color += (texture2D(u_texture, v_texCoord + vec2(-2.5 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 2.5 * pixelSize.x * r, 0.0))) * 0.0434;
+            color += (texture2D(u_texture, v_texCoord + vec2(-3.0 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 3.0 * pixelSize.x * r, 0.0))) * 0.0286;
+            color += (texture2D(u_texture, v_texCoord + vec2(-3.5 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 3.5 * pixelSize.x * r, 0.0))) * 0.0175;
+            color += (texture2D(u_texture, v_texCoord + vec2(-4.0 * pixelSize.x * r, 0.0)) +
+                      texture2D(u_texture, v_texCoord + vec2( 4.0 * pixelSize.x * r, 0.0))) * 0.0099;
 
             gl_FragColor = color;
         }
@@ -76,7 +82,7 @@ object GLShaders {
 
     /**
      * Fragment shader for vertical Gaussian blur pass.
-     * Uses 9-tap kernel with branchless design matching horizontal pass.
+     * Uses 17-tap kernel matching the horizontal pass.
      */
     const val BLUR_VERTICAL_FRAGMENT_SHADER = """
         precision mediump float;
@@ -87,23 +93,27 @@ object GLShaders {
 
         void main() {
             vec2 pixelSize = 1.0 / u_resolution;
-
-            // Sample center pixel
-            vec4 center = texture2D(u_texture, v_texCoord);
-
-            // 9-tap Gaussian blur (branchless - when radius is 0, offsets are 0)
-            vec4 color = center * 0.2210;
-
-            // Symmetric pairs for efficiency
             float r = u_blurRadius;
-            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -4.0 * pixelSize.y * r)) +
-                      texture2D(u_texture, v_texCoord + vec2(0.0,  4.0 * pixelSize.y * r))) * 0.0204;
-            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -3.0 * pixelSize.y * r)) +
-                      texture2D(u_texture, v_texCoord + vec2(0.0,  3.0 * pixelSize.y * r))) * 0.0577;
-            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -2.0 * pixelSize.y * r)) +
-                      texture2D(u_texture, v_texCoord + vec2(0.0,  2.0 * pixelSize.y * r))) * 0.1215;
+
+            // 17-tap Gaussian (half-integer steps: 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0)
+            vec4 color = texture2D(u_texture, v_texCoord) * 0.1120;
+
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -0.5 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  0.5 * pixelSize.y * r))) * 0.1078;
             color += (texture2D(u_texture, v_texCoord + vec2(0.0, -1.0 * pixelSize.y * r)) +
-                      texture2D(u_texture, v_texCoord + vec2(0.0,  1.0 * pixelSize.y * r))) * 0.1899;
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  1.0 * pixelSize.y * r))) * 0.0962;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -1.5 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  1.5 * pixelSize.y * r))) * 0.0796;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -2.0 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  2.0 * pixelSize.y * r))) * 0.0610;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -2.5 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  2.5 * pixelSize.y * r))) * 0.0434;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -3.0 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  3.0 * pixelSize.y * r))) * 0.0286;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -3.5 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  3.5 * pixelSize.y * r))) * 0.0175;
+            color += (texture2D(u_texture, v_texCoord + vec2(0.0, -4.0 * pixelSize.y * r)) +
+                      texture2D(u_texture, v_texCoord + vec2(0.0,  4.0 * pixelSize.y * r))) * 0.0099;
 
             gl_FragColor = color;
         }
@@ -129,15 +139,18 @@ object GLShaders {
             // 1. Apply darken (branchless - when factor is 0, multiplier is 1.0)
             color.rgb *= (1.0 - u_darkenFactor);
  
-            // 2. Apply vignette (branchless using mix)
-            // When vignetteFactor is 0, the vignette calculation still runs but
-            // the smoothstep result approaches 1.0 everywhere, so color is unchanged
-            vec2 center = v_texCoord - 0.5;
-            float dist = length(center);
-            float vignette = 1.0 - smoothstep(0.3, 0.9, dist * (1.0 + u_vignetteFactor * 2.0));
-            // Mix between original (1.0) and vignette based on factor
-            float vignetteMultiplier = mix(1.0, vignette, u_vignetteFactor);
-            color.rgb *= vignetteMultiplier;
+            // 2. Apply vignette — matches CPU vignetteBitmap gradient stops:
+            //    [0% dark at center] → [10% dark at 70% of radius] → [80% dark at edge]
+            //    radius is normalized to 0.5 UV (image edge along shorter axis)
+            vec2 vignetteCenter = v_texCoord - 0.5;
+            float dist = length(vignetteCenter);
+            float t = clamp(dist / 0.5, 0.0, 1.0);
+            // Inner segment: 0% → 10% over [0, 0.7]
+            float innerDark = smoothstep(0.0, 0.7, t) * 0.1;
+            // Outer segment: 10% → 80% over [0.7, 1.0]
+            float outerDark = smoothstep(0.7, 1.0, t) * 0.7;
+            float darkAmount = innerDark + outerDark;
+            color.rgb *= (1.0 - darkAmount * u_vignetteFactor);
  
             // 3. Apply grayscale (branchless - mix handles factor 0 correctly)
             // ITU-R BT.709 standard luminance calculation
