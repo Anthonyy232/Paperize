@@ -10,7 +10,6 @@ import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
 import com.anthonyla.paperize.core.util.getDeviceScreenSize
-import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.core.util.processBitmap
 import com.anthonyla.paperize.core.util.retrieveBitmap
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -85,53 +84,52 @@ class ChangeWallpaperUseCase @Inject constructor(
                 }
 
                 val uri = candidate.uri.toUri()
-                if (uri.isValid(context.contentResolver)) {
-                    // Try to load and process the bitmap
-                    try {
-                        val bitmap = retrieveBitmap(context, uri, screenSize.width, screenSize.height, scaling)
-                        if (bitmap != null) {
-                            // retrieveBitmap already applies scaling via ImageDecoder.setTargetSize
-                            // Apply effects directly to the retrieved bitmap
+                // Skip the isValid() pre-check — retrieveBitmap returns null on failure,
+                // which is handled below. Avoiding the extra contentResolver.query() saves
+                // one round-trip per wallpaper on the hot path.
+                try {
+                    val bitmap = retrieveBitmap(context, uri, screenSize.width, screenSize.height, scaling)
+                    if (bitmap != null) {
+                        var processedBitmap = processBitmap(
+                            source = bitmap,
+                            enableDarken = effects.enableDarken,
+                            darkenPercent = effects.darkenPercentage,
+                            enableBlur = effects.enableBlur,
+                            blurPercent = effects.blurPercentage,
+                            enableVignette = effects.enableVignette,
+                            vignettePercent = effects.vignettePercentage,
+                            enableGrayscale = effects.enableGrayscale,
+                            grayscalePercent = effects.grayscalePercentage
+                        )
 
-                            var processedBitmap = processBitmap(
-                                source = bitmap,
-                                enableDarken = effects.enableDarken,
-                                darkenPercent = effects.darkenPercentage,
-                                enableBlur = effects.enableBlur,
-                                blurPercent = effects.blurPercentage,
-                                enableVignette = effects.enableVignette,
-                                vignettePercent = effects.vignettePercentage,
-                                enableGrayscale = effects.enableGrayscale,
-                                grayscalePercent = effects.grayscalePercentage
-                            )
-
-                            if (processedBitmap !== bitmap) {
-                                bitmap.recycle()
-                            }
-
-                            // Apply adaptive brightness
-                            if (settings.adaptiveBrightness) {
-                                val previousBitmap = processedBitmap
-                                processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
-                                if (processedBitmap !== previousBitmap) {
-                                    previousBitmap.recycle()
-                                }
-                            }
-
-                            finalBitmap = processedBitmap
-                        } else {
-                            // File exists but failed to decode (corrupted)
-                            wallpaperRepository.deleteWallpaper(candidate.id)
-                            maxRetries--
+                        if (processedBitmap !== bitmap) {
+                            bitmap.recycle()
                         }
-                    } catch (_: Exception) {
-                        // Error during processing, skip this wallpaper
-                        wallpaperRepository.deleteWallpaper(candidate.id)
+
+                        if (settings.adaptiveBrightness) {
+                            val previousBitmap = processedBitmap
+                            processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
+                            if (processedBitmap !== previousBitmap) {
+                                previousBitmap.recycle()
+                            }
+                        }
+
+                        finalBitmap = processedBitmap
+
+                        try {
+                            wallpaperRepository.setCurrentWallpaper(albumId, screenType, candidate.id)
+                        } catch (e: Exception) {
+                            android.util.Log.w("ChangeWallpaperUseCase", "Failed to record current wallpaper", e)
+                        }
+                    } else {
+                        // null bitmap — file temporarily inaccessible; skip this cycle.
+                        // Do NOT delete the wallpaper permanently — a transient storage or
+                        // permission issue should not remove it from the user's album.
+                        // RefreshAlbumUseCase is responsible for pruning truly invalid URIs.
                         maxRetries--
                     }
-                } else {
-                    // URI invalid
-                    wallpaperRepository.deleteWallpaper(candidate.id)
+                } catch (_: Exception) {
+                    // Error during bitmap processing; skip this wallpaper this cycle.
                     maxRetries--
                 }
             }

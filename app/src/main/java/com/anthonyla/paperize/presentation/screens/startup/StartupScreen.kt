@@ -1,7 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.startup
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.core.graphics.createBitmap
 import androidx.appcompat.content.res.AppCompatResources
 import com.anthonyla.paperize.presentation.components.OnboardingLayout
 import androidx.compose.foundation.BorderStroke
@@ -48,24 +48,28 @@ fun StartupScreen(
 ) {
     val context = LocalContext.current
     val appIcon = remember {
-        val drawable = AppCompatResources.getDrawable(context, R.mipmap.ic_launcher_round)!!
-        val size = 192 // Use a fixed high resolution size
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, size, size)
-        drawable.draw(canvas)
-        bitmap.asImageBitmap()
+        val drawable = AppCompatResources.getDrawable(context, R.mipmap.ic_launcher_round)
+        if (drawable != null) {
+            val size = 192 // Use a fixed high resolution size
+            val bitmap = createBitmap(size, size)
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, size, size)
+            drawable.draw(canvas)
+            bitmap.asImageBitmap()
+        } else null
     }
     
     OnboardingLayout(
         title = stringResource(R.string.app_name),
         modifier = modifier,
         iconContent = {
-            Image(
-                bitmap = appIcon,
-                contentDescription = null,
-                modifier = Modifier.size(100.dp)
-            )
+            if (appIcon != null) {
+                Image(
+                    bitmap = appIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp)
+                )
+            }
         },
         content = {
             Column(
@@ -91,7 +95,7 @@ fun StartupScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
-                    border = androidx.compose.foundation.BorderStroke(
+                    border = BorderStroke(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.outlineVariant
                     )

@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinCompose)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ksp)
@@ -57,12 +58,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-        }
-    }
-
     buildFeatures {
         compose = true
         viewBinding = true
@@ -74,19 +69,15 @@ android {
         generateLocaleConfig = true
     }
 
-    buildToolsVersion = "35.0.1"
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
     }
+}
 
-    applicationVariants.all {
-        this.outputs
-            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-            .forEach { output ->
-                val apkName = "paperize-v${this.versionName}.apk"
-                output.outputFileName = apkName
-            }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

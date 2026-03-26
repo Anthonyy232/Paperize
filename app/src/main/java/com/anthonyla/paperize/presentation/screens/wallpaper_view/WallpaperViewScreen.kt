@@ -1,8 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper_view
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,7 +27,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 import net.engawapg.lib.zoomable.rememberZoomState
@@ -46,8 +42,6 @@ fun WallpaperViewScreen(
 ) {
     val zoomState = rememberZoomState()
 
-    BackHandler { onBackClick() }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -56,7 +50,7 @@ fun WallpaperViewScreen(
                     containerColor = Color.Transparent
                 ),
                 title = {
-                    if (zoomState.scale == 1f) {
+                    if (zoomState.scale <= 1.01f) {
                         Text(
                             text = wallpaperName,
                             color = MaterialTheme.colorScheme.surfaceBright,

@@ -7,6 +7,7 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.dao.AlbumDao
 import com.anthonyla.paperize.data.database.dao.FolderDao
+import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.dao.WallpaperQueueDao
 import com.anthonyla.paperize.data.datastore.PreferencesManager
@@ -70,6 +71,11 @@ object AppModule {
     fun provideWallpaperQueueDao(database: PaperizeDatabase): WallpaperQueueDao =
         database.wallpaperQueueDao()
 
+    @Provides
+    @Singleton
+    fun provideWallpaperCurrentDao(database: PaperizeDatabase): WallpaperCurrentDao =
+        database.wallpaperCurrentDao()
+
     /**
      * Provide PreferencesManager
      */
@@ -97,8 +103,9 @@ object AppModule {
     fun provideWallpaperRepository(
         @ApplicationContext context: Context,
         wallpaperDao: WallpaperDao,
-        wallpaperQueueDao: WallpaperQueueDao
-    ): WallpaperRepository = WallpaperRepositoryImpl(context, wallpaperDao, wallpaperQueueDao)
+        wallpaperQueueDao: WallpaperQueueDao,
+        wallpaperCurrentDao: WallpaperCurrentDao
+    ): WallpaperRepository = WallpaperRepositoryImpl(context, wallpaperDao, wallpaperQueueDao, wallpaperCurrentDao)
 
     @Provides
     @Singleton

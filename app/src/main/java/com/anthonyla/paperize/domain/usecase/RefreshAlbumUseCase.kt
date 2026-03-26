@@ -31,14 +31,8 @@ class RefreshAlbumUseCase @Inject constructor(
             totalRemoved += wallpapersResult.data
         }
 
-        // If wallpapers were removed, normalize queue positions to fix gaps from CASCADE deletes
         if (totalRemoved > 0) {
-            // Refresh album cover after validation (in case cover wallpaper was removed)
             albumRepository.refreshAlbumCover(albumId)
-
-            // Normalize both HOME and LOCK queues to fix position gaps
-            // CASCADE deletes may leave gaps in queue positions (e.g., 0, 2, 4 instead of 0, 1, 2)
-            wallpaperRepository.normalizeAllQueuesForAlbum(albumId)
         }
 
         // Return error if either operation failed

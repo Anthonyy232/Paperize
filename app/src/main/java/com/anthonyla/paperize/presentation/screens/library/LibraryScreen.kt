@@ -23,14 +23,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.AddAlbumDialog
@@ -47,7 +45,8 @@ fun LibraryScreen(
 ) {
     val lazyListState = rememberLazyGridState()
     var showAddAlbumDialog by rememberSaveable { mutableStateOf(false) }
-    var albumNameError by remember { mutableStateOf<String?>(null) }
+    var albumNameError by rememberSaveable { mutableStateOf<String?>(null) }
+    val albumNameExistsError = stringResource(R.string.album_name_exists_error)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -102,7 +101,9 @@ fun LibraryScreen(
         } else {
             LazyVerticalGrid(
                 state = lazyListState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 columns = GridCells.Adaptive(AppGrid.itemMinSize),
                 contentPadding = PaddingValues(AppSpacing.gridPadding),
                 horizontalArrangement = Arrangement.Start
@@ -119,9 +120,8 @@ fun LibraryScreen(
     }
 
     if (showAddAlbumDialog) {
-        val errorMessageString = stringResource(R.string.album_name_exists_error)
         AddAlbumDialog(
-            onDismiss = { 
+            onDismiss = {
                 showAddAlbumDialog = false
                 albumNameError = null
             },
@@ -129,7 +129,7 @@ fun LibraryScreen(
                 // Check if album with this name already exists
                 val isDuplicate = albums.any { it.name.equals(name, ignoreCase = true) }
                 if (isDuplicate) {
-                    albumNameError = errorMessageString
+                    albumNameError = albumNameExistsError
                 } else {
                     onCreateAlbum(name)
                     showAddAlbumDialog = false

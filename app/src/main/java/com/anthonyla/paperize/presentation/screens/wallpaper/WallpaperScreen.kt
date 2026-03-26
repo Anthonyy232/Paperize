@@ -43,9 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingType
-import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
@@ -77,7 +75,7 @@ fun WallpaperScreen(
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
     var albumSelectionContext by rememberSaveable { mutableStateOf(AlbumSelectionContext.BOTH) }
-    var showEmptyAlbumWarning by remember { mutableStateOf(false) }
+    var showEmptyAlbumWarning by rememberSaveable { mutableStateOf(false) }
 
     // Settings debouncing
     var pendingSettings by remember { mutableStateOf<ScheduleSettings?>(null) }
@@ -165,9 +163,10 @@ fun WallpaperScreen(
         stringResource(R.string.none)
     )
 
-    var selectedScalingIndex by rememberSaveable {
+    val scalingTypeFromSettings = if (wallpaperMode == WallpaperMode.LIVE) scheduleSettings.liveScalingType else scheduleSettings.homeScalingType
+    var selectedScalingIndex by remember(scalingTypeFromSettings) {
         mutableIntStateOf(
-            when (if (wallpaperMode == WallpaperMode.LIVE) scheduleSettings.liveScalingType else scheduleSettings.homeScalingType) {
+            when (scalingTypeFromSettings) {
                 ScalingType.FILL -> 0
                 ScalingType.FIT -> 1
                 ScalingType.STRETCH -> 2
@@ -364,7 +363,8 @@ fun WallpaperScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(AppSpacing.large),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -374,12 +374,14 @@ fun WallpaperScreen(
                                     stringResource(R.string.no_album_selected)
                                 },
                                 style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = stringResource(R.string.home_album_label),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -388,7 +390,7 @@ fun WallpaperScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -519,7 +521,7 @@ fun WallpaperScreen(
                         title = stringResource(R.string.interval_text),
                         minutes = scheduleSettings.homeIntervalMinutes,
                         onMinutesChange = { minutes ->
-                            onUpdateScheduleSettings(
+                            updateSettingsDebounced(
                                 scheduleSettings.copy(
                                     homeIntervalMinutes = minutes,
                                     lockIntervalMinutes = minutes
@@ -1083,8 +1085,6 @@ fun WallpaperScreen(
                         }
                     }
                 }
-                // Dismiss the bottom sheet after selection
-                showAlbumSelectionSheet = false
             },
             onDismiss = { showAlbumSelectionSheet = false }
         )

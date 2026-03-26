@@ -4,13 +4,8 @@ import com.anthonyla.paperize.presentation.components.OnboardingLayout
 import com.anthonyla.paperize.core.util.PermissionUtil
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import android.provider.Settings
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
@@ -18,14 +13,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.constants.Constants
+import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
 /**
@@ -39,18 +34,18 @@ fun StoragePermissionScreen(
 ) {
     val context = LocalContext.current
     var permissionGranted by remember { mutableStateOf(PermissionUtil.hasStoragePermission()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
     // Check permission status on resume (when user returns from settings)
-    DisposableEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
         val listener = object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
                 permissionGranted = PermissionUtil.hasStoragePermission()
             }
         }
-        val lifecycleOwner = context as? LifecycleOwner
-        lifecycleOwner?.lifecycle?.addObserver(listener)
+        lifecycleOwner.lifecycle.addObserver(listener)
 
         onDispose {
-            lifecycleOwner?.lifecycle?.removeObserver(listener)
+            lifecycleOwner.lifecycle.removeObserver(listener)
         }
     }
 
@@ -118,7 +113,7 @@ fun StoragePermissionScreen(
                 onClick = {
                     if (!PermissionUtil.hasStoragePermission()) {
                         val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                            data = Uri.parse("package:${context.packageName}")
+                            data = "package:${context.packageName}".toUri()
                         }
                         context.startActivity(intent)
                     } else {

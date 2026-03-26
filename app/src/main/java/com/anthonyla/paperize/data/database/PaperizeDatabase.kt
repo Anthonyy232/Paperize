@@ -6,10 +6,12 @@ import androidx.room.TypeConverters
 import com.anthonyla.paperize.data.database.converters.TypeConverters as PaperizeTypeConverters
 import com.anthonyla.paperize.data.database.dao.AlbumDao
 import com.anthonyla.paperize.data.database.dao.FolderDao
+import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.dao.WallpaperQueueDao
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.database.entities.FolderEntity
+import com.anthonyla.paperize.data.database.entities.WallpaperCurrentEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperQueueEntity
 import com.anthonyla.paperize.core.constants.Constants
@@ -32,7 +34,8 @@ import com.anthonyla.paperize.core.constants.Constants
         AlbumEntity::class,
         WallpaperEntity::class,
         FolderEntity::class,
-        WallpaperQueueEntity::class
+        WallpaperQueueEntity::class,
+        WallpaperCurrentEntity::class
     ],
     version = Constants.DATABASE_VERSION,
     exportSchema = true
@@ -43,4 +46,5 @@ abstract class PaperizeDatabase : RoomDatabase() {
     abstract fun wallpaperDao(): WallpaperDao
     abstract fun folderDao(): FolderDao
     abstract fun wallpaperQueueDao(): WallpaperQueueDao
+    abstract fun wallpaperCurrentDao(): WallpaperCurrentDao
 }

@@ -11,8 +11,10 @@ import com.anthonyla.paperize.core.WallpaperSourceType
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.core.util.isValid
+import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.dao.WallpaperQueueDao
+import com.anthonyla.paperize.data.database.entities.WallpaperCurrentEntity
 import com.anthonyla.paperize.data.mapper.toDomainModel
 import com.anthonyla.paperize.data.mapper.toDomainModels
 import com.anthonyla.paperize.data.mapper.toEntity
@@ -20,7 +22,6 @@ import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,7 +36,8 @@ import java.util.concurrent.ConcurrentHashMap
 class WallpaperRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val wallpaperDao: WallpaperDao,
-    private val wallpaperQueueDao: WallpaperQueueDao
+    private val wallpaperQueueDao: WallpaperQueueDao,
+    private val wallpaperCurrentDao: WallpaperCurrentDao
 ) : WallpaperRepository {
 
     private val contentResolver: ContentResolver = context.contentResolver
@@ -165,35 +167,55 @@ class WallpaperRepositoryImpl @Inject constructor(
 
         return mutex.withLock {
             try {
-                val wallpapers = wallpaperDao.getWallpapersByAlbum(albumId).first()
-
-                // If shuffle is enabled, check if there's an existing queue for another screen type
-                // with the same album to maintain synchronized order
-                val otherScreenType = if (shuffle) {
-                    when (screenType) {
-                        ScreenType.HOME -> ScreenType.LOCK
-                        ScreenType.LOCK -> ScreenType.HOME
-                        ScreenType.BOTH -> null
-                        ScreenType.LIVE -> null
-                    }
+                // Load only IDs (+ order for sequential mode) instead of full WallpaperEntity
+                // objects, to avoid deserializing every field for every wallpaper in the album.
+                val otherScreenType: ScreenType? = if (shuffle) when (screenType) {
+                    ScreenType.HOME -> ScreenType.LOCK
+                    ScreenType.LOCK -> ScreenType.HOME
+                    else -> null
                 } else null
 
-                val otherScreenQueueIds = otherScreenType?.let {
+                val wallpaperIds = if (shuffle) {
+                    val ids = wallpaperDao.getWallpaperIdsByAlbum(albumId)
+
+                    // In shuffle mode, sync with the other screen's queue if it exists
+                    val otherScreenQueueIds = otherScreenType?.let {
+                        try {
+                            wallpaperQueueDao.getQueueItems(albumId, it)
+                                .map { item -> item.wallpaperId }
+                        } catch (_: Exception) { null }
+                    }
+
+                    if (otherScreenQueueIds != null && otherScreenQueueIds.isNotEmpty()) {
+                        com.anthonyla.paperize.core.util.QueueBuilder.mergeWithExistingQueue(otherScreenQueueIds, ids)
+                    } else {
+                        com.anthonyla.paperize.core.util.QueueBuilder.buildShuffledQueue(ids)
+                    }
+                } else {
+                    val idsWithOrder = wallpaperDao.getWallpaperIdsAndOrderByAlbum(albumId)
+                    com.anthonyla.paperize.core.util.QueueBuilder.buildSequentialQueue(
+                        idsWithOrder.map { it.id to it.displayOrder }
+                    )
+                }
+
+                wallpaperQueueDao.rebuildQueue(albumId, screenType, wallpaperIds)
+
+                // In shuffle mode, pre-populate the other screen's queue with the same order
+                // if it doesn't yet exist. This ensures both screens start from the same
+                // shuffle sequence, preventing drift when switching to separate schedules.
+                if (shuffle && otherScreenType != null) {
                     try {
-                        wallpaperQueueDao.getQueueItems(albumId, it)
-                            .map { queueItem -> queueItem.wallpaperId }
+                        val otherQueueIsEmpty = wallpaperQueueDao
+                            .getQueueItems(albumId, otherScreenType).isEmpty()
+                        if (otherQueueIsEmpty) {
+                            wallpaperQueueDao.rebuildQueue(albumId, otherScreenType, wallpaperIds)
+                        }
                     } catch (_: Exception) {
-                        null
+                        // Best-effort: if pre-population fails the other screen will build its
+                        // own queue on demand via mergeWithExistingQueue
                     }
                 }
 
-                val wallpaperIds = com.anthonyla.paperize.core.util.QueueBuilder.buildQueue(
-                    wallpapers = wallpapers.toDomainModels(),
-                    shuffle = shuffle,
-                    otherScreenQueue = otherScreenQueueIds
-                )
-
-                wallpaperQueueDao.rebuildQueue(albumId, screenType, wallpaperIds)
                 Result.Success(Unit)
             } catch (e: Exception) {
                 Result.Error(e)
@@ -227,18 +249,14 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun normalizeAllQueuesForAlbum(albumId: String): Result<Unit> {
-        return try {
-            // Normalize queue positions for each active screen type
-            // This fixes gaps in queue positions caused by CASCADE deletes
-            // Note: BOTH queue is intentionally excluded — it is never populated or consumed
-            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.HOME)
-            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LOCK)
-            wallpaperQueueDao.normalizeQueuePositions(albumId, ScreenType.LIVE)
-            Result.Success(Unit)
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
+
+    override suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): Wallpaper? =
+        wallpaperCurrentDao.getCurrentWallpaper(albumId, screenType)?.toDomainModel()
+
+    override suspend fun setCurrentWallpaper(albumId: String, screenType: ScreenType, wallpaperId: String) {
+        wallpaperCurrentDao.upsertCurrentWallpaper(
+            WallpaperCurrentEntity(albumId = albumId, screenType = screenType, wallpaperId = wallpaperId)
+        )
     }
 
     override suspend fun scanFolderForWallpapers(folderUri: Uri): Result<List<Wallpaper>> {

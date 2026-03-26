@@ -6,7 +6,7 @@ package com.anthonyla.paperize.core.constants
 object Constants {
     // Database
     const val DATABASE_NAME = "paperize_database"
-    const val DATABASE_VERSION = 2  // v2: Added mediaType and crop fields to WallpaperEntity
+    const val DATABASE_VERSION = 3  // v3: Added wallpaper_current table for reapply-effects support
 
     // DataStore
     const val PREFERENCES_NAME = "paperize_preferences"
@@ -17,6 +17,7 @@ object Constants {
 
     // Services
     const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER"
+    const val ACTION_REAPPLY_EFFECTS = "com.anthonyla.paperize.ACTION_REAPPLY_EFFECTS"
     const val ACTION_RELOAD_WALLPAPER = "com.anthonyla.paperize.ACTION_RELOAD_WALLPAPER"
 
     // WorkManager
@@ -194,10 +195,6 @@ object PreferenceKeys {
     const val HOME_SCALING_TYPE = "home_scaling_type"
     const val LOCK_SCALING_TYPE = "lock_scaling_type"
     const val LIVE_SCALING_TYPE = "live_scaling_type"
-
-    // Current wallpapers
-    const val CURRENT_HOME_WALLPAPER_ID = "current_home_wallpaper_id"
-    const val CURRENT_LOCK_WALLPAPER_ID = "current_lock_wallpaper_id"
 
     // Behavior
     const val ADAPTIVE_BRIGHTNESS = "adaptive_brightness"

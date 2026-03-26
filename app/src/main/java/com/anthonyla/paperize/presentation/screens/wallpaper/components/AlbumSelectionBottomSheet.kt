@@ -4,7 +4,6 @@ import com.anthonyla.paperize.presentation.theme.AppBorderWidths
 import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PhotoAlbum
@@ -33,9 +31,13 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Size
@@ -118,8 +120,11 @@ private fun AlbumSelectionItem(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val showCoverUri by remember(album.coverUri) {
-        mutableStateOf(!album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri))
+    var showCoverUri by remember(album.coverUri) { mutableStateOf(false) }
+    LaunchedEffect(album.coverUri) {
+        showCoverUri = withContext(Dispatchers.IO) {
+            !album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri)
+        }
     }
 
     Row(
@@ -146,7 +151,7 @@ private fun AlbumSelectionItem(
             if (showCoverUri) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
-                        .data(Uri.parse(album.coverUri))
+                        .data(album.coverUri!!.toUri())
                         .size(Size(Constants.LIST_THUMBNAIL_SIZE, Constants.LIST_THUMBNAIL_SIZE))  // Small thumbnail for list item
                         .build(),
                     contentDescription = album.name,
@@ -197,9 +202,9 @@ private fun AlbumSelectionItem(
 private fun isValidUri(context: Context, uriString: String?): Boolean {
     if (uriString.isNullOrEmpty()) return false
     return try {
-        val uri = Uri.parse(uriString)
+        val uri = uriString.toUri()
         context.contentResolver.openInputStream(uri)?.use { true } ?: false
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }

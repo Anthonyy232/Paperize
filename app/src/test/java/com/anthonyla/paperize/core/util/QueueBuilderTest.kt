@@ -89,68 +89,6 @@ class QueueBuilderTest {
     }
 
     // ============================================================
-    // Test: needsNormalization
-    // ============================================================
-
-    @Test
-    fun `needsNormalization returns false for empty list`() {
-        assertFalse(QueueBuilder.needsNormalization(emptyList()))
-    }
-
-    @Test
-    fun `needsNormalization returns false for sequential positions`() {
-        assertFalse(QueueBuilder.needsNormalization(listOf(0, 1, 2, 3)))
-    }
-
-    @Test
-    fun `needsNormalization returns true for positions with gaps`() {
-        assertTrue(QueueBuilder.needsNormalization(listOf(0, 2, 4)))
-    }
-
-    @Test
-    fun `needsNormalization returns true for positions not starting at 0`() {
-        assertTrue(QueueBuilder.needsNormalization(listOf(1, 2, 3)))
-    }
-
-    @Test
-    fun `needsNormalization returns false for out of order but contiguous positions`() {
-        // [2, 0, 1] when sorted becomes [0, 1, 2] - no gaps, so no normalization needed
-        assertFalse(QueueBuilder.needsNormalization(listOf(2, 0, 1)))
-    }
-
-    @Test
-    fun `needsNormalization returns false for single item at 0`() {
-        assertFalse(QueueBuilder.needsNormalization(listOf(0)))
-    }
-
-    @Test
-    fun `needsNormalization returns true for single item not at 0`() {
-        assertTrue(QueueBuilder.needsNormalization(listOf(5)))
-    }
-
-    // ============================================================
-    // Test: normalizePositions
-    // ============================================================
-
-    @Test
-    fun `normalizePositions creates sequential indices`() {
-        val normalized = QueueBuilder.normalizePositions(listOf(0, 2, 5))
-        assertEquals(listOf(0, 1, 2), normalized)
-    }
-
-    @Test
-    fun `normalizePositions handles empty list`() {
-        val normalized = QueueBuilder.normalizePositions(emptyList())
-        assertTrue(normalized.isEmpty())
-    }
-
-    @Test
-    fun `normalizePositions handles already normalized`() {
-        val normalized = QueueBuilder.normalizePositions(listOf(0, 1, 2))
-        assertEquals(listOf(0, 1, 2), normalized)
-    }
-
-    // ============================================================
     // Test: mergeWithExistingQueueDeterministic
     // ============================================================
 

@@ -6,9 +6,11 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.repository.SettingsRepository
+import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -26,7 +28,8 @@ class WallpaperChangeWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
     private val changeWallpaperUseCase: ChangeWallpaperUseCase,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val wallpaperRepository: WallpaperRepository
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -79,7 +82,7 @@ class WallpaperChangeWorker @AssistedInject constructor(
             ScreenType.HOME -> {
                 val homeAlbumId = settings.homeAlbumId
                 if (homeAlbumId != null) {
-                    changeHomeWallpaper(homeAlbumId, wallpaperManager)
+                    changeHomeWallpaper(homeAlbumId, settings, wallpaperManager)
                 } else {
                     Log.w(TAG, "No home album selected")
                 }
@@ -87,7 +90,7 @@ class WallpaperChangeWorker @AssistedInject constructor(
             ScreenType.LOCK -> {
                 val lockAlbumId = settings.lockAlbumId
                 if (lockAlbumId != null) {
-                    changeLockWallpaper(lockAlbumId, wallpaperManager)
+                    changeLockWallpaper(lockAlbumId, settings, wallpaperManager)
                 } else {
                     Log.w(TAG, "No lock album selected")
                 }
@@ -127,6 +130,27 @@ class WallpaperChangeWorker @AssistedInject constructor(
                             )
 
                             Log.d(TAG, "Both screens wallpaper changed successfully")
+
+                            // Keep LOCK queue in sync with HOME so that if the user later
+                            // switches to separate schedules, both screens continue from
+                            // the same queue position rather than LOCK restarting at 0.
+                            try {
+                                val homeCurrentId = wallpaperRepository
+                                    .getCurrentWallpaper(albumId, ScreenType.HOME)?.id
+                                if (homeCurrentId != null) {
+                                    if (wallpaperRepository.getNextWallpaperInQueue(
+                                            albumId, ScreenType.LOCK) == null) {
+                                        wallpaperRepository.buildWallpaperQueue(
+                                            albumId, ScreenType.LOCK, settings.shuffleEnabled)
+                                    }
+                                    wallpaperRepository.getAndDequeueWallpaper(
+                                        albumId, ScreenType.LOCK)
+                                    wallpaperRepository.setCurrentWallpaper(
+                                        albumId, ScreenType.LOCK, homeCurrentId)
+                                }
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
+                            }
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting wallpaper for both screens", e)
                             throw e
@@ -134,8 +158,18 @@ class WallpaperChangeWorker @AssistedInject constructor(
                             bitmap.recycle()
                         }
                     }.onError { error ->
-                        Log.e(TAG, "Error getting wallpaper bitmap for both screens", error)
-                        throw error
+                        if (error is EmptyAlbumException) {
+                            Log.w(TAG, "Album is empty for BOTH screens — disabling changer")
+                            val updatedSettings = settings.copy(
+                                homeAlbumId = null,
+                                lockAlbumId = null,
+                                enableChanger = false
+                            )
+                            settingsRepository.updateScheduleSettings(updatedSettings)
+                        } else {
+                            Log.e(TAG, "Error getting wallpaper bitmap for both screens", error)
+                            throw error
+                        }
                     }
                 } else {
                     Log.w(TAG, "No album selected for synchronized mode")
@@ -144,7 +178,7 @@ class WallpaperChangeWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun changeHomeWallpaper(albumId: String, wallpaperManager: WallpaperManager) {
+    private suspend fun changeHomeWallpaper(albumId: String, settings: com.anthonyla.paperize.domain.model.ScheduleSettings, wallpaperManager: WallpaperManager) {
         val result = changeWallpaperUseCase(albumId, ScreenType.HOME)
         result.onSuccess { bitmap ->
             try {
@@ -173,12 +207,21 @@ class WallpaperChangeWorker @AssistedInject constructor(
                 bitmap.recycle()
             }
         }.onError { error ->
-            Log.e(TAG, "Error getting home wallpaper bitmap", error)
-            throw error
+            if (error is EmptyAlbumException) {
+                Log.w(TAG, "Home album is empty — disabling home screen")
+                val lockStillActive = settings.lockEnabled && settings.lockAlbumId != null
+                settingsRepository.updateScheduleSettings(settings.copy(
+                    homeAlbumId = null,
+                    enableChanger = if (lockStillActive) settings.enableChanger else false
+                ))
+            } else {
+                Log.e(TAG, "Error getting home wallpaper bitmap", error)
+                throw error
+            }
         }
     }
 
-    private suspend fun changeLockWallpaper(albumId: String, wallpaperManager: WallpaperManager) {
+    private suspend fun changeLockWallpaper(albumId: String, settings: com.anthonyla.paperize.domain.model.ScheduleSettings, wallpaperManager: WallpaperManager) {
         val result = changeWallpaperUseCase(albumId, ScreenType.LOCK)
         result.onSuccess { bitmap ->
             try {
@@ -207,8 +250,17 @@ class WallpaperChangeWorker @AssistedInject constructor(
                 bitmap.recycle()
             }
         }.onError { error ->
-            Log.e(TAG, "Error getting lock wallpaper bitmap", error)
-            throw error
+            if (error is EmptyAlbumException) {
+                Log.w(TAG, "Lock album is empty — disabling lock screen")
+                val homeStillActive = settings.homeEnabled && settings.homeAlbumId != null
+                settingsRepository.updateScheduleSettings(settings.copy(
+                    lockAlbumId = null,
+                    enableChanger = if (homeStillActive) settings.enableChanger else false
+                ))
+            } else {
+                Log.e(TAG, "Error getting lock wallpaper bitmap", error)
+                throw error
+            }
         }
     }
 }

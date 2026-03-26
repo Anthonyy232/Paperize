@@ -98,11 +98,16 @@ interface WallpaperRepository {
     suspend fun clearQueuesForAlbum(albumId: String): Result<Unit>
 
     /**
-     * Normalize queue positions for all queues (HOME and LOCK) of an album
-     * Fixes gaps in queue positions caused by CASCADE deletes when wallpapers are removed
-     * Ensures positions are sequential (0, 1, 2, ...) without gaps
+     * Get the last-applied wallpaper for a given album/screen.
+     * Returns null if none has been recorded yet or if it was deleted.
      */
-    suspend fun normalizeAllQueuesForAlbum(albumId: String): Result<Unit>
+    suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): Wallpaper?
+
+    /**
+     * Record the wallpaper that was just applied for a given album/screen.
+     * Called by WallpaperChangeService after a successful setBitmap().
+     */
+    suspend fun setCurrentWallpaper(albumId: String, screenType: ScreenType, wallpaperId: String)
 
     /**
      * Scan folder for wallpapers

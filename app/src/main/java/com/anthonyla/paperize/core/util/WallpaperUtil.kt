@@ -47,44 +47,6 @@ import com.anthonyla.paperize.core.WallpaperMediaType
 private const val TAG = "WallpaperUtil"
 
 /**
- * Get the dimensions of the image from the URI
- */
-fun Uri.getImageDimensions(context: Context): Size? {
-    // Try EXIF first
-    try {
-        context.contentResolver.openInputStream(this)?.use { inputStream ->
-            val exif = ExifInterface(inputStream)
-            val width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0)
-            val height = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0)
-            if (width > 0 && height > 0) {
-                return Size(width, height)
-            }
-        }
-    } catch (e: Exception) {
-        Log.w(TAG, "Error reading EXIF dimensions for $this, falling back: $e")
-    }
-
-    // Fallback to BitmapFactory
-    try {
-        context.contentResolver.openInputStream(this)?.use { inputStream ->
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-            BitmapFactory.decodeStream(inputStream, null, options)
-            if (options.outWidth > 0 && options.outHeight > 0) {
-                return Size(options.outWidth, options.outHeight)
-            }
-        }
-    } catch (e: Exception) {
-        Log.e(TAG, "Error getting image dimensions with BitmapFactory for $this: $e")
-        return null
-    }
-
-    Log.w(TAG, "Could not get image dimensions for $this")
-    return null
-}
-
-/**
  * Get EXIF orientation from URI
  */
 fun Uri.getExifOrientation(context: Context): Int {
@@ -179,8 +141,12 @@ fun getDeviceScreenSize(context: Context): Size {
 }
 
 /**
- * Retrieve a bitmap from a URI that is scaled down to the device's screen size
- * Now with EXIF orientation support
+ * Retrieve a bitmap from a URI that is scaled down to the device's screen size.
+ *
+ * ImageDecoder is the primary path: it auto-applies EXIF orientation and exposes
+ * post-EXIF dimensions in the callback via info.size, so we no longer need a
+ * separate getImageDimensions() pre-read. The BitmapFactory fallback computes its
+ * own inSampleSize inline to avoid an extra stream open on the happy path.
  */
 fun retrieveBitmap(
     context: Context,
@@ -189,26 +155,12 @@ fun retrieveBitmap(
     height: Int,
     scaling: ScalingType = ScalingType.FIT
 ): Bitmap? {
-    val imageSize = wallpaperUri.getImageDimensions(context) ?: return null
-    if (imageSize.width <= 0 || imageSize.height <= 0) {
-        Log.e(TAG, "Invalid image dimensions from URI: $imageSize")
-        return null
-    }
-
-    val sampleSize = if (scaling == ScalingType.NONE) {
-        1
-    } else {
-        calculateInSampleSize(imageSize, width, height)
-    }
-
-    // ImageDecoder auto-applies EXIF orientation and its info.size returns post-EXIF dimensions.
-    // We must NOT call applyExifOrientation on the ImageDecoder result — it would double-rotate.
-    // BitmapFactory does NOT auto-apply EXIF, so applyExifOrientation is needed only for that path.
+    // ImageDecoder auto-applies EXIF orientation; info.size is the post-EXIF display size.
+    // No separate getImageDimensions() call needed — saves 1-2 stream opens per wallpaper.
     var decodedWithImageDecoder = false
     val bitmap = try {
         val source = ImageDecoder.createSource(context.contentResolver, wallpaperUri)
         val result = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-            // info.size is the post-EXIF (display) size — use it for correct aspect-ratio math
             val srcWidth = info.size.width
             val srcHeight = info.size.height
             val (targetWidth, targetHeight) = when (scaling) {
@@ -222,7 +174,6 @@ fun retrieveBitmap(
                 }
                 ScalingType.STRETCH -> Pair(width, height)
                 ScalingType.NONE -> {
-                    // Cap at 2× screen size to prevent OOM on very large source images
                     val maxWidth = width * 2
                     val maxHeight = height * 2
                     if (srcWidth > maxWidth || srcHeight > maxHeight) {
@@ -233,7 +184,6 @@ fun retrieveBitmap(
                     }
                 }
             }
-
             decoder.setTargetSize(targetWidth, targetHeight)
             decoder.isMutableRequired = true
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
@@ -243,16 +193,23 @@ fun retrieveBitmap(
     } catch (e: Exception) {
         Log.w(TAG, "ImageDecoder failed, falling back to BitmapFactory: $e")
         try {
-            context.contentResolver.openInputStream(wallpaperUri)?.use { inputStream ->
-                val options = BitmapFactory.Options().apply {
+            // Compute inSampleSize from a bounds-only pass, then decode in a second pass.
+            // Two opens only on the rare fallback path — the primary ImageDecoder path is free.
+            val sampleSize = context.contentResolver.openInputStream(wallpaperUri)?.use { stream ->
+                val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeStream(stream, null, opts)
+                if (scaling == ScalingType.NONE || opts.outWidth <= 0 || opts.outHeight <= 0) 1
+                else calculateInSampleSize(Size(opts.outWidth, opts.outHeight), width, height)
+            } ?: 1
+            context.contentResolver.openInputStream(wallpaperUri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, BitmapFactory.Options().apply {
                     inSampleSize = sampleSize
                     inMutable = true
                     inPreferredConfig = Bitmap.Config.ARGB_8888
-                }
-                BitmapFactory.decodeStream(inputStream, null, options)
+                })
             }
-        } catch (e: OutOfMemoryError) {
-            Log.e(TAG, "OOM during BitmapFactory fallback for $wallpaperUri: $e")
+        } catch (oom: OutOfMemoryError) {
+            Log.e(TAG, "OOM during BitmapFactory fallback for $wallpaperUri: $oom")
             null
         }
     } catch (e: OutOfMemoryError) {
@@ -543,6 +500,12 @@ fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {
 /**
  * Process bitmap with all effects - now respects enable flags
  * Properly manages bitmap lifecycle by recycling intermediate results
+ *
+ * Uses a GPU-accelerated pipeline via [RenderEffect] chaining when possible (API 31+).
+ * All colour-filter effects (darken, grayscale) and blur are composed into a single
+ * RenderNode draw call so there is only **one** GPU→CPU copy at the end.
+ * Vignette is drawn on the same RenderNode canvas before read-back.
+ * Falls back to the sequential CPU path on error.
  */
 fun processBitmap(
     source: Bitmap,
@@ -555,40 +518,194 @@ fun processBitmap(
     enableGrayscale: Boolean = false,
     grayscalePercent: Int = 0
 ): Bitmap {
+    // Fast path – nothing to do
+    val hasDarken = enableDarken && darkenPercent > 0
+    val hasBlur = enableBlur && blurPercent > 0
+    val hasVignette = enableVignette && vignettePercent > 0
+    val hasGrayscale = enableGrayscale && grayscalePercent > 0
+    if (!hasDarken && !hasBlur && !hasVignette && !hasGrayscale) return source
+
+    // Try GPU-chained path
+    try {
+        return processBitmapGpu(
+            source,
+            hasDarken, darkenPercent,
+            hasBlur, blurPercent,
+            hasVignette, vignettePercent,
+            hasGrayscale, grayscalePercent
+        )
+    } catch (e: Exception) {
+        Log.w(TAG, "GPU effects pipeline failed, falling back to CPU: $e")
+    } catch (e: OutOfMemoryError) {
+        Log.w(TAG, "OOM in GPU effects pipeline, falling back to CPU: $e")
+    }
+
+    // CPU fallback
+    return processBitmapCpu(
+        source,
+        hasDarken, darkenPercent,
+        hasBlur, blurPercent,
+        hasVignette, vignettePercent,
+        hasGrayscale, grayscalePercent
+    )
+}
+
+/**
+ * GPU-accelerated effects pipeline.
+ *
+ * Chains darken, blur, and grayscale as [RenderEffect]s on a single [RenderNode],
+ * draws the vignette overlay on the same canvas, and reads back the result once.
+ */
+private fun processBitmapGpu(
+    source: Bitmap,
+    hasDarken: Boolean, darkenPercent: Int,
+    hasBlur: Boolean, blurPercent: Int,
+    hasVignette: Boolean, vignettePercent: Int,
+    hasGrayscale: Boolean, grayscalePercent: Int
+): Bitmap {
+    val w = source.width
+    val h = source.height
+
+    val imageReader = ImageReader.newInstance(
+        w, h, PixelFormat.RGBA_8888, 1,
+        HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE or HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
+    )
+    val renderNode = RenderNode("EffectsChain")
+    val hardwareRenderer = HardwareRenderer()
+
+    try {
+        hardwareRenderer.setSurface(imageReader.surface)
+        hardwareRenderer.setContentRoot(renderNode)
+        renderNode.setPosition(0, 0, w, h)
+
+        // --- Build chained RenderEffect (darken → blur → grayscale) ---
+        var effect: RenderEffect? = null
+
+        if (hasDarken) {
+            val factor = (100 - darkenPercent.coerceIn(0, 100)) / 100f
+            val cm = ColorMatrix().apply { setScale(factor, factor, factor, 1f) }
+            val darkenEffect = RenderEffect.createColorFilterEffect(ColorMatrixColorFilter(cm))
+            effect = darkenEffect
+        }
+
+        if (hasBlur) {
+            val radius = (blurPercent.coerceIn(0, 100) / 100f) * Constants.MAX_BLUR_RADIUS
+            val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
+            effect = if (effect != null) {
+                RenderEffect.createChainEffect(blurEffect, effect)
+            } else {
+                blurEffect
+            }
+        }
+
+        if (hasGrayscale) {
+            val factor = grayscalePercent.coerceIn(0, 100) / 100f
+            val cm = ColorMatrix().apply { setSaturation(1 - factor) }
+            val gsEffect = RenderEffect.createColorFilterEffect(ColorMatrixColorFilter(cm))
+            effect = if (effect != null) {
+                RenderEffect.createChainEffect(gsEffect, effect)
+            } else {
+                gsEffect
+            }
+        }
+
+        if (effect != null) {
+            renderNode.setRenderEffect(effect)
+        }
+
+        // --- Record canvas commands ---
+        val canvas = renderNode.beginRecording()
+        canvas.drawBitmap(source, 0f, 0f, null)
+
+        // Vignette is an overlay drawn on top of the source in the same pass
+        if (hasVignette) {
+            val halfW = w / 2f
+            val halfH = h / 2f
+            val diagonal = kotlin.math.sqrt(halfW * halfW + halfH * halfH)
+            val rad = (diagonal * (1 - (vignettePercent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR)))
+                .coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
+            val colors = intArrayOf(
+                Color.TRANSPARENT,
+                Color.argb((Constants.VIGNETTE_INNER_ALPHA * 255).toInt(), 0, 0, 0),
+                Color.argb((Constants.VIGNETTE_OUTER_ALPHA * 255).toInt(), 0, 0, 0)
+            )
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                shader = RadialGradient(
+                    halfW, halfH, rad,
+                    colors, Constants.VIGNETTE_GRADIENT_POSITIONS, Shader.TileMode.CLAMP
+                )
+            }
+            canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), paint)
+        }
+
+        renderNode.endRecording()
+
+        // --- Single GPU render + single read-back ---
+        hardwareRenderer.createRenderRequest()
+            .setWaitForPresent(true)
+            .syncAndDraw()
+
+        val image = imageReader.acquireNextImage()
+            ?: throw IllegalStateException("Failed to acquire image after GPU render")
+
+        try {
+            val hwBuffer = image.hardwareBuffer
+                ?: throw IllegalStateException("Failed to acquire hardware buffer")
+            try {
+                val hwBitmap = Bitmap.wrapHardwareBuffer(hwBuffer, null)
+                    ?: throw IllegalStateException("Failed to wrap hardware buffer")
+                val result = hwBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                    ?: throw IllegalStateException("Failed to copy hardware bitmap")
+                hwBitmap.recycle()
+                return result
+            } finally {
+                hwBuffer.close()
+            }
+        } finally {
+            image.close()
+        }
+    } finally {
+        hardwareRenderer.destroy()
+        renderNode.discardDisplayList()
+        imageReader.close()
+    }
+}
+
+/**
+ * CPU fallback: applies effects sequentially (original implementation).
+ */
+private fun processBitmapCpu(
+    source: Bitmap,
+    hasDarken: Boolean, darkenPercent: Int,
+    hasBlur: Boolean, blurPercent: Int,
+    hasVignette: Boolean, vignettePercent: Int,
+    hasGrayscale: Boolean, grayscalePercent: Int
+): Bitmap {
     var result = source
 
-    // Apply effects in order, respecting enable flags
-    // Recycle intermediate bitmaps to prevent memory leaks
-    
-    // Darken modifies in-place for mutable bitmaps, no need to track previous
-    if (enableDarken && darkenPercent > 0) {
+    if (hasDarken) {
         result = darkenBitmap(result, darkenPercent)
     }
 
-    // Blur always creates a new bitmap
-    if (enableBlur && blurPercent > 0) {
+    if (hasBlur) {
         val previous = result
         result = blurBitmap(result, blurPercent)
-        // Recycle the previous one if different from source
         if (result !== previous && previous !== source) {
             previous.recycle()
         }
     }
 
-
-    if (enableVignette && vignettePercent > 0) {
+    if (hasVignette) {
         val previous = result
         result = vignetteBitmap(result, vignettePercent)
-        // Vignette modifies in-place for mutable bitmaps, may create copy for immutable
         if (result !== previous && previous !== source) {
             previous.recycle()
         }
     }
 
-    if (enableGrayscale && grayscalePercent > 0) {
+    if (hasGrayscale) {
         val previous = result
         result = grayscaleBitmap(result, grayscalePercent)
-        // Grayscale modifies in-place for mutable bitmaps, may create copy for immutable
         if (result !== previous && previous !== source) {
             previous.recycle()
         }

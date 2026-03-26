@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.home
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
 import android.content.Intent
@@ -7,13 +6,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.isPaperizeLiveWallpaperActive
-import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.CreateAlbumUseCase
-import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
 import com.anthonyla.paperize.domain.usecase.GetAlbumSummariesUseCase
 import com.anthonyla.paperize.service.wallpaper.WallpaperChangeService
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
@@ -34,7 +32,6 @@ class HomeViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     getAlbumSummariesUseCase: GetAlbumSummariesUseCase,
     private val createAlbumUseCase: CreateAlbumUseCase,
-    private val deleteAlbumUseCase: DeleteAlbumUseCase,
     private val settingsRepository: SettingsRepository,
     private val wallpaperScheduler: WallpaperScheduler,
     private val wallpaperRepository: com.anthonyla.paperize.domain.repository.WallpaperRepository
@@ -121,36 +118,6 @@ class HomeViewModel @Inject constructor(
                 is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
                 is com.anthonyla.paperize.core.Result.Error -> { 
                     Log.e(TAG, "Error creating album", result.exception)
-                }
-                is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
-            }
-        }
-    }
-
-    fun deleteAlbum(albumId: String) {
-        viewModelScope.launch {
-            // Atomically clear album selections if they match (prevents race conditions)
-            val wasCleared = settingsRepository.clearAlbumSelectionsIfMatches(albumId)
-
-            // Disable changer if albums were cleared and no albums remain selected
-            if (wasCleared) {
-                val settings = settingsRepository.getScheduleSettings()
-                // Check appropriate album IDs based on wallpaper mode
-                val shouldDisable = if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
-                    settings.liveAlbumId == null
-                } else {
-                    settings.homeAlbumId == null && settings.lockAlbumId == null
-                }
-                if (shouldDisable) {
-                    toggleWallpaperChanger(false)
-                }
-            }
-
-            // Delete the album
-            when (val result = deleteAlbumUseCase(albumId)) {
-                is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { 
-                    Log.e(TAG, "Error deleting album", result.exception)
                 }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
@@ -376,11 +343,12 @@ class HomeViewModel @Inject constructor(
             val screenToggleChanged = currentSettings.homeEnabled != settings.homeEnabled ||
                                      currentSettings.lockEnabled != settings.lockEnabled
 
-            // If screen toggles changed, clear all album selections
+            // If a screen was disabled, clear only that screen's album selection.
+            // Clearing both when only one changes would lose the other screen's selection.
             val settingsWithClearedAlbums = if (screenToggleChanged) {
                 settings.copy(
-                    homeAlbumId = null,
-                    lockAlbumId = null
+                    homeAlbumId = if (!settings.homeEnabled) null else settings.homeAlbumId,
+                    lockAlbumId = if (!settings.lockEnabled) null else settings.lockAlbumId
                 )
             } else {
                 settings
@@ -441,10 +409,10 @@ class HomeViewModel @Inject constructor(
                                validated.homeAlbumId == validated.lockAlbumId &&
                                !validated.separateSchedules
                 if (isSynced) {
-                    changeWallpaperNow(ScreenType.BOTH)
+                    reapplyEffectsNow(ScreenType.BOTH)
                 } else {
-                    if (homeActive) changeWallpaperNow(ScreenType.HOME)
-                    if (lockActive) changeWallpaperNow(ScreenType.LOCK)
+                    if (homeActive) reapplyEffectsNow(ScreenType.HOME)
+                    if (lockActive) reapplyEffectsNow(ScreenType.LOCK)
                 }
             }
         }
@@ -453,6 +421,14 @@ class HomeViewModel @Inject constructor(
     fun changeWallpaperNow(screenType: ScreenType) {
         val intent = Intent(context, WallpaperChangeService::class.java).apply {
             action = WallpaperChangeService.ACTION_CHANGE_WALLPAPER
+            putExtra(WallpaperChangeService.EXTRA_SCREEN_TYPE, screenType.name)
+        }
+        context.startForegroundService(intent)
+    }
+
+    fun reapplyEffectsNow(screenType: ScreenType) {
+        val intent = Intent(context, WallpaperChangeService::class.java).apply {
+            action = WallpaperChangeService.ACTION_REAPPLY_EFFECTS
             putExtra(WallpaperChangeService.EXTRA_SCREEN_TYPE, screenType.name)
         }
         context.startForegroundService(intent)

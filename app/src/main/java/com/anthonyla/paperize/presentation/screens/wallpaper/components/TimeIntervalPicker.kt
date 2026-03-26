@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -21,13 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.theme.AppSpacing
@@ -60,8 +56,8 @@ fun TimeIntervalPicker(
     var hourInput by remember(minutes) { mutableStateOf(initialHours.toString()) }
     var minuteInput by remember(minutes) { mutableStateOf(initialMins.toString()) }
 
-    // Debounce state - tracks when user last made a change
-    var lastChangeTimestamp by remember { mutableStateOf(0L) }
+    // Debounce state - tracks when user last made a change; reset when external `minutes` prop changes
+    var lastChangeTimestamp by remember(minutes) { mutableStateOf(0L) }
 
     // Debounced update - only fires after user stops typing
     LaunchedEffect(dayValue, hourValue, minuteValue, lastChangeTimestamp) {
@@ -170,27 +166,28 @@ fun TimeIntervalPicker(
 @Composable
 private fun formatIntervalComposable(minutes: Int): String {
     val minUnit = stringResource(R.string.time_unit_min)
-    val hourUnit = pluralStringResource(R.plurals.time_unit_hours, 1)
-    val hoursUnit = pluralStringResource(R.plurals.time_unit_hours, 2)
-    val dayUnit = pluralStringResource(R.plurals.time_unit_days, 1)
-    val daysUnit = pluralStringResource(R.plurals.time_unit_days, 2)
 
     return when {
         minutes < Constants.MINUTES_PER_HOUR -> "$minutes $minUnit"
         minutes < Constants.MINUTES_PER_DAY -> {
-            val hours = minutes / Constants.MINUTES_PER_HOUR
+            val h = minutes / Constants.MINUTES_PER_HOUR
             val remainingMins = minutes % Constants.MINUTES_PER_HOUR
-            if (remainingMins == 0) "$hours ${if (hours > 1) hoursUnit else hourUnit}"
-            else "$hours ${if (hours > 1) hoursUnit else hourUnit} $remainingMins $minUnit"
+            val hUnit = pluralStringResource(R.plurals.time_unit_hours, h)
+            if (remainingMins == 0) "$h $hUnit"
+            else "$h $hUnit $remainingMins $minUnit"
         }
         else -> {
-            val days = minutes / Constants.MINUTES_PER_DAY
+            val d = minutes / Constants.MINUTES_PER_DAY
             val remainingMinutes = minutes % Constants.MINUTES_PER_DAY
             val remainingHours = remainingMinutes / Constants.MINUTES_PER_HOUR
             val finalMins = remainingMinutes % Constants.MINUTES_PER_HOUR
+            val dUnit = pluralStringResource(R.plurals.time_unit_days, d)
             buildString {
-                append("$days ${if (days > 1) daysUnit else dayUnit}")
-                if (remainingHours > 0) append(" $remainingHours ${if (remainingHours > 1) hoursUnit else hourUnit}")
+                append("$d $dUnit")
+                if (remainingHours > 0) {
+                    val hUnit = pluralStringResource(R.plurals.time_unit_hours, remainingHours)
+                    append(" $remainingHours $hUnit")
+                }
                 if (finalMins > 0) append(" $finalMins $minUnit")
             }
         }

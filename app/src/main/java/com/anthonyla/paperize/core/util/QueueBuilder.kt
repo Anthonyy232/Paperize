@@ -28,27 +28,6 @@ object QueueBuilder {
     }
 
     /**
-     * Check if queue positions need normalization
-     * Positions need normalization if they have gaps (e.g., 0, 2, 4 instead of 0, 1, 2)
-     * @param positions Current queue positions
-     * @return True if normalization is needed, false otherwise
-     */
-    fun needsNormalization(positions: List<Int>): Boolean {
-        if (positions.isEmpty()) return false
-        val sorted = positions.sorted()
-        return sorted.indices.any { sorted[it] != it }
-    }
-
-    /**
-     * Normalize queue positions to be sequential starting from 0
-     * @param positions Current queue positions (may have gaps)
-     * @return Normalized positions (0, 1, 2, ...)
-     */
-    fun normalizePositions(positions: List<Int>): List<Int> {
-        return positions.indices.toList()
-    }
-
-    /**
      * Merge existing queue with new wallpapers while preserving existing order
      * Used when new wallpapers are added to an album during shuffle mode
      * @param existingQueueIds Current queue order (filtered to valid IDs)

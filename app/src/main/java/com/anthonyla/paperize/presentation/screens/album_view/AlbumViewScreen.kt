@@ -1,10 +1,12 @@
 package com.anthonyla.paperize.presentation.screens.album_view
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +19,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,7 +29,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import android.net.Uri
+import com.anthonyla.paperize.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
@@ -45,21 +48,20 @@ fun AlbumViewScreen(
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
     onNavigateToWallpaperView: (String, String) -> Unit,
-    onNavigateToSort: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AlbumViewViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyGridState()
 
-    val album by viewModel.album.collectAsState()
-    val folders by viewModel.folders.collectAsState()
-    val wallpapers by viewModel.wallpapers.collectAsState()
+    val album by viewModel.album.collectAsStateWithLifecycle()
+    val folders by viewModel.folders.collectAsStateWithLifecycle()
+    val wallpapers by viewModel.wallpapers.collectAsStateWithLifecycle()
 
     // Selection state
-    val selectedWallpapers by viewModel.selectedWallpapers.collectAsState()
-    val selectedFolders by viewModel.selectedFolders.collectAsState()
-    val isSelectionMode by viewModel.isSelectionMode.collectAsState()
+    val selectedWallpapers by viewModel.selectedWallpapers.collectAsStateWithLifecycle()
+    val selectedFolders by viewModel.selectedFolders.collectAsStateWithLifecycle()
+    val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
     val selectedCount = selectedWallpapers.size + selectedFolders.size
 
     // Check if all items are selected
@@ -67,6 +69,7 @@ fun AlbumViewScreen(
     val allSelected = selectedCount == totalItemsCount && totalItemsCount > 0
 
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
+    var showDeleteAlbumDialog by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
 
     // Handle back press when in selection mode
@@ -112,7 +115,7 @@ fun AlbumViewScreen(
             uris.forEach { uri ->
                 try {
                     context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Handle permission failure
                 }
             }
@@ -129,7 +132,7 @@ fun AlbumViewScreen(
             try {
                 context.contentResolver.takePersistableUriPermission(it, takeFlags)
                 viewModel.addFolder(it.toString())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Handle permission failure
             }
         }
@@ -143,8 +146,8 @@ fun AlbumViewScreen(
                 selectedCount = selectedCount,
                 allSelected = allSelected,
                 onBackClick = onBackClick,
-                onSortClick = onNavigateToSort,
-                onDeleteAlbum = { viewModel.deleteAlbum(); onBackClick() },
+                onSortClick = { showSortSheet = true },
+                onDeleteAlbum = { showDeleteAlbumDialog = true },
                 onSelectAll = { if (allSelected) viewModel.clearSelection() else viewModel.selectAll() },
                 onDeleteSelected = { viewModel.deleteSelected() },
                 onClearSelection = { viewModel.clearSelection() }
@@ -242,6 +245,28 @@ fun AlbumViewScreen(
         SortBottomSheet(
             onSortSelected = { sortOption = it },
             onDismiss = { showSortSheet = false }
+        )
+    }
+
+    // Delete Album Confirmation Dialog
+    if (showDeleteAlbumDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAlbumDialog = false },
+            title = { Text(stringResource(R.string.delete_album_question)) },
+            text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAlbum()
+                        onBackClick()
+                    }
+                ) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAlbumDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 }

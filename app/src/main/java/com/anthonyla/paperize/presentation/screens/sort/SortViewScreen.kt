@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -43,10 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -130,7 +129,7 @@ fun SortViewScreen(
             AnimatedContent(
                 modifier = Modifier.fillMaxSize(),
                 targetState = !expandedFolderId.isNullOrEmpty(),
-                label = "",
+                label = "sort_view_content",
             ) { targetState ->
                 with(this@SharedTransitionLayout) {
                     if (!targetState) {
@@ -155,7 +154,7 @@ fun SortViewScreen(
                                 ReorderableItem(
                                     state = reorderableLazyListStateFolder,
                                     key = folder.uri
-                                ) { isDragging ->
+                                ) { _ ->
                                     val interactionSource = remember { MutableInteractionSource() }
                                     Card(
                                         modifier = Modifier
@@ -234,7 +233,7 @@ fun SortViewScreen(
                                 ReorderableItem(
                                     reorderableLazyListStateWallpaper,
                                     key = wallpaper.uri
-                                ) { isDragging ->
+                                ) { _ ->
                                     val interactionSource = remember { MutableInteractionSource() }
                                     Card(
                                         modifier = Modifier
@@ -357,7 +356,7 @@ fun SortViewScreen(
                                     ReorderableItem(
                                         reorderableFolderWallpapersState,
                                         key = wallpaper.uri
-                                    ) { isDragging ->
+                                    ) { _ ->
                                         val interactionSource = remember { MutableInteractionSource() }
                                         Card(
                                             modifier = Modifier

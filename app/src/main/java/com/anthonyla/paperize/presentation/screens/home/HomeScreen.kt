@@ -1,11 +1,8 @@
 package com.anthonyla.paperize.presentation.screens.home
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,14 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.screens.home.components.HomeTopBar
 import com.anthonyla.paperize.presentation.screens.home.components.getTabItems
 import com.anthonyla.paperize.presentation.screens.library.LibraryScreen
@@ -54,11 +47,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val albums by viewModel.albums.collectAsState()
-    val scheduleSettings by viewModel.scheduleSettings.collectAsState()
-    val appSettings by viewModel.appSettings.collectAsState()
-    val wallpaperMode by viewModel.wallpaperMode.collectAsState()
-    val showLiveWallpaperPrompt by viewModel.showLiveWallpaperPrompt.collectAsState()
+    val albums by viewModel.albums.collectAsStateWithLifecycle()
+    val scheduleSettings by viewModel.scheduleSettings.collectAsStateWithLifecycle()
+    val appSettings by viewModel.appSettings.collectAsStateWithLifecycle()
+    val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
+    val showLiveWallpaperPrompt by viewModel.showLiveWallpaperPrompt.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -114,7 +107,7 @@ fun HomeScreen(
                     state = pagerState,
                     beyondViewportPageCount = 1
                 ) { index ->
-                    when (index.coerceIn(tabItems.indices)) {
+                    when (index) {
                         0 -> {
                             if (wallpaperMode == null) {
                                 Box(modifier = Modifier.fillMaxSize())
@@ -181,12 +174,12 @@ fun HomeScreen(
                                 )
                             }
                             context.startActivity(intent)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             // Fallback: Open general wallpaper settings
                             try {
                                 val fallbackIntent = Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER)
                                 context.startActivity(fallbackIntent)
-                            } catch (e2: Exception) {
+                            } catch (_: Exception) {
                                 // Last resort: Open wallpaper settings
                                 val settingsIntent = Intent(android.provider.Settings.ACTION_SETTINGS)
                                 context.startActivity(settingsIntent)

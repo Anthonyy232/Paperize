@@ -36,7 +36,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
  */
 @Singleton
 class PreferencesManager @Inject constructor(
-    private val context: Context
+    context: Context
 ) {
     private val dataStore = context.dataStore
 
@@ -48,9 +48,7 @@ class PreferencesManager @Inject constructor(
             darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)],
             dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
-            firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
-            currentHomeWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID)],
-            currentLockWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_LOCK_WALLPAPER_ID)]
+            firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true
         )
     }
 
@@ -59,9 +57,7 @@ class PreferencesManager @Inject constructor(
             darkMode = prefs[booleanPreferencesKey(PreferenceKeys.DARK_MODE)],
             dynamicTheming = prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] ?: false,
             animate = prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] ?: true,
-            firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true,
-            currentHomeWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID)],
-            currentLockWallpaperId = prefs[stringPreferencesKey(PreferenceKeys.CURRENT_LOCK_WALLPAPER_ID)]
+            firstLaunch = prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] ?: true
         )
     }
 
@@ -75,12 +71,6 @@ class PreferencesManager @Inject constructor(
             prefs[booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)] = settings.dynamicTheming
             prefs[booleanPreferencesKey(PreferenceKeys.ANIMATE)] = settings.animate
             prefs[booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)] = settings.firstLaunch
-            settings.currentHomeWallpaperId?.let {
-                prefs[stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID)] = it
-            }
-            settings.currentLockWallpaperId?.let {
-                prefs[stringPreferencesKey(PreferenceKeys.CURRENT_LOCK_WALLPAPER_ID)] = it
-            }
         }
     }
 
@@ -468,17 +458,6 @@ class PreferencesManager @Inject constructor(
         } as T
     }
 
-    fun <T> getValueFlow(key: String, defaultValue: T): Flow<T> = dataStore.data.map { prefs ->
-        @Suppress("UNCHECKED_CAST")
-        when (defaultValue) {
-            is Boolean -> prefs[booleanPreferencesKey(key)] ?: defaultValue
-            is Int -> prefs[intPreferencesKey(key)] ?: defaultValue
-            is Long -> prefs[longPreferencesKey(key)] ?: defaultValue
-            is String -> prefs[stringPreferencesKey(key)] ?: defaultValue
-            else -> throw IllegalArgumentException("Unsupported preference type")
-        } as T
-    }
-
     /**
      * Clear schedule settings (reset to defaults)
      * Used when switching wallpaper modes
@@ -542,10 +521,6 @@ class PreferencesManager @Inject constructor(
             prefs.remove(stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE))
             prefs.remove(stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE))
             prefs.remove(stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE))
-
-            // Clear current wallpapers
-            prefs.remove(stringPreferencesKey(PreferenceKeys.CURRENT_HOME_WALLPAPER_ID))
-            prefs.remove(stringPreferencesKey(PreferenceKeys.CURRENT_LOCK_WALLPAPER_ID))
 
             // Clear adaptive brightness
             prefs.remove(booleanPreferencesKey(PreferenceKeys.ADAPTIVE_BRIGHTNESS))

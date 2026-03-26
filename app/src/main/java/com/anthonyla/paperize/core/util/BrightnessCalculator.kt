@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.core.util
 
 import android.graphics.Bitmap
-import androidx.core.graphics.get
 import com.anthonyla.paperize.core.constants.Constants
 
 /**
@@ -23,18 +22,27 @@ object BrightnessCalculator {
     }
 
     /**
-     * Calculate brightness estimate of bitmap (0.0 - 1.0)
-     * Uses luminance calculation based on RGB values.
+     * Calculate brightness estimate of bitmap (0.0 - 1.0).
+     *
+     * Reads one sampled row at a time using [Bitmap.getPixels] so the entire
+     * sample set is fetched with (height / sampleSize) JNI calls instead of
+     * (width / sampleSize) × (height / sampleSize) individual pixel lookups.
+     * A reusable row buffer keeps allocations to one IntArray(width).
      */
     fun calculateBitmapBrightness(bitmap: Bitmap): Float {
         val sampleSize = Constants.BRIGHTNESS_SAMPLE_SIZE
+        val w = bitmap.width
+        val h = bitmap.height
+        if (w <= 0 || h <= 0) return Constants.DEFAULT_BRIGHTNESS
+
+        val rowBuffer = IntArray(w)
         var totalLuminance = 0.0
         var pixelCount = 0
 
-        for (x in 0 until bitmap.width step sampleSize) {
-            for (y in 0 until bitmap.height step sampleSize) {
-                val pixel = bitmap[x, y]
-                totalLuminance += calculateLuminance(pixel)
+        for (y in 0 until h step sampleSize) {
+            bitmap.getPixels(rowBuffer, 0, w, 0, y, w, 1)
+            for (x in 0 until w step sampleSize) {
+                totalLuminance += calculateLuminance(rowBuffer[x])
                 pixelCount++
             }
         }

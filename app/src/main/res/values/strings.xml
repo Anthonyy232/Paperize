@@ -6,8 +6,7 @@
   <string name="wallpaper">Wallpaper</string>
   <string name="library">Library</string>
   <string name="back">Back</string>
-  <string name="add_images">Add images</string>
-  <string name="add_folder">Add folder</string>
+    <string name="add_folder">Add folder</string>
   <string name="add_album">Add album</string>
   <string name="enter_the_name_of_the_album">Enter the name of the album</string>
   <string name="album_name">Album Name</string>
@@ -19,32 +18,17 @@
   <string name="currently_selected_album">Currently selected album</string>
   <string name="agree">Agree</string>
   <string name="welcome">Welcome</string>
-  <string name="notifications">Notifications</string>
-  <string name="continue_button">I\'m In</string>
+    <string name="continue_button">I\'m In</string>
   <string name="allow">Allow</string>
   <string name="privacy_policy">Privacy Policy</string>
   <string name="reset_to_default">Reset to default</string>
   <string name="reset_all_data">Reset all data</string>
   <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">Are you sure you want to reset all settings and data to default?</string>
   <string name="confirm">Confirm</string>
-  <plurals name="minutes" comment="minutes [one] [other]">
-    <item quantity="one">%d minute</item>
-    <item quantity="other">%d minutes</item>
-  </plurals>
-  <plurals name="hours" comment="hours [one] [other]">
-    <item quantity="one">%d hour</item>
-    <item quantity="other">%d hours</item>
-  </plurals>
-  <plurals name="days" comment="days [one] [other]">
-    <item quantity="one">%d day</item>
-    <item quantity="other">%d days</item>
-  </plurals>
-  <string name="selected_count">%1$s selected</string>
+    <string name="selected_count">%1$s selected</string>
   <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">Please read and agree to the following privacy notice to use the app.</string>
   <string name="privacy_notice">Privacy Notice</string>
-  <string name="delete_these">Delete these?</string>
-  <string name="are_you_sure_you_want_to_delete_these_wallpapers">Are you sure you want to delete these wallpapers?</string>
-  <string name="are_you_sure_you_want_to_delete_this">Are you sure you want to delete this?</string>
+    <string name="are_you_sure_you_want_to_delete_this">Are you sure you want to delete this?</string>
   <string name="delete_album_question">Delete album?</string>
   <string name="animation">Animation</string>
   <string name="increase_visual_appeal">Increase visual appeal</string>
@@ -55,8 +39,7 @@
   <string name="click_here_to_view_our_privacy_policy">Click here to view our privacy policy</string>
   <string name="appearance">Appearance</string>
   <string name="about">About</string>
-  <string name="wallpapers">wallpapers</string>
-  <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
+    <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
     <item quantity="one">%d wallpaper</item>
     <item quantity="other">%d wallpapers</item>
   </plurals>
@@ -72,8 +55,7 @@
   <string name="empty_album">Empty Album</string>
   <string name="empty_album_message">This album has no wallpapers. Please add wallpapers to the album before selecting it.</string>
   <string name="ok">OK</string>
-  <string name="percentage">%1$s%%</string>
-  <string name="fill">Fill</string>
+    <string name="fill">Fill</string>
   <string name="fit">Fit</string>
   <string name="stretch">Stretch</string>
   <string name="change_brightness">Brightness Effect</string>
@@ -83,12 +65,7 @@
   <string name="show_interval_sliders">Show interval sliders</string>
   <string name="interval_text">Time Interval</string>
   <string name="change_blur">Blur Effect</string>
-  <string name="paperize_is_running">Paperize is running</string>
-  <string name="next_wallpaper_change">Next wallpaper change: %1$s</string>
-  <string name="theme">Theme</string>
-  <string name="wallpaper_changer">Wallpaper Changer</string>
-  <string name="enable_wallpaper_changer">Enable Wallpaper Changer</string>
-  <string name="lock">Lock</string>
+    <string name="lock">Lock</string>
   <string name="change_vignette">Vignette Effect</string>
   <string name="none">None</string>
   <string name="gray_filter">Gray Filter</string>
@@ -98,8 +75,7 @@
   <string name="shuffle">Shuffle</string>
   <string name="days_txt">Days</string>
   <string name="hours_txt">Hours</string>
-  <string name="minutes_txt">Minutes</string>
-  <string name="change_the_image_brightness">Change the image brightness</string>
+    <string name="change_the_image_brightness">Change the image brightness</string>
   <string name="add_blur_to_the_image">Add blur to the image</string>
   <string name="darken_the_edges_of_the_image">Darken the edges of the image</string>
   <string name="make_the_colors_grayscale">Make the colors grayscale</string>
@@ -111,8 +87,7 @@
   <string name="wallpaper_moves_with_screen_scroll">Wallpaper moves with screen scroll</string>
   <string name="live_wallpaper_name">Paperize Live Wallpaper</string>
   <string name="live_wallpaper_description">Dynamic wallpapers with effects and interactive features</string>
-  <string name="visual_effects_note_live_mode">Note: Visual effects (blur, darken, vignette, grayscale) apply to all wallpapers in live mode.</string>
-  <string name="adaptive_brightness">Adaptive Brightness</string>
+    <string name="adaptive_brightness">Adaptive Brightness</string>
   <string name="adjust_brightness_based_on_mode">Adjust brightness based on dark/light mode</string>
   <string name="randomly_shuffle_the_wallpapers">Randomly shuffle the wallpapers</string>
   <string name="changing_wallpaper">Changing wallpaper…</string>
@@ -170,10 +145,8 @@
   <string name="mins">Mins</string>
   <string name="total_interval">Total: </string>
   <string name="time_unit_min">min</string>
-  <string name="time_unit_hour">hour</string>
-  <string name="time_unit_day">day</string>
 
-  <!-- Notification Service -->
+    <!-- Notification Service -->
   <string name="notification_channel_description">Wallpaper change notifications</string>
   <string name="no_wallpapers_in_album">No wallpapers in album</string>
   <string name="wallpaper_changer_disabled_empty_album">Wallpaper changer has been disabled because the album is empty.</string>
@@ -181,17 +154,12 @@
   <!-- Error Messages -->
   <string name="error_failed_to_build_queue">Failed to build wallpaper queue</string>
   <string name="error_no_valid_wallpaper_after_retries">Could not find a valid wallpaper after retries</string>
-  <string name="error_failed_to_load_bitmap">Failed to load wallpaper image</string>
 
-  <!-- OEM Compatibility Warnings -->
+    <!-- OEM Compatibility Warnings -->
   <string name="parallax_may_not_work">Parallax effect may not work with your OEM or launcher.</string>
 
   <!-- Plurals -->
-  <plurals name="items_count">
-    <item quantity="one">%d item</item>
-    <item quantity="other">%d items</item>
-  </plurals>
-  <plurals name="time_unit_hours">
+    <plurals name="time_unit_hours">
     <item quantity="one">hour</item>
     <item quantity="other">hours</item>
   </plurals>
@@ -216,8 +184,7 @@
   <!-- Live Wallpaper Selection Dialog -->
   <string name="select_live_wallpaper">Select Live Wallpaper</string>
   <string name="select_live_wallpaper_instruction">To use Paperize in Live Wallpaper mode, you need to select it as your live wallpaper from the system settings.</string>
-  <string name="open_wallpaper_picker_instruction">\nTap \'Open Wallpaper Picker\' below to select Paperize from the list of available live wallpapers.</string>
-  <string name="open_wallpaper_picker">Open Wallpaper Picker</string>
+    <string name="open_wallpaper_picker">Open Wallpaper Picker</string>
   <string name="later">Later</string>
 
   <!-- Settings Mode Switcher -->

@@ -99,8 +99,11 @@ class AlbumViewViewModel @Inject constructor(
                 )
             }
             when (val result = albumRepository.addWallpapersToAlbum(albumId, wallpapers)) {
-                is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { 
+                is com.anthonyla.paperize.core.Result.Success -> {
+                    // Clear queues so the new wallpapers are included on the next cycle
+                    wallpaperRepository.clearQueuesForAlbum(albumId)
+                }
+                is com.anthonyla.paperize.core.Result.Error -> {
                     Log.e(TAG, "Error adding wallpapers to album", result.exception)
                 }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
@@ -144,9 +147,12 @@ class AlbumViewViewModel @Inject constructor(
             )
 
             when (val result = albumRepository.addFolderToAlbum(albumId, folder)) {
-                is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { 
-                    Log.e(TAG, "Error adding folder to album", result.exception) 
+                is com.anthonyla.paperize.core.Result.Success -> {
+                    // Clear queues so the new folder's wallpapers are included on the next cycle
+                    wallpaperRepository.clearQueuesForAlbum(albumId)
+                }
+                is com.anthonyla.paperize.core.Result.Error -> {
+                    Log.e(TAG, "Error adding folder to album", result.exception)
                 }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }

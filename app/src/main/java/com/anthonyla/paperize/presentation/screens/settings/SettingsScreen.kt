@@ -17,17 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.theme.AppSpacing
-import com.anthonyla.paperize.core.util.BatteryOptimizationUtil
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.isIgnoringBatteryOptimizations
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.requestIgnoreBatteryOptimizations
 
@@ -42,15 +42,15 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val appSettings by viewModel.appSettings.collectAsState()
-    val wallpaperMode by viewModel.wallpaperMode.collectAsState()
+    val appSettings by viewModel.appSettings.collectAsStateWithLifecycle()
+    val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
     var showResetDialog by remember { mutableStateOf(false) }
     var showModeChangeDialog by remember { mutableStateOf(false) }
     var pendingMode by remember { mutableStateOf<com.anthonyla.paperize.core.WallpaperMode?>(null) }
     val context = LocalContext.current
 
     var isIgnoringBatteryOptimizations by remember {
-        mutableStateOf(BatteryOptimizationUtil.isIgnoringBatteryOptimizations(context))
+        mutableStateOf(isIgnoringBatteryOptimizations(context))
     }
 
     // Refresh battery optimization status when returning to the screen
@@ -58,7 +58,7 @@ fun SettingsScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                isIgnoringBatteryOptimizations = BatteryOptimizationUtil.isIgnoringBatteryOptimizations(context)
+                isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -250,8 +250,8 @@ fun SettingsScreen(
 
                         if (!isIgnoringBatteryOptimizations) {
                             Button(
-                                onClick = { 
-                                    BatteryOptimizationUtil.requestIgnoreBatteryOptimizations(context)
+                                onClick = {
+                                    requestIgnoreBatteryOptimizations(context)
                                 }
                             ) {
                                 Text(stringResource(R.string.check_status))

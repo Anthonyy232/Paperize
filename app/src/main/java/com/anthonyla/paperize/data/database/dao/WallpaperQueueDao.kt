@@ -8,7 +8,6 @@ import androidx.room.Transaction
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperQueueEntity
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Data Access Object for Wallpaper Queue operations
@@ -55,15 +54,17 @@ interface WallpaperQueueDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQueueItems(items: List<WallpaperQueueEntity>)
 
+    /**
+     * Delete a specific queue item by wallpaperId.
+     *
+     * The MIN() subquery was removed because [getAndDequeueWallpaper] already retrieves
+     * the item at the minimum position before calling this, so the subquery is redundant.
+     * The [wallpaperId] index makes this O(log n) instead of O(n) with the subquery.
+     */
     @Query("""
         DELETE FROM wallpaper_queue
         WHERE albumId = :albumId AND screenType = :screenType
         AND wallpaperId = :wallpaperId
-        AND queuePosition = (
-            SELECT MIN(queuePosition)
-            FROM wallpaper_queue
-            WHERE albumId = :albumId AND screenType = :screenType
-        )
     """)
     suspend fun deleteQueueItem(albumId: String, screenType: ScreenType, wallpaperId: String)
 
@@ -77,29 +78,6 @@ interface WallpaperQueueDao {
         )
     """)
     suspend fun deleteFirstQueueItem(albumId: String, screenType: ScreenType)
-
-    /**
-     * Normalize queue positions to be sequential starting from 0
-     * This fixes gaps created by CASCADE deletes when wallpapers are removed
-     * Called after every dequeue to ensure queue integrity
-     */
-    @Transaction
-    suspend fun normalizeQueuePositions(albumId: String, screenType: ScreenType) {
-        val items = getQueueItems(albumId, screenType)
-        if (items.isEmpty()) return
-
-        // Check if normalization is needed (positions should be 0, 1, 2, ...)
-        // Use indexed access instead of indexOf() for O(n) instead of O(n²)
-        val needsNormalization = items.indices.any { items[it].queuePosition != it }
-        if (!needsNormalization) return
-
-        // Rebuild queue with normalized positions
-        clearQueue(albumId, screenType)
-        val normalizedItems = items.mapIndexed { index, item ->
-            item.copy(queuePosition = index)
-        }
-        insertQueueItems(normalizedItems)
-    }
 
     /**
      * Clear queue for album and screen type

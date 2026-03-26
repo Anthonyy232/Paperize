@@ -1,7 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
+
 import com.anthonyla.paperize.core.constants.Constants
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -16,14 +16,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
@@ -41,8 +40,8 @@ fun FolderViewScreen(
 ) {
     val lazyListState = rememberLazyGridState()
 
-    val folder by viewModel.folder.collectAsState()
-    val wallpapers by viewModel.wallpapers.collectAsState()
+    val folder by viewModel.folder.collectAsStateWithLifecycle()
+    val wallpapers by viewModel.wallpapers.collectAsStateWithLifecycle()
 
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
@@ -58,8 +57,6 @@ fun FolderViewScreen(
             SortOption.DATE_MODIFIED_DESC -> wallpapers.sortedByDescending { it.dateModified }
         }
     }
-
-    BackHandler { onBackClick() }
 
     Scaffold(
         topBar = {
@@ -83,28 +80,22 @@ fun FolderViewScreen(
                 items = sortedWallpapers,
                 key = { wallpaper -> wallpaper.id }
             ) { wallpaper ->
-                val itemModifier = remember {
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(9f / 16f)
-                        .then(
-                            Modifier.animateItem(
-                                placementSpec = tween(
-                                    durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        )
-                }
-
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,
                     isSelected = false,
                     isSelectionMode = false,
                     onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName) },
                     onLongClick = { /* No selection in folder view */ },
-                    modifier = itemModifier
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(9f / 16f)
+                        .animateItem(
+                            placementSpec = tween(
+                                durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
+                                delayMillis = 0,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
                 )
             }
         }
