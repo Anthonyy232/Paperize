@@ -358,6 +358,9 @@ class PreferencesManager @Inject constructor(
     suspend fun clearAlbumSelectionsIfMatches(albumId: String): Boolean {
         var wasCleared = false
         dataStore.edit { prefs ->
+            // Reset on each attempt — DataStore may retry the lambda on concurrent write conflicts
+            wasCleared = false
+
             val homeAlbumId = prefs[stringPreferencesKey(PreferenceKeys.HOME_ALBUM_ID)]
             val lockAlbumId = prefs[stringPreferencesKey(PreferenceKeys.LOCK_ALBUM_ID)]
             val liveAlbumId = prefs[stringPreferencesKey(PreferenceKeys.LIVE_ALBUM_ID)]
