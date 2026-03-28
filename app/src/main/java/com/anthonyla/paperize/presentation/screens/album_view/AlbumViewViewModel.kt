@@ -83,7 +83,7 @@ class AlbumViewViewModel @Inject constructor(
     fun addWallpapers(uris: List<String>) {
         viewModelScope.launch {
             val existingCount = wallpapers.value.size
-            val wallpapers = uris.mapIndexed { index, uri ->
+            val newWallpapers = uris.mapIndexed { index, uri ->
                 val parsedUri = uri.toUri()
                 val mediaType = parsedUri.detectMediaType(context) ?: WallpaperMediaType.IMAGE
 
@@ -98,7 +98,7 @@ class AlbumViewViewModel @Inject constructor(
                     mediaType = mediaType
                 )
             }
-            when (val result = albumRepository.addWallpapersToAlbum(albumId, wallpapers)) {
+            when (val result = albumRepository.addWallpapersToAlbum(albumId, newWallpapers)) {
                 is com.anthonyla.paperize.core.Result.Success -> {
                     // Clear queues so the new wallpapers are included on the next cycle
                     wallpaperRepository.clearQueuesForAlbum(albumId)
