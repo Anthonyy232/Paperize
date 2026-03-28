@@ -9,7 +9,7 @@ import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
-import com.anthonyla.paperize.core.util.getDeviceScreenSize
+import com.anthonyla.paperize.core.util.getWallpaperRenderSize
 import com.anthonyla.paperize.core.util.processBitmap
 import com.anthonyla.paperize.core.util.retrieveBitmap
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -55,8 +55,9 @@ class ChangeWallpaperUseCase @Inject constructor(
             var maxRetries = Constants.MAX_WALLPAPER_LOAD_RETRIES
             var queueRebuildAttempts = 0
 
-            // Get screen dimensions once for the retry loop
-            val screenSize = getDeviceScreenSize(context)
+            // Get render dimensions once for the retry loop.
+            // HOME/BOTH use the launcher's desired parallax canvas; LOCK uses physical screen.
+            val screenSize = getWallpaperRenderSize(context, screenType)
             val effects = when (screenType) {
                 ScreenType.LIVE -> settings.liveEffects
                 ScreenType.HOME, ScreenType.BOTH -> settings.homeEffects

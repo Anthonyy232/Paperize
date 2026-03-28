@@ -144,6 +144,39 @@ fun getDeviceScreenSize(context: Context): Size {
 }
 
 /**
+ * Get the target render size for a wallpaper bitmap.
+ *
+ * For the HOME screen (and BOTH), the launcher may request a wider canvas than the physical
+ * screen to support horizontal parallax scrolling across multiple home-screen pages (e.g.
+ * Pixel Launcher with 3 pages requests ~3× screen width). If we render at physical-screen
+ * width and pass a null visibleCropHint to WallpaperManager.setBitmap(), Android scales the
+ * bitmap up to fill the launcher's desired width, which also enlarges the height and crops
+ * the top/bottom — making "FIT" behave identically to "FILL" from the user's perspective.
+ *
+ * Fix: use WallpaperManager.getDesiredMinimumWidth/Height as the render target for HOME/BOTH
+ * so the bitmap already fills the full parallax canvas. The launcher then has nothing to scale,
+ * and the chosen scaling mode (FIT, FILL, STRETCH, NONE) is preserved correctly.
+ *
+ * LOCK screen wallpapers are not parallax-scrolled, so the physical screen size is correct.
+ * LIVE wallpapers are rendered by GLRenderer directly; they do not go through this path.
+ */
+fun getWallpaperRenderSize(context: Context, screenType: com.anthonyla.paperize.core.ScreenType): Size {
+    val screen = getDeviceScreenSize(context)
+    return when (screenType) {
+        com.anthonyla.paperize.core.ScreenType.HOME,
+        com.anthonyla.paperize.core.ScreenType.BOTH -> {
+            val wm = WallpaperManager.getInstance(context)
+            val desiredW = wm.desiredMinimumWidth
+            val desiredH = wm.desiredMinimumHeight
+            // desiredMinimumWidth/Height return 0 when the launcher hasn't set a preference yet.
+            // Fall back to physical screen size in that case.
+            if (desiredW > 0 && desiredH > 0) Size(desiredW, desiredH) else screen
+        }
+        else -> screen
+    }
+}
+
+/**
  * Retrieve a bitmap from a URI that is scaled down to the device's screen size.
  *
  * ImageDecoder is the primary path: it auto-applies EXIF orientation and exposes

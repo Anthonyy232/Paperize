@@ -7,7 +7,7 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
-import com.anthonyla.paperize.core.util.getDeviceScreenSize
+import com.anthonyla.paperize.core.util.getWallpaperRenderSize
 import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.core.util.processBitmap
 import com.anthonyla.paperize.core.util.retrieveBitmap
@@ -36,7 +36,7 @@ class ReapplyEffectsUseCase @Inject constructor(
                 ?: return Result.Error(Exception(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
 
             val settings = settingsRepository.getScheduleSettings()
-            val screenSize = getDeviceScreenSize(context)
+            val screenSize = getWallpaperRenderSize(context, screenType)
 
             val effects = when (screenType) {
                 ScreenType.LIVE -> settings.liveEffects
