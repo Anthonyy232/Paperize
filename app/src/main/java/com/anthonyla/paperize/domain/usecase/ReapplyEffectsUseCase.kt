@@ -57,27 +57,37 @@ class ReapplyEffectsUseCase @Inject constructor(
             val bitmap = retrieveBitmap(context, uri, screenSize.width, screenSize.height, scaling)
                 ?: return Result.Error(Exception(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
 
-            var processed = processBitmap(
-                source = bitmap,
-                enableDarken = effects.enableDarken,
-                darkenPercent = effects.darkenPercentage,
-                enableBlur = effects.enableBlur,
-                blurPercent = effects.blurPercentage,
-                enableVignette = effects.enableVignette,
-                vignettePercent = effects.vignettePercentage,
-                enableGrayscale = effects.enableGrayscale,
-                grayscalePercent = effects.grayscalePercentage
-            )
+            var processed: Bitmap? = null
+            try {
+                processed = processBitmap(
+                    source = bitmap,
+                    enableDarken = effects.enableDarken,
+                    darkenPercent = effects.darkenPercentage,
+                    enableBlur = effects.enableBlur,
+                    blurPercent = effects.blurPercentage,
+                    enableVignette = effects.enableVignette,
+                    vignettePercent = effects.vignettePercentage,
+                    enableGrayscale = effects.enableGrayscale,
+                    grayscalePercent = effects.grayscalePercentage
+                )
 
-            if (processed !== bitmap) bitmap.recycle()
+                if (processed !== bitmap) bitmap.recycle()
 
-            if (settings.adaptiveBrightness) {
-                val prev = processed
-                processed = adaptiveBrightnessAdjustment(context, processed)
-                if (processed !== prev) prev.recycle()
+                if (settings.adaptiveBrightness) {
+                    val prev = processed
+                    processed = adaptiveBrightnessAdjustment(context, processed)
+                    if (processed !== prev) prev.recycle()
+                }
+
+                Result.Success(processed)
+            } catch (e: Exception) {
+                if (processed != null && !processed.isRecycled) {
+                    processed.recycle()
+                } else if (!bitmap.isRecycled) {
+                    bitmap.recycle()
+                }
+                throw e
             }
-
-            Result.Success(processed)
         } catch (e: Exception) {
             Result.Error(e)
         }

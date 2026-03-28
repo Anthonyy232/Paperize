@@ -90,36 +90,47 @@ class ChangeWallpaperUseCase @Inject constructor(
                 try {
                     val bitmap = retrieveBitmap(context, uri, screenSize.width, screenSize.height, scaling)
                     if (bitmap != null) {
-                        var processedBitmap = processBitmap(
-                            source = bitmap,
-                            enableDarken = effects.enableDarken,
-                            darkenPercent = effects.darkenPercentage,
-                            enableBlur = effects.enableBlur,
-                            blurPercent = effects.blurPercentage,
-                            enableVignette = effects.enableVignette,
-                            vignettePercent = effects.vignettePercentage,
-                            enableGrayscale = effects.enableGrayscale,
-                            grayscalePercent = effects.grayscalePercentage
-                        )
-
-                        if (processedBitmap !== bitmap) {
-                            bitmap.recycle()
-                        }
-
-                        if (settings.adaptiveBrightness) {
-                            val previousBitmap = processedBitmap
-                            processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
-                            if (processedBitmap !== previousBitmap) {
-                                previousBitmap.recycle()
-                            }
-                        }
-
-                        finalBitmap = processedBitmap
-
+                        var processedBitmap: Bitmap? = null
                         try {
-                            wallpaperRepository.setCurrentWallpaper(albumId, screenType, candidate.id)
+                            processedBitmap = processBitmap(
+                                source = bitmap,
+                                enableDarken = effects.enableDarken,
+                                darkenPercent = effects.darkenPercentage,
+                                enableBlur = effects.enableBlur,
+                                blurPercent = effects.blurPercentage,
+                                enableVignette = effects.enableVignette,
+                                vignettePercent = effects.vignettePercentage,
+                                enableGrayscale = effects.enableGrayscale,
+                                grayscalePercent = effects.grayscalePercentage
+                            )
+
+                            if (processedBitmap !== bitmap) {
+                                bitmap.recycle()
+                            }
+
+                            if (settings.adaptiveBrightness) {
+                                val previousBitmap = processedBitmap
+                                processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
+                                if (processedBitmap !== previousBitmap) {
+                                    previousBitmap.recycle()
+                                }
+                            }
+
+                            finalBitmap = processedBitmap
+
+                            try {
+                                wallpaperRepository.setCurrentWallpaper(albumId, screenType, candidate.id)
+                            } catch (e: Exception) {
+                                android.util.Log.w("ChangeWallpaperUseCase", "Failed to record current wallpaper", e)
+                            }
                         } catch (e: Exception) {
-                            android.util.Log.w("ChangeWallpaperUseCase", "Failed to record current wallpaper", e)
+                            // Recycle any bitmaps that were allocated before the exception
+                            if (processedBitmap != null && !processedBitmap.isRecycled) {
+                                processedBitmap.recycle()
+                            } else if (!bitmap.isRecycled) {
+                                bitmap.recycle()
+                            }
+                            throw e
                         }
                     } else {
                         // null bitmap — file temporarily inaccessible; skip this cycle.
