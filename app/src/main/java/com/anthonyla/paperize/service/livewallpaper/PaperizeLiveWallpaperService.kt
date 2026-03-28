@@ -202,8 +202,9 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                         if (uri.isValid(contentResolver)) {
                             wallpaper = candidate
                         } else {
-                            // Remove invalid wallpaper
-                            wallpaperRepository.deleteWallpaper(candidate.id)
+                            // Skip this cycle — do not permanently delete.
+                            // A transient permission or storage issue should not remove it from the album.
+                            // AlbumRefreshWorker handles pruning of truly invalid URIs on its daily scan.
                             maxRetries--
                         }
                     }
@@ -386,7 +387,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
         private fun handleScreenOff() {
             engineScope.launch {
                 val settings = settingsRepository.getScheduleSettings()
-                if (settings.liveEffects.enableChangeOnScreenOn) {
+                if (settings.liveEffects.enableChangeOnScreenOff) {
                     Log.d(TAG, "Screen off - changing wallpaper")
                     // Use forceReload to bypass visibility check and load while screen is off
                     renderController.forceReloadCurrentArtwork()

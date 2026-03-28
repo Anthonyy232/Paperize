@@ -952,12 +952,12 @@ fun WallpaperScreen(
                     // Change wallpaper on screen off
                     SettingSwitch(
                         title = R.string.change_on_screen_off,
-                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOn) null else R.string.change_wallpaper_when_screen_turns_off,
-                        checked = scheduleSettings.liveEffects.enableChangeOnScreenOn,
+                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOff) null else R.string.change_wallpaper_when_screen_turns_off,
+                        checked = scheduleSettings.liveEffects.enableChangeOnScreenOff,
                         onCheckedChange = { enabled ->
                             updateSettingsImmediate(
                                 scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableChangeOnScreenOn = enabled)
+                                    liveEffects = scheduleSettings.liveEffects.copy(enableChangeOnScreenOff = enabled)
                                 )
                             )
                         }

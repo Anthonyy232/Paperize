@@ -162,7 +162,7 @@ class PreferencesManager @Inject constructor(
                 enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] ?: false,
                 grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] ?: false,
-                enableChangeOnScreenOn = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] ?: false,
+                enableChangeOnScreenOff = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_OFF)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
             ),
@@ -225,7 +225,7 @@ class PreferencesManager @Inject constructor(
                 enableGrayscale = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] ?: false,
                 grayscalePercentage = prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] ?: 0,
                 enableDoubleTap = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] ?: false,
-                enableChangeOnScreenOn = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] ?: false,
+                enableChangeOnScreenOff = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_OFF)] ?: false,
                 enableParallax = prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] ?: false,
                 parallaxIntensity = prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] ?: Constants.DEFAULT_PARALLAX_INTENSITY
             ),
@@ -298,7 +298,7 @@ class PreferencesManager @Inject constructor(
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE)] = settings.liveEffects.enableGrayscale
             prefs[intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE)] = settings.liveEffects.grayscalePercentage
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP)] = settings.liveEffects.enableDoubleTap
-            prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON)] = settings.liveEffects.enableChangeOnScreenOn
+            prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_OFF)] = settings.liveEffects.enableChangeOnScreenOff
             prefs[booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX)] = settings.liveEffects.enableParallax
             prefs[intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY)] = settings.liveEffects.parallaxIntensity
 
@@ -513,7 +513,7 @@ class PreferencesManager @Inject constructor(
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_GRAYSCALE))
             prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_GRAYSCALE))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_DOUBLE_TAP))
-            prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_ON))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_CHANGE_ON_SCREEN_OFF))
             prefs.remove(booleanPreferencesKey(PreferenceKeys.LIVE_ENABLE_PARALLAX))
             prefs.remove(intPreferencesKey(PreferenceKeys.LIVE_PARALLAX_INTENSITY))
 
