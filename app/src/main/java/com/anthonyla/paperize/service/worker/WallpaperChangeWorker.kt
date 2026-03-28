@@ -91,13 +91,14 @@ class WallpaperChangeWorker @AssistedInject constructor(
                 }
             }
             ScreenType.BOTH -> {
-                // Synchronized mode: set both screens to the same wallpaper
-                // This ensures both HOME and LOCK show identical wallpapers
-                // Both screens must use the same album in sync mode
-                val albumId = settings.homeAlbumId
+                val homeAlbumId = settings.homeAlbumId
+                val lockAlbumId = settings.lockAlbumId
 
-                if (albumId != null) {
-                    val result = changeWallpaperUseCase(albumId, ScreenType.HOME)
+                // Only treat as synchronized when both screens point to the same album.
+                // If they diverge (transient state during album selection), fall back to
+                // independent changes — mirrors the guard in WallpaperChangeService.
+                if (homeAlbumId != null && lockAlbumId != null && homeAlbumId == lockAlbumId) {
+                    val result = changeWallpaperUseCase(homeAlbumId, ScreenType.HOME)
                     result.onSuccess { bitmap ->
                         try {
                             // Validate bitmap before setting
@@ -131,17 +132,17 @@ class WallpaperChangeWorker @AssistedInject constructor(
                             // the same queue position rather than LOCK restarting at 0.
                             try {
                                 val homeCurrentId = wallpaperRepository
-                                    .getCurrentWallpaper(albumId, ScreenType.HOME)?.id
+                                    .getCurrentWallpaper(homeAlbumId, ScreenType.HOME)?.id
                                 if (homeCurrentId != null) {
                                     if (wallpaperRepository.getNextWallpaperInQueue(
-                                            albumId, ScreenType.LOCK) == null) {
+                                            homeAlbumId, ScreenType.LOCK) == null) {
                                         wallpaperRepository.buildWallpaperQueue(
-                                            albumId, ScreenType.LOCK, settings.shuffleEnabled)
+                                            homeAlbumId, ScreenType.LOCK, settings.shuffleEnabled)
                                     }
                                     wallpaperRepository.getAndDequeueWallpaper(
-                                        albumId, ScreenType.LOCK)
+                                        homeAlbumId, ScreenType.LOCK)
                                     wallpaperRepository.setCurrentWallpaper(
-                                        albumId, ScreenType.LOCK, homeCurrentId)
+                                        homeAlbumId, ScreenType.LOCK, homeCurrentId)
                                 }
                             } catch (e: Exception) {
                                 Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
@@ -167,7 +168,17 @@ class WallpaperChangeWorker @AssistedInject constructor(
                         }
                     }
                 } else {
-                    Log.w(TAG, "No album selected for synchronized mode")
+                    // Albums diverged — change screens independently
+                    if (homeAlbumId != null) {
+                        changeHomeWallpaper(homeAlbumId, settings, wallpaperManager)
+                    } else {
+                        Log.w(TAG, "No home album selected for BOTH mode")
+                    }
+                    if (lockAlbumId != null) {
+                        changeLockWallpaper(lockAlbumId, settings, wallpaperManager)
+                    } else {
+                        Log.w(TAG, "No lock album selected for BOTH mode")
+                    }
                 }
             }
         }
