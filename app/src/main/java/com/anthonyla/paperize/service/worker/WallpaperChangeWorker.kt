@@ -145,7 +145,6 @@ class WallpaperChangeWorker @AssistedInject constructor(
 
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting wallpaper for both screens", e)
-                            throw e
                         } finally {
                             // Recycle HOME bitmap BEFORE rendering LOCK to avoid
                             // holding both in memory simultaneously.
