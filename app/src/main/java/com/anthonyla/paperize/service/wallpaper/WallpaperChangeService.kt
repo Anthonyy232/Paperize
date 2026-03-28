@@ -157,22 +157,14 @@ class WallpaperChangeService : Service() {
                                         throw IllegalStateException("Bitmap has been recycled")
                                     }
 
-                                    // Set for home screen
+                                    // Set for home screen (rendered at parallax canvas size)
                                     wallpaperManager.setBitmap(
                                         bitmap,
                                         null,
                                         true,
                                         WallpaperManager.FLAG_SYSTEM
                                     )
-                                    // Set for lock screen
-                                    wallpaperManager.setBitmap(
-                                        bitmap,
-                                        null,
-                                        true,
-                                        WallpaperManager.FLAG_LOCK
-                                    )
-
-                                    Log.d(TAG, "Same wallpaper set for both screens")
+                                    Log.d(TAG, "Home wallpaper set in BOTH mode")
 
                                     // Keep LOCK queue in sync with HOME so that if the user later
                                     // switches to separate schedules, both screens continue from
@@ -194,6 +186,31 @@ class WallpaperChangeService : Service() {
                                         }
                                     } catch (e: Exception) {
                                         Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
+                                    }
+
+                                    // Render a separate bitmap for the lock screen at physical
+                                    // screen dimensions. The HOME bitmap was sized for the
+                                    // launcher's parallax canvas which is typically wider than
+                                    // the screen; reusing it for LOCK would let Android
+                                    // center-crop it, defeating FIT/NONE scaling modes.
+                                    val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
+                                    lockResult.onSuccess { lockBitmap ->
+                                        try {
+                                            wallpaperManager.setBitmap(
+                                                lockBitmap, null, true, WallpaperManager.FLAG_LOCK
+                                            )
+                                            Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                                        } catch (e: Exception) {
+                                            Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
+                                        } finally {
+                                            lockBitmap.recycle()
+                                        }
+                                    }.onError {
+                                        // Fallback: use the HOME bitmap for LOCK (old behavior)
+                                        Log.w(TAG, "Lock rerender failed in BOTH mode, using HOME bitmap")
+                                        wallpaperManager.setBitmap(
+                                            bitmap, null, true, WallpaperManager.FLAG_LOCK
+                                        )
                                     }
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Error setting wallpaper for both screens", e)

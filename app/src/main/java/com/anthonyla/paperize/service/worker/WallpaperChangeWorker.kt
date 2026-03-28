@@ -12,6 +12,7 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
+import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
 import com.anthonyla.paperize.service.WallpaperChangeLock
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -28,6 +29,7 @@ class WallpaperChangeWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
     private val changeWallpaperUseCase: ChangeWallpaperUseCase,
+    private val reapplyEffectsUseCase: ReapplyEffectsUseCase,
     private val settingsRepository: SettingsRepository,
     private val wallpaperRepository: WallpaperRepository,
     private val wallpaperChangeLock: WallpaperChangeLock
@@ -111,21 +113,14 @@ class WallpaperChangeWorker @AssistedInject constructor(
 
                             Log.d(TAG, "Setting both screens - size: ${bitmap.width}x${bitmap.height}, config: ${bitmap.config}")
 
+                            // Set HOME (rendered at parallax canvas size)
                             wallpaperManager.setBitmap(
                                 bitmap,
                                 null,
                                 true,
                                 WallpaperManager.FLAG_SYSTEM
                             )
-
-                            wallpaperManager.setBitmap(
-                                bitmap,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_LOCK
-                            )
-
-                            Log.d(TAG, "Both screens wallpaper changed successfully")
+                            Log.d(TAG, "Home wallpaper set in BOTH mode")
 
                             // Keep LOCK queue in sync with HOME so that if the user later
                             // switches to separate schedules, both screens continue from
@@ -146,6 +141,27 @@ class WallpaperChangeWorker @AssistedInject constructor(
                                 }
                             } catch (e: Exception) {
                                 Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
+                            }
+
+                            // Render a separate bitmap for the lock screen at physical
+                            // screen dimensions (no parallax on lock screen).
+                            val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
+                            lockResult.onSuccess { lockBitmap ->
+                                try {
+                                    wallpaperManager.setBitmap(
+                                        lockBitmap, null, true, WallpaperManager.FLAG_LOCK
+                                    )
+                                    Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
+                                } finally {
+                                    lockBitmap.recycle()
+                                }
+                            }.onError {
+                                Log.w(TAG, "Lock rerender failed in BOTH mode, using HOME bitmap")
+                                wallpaperManager.setBitmap(
+                                    bitmap, null, true, WallpaperManager.FLAG_LOCK
+                                )
                             }
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting wallpaper for both screens", e)
