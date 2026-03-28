@@ -188,35 +188,33 @@ class WallpaperChangeService : Service() {
                                         Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
                                     }
 
-                                    // Render a separate bitmap for the lock screen at physical
-                                    // screen dimensions. The HOME bitmap was sized for the
-                                    // launcher's parallax canvas which is typically wider than
-                                    // the screen; reusing it for LOCK would let Android
-                                    // center-crop it, defeating FIT/NONE scaling modes.
-                                    val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
-                                    lockResult.onSuccess { lockBitmap ->
-                                        try {
-                                            wallpaperManager.setBitmap(
-                                                lockBitmap, null, true, WallpaperManager.FLAG_LOCK
-                                            )
-                                            Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
-                                        } catch (e: Exception) {
-                                            Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
-                                        } finally {
-                                            lockBitmap.recycle()
-                                        }
-                                    }.onError {
-                                        // Fallback: use the HOME bitmap for LOCK (old behavior)
-                                        Log.w(TAG, "Lock rerender failed in BOTH mode, using HOME bitmap")
-                                        wallpaperManager.setBitmap(
-                                            bitmap, null, true, WallpaperManager.FLAG_LOCK
-                                        )
-                                    }
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Error setting wallpaper for both screens", e)
                                 } finally {
-                                    // Always recycle bitmap to prevent memory leaks
+                                    // Recycle HOME bitmap BEFORE rendering LOCK to avoid
+                                    // holding both in memory (~48MB + ~16MB).
                                     bitmap.recycle()
+                                }
+
+                                // Render a separate bitmap for the lock screen at physical
+                                // screen dimensions. The HOME bitmap was sized for the
+                                // launcher's parallax canvas which is typically wider than
+                                // the screen; reusing it for LOCK would let Android
+                                // center-crop it, defeating FIT/NONE scaling modes.
+                                val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
+                                lockResult.onSuccess { lockBitmap ->
+                                    try {
+                                        wallpaperManager.setBitmap(
+                                            lockBitmap, null, true, WallpaperManager.FLAG_LOCK
+                                        )
+                                        Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
+                                    } finally {
+                                        lockBitmap.recycle()
+                                    }
+                                }.onError { error ->
+                                    Log.w(TAG, "Lock rerender failed in BOTH mode: ${error.message}")
                                 }
                             }.onError { error ->
                                 if (error is EmptyAlbumException) {

@@ -199,28 +199,46 @@ fun retrieveBitmap(
         val result = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             val srcWidth = info.size.width
             val srcHeight = info.size.height
-            val (targetWidth, targetHeight) = when (scaling) {
+
+            when (scaling) {
                 ScalingType.FILL -> {
+                    // Scale to fill, then crop to canvas during decode.
+                    // setCrop avoids allocating the full fill-scale bitmap (which can be
+                    // much taller/wider than the canvas) — major OOM prevention.
                     val scale = maxOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
-                    Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
+                    val targetW = (srcWidth * scale).fastRoundToInt()
+                    val targetH = (srcHeight * scale).fastRoundToInt()
+                    decoder.setTargetSize(targetW, targetH)
+                    if (targetW > width || targetH > height) {
+                        val cropX = ((targetW - width) / 2).coerceAtLeast(0)
+                        val cropY = ((targetH - height) / 2).coerceAtLeast(0)
+                        decoder.setCrop(android.graphics.Rect(
+                            cropX, cropY, cropX + width, cropY + height
+                        ))
+                    }
                 }
                 ScalingType.FIT -> {
                     val scale = minOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
-                    Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
+                    decoder.setTargetSize(
+                        (srcWidth * scale).fastRoundToInt(),
+                        (srcHeight * scale).fastRoundToInt()
+                    )
                 }
-                ScalingType.STRETCH -> Pair(width, height)
+                ScalingType.STRETCH -> decoder.setTargetSize(width, height)
                 ScalingType.NONE -> {
                     val maxWidth = width * 2
                     val maxHeight = height * 2
                     if (srcWidth > maxWidth || srcHeight > maxHeight) {
                         val scale = minOf(maxWidth.toFloat() / srcWidth, maxHeight.toFloat() / srcHeight)
-                        Pair((srcWidth * scale).fastRoundToInt(), (srcHeight * scale).fastRoundToInt())
-                    } else {
-                        Pair(srcWidth, srcHeight)
+                        decoder.setTargetSize(
+                            (srcWidth * scale).fastRoundToInt(),
+                            (srcHeight * scale).fastRoundToInt()
+                        )
                     }
+                    // else: decode at original resolution
                 }
             }
-            decoder.setTargetSize(targetWidth, targetHeight)
+
             decoder.isMutableRequired = true
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }

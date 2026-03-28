@@ -143,31 +143,31 @@ class WallpaperChangeWorker @AssistedInject constructor(
                                 Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
                             }
 
-                            // Render a separate bitmap for the lock screen at physical
-                            // screen dimensions (no parallax on lock screen).
-                            val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
-                            lockResult.onSuccess { lockBitmap ->
-                                try {
-                                    wallpaperManager.setBitmap(
-                                        lockBitmap, null, true, WallpaperManager.FLAG_LOCK
-                                    )
-                                    Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
-                                } finally {
-                                    lockBitmap.recycle()
-                                }
-                            }.onError {
-                                Log.w(TAG, "Lock rerender failed in BOTH mode, using HOME bitmap")
-                                wallpaperManager.setBitmap(
-                                    bitmap, null, true, WallpaperManager.FLAG_LOCK
-                                )
-                            }
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting wallpaper for both screens", e)
                             throw e
                         } finally {
+                            // Recycle HOME bitmap BEFORE rendering LOCK to avoid
+                            // holding both in memory simultaneously.
                             bitmap.recycle()
+                        }
+
+                        // Render a separate bitmap for the lock screen at physical
+                        // screen dimensions (no parallax on lock screen).
+                        val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
+                        lockResult.onSuccess { lockBitmap ->
+                            try {
+                                wallpaperManager.setBitmap(
+                                    lockBitmap, null, true, WallpaperManager.FLAG_LOCK
+                                )
+                                Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
+                            } finally {
+                                lockBitmap.recycle()
+                            }
+                        }.onError { error ->
+                            Log.w(TAG, "Lock rerender failed in BOTH mode: ${error.message}")
                         }
                     }.onError { error ->
                         if (error is EmptyAlbumException) {
