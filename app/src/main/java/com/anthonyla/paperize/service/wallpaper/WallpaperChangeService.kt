@@ -99,6 +99,11 @@ class WallpaperChangeService : Service() {
                 } ?: ScreenType.BOTH
                 handleReapplyEffects(screenType, startId)
             }
+            else -> {
+                // Unknown or null action — stop immediately to avoid a stuck foreground service
+                Log.w(TAG, "Unknown action: ${intent?.action}")
+                stopSelf(startId)
+            }
         }
 
         return START_NOT_STICKY
