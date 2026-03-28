@@ -254,7 +254,80 @@ fun retrieveBitmap(
     }
 
     // Only apply EXIF orientation for the BitmapFactory path — ImageDecoder already handles it
-    return if (decodedWithImageDecoder) bitmap else bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
+    val oriented = if (decodedWithImageDecoder) bitmap else bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
+
+    // Composite onto an exact (width × height) canvas so WallpaperManager.setBitmap() receives
+    // a bitmap that already matches the desired canvas dimensions.  Without this step the launcher
+    // still has to scale/position the bitmap, which undoes the scaling mode the user chose:
+    //   FILL  → decoded bitmap may be taller than canvas; center-crop to canvas size.
+    //   FIT   → decoded bitmap may be narrower/shorter than canvas; center on black canvas.
+    //   NONE  → original-size image may be smaller than canvas; center on black canvas.
+    //   STRETCH → decoder was told the exact canvas size; no-op.
+    return oriented?.let { finalizeToCanvas(it, width, height, scaling) }
+}
+
+/**
+ * Produce a bitmap of exactly [canvasW] × [canvasH] pixels according to [scaling]:
+ *
+ * - FILL:    the source already fills (or overflows) the canvas because [retrieveBitmap]
+ *            decoded it at fill-scale.  Center-crop any overflow.
+ * - FIT:     the source fits within the canvas but may leave empty margins.
+ *            Draw it centered on a black [canvasW]×[canvasH] bitmap.
+ * - STRETCH: [retrieveBitmap] decoded to the exact canvas size; nothing to do.
+ * - NONE:    the source is at most canvas-sized (possibly smaller).
+ *            Draw it centered on a black [canvasW]×[canvasH] bitmap.
+ */
+private fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scaling: ScalingType): Bitmap {
+    val sw = source.width
+    val sh = source.height
+
+    return when (scaling) {
+        ScalingType.FILL -> {
+            // Primary path (ImageDecoder): source was decoded at fill-scale so it is
+            // >= canvasW wide AND >= canvasH tall.  Center-crop to exact canvas size.
+            // Fallback path (BitmapFactory): source may be smaller if the image needed
+            // upscaling — scale up first, then center-crop.
+            val fillSrc = if (sw < canvasW || sh < canvasH) {
+                val scale = maxOf(canvasW.toFloat() / sw, canvasH.toFloat() / sh)
+                val scaledW = (sw * scale).fastRoundToInt()
+                val scaledH = (sh * scale).fastRoundToInt()
+                val scaled = Bitmap.createScaledBitmap(source, scaledW, scaledH, true)
+                if (scaled !== source) source.recycle()
+                scaled
+            } else source
+            val fsw = fillSrc.width
+            val fsh = fillSrc.height
+            if (fsw == canvasW && fsh == canvasH) return fillSrc
+            val x = ((fsw - canvasW) / 2).coerceAtLeast(0)
+            val y = ((fsh - canvasH) / 2).coerceAtLeast(0)
+            val cropped = Bitmap.createBitmap(fillSrc, x, y, canvasW, canvasH)
+            if (cropped !== fillSrc) fillSrc.recycle()
+            cropped
+        }
+
+        ScalingType.FIT, ScalingType.NONE -> {
+            // FIT / NONE: source fits within the canvas; center it on a black background.
+            if (sw == canvasW && sh == canvasH) return source
+            compositeCenter(source, canvasW, canvasH)
+        }
+
+        ScalingType.STRETCH -> source // decoder was given exact canvas dimensions
+    }
+}
+
+/**
+ * Draw [source] centered on a new [canvasW]×[canvasH] black bitmap and return the result.
+ * [source] is recycled unless it is the same object as the returned bitmap.
+ */
+private fun compositeCenter(source: Bitmap, canvasW: Int, canvasH: Int): Bitmap {
+    val canvas = Bitmap.createBitmap(canvasW, canvasH, Bitmap.Config.ARGB_8888)
+    val c = Canvas(canvas)
+    c.drawColor(Color.BLACK)
+    val offsetX = ((canvasW - source.width) / 2f).coerceAtLeast(0f)
+    val offsetY = ((canvasH - source.height) / 2f).coerceAtLeast(0f)
+    c.drawBitmap(source, offsetX, offsetY, null)
+    source.recycle()
+    return canvas
 }
 
 /**
