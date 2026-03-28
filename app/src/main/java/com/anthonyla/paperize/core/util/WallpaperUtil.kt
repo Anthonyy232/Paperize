@@ -109,9 +109,12 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
     if (width == 0 || height == 0) return 1
 
     if (imageSize.width > width || imageSize.height > height) {
-        val heightRatio = (imageSize.height.toFloat() / height.toFloat()).fastRoundToInt()
-        val widthRatio = (imageSize.width.toFloat() / width.toFloat()).fastRoundToInt()
-        return (if (heightRatio < widthRatio) heightRatio else widthRatio).coerceAtLeast(1)
+        // Integer division (floor) ensures inSampleSize is never larger than needed,
+        // guaranteeing the decoded bitmap is at least as wide/tall as the target.
+        // fastRoundToInt() can round UP, producing a bitmap smaller than the target.
+        val heightRatio = imageSize.height / height
+        val widthRatio = imageSize.width / width
+        return minOf(heightRatio, widthRatio).coerceAtLeast(1)
     }
     return 1
 }
