@@ -12,9 +12,9 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
+import com.anthonyla.paperize.service.WallpaperChangeLock
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
@@ -29,17 +29,12 @@ class WallpaperChangeWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val changeWallpaperUseCase: ChangeWallpaperUseCase,
     private val settingsRepository: SettingsRepository,
-    private val wallpaperRepository: WallpaperRepository
+    private val wallpaperRepository: WallpaperRepository,
+    private val wallpaperChangeLock: WallpaperChangeLock
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
         private const val TAG = "WallpaperChangeWorker"
-
-        /**
-         * Mutex to prevent concurrent wallpaper changes
-         * Ensures only one wallpaper change operation runs at a time
-         */
-        private val wallpaperChangeMutex = Mutex()
     }
 
     override suspend fun doWork(): Result {
@@ -49,8 +44,8 @@ class WallpaperChangeWorker @AssistedInject constructor(
 
             Log.d(TAG, "Starting wallpaper change for $screenType")
 
-            // Use mutex to prevent concurrent wallpaper changes
-            wallpaperChangeMutex.withLock {
+            // Use shared lock to prevent concurrent wallpaper changes across service and worker
+            wallpaperChangeLock.mutex.withLock {
                 changeWallpaper(screenType)
             }
 

@@ -20,13 +20,13 @@ import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
 import com.anthonyla.paperize.presentation.MainActivity
+import com.anthonyla.paperize.service.WallpaperChangeLock
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
@@ -51,6 +51,9 @@ class WallpaperChangeService : Service() {
     @Inject
     lateinit var settingsRepository: SettingsRepository
 
+    @Inject
+    lateinit var wallpaperChangeLock: WallpaperChangeLock
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private lateinit var wallpaperManager: WallpaperManager
@@ -62,14 +65,6 @@ class WallpaperChangeService : Service() {
         const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
         const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
         private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
-
-        /**
-         * Mutex to prevent concurrent wallpaper changes
-         * Multiple service instances can be started simultaneously from different triggers
-         * (alarms, manual changes, etc.). This mutex ensures only one wallpaper change
-         * operation runs at a time, preventing race conditions.
-         */
-        private val wallpaperChangeMutex = Mutex()
     }
 
     override fun onCreate() {
@@ -112,7 +107,7 @@ class WallpaperChangeService : Service() {
     private fun handleChangeWallpaper(screenType: ScreenType, startId: Int) {
         serviceScope.launch {
             // Use mutex to prevent concurrent wallpaper changes
-            wallpaperChangeMutex.withLock {
+            wallpaperChangeLock.mutex.withLock {
                 try {
                     // Get schedule settings to determine which albums to use
                     val settings = settingsRepository.getScheduleSettings()
@@ -308,7 +303,7 @@ class WallpaperChangeService : Service() {
      */
     private fun handleReapplyEffects(screenType: ScreenType, startId: Int) {
         serviceScope.launch {
-            wallpaperChangeMutex.withLock {
+            wallpaperChangeLock.mutex.withLock {
                 try {
                     val settings = settingsRepository.getScheduleSettings()
                     when (screenType) {
