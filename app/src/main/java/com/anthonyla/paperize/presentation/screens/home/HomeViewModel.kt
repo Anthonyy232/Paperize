@@ -446,7 +446,7 @@ class HomeViewModel @Inject constructor(
         context.startForegroundService(intent)
     }
 
-    private fun scheduleAlarms(settings: ScheduleSettings, onlyIfNotScheduled: Boolean = false) {
+    private suspend fun scheduleAlarms(settings: ScheduleSettings, onlyIfNotScheduled: Boolean = false) {
         // Check if we're in LIVE mode
         if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
             // LIVE mode: schedule live wallpaper changes

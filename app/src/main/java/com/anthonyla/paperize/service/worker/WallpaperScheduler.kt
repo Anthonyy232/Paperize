@@ -12,10 +12,6 @@ import kotlinx.coroutines.flow.first
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Calendar
@@ -38,7 +34,6 @@ class WallpaperScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     private val workManager = WorkManager.getInstance(context)
-    private val schedulerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mutex = Mutex()
 
     companion object {
@@ -107,7 +102,7 @@ class WallpaperScheduler @Inject constructor(
      * @param requireCharging Whether device must be charging
      * @param onlyIfNotScheduled If true, only schedule if work is not already scheduled (for app startup)
      */
-    fun scheduleWallpaperChanges(
+    suspend fun scheduleWallpaperChanges(
         homeIntervalMinutes: Int,
         lockIntervalMinutes: Int,
         synchronized: Boolean = false,
@@ -115,8 +110,7 @@ class WallpaperScheduler @Inject constructor(
         requireCharging: Boolean = false,
         onlyIfNotScheduled: Boolean = false
     ) {
-        schedulerScope.launch {
-            mutex.withLock {
+        mutex.withLock {
                 // Don't cancel all first - let UPDATE policy handle existing work
                 // This prevents immediate wallpaper change when just updating intervals
 
@@ -193,7 +187,6 @@ class WallpaperScheduler @Inject constructor(
                 } else {
                     Log.d(TAG, "Skipped scheduling album refresh - already scheduled")
                 }
-            }
         }
     }
 
