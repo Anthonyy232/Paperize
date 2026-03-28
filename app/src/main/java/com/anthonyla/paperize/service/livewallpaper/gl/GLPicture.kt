@@ -63,54 +63,64 @@ class GLPicture(
 
         Log.d(TAG, "Creating GLPicture: ${width}x${height}, tiling to ${cols}x${rows} (tile size: $tileSize)")
 
-        tiles = Array(cols * rows) { index ->
-            val col = index % cols
-            val row = index / cols
+        val partialTiles = ArrayList<Tile>(cols * rows)
+        try {
+            for (index in 0 until cols * rows) {
+                val col = index % cols
+                val row = index / cols
 
-            val tileX = col * tileSize
-            val tileY = row * tileSize
-            val tileWidth = min(tileSize, width - tileX)
-            val tileHeight = min(tileSize, height - tileY)
+                val tileX = col * tileSize
+                val tileY = row * tileSize
+                val tileWidth = min(tileSize, width - tileX)
+                val tileHeight = min(tileSize, height - tileY)
 
-            // Calculate geometry once at creation time (not per-frame)
-            val left = -1f + (tileX.toFloat() / width) * 2f
-            val right = -1f + ((tileX + tileWidth).toFloat() / width) * 2f
-            val bottom = 1f - ((tileY + tileHeight).toFloat() / height) * 2f
-            val top = 1f - (tileY.toFloat() / height) * 2f
+                // Calculate geometry once at creation time (not per-frame)
+                val left = -1f + (tileX.toFloat() / width) * 2f
+                val right = -1f + ((tileX + tileWidth).toFloat() / width) * 2f
+                val bottom = 1f - ((tileY + tileHeight).toFloat() / height) * 2f
+                val top = 1f - (tileY.toFloat() / height) * 2f
 
-            val vertices = floatArrayOf(
-                left, bottom,   // Bottom-left
-                right, bottom,  // Bottom-right
-                left, top,      // Top-left
-                right, top      // Top-right
-            )
+                val vertices = floatArrayOf(
+                    left, bottom,   // Bottom-left
+                    right, bottom,  // Bottom-right
+                    left, top,      // Top-left
+                    right, top      // Top-right
+                )
 
-            val texCoords = floatArrayOf(
-                0f, 1f,  // Bottom-left
-                1f, 1f,  // Bottom-right
-                0f, 0f,  // Top-left
-                1f, 0f   // Top-right
-            )
+                val texCoords = floatArrayOf(
+                    0f, 1f,  // Bottom-left
+                    1f, 1f,  // Bottom-right
+                    0f, 0f,  // Top-left
+                    1f, 0f   // Top-right
+                )
 
-            // Pre-allocate buffers (reused every frame)
-            val vertexBuffer = createFloatBuffer(vertices)
-            val texCoordBuffer = createFloatBuffer(texCoords)
+                // Pre-allocate buffers (reused every frame)
+                val vertexBuffer = createFloatBuffer(vertices)
+                val texCoordBuffer = createFloatBuffer(texCoords)
 
-            // Extract and upload tile bitmap
-            val tileBitmap = Bitmap.createBitmap(bitmap, tileX, tileY, tileWidth, tileHeight)
-            val textureId = loadTexture(tileBitmap)
-            tileBitmap.recycle()
+                // Extract and upload tile bitmap
+                val tileBitmap = Bitmap.createBitmap(bitmap, tileX, tileY, tileWidth, tileHeight)
+                val textureId = loadTexture(tileBitmap)
+                tileBitmap.recycle()
 
-            Tile(
-                textureId = textureId,
-                x = tileX,
-                y = tileY,
-                width = tileWidth,
-                height = tileHeight,
-                vertexBuffer = vertexBuffer,
-                texCoordBuffer = texCoordBuffer
-            )
+                partialTiles.add(Tile(
+                    textureId = textureId,
+                    x = tileX,
+                    y = tileY,
+                    width = tileWidth,
+                    height = tileHeight,
+                    vertexBuffer = vertexBuffer,
+                    texCoordBuffer = texCoordBuffer
+                ))
+            }
+        } catch (e: Throwable) {
+            // Recycle any textures already uploaded to the GPU before re-throwing
+            for (tile in partialTiles) {
+                GLUtil.deleteTexture(tile.textureId)
+            }
+            throw e
         }
+        tiles = partialTiles.toTypedArray()
     }
 
     /**
