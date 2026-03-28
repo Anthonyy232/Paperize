@@ -52,17 +52,5 @@ data class WallpaperEntity(
     val sourceType: WallpaperSourceType = WallpaperSourceType.DIRECT,
     val addedAt: Long = System.currentTimeMillis(),
 
-    /**
-     * Media type (IMAGE)
-     * Added in database version 2 for live wallpaper support
-     */
     val mediaType: WallpaperMediaType = WallpaperMediaType.IMAGE,
-
-    /**
-     * Manual crop parameters for live wallpaper rendering
-     * Added in database version 2
-     */
-    val cropOffsetX: Float? = null,
-    val cropOffsetY: Float? = null,
-    val cropScale: Float? = null
 )

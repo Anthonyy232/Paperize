@@ -76,19 +76,21 @@ class AlbumRefreshWorker @AssistedInject constructor(
                 coroutineScope {
                     album.folders.map { folder ->
                         async {
+                            // Load existing URIs for this folder once — avoids one DB query per scanned wallpaper
+                            val existingUris = wallpaperRepository.getExistingWallpaperUris(album.id, folder.id)
+
                             when (val scanResult = wallpaperRepository.scanFolderForWallpapers(android.net.Uri.parse(folder.uri))) {
                                 is CoreResult.Success -> {
                                     val scannedWallpapers = scanResult.data
 
                                     // Find and add new wallpapers not already in album
                                     scannedWallpapers.forEach { wallpaper ->
-                                        // Memory-efficient check: check database for existing URI in this album
-                                        if (!wallpaperRepository.isWallpaperInAlbum(album.id, wallpaper.uri)) {
+                                        if (wallpaper.uri !in existingUris) {
                                             val wallpaperToAdd = wallpaper.copy(
                                                 albumId = album.id,
                                                 folderId = folder.id
                                             )
-                                            
+
                                             when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
                                                 is CoreResult.Success -> {
                                                     totalAdded.incrementAndGet()

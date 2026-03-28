@@ -38,13 +38,10 @@ object QueueBuilder {
         existingQueueIds: List<String>,
         allWallpaperIds: List<String>
     ): List<String> {
-        // Filter existing queue to only include IDs that still exist
-        val existingValid = existingQueueIds.filter { it in allWallpaperIds }
-        
-        // Find new wallpapers not in existing queue
-        val newWallpaperIds = allWallpaperIds.filter { it !in existingQueueIds }
-        
-        // Return existing order with new wallpapers shuffled at the end
+        val allSet = allWallpaperIds.toHashSet()
+        val existingSet = existingQueueIds.toHashSet()
+        val existingValid = existingQueueIds.filter { it in allSet }
+        val newWallpaperIds = allWallpaperIds.filter { it !in existingSet }
         return existingValid + newWallpaperIds.shuffled()
     }
 
@@ -56,8 +53,10 @@ object QueueBuilder {
         existingQueueIds: List<String>,
         allWallpaperIds: List<String>
     ): List<String> {
-        val existingValid = existingQueueIds.filter { it in allWallpaperIds }
-        val newWallpaperIds = allWallpaperIds.filter { it !in existingQueueIds }
+        val allSet = allWallpaperIds.toHashSet()
+        val existingSet = existingQueueIds.toHashSet()
+        val existingValid = existingQueueIds.filter { it in allSet }
+        val newWallpaperIds = allWallpaperIds.filter { it !in existingSet }
         return existingValid + newWallpaperIds
     }
 

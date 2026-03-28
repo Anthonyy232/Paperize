@@ -119,4 +119,10 @@ interface WallpaperRepository {
      * Optimized for checking duplicates during folder sync
      */
     suspend fun isWallpaperInAlbum(albumId: String, uri: String): Boolean
+
+    /**
+     * Get all existing wallpaper URIs for a specific folder within an album.
+     * Used for bulk duplicate detection during folder rescan (avoids N+1 queries).
+     */
+    suspend fun getExistingWallpaperUris(albumId: String, folderId: String): Set<String>
 }

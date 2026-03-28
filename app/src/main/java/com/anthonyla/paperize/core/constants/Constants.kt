@@ -6,7 +6,7 @@ package com.anthonyla.paperize.core.constants
 object Constants {
     // Database
     const val DATABASE_NAME = "paperize_database"
-    const val DATABASE_VERSION = 3  // v3: Added wallpaper_current table for reapply-effects support
+    const val DATABASE_VERSION = 4  // v4: Removed unused cropOffsetX/Y/Scale columns from wallpapers table
 
     // DataStore
     const val PREFERENCES_NAME = "paperize_preferences"
@@ -187,7 +187,7 @@ object PreferenceKeys {
     const val LIVE_ENABLE_GRAYSCALE = "live_enable_grayscale"
     const val LIVE_GRAYSCALE = "live_grayscale"
     const val LIVE_ENABLE_DOUBLE_TAP = "live_enable_double_tap"
-    const val LIVE_ENABLE_CHANGE_ON_SCREEN_OFF = "live_enable_change_on_screen_on"
+    const val LIVE_ENABLE_CHANGE_ON_SCREEN_OFF = "live_enable_change_on_screen_off"
     const val LIVE_ENABLE_PARALLAX = "live_enable_parallax"
     const val LIVE_PARALLAX_INTENSITY = "live_parallax_intensity"
 

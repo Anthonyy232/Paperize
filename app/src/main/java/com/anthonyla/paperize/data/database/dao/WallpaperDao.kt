@@ -123,6 +123,12 @@ interface WallpaperDao {
     suspend fun getWallpaperCountByAlbum(albumId: String): Int
 
     /**
+     * Get all URIs for wallpapers in a folder — used for duplicate detection during folder rescan.
+     */
+    @Query("SELECT uri FROM wallpapers WHERE albumId = :albumId AND folderId = :folderId")
+    suspend fun getWallpaperUrisByAlbumAndFolder(albumId: String, folderId: String): List<String>
+
+    /**
      * Get wallpaper IDs only for queue building (shuffle mode).
      * Avoids loading full entities when only IDs are needed.
      */
