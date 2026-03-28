@@ -68,17 +68,6 @@ interface WallpaperQueueDao {
     """)
     suspend fun deleteQueueItem(albumId: String, screenType: ScreenType, wallpaperId: String)
 
-    @Query("""
-        DELETE FROM wallpaper_queue
-        WHERE albumId = :albumId AND screenType = :screenType
-        AND queuePosition = (
-            SELECT MIN(queuePosition)
-            FROM wallpaper_queue
-            WHERE albumId = :albumId AND screenType = :screenType
-        )
-    """)
-    suspend fun deleteFirstQueueItem(albumId: String, screenType: ScreenType)
-
     /**
      * Clear queue for album and screen type
      */
