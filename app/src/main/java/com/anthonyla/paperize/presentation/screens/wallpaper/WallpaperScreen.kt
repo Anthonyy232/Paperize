@@ -31,7 +31,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,7 +53,6 @@ import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingS
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.TimeIntervalPicker
 import com.anthonyla.paperize.presentation.theme.AppSpacing
-import kotlinx.coroutines.delay
 
 enum class AlbumSelectionContext {
     HOME, LOCK, BOTH, LIVE
@@ -71,37 +69,18 @@ fun WallpaperScreen(
     onSelectLockAlbum: (AlbumSummary?) -> Unit,
     onSelectLiveAlbum: (AlbumSummary?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
+    onUpdateScheduleSettingsDebounced: (ScheduleSettings) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
     var albumSelectionContext by rememberSaveable { mutableStateOf(AlbumSelectionContext.BOTH) }
     var showEmptyAlbumWarning by rememberSaveable { mutableStateOf(false) }
 
-    // Settings debouncing
-    var pendingSettings by remember { mutableStateOf<ScheduleSettings?>(null) }
-    var lastSettingsChangeTimestamp by remember { mutableLongStateOf(0L) }
-
-    // Debounce settings updates to avoid excessive database writes and rescheduling
-    LaunchedEffect(lastSettingsChangeTimestamp) {
-        if (lastSettingsChangeTimestamp > 0 && pendingSettings != null) {
-            delay(Constants.SETTINGS_DEBOUNCE_MS)
-            pendingSettings?.let { onUpdateScheduleSettings(it) }
-            pendingSettings = null
-        }
-    }
-
-    // Helper function to update settings with debouncing
     fun updateSettingsDebounced(newSettings: ScheduleSettings) {
-        pendingSettings = newSettings
-        lastSettingsChangeTimestamp = System.currentTimeMillis()
+        onUpdateScheduleSettingsDebounced(newSettings)
     }
 
-    // Wrapper for immediate updates that cancels pending debounced updates
     fun updateSettingsImmediate(newSettings: ScheduleSettings) {
-        // Cancel any pending debounced updates
-        pendingSettings = null
-        lastSettingsChangeTimestamp = 0L
-        // Apply the update immediately
         onUpdateScheduleSettings(newSettings)
     }
 

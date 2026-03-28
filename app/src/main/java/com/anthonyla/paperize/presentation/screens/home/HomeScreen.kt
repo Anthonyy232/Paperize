@@ -121,7 +121,8 @@ fun HomeScreen(
                                     onSelectHomeAlbum = { album -> viewModel.selectHomeAlbum(album) },
                                     onSelectLockAlbum = { album -> viewModel.selectLockAlbum(album) },
                                     onSelectLiveAlbum = { album -> viewModel.selectLiveAlbum(album) },
-                                    onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) }
+                                    onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) },
+                                    onUpdateScheduleSettingsDebounced = { viewModel.updateScheduleSettingsDebounced(it) }
                                 )
                             }
                         }

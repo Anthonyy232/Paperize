@@ -17,6 +17,8 @@ import com.anthonyla.paperize.service.wallpaper.WallpaperChangeService
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -415,6 +417,16 @@ class HomeViewModel @Inject constructor(
                     if (lockActive) reapplyEffectsNow(ScreenType.LOCK)
                 }
             }
+        }
+    }
+
+    private var pendingSettingsJob: Job? = null
+
+    fun updateScheduleSettingsDebounced(settings: ScheduleSettings) {
+        pendingSettingsJob?.cancel()
+        pendingSettingsJob = viewModelScope.launch {
+            delay(Constants.SETTINGS_DEBOUNCE_MS)
+            updateScheduleSettings(settings)
         }
     }
 
