@@ -145,7 +145,7 @@ jobs:
       - name: Create Draft Release
         # Publishes a new release to GitHub. `draft: true` ensures the release is not made
         # public until it has been manually reviewed and published.
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ./apk-artifact/paperize-v*.apk
           draft: true
