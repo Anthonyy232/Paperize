@@ -165,7 +165,7 @@ fun NavigationGraph(
             popEnterTransition = enterBackward,
             popExitTransition = exitBackward
         ) { backStackEntry ->
-            val route = backStackEntry.toRoute<AlbumRoute>()
+            backStackEntry.toRoute<AlbumRoute>()
             AlbumViewScreen(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToFolder = { folderId ->
@@ -173,9 +173,6 @@ fun NavigationGraph(
                 },
                 onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
                     navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
-                },
-                onNavigateToSort = {
-                    navController.navigate(SortRoute(route.albumId))
                 }
             )
         }
