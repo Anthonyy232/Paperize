@@ -37,6 +37,7 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
+import com.anthonyla.paperize.presentation.screens.album_view.components.ImportProgressDialog
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
 import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
@@ -62,6 +63,7 @@ fun AlbumViewScreen(
     val selectedWallpapers by viewModel.selectedWallpapers.collectAsStateWithLifecycle()
     val selectedFolders by viewModel.selectedFolders.collectAsStateWithLifecycle()
     val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
+    val importProgress by viewModel.importProgress.collectAsStateWithLifecycle()
     val selectedCount = selectedWallpapers.size + selectedFolders.size
 
     // Check if all items are selected
@@ -157,7 +159,7 @@ fun AlbumViewScreen(
             // Hide FAB when in selection mode
             if (!isSelectionMode) {
                 AddAlbumAnimatedFab(
-                    isLoading = false,
+                    isLoading = importProgress !is ImportProgress.Idle,
                     onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
                     onFolderClick = { folderPickerLauncher.launch(null) }
                 )
@@ -247,6 +249,9 @@ fun AlbumViewScreen(
             onDismiss = { showSortSheet = false }
         )
     }
+
+    // Import progress (add folder / add wallpapers)
+    ImportProgressDialog(progress = importProgress)
 
     // Delete Album Confirmation Dialog
     if (showDeleteAlbumDialog) {

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Paperize</string>
+  <string name="import_adding_folder">Adding folder…</string>
+  <string name="import_adding_wallpapers">Adding wallpapers…</string>
+  <string name="import_scanning">Scanning… %1$d found</string>
+  <string name="import_saving">Saving %1$d / %2$d</string>
   <string name="home">Home</string>
   <string name="settings_screen">Settings</string>
   <string name="wallpaper">Wallpaper</string>
