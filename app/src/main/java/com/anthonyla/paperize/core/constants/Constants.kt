@@ -195,6 +195,7 @@ object PreferenceKeys {
     const val HOME_SCALING_TYPE = "home_scaling_type"
     const val LOCK_SCALING_TYPE = "lock_scaling_type"
     const val LIVE_SCALING_TYPE = "live_scaling_type"
+    const val HOME_SCROLLING_ENABLED = "home_scrolling_enabled"
 
     // Behavior
     const val ADAPTIVE_BRIGHTNESS = "adaptive_brightness"

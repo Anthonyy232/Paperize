@@ -438,6 +438,29 @@ class HomeViewModel @Inject constructor(
         context.startForegroundService(intent)
     }
 
+    /**
+     * Trigger an immediate wallpaper change for whichever screen(s) are currently active,
+     * mirroring the BOTH/HOME/LOCK split used when scheduling. Backs the manual "change now" button.
+     */
+    fun changeWallpaperNowForActiveScreens() {
+        val settings = scheduleSettings.value
+        if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
+            changeWallpaperNow(ScreenType.LIVE)
+            return
+        }
+        val homeActive = settings.homeEnabled && settings.homeAlbumId != null
+        val lockActive = settings.lockEnabled && settings.lockAlbumId != null
+        val isSynced = homeActive && lockActive &&
+            settings.homeAlbumId == settings.lockAlbumId && !settings.separateSchedules
+        when {
+            isSynced -> changeWallpaperNow(ScreenType.BOTH)
+            else -> {
+                if (homeActive) changeWallpaperNow(ScreenType.HOME)
+                if (lockActive) changeWallpaperNow(ScreenType.LOCK)
+            }
+        }
+    }
+
     fun reapplyEffectsNow(screenType: ScreenType) {
         val intent = Intent(context, WallpaperChangeService::class.java).apply {
             action = WallpaperChangeService.ACTION_REAPPLY_EFFECTS

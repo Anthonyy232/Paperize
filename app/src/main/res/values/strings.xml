@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Paperize</string>
+  <string name="change_wallpaper_now">Change wallpaper now</string>
+  <string name="dont_scroll_home">Don\'t scroll across home screens</string>
+  <string name="dont_scroll_home_description">Show the same centered wallpaper on every home screen page</string>
   <string name="home">Home</string>
   <string name="settings_screen">Settings</string>
   <string name="wallpaper">Wallpaper</string>

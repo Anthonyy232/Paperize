@@ -125,6 +125,7 @@ class PreferencesManager @Inject constructor(
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
             homeScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)]),
             lockScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)]),
+            homeScrollingEnabled = prefs[booleanPreferencesKey(PreferenceKeys.HOME_SCROLLING_ENABLED)] ?: true,
             liveScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)]),
             homeEffects = WallpaperEffects(
                 enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR)] ?: false,
@@ -188,6 +189,7 @@ class PreferencesManager @Inject constructor(
                 ?: Constants.DEFAULT_INTERVAL_MINUTES,
             homeScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)]),
             lockScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)]),
+            homeScrollingEnabled = prefs[booleanPreferencesKey(PreferenceKeys.HOME_SCROLLING_ENABLED)] ?: true,
             liveScalingType = ScalingType.fromString(prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)]),
             homeEffects = WallpaperEffects(
                 enableBlur = prefs[booleanPreferencesKey(PreferenceKeys.HOME_ENABLE_BLUR)] ?: false,
@@ -260,6 +262,7 @@ class PreferencesManager @Inject constructor(
             prefs[intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES)] = settings.liveIntervalMinutes
             prefs[stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)] = settings.homeScalingType.name
             prefs[stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)] = settings.lockScalingType.name
+            prefs[booleanPreferencesKey(PreferenceKeys.HOME_SCROLLING_ENABLED)] = settings.homeScrollingEnabled
             prefs[stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)] = settings.liveScalingType.name
 
             // Home effects
@@ -524,6 +527,7 @@ class PreferencesManager @Inject constructor(
             prefs.remove(stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE))
             prefs.remove(stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE))
             prefs.remove(stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE))
+            prefs.remove(booleanPreferencesKey(PreferenceKeys.HOME_SCROLLING_ENABLED))
 
             // Clear adaptive brightness
             prefs.remove(booleanPreferencesKey(PreferenceKeys.ADAPTIVE_BRIGHTNESS))

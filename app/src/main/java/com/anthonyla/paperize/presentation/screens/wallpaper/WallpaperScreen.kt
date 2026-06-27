@@ -25,6 +25,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +71,7 @@ fun WallpaperScreen(
     onSelectLiveAlbum: (AlbumSummary?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onUpdateScheduleSettingsDebounced: (ScheduleSettings) -> Unit,
+    onChangeWallpaperNow: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
@@ -623,6 +625,45 @@ fun WallpaperScreen(
                         }
                     }
                 }
+            }
+        }
+
+        // Don't-scroll toggle (static HOME only; LOCK never scrolls, LIVE has its own parallax)
+        if (wallpaperMode != WallpaperMode.LIVE && homeEnabled) {
+            Card(
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+            ) {
+                Column(
+                    modifier = Modifier.padding(AppSpacing.large),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+                ) {
+                    SettingSwitch(
+                        title = R.string.dont_scroll_home,
+                        description = R.string.dont_scroll_home_description,
+                        checked = !scheduleSettings.homeScrollingEnabled,
+                        onCheckedChange = { dontScroll ->
+                            updateSettingsImmediate(scheduleSettings.copy(homeScrollingEnabled = !dontScroll))
+                        }
+                    )
+                }
+            }
+        }
+
+        // Change wallpaper now
+        if (scheduleSettings.enableChanger) {
+            Button(
+                onClick = onChangeWallpaperNow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+            ) {
+                Text(text = stringResource(R.string.change_wallpaper_now))
             }
         }
 

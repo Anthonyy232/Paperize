@@ -19,6 +19,8 @@ data class ScheduleSettings(
     val liveIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val homeScalingType: ScalingType = ScalingType.FILL,
     val lockScalingType: ScalingType = ScalingType.FILL,
+    /** When false, the home wallpaper is rendered at single-screen size and not parallax-scrolled. */
+    val homeScrollingEnabled: Boolean = true,
     val homeEffects: WallpaperEffects = WallpaperEffects.none(),
     val lockEffects: WallpaperEffects = WallpaperEffects.none(),
     val liveAlbumId: String? = null,
@@ -67,6 +69,7 @@ data class ScheduleSettings(
     fun hasDisplayChanges(other: ScheduleSettings): Boolean {
         return homeScalingType != other.homeScalingType ||
                lockScalingType != other.lockScalingType ||
+               homeScrollingEnabled != other.homeScrollingEnabled ||
                homeEffects != other.homeEffects ||
                lockEffects != other.lockEffects ||
                liveEffects != other.liveEffects ||

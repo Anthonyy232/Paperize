@@ -4,6 +4,8 @@
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <!-- Required by WallpaperManager.suggestDesiredDimensions() (non-scrolling home option). Normal-level, auto-granted. -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
