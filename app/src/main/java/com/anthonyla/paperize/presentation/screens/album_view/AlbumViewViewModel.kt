@@ -11,7 +11,7 @@ import androidx.navigation.toRoute
 import com.anthonyla.paperize.core.util.detectMediaType
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.core.util.getFileName
-import com.anthonyla.paperize.core.util.scanFolderForImages
+import com.anthonyla.paperize.core.util.scanFolderImages
 import com.anthonyla.paperize.core.WallpaperMediaType
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
@@ -113,25 +113,24 @@ class AlbumViewViewModel @Inject constructor(
 
     fun addFolder(uri: String) {
         viewModelScope.launch {
-            // Scan folder for images on IO dispatcher
-            val imageUris = withContext(Dispatchers.IO) {
-                uri.toUri().scanFolderForImages(context)
+            // Scan folder for images on IO dispatcher. The scan already returns each file's
+            // name and modified time, so no per-file follow-up query is needed below.
+            val images = withContext(Dispatchers.IO) {
+                uri.toUri().scanFolderImages(context).sortedBy { it.uri.toString() }
             }
 
             // Create folder with scanned wallpapers
             val folderId = generateId()
-            val wallpapers = imageUris.mapIndexed { index, imageUri ->
-                val mediaType = imageUri.detectMediaType(context) ?: WallpaperMediaType.IMAGE
-
+            val wallpapers = images.mapIndexed { index, image ->
                 Wallpaper(
                     id = generateId(),
                     albumId = albumId,
                     folderId = folderId,
-                    uri = imageUri.toString(),
-                    fileName = imageUri.getFileName(context) ?: imageUri.lastPathSegment ?: imageUri.toString().substringAfterLast('/'),
-                    dateModified = System.currentTimeMillis(),
+                    uri = image.uri.toString(),
+                    fileName = image.name,
+                    dateModified = image.lastModified,
                     displayOrder = index,
-                    mediaType = mediaType
+                    mediaType = WallpaperMediaType.fromExtension(image.name.substringAfterLast('.', "")) ?: WallpaperMediaType.IMAGE
                 )
             }
 
