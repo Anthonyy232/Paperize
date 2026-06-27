@@ -3,7 +3,9 @@ package com.anthonyla.paperize.core.util
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
+import com.anthonyla.paperize.core.constants.Constants
 import java.util.UUID
 
 /**
@@ -34,30 +36,81 @@ fun Uri.getFileName(context: Context): String? {
 }
 
 /**
- * Scan a folder URI and return all image file URIs
+ * One image file discovered while scanning a folder tree.
+ *
+ * [name] and [lastModified] are read from the same cursor row as [uri], so callers
+ * do not need a follow-up per-file query to obtain them.
  */
-fun Uri.scanFolderForImages(context: Context): List<Uri> {
-    val documentFile = DocumentFile.fromTreeUri(context, this) ?: return emptyList()
-    if (!documentFile.isDirectory) return emptyList()
+data class ScannedImage(
+    val uri: Uri,
+    val name: String,
+    val lastModified: Long
+)
 
-    val imageUris = mutableListOf<Uri>()
+/**
+ * Recursively scan a tree [Uri] for image files.
+ *
+ * Uses a single [DocumentsContract] cursor query per directory instead of
+ * [DocumentFile.listFiles], which issues a separate IPC round-trip for every file and
+ * for every attribute access (name, isDirectory, lastModified). For folders with tens of
+ * thousands of files that difference is the dominant cost. Directories are traversed
+ * iteratively to avoid deep-recursion stack overflow on heavily nested trees.
+ *
+ * Returned URIs are built from the same tree document id used by [DocumentFile], so they
+ * are byte-for-byte identical to the previous implementation and remain stable across the app.
+ */
+fun Uri.scanFolderImages(context: Context): List<ScannedImage> {
+    val rootDocumentId = try {
+        DocumentsContract.getTreeDocumentId(this)
+    } catch (_: IllegalArgumentException) {
+        return emptyList() // Not a tree URI
+    }
 
-    fun scanDirectory(directory: DocumentFile) {
-        directory.listFiles().forEach { file ->
-            when {
-                file.isDirectory -> scanDirectory(file) // Recursively scan subdirectories
-                file.isFile -> {
-                    val ext = file.name?.substringAfterLast('.', "")?.lowercase() ?: ""
-                    if (ext in com.anthonyla.paperize.core.constants.Constants.SUPPORTED_IMAGE_EXTENSIONS) {
-                        imageUris.add(file.uri)
+    val projection = arrayOf(
+        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        DocumentsContract.Document.COLUMN_MIME_TYPE,
+        DocumentsContract.Document.COLUMN_LAST_MODIFIED
+    )
+
+    val results = mutableListOf<ScannedImage>()
+    val pendingDirs = ArrayDeque<String>()
+    pendingDirs.addLast(rootDocumentId)
+
+    while (pendingDirs.isNotEmpty()) {
+        val parentDocumentId = pendingDirs.removeLast()
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(this, parentDocumentId)
+        try {
+            context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                val mimeColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+                val modifiedColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+
+                while (cursor.moveToNext()) {
+                    val documentId = cursor.getString(idColumn) ?: continue
+                    if (cursor.getString(mimeColumn) == DocumentsContract.Document.MIME_TYPE_DIR) {
+                        pendingDirs.addLast(documentId)
+                    } else {
+                        val name = cursor.getString(nameColumn) ?: continue
+                        val extension = name.substringAfterLast('.', "").lowercase()
+                        if (extension in Constants.SUPPORTED_IMAGE_EXTENSIONS) {
+                            results.add(
+                                ScannedImage(
+                                    uri = DocumentsContract.buildDocumentUriUsingTree(this, documentId),
+                                    name = name,
+                                    lastModified = if (cursor.isNull(modifiedColumn)) 0L else cursor.getLong(modifiedColumn)
+                                )
+                            )
+                        }
                     }
                 }
             }
+        } catch (_: Exception) {
+            // Skip directories that can't be read and continue with the rest of the tree.
         }
     }
-
-    scanDirectory(documentFile)
-    return imageUris.sortedBy { it.toString() } // Sort for consistency
+    return results
 }
 
 /**
