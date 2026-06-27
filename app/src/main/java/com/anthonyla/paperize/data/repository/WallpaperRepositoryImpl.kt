@@ -4,13 +4,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperSourceType
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.core.util.isValid
+import com.anthonyla.paperize.core.util.scanFolderImages
 import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
 import com.anthonyla.paperize.data.database.dao.WallpaperQueueDao
@@ -261,49 +260,21 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun scanFolderForWallpapers(folderUri: Uri): Result<List<Wallpaper>> {
         return try {
-            val documentFile = DocumentFile.fromTreeUri(context, folderUri)
-                ?: return Result.Error(Exception("Invalid folder URI"))
-
-            val wallpapers = mutableListOf<Wallpaper>()
-            scanDirectoryRecursive(documentFile, wallpapers)
-
+            val wallpapers = folderUri.scanFolderImages(context).map { image ->
+                Wallpaper(
+                    id = generateId(),
+                    albumId = "",
+                    folderId = null,
+                    uri = image.uri.toString(),
+                    fileName = image.name,
+                    dateModified = image.lastModified,
+                    sourceType = WallpaperSourceType.FOLDER
+                )
+            }
             Result.Success(wallpapers)
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
-
-    private fun scanDirectoryRecursive(directory: DocumentFile, result: MutableList<Wallpaper>) {
-        directory.listFiles().forEach { file ->
-            if (file.isDirectory) {
-                scanDirectoryRecursive(file, result)
-            } else if (file.isFile && file.name?.let { name -> isImageFile(name) } == true) {
-                try {
-                    val uri = file.uri.toString()
-                    val fileName = file.name ?: return@forEach
-                    val dateModified = file.lastModified()
-
-                    result.add(
-                        Wallpaper(
-                            id = generateId(),
-                            albumId = "", 
-                            folderId = null,
-                            uri = uri,
-                            fileName = fileName,
-                            dateModified = dateModified,
-                            sourceType = WallpaperSourceType.FOLDER
-                        )
-                    )
-                } catch (_: Exception) {
-                    // Skip failed items
-                }
-            }
-        }
-    }
-
-    private fun isImageFile(fileName: String): Boolean {
-        val extension = fileName.substringAfterLast('.', "").lowercase()
-        return extension in Constants.SUPPORTED_IMAGE_EXTENSIONS
     }
 
     override suspend fun isWallpaperInAlbum(albumId: String, uri: String): Boolean =
