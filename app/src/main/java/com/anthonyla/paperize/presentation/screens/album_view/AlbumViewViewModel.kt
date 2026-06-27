@@ -80,8 +80,12 @@ class AlbumViewViewModel @Inject constructor(
     private val _isSelectionMode = MutableStateFlow(false)
     val isSelectionMode: StateFlow<Boolean> = _isSelectionMode.asStateFlow()
 
+    private val _importProgress = MutableStateFlow<ImportProgress>(ImportProgress.Idle)
+    val importProgress: StateFlow<ImportProgress> = _importProgress.asStateFlow()
+
     fun addWallpapers(uris: List<String>) {
         viewModelScope.launch {
+            _importProgress.value = ImportProgress.Saving(saved = 0, total = uris.size)
             val existingCount = wallpapers.value.size
             val newWallpapers = uris.mapIndexed { index, uri ->
                 val parsedUri = uri.toUri()
@@ -98,7 +102,10 @@ class AlbumViewViewModel @Inject constructor(
                     mediaType = mediaType
                 )
             }
-            when (val result = albumRepository.addWallpapersToAlbum(albumId, newWallpapers)) {
+            val result = albumRepository.addWallpapersToAlbum(albumId, newWallpapers) { saved, total ->
+                _importProgress.value = ImportProgress.Saving(saved, total)
+            }
+            when (result) {
                 is com.anthonyla.paperize.core.Result.Success -> {
                     // Clear queues so the new wallpapers are included on the next cycle
                     wallpaperRepository.clearQueuesForAlbum(albumId)
@@ -108,15 +115,19 @@ class AlbumViewViewModel @Inject constructor(
                 }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
+            _importProgress.value = ImportProgress.Idle
         }
     }
 
     fun addFolder(uri: String) {
         viewModelScope.launch {
+            _importProgress.value = ImportProgress.Scanning(found = 0)
             // Scan folder for images on IO dispatcher. The scan already returns each file's
             // name and modified time, so no per-file follow-up query is needed below.
             val images = withContext(Dispatchers.IO) {
-                uri.toUri().scanFolderImages(context).sortedBy { it.uri.toString() }
+                uri.toUri().scanFolderImages(context) { found ->
+                    _importProgress.value = ImportProgress.Scanning(found)
+                }.sortedBy { it.uri.toString() }
             }
 
             // Create folder with scanned wallpapers
@@ -133,6 +144,7 @@ class AlbumViewViewModel @Inject constructor(
                     mediaType = WallpaperMediaType.fromExtension(image.name.substringAfterLast('.', "")) ?: WallpaperMediaType.IMAGE
                 )
             }
+            _importProgress.value = ImportProgress.Saving(saved = 0, total = wallpapers.size)
 
             val folder = Folder(
                 id = folderId,
@@ -145,7 +157,10 @@ class AlbumViewViewModel @Inject constructor(
                 wallpapers = wallpapers
             )
 
-            when (val result = albumRepository.addFolderToAlbum(albumId, folder)) {
+            val result = albumRepository.addFolderToAlbum(albumId, folder) { saved, total ->
+                _importProgress.value = ImportProgress.Saving(saved, total)
+            }
+            when (result) {
                 is com.anthonyla.paperize.core.Result.Success -> {
                     // Clear queues so the new folder's wallpapers are included on the next cycle
                     wallpaperRepository.clearQueuesForAlbum(albumId)
@@ -155,6 +170,7 @@ class AlbumViewViewModel @Inject constructor(
                 }
                 is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
             }
+            _importProgress.value = ImportProgress.Idle
         }
     }
 

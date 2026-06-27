@@ -43,6 +43,11 @@ class AlbumRepositoryImpl @Inject constructor(
     private val wallpaperRepository: dagger.Lazy<com.anthonyla.paperize.domain.repository.WallpaperRepository>
 ) : AlbumRepository {
 
+    companion object {
+        /** Number of wallpapers written per insert/progress step during an import. */
+        private const val WALLPAPER_INSERT_CHUNK_SIZE = 500
+    }
+
     override fun getAlbumSummaries(): Flow<List<AlbumSummary>> =
         albumDao.getAlbumSummaries().map { it.toDomainModelsFromSummaries() }
 
@@ -115,12 +120,13 @@ class AlbumRepositoryImpl @Inject constructor(
 
     override suspend fun addWallpapersToAlbum(
         albumId: String,
-        wallpapers: List<Wallpaper>
+        wallpapers: List<Wallpaper>,
+        onProgress: (saved: Int, total: Int) -> Unit
     ): Result<Unit> {
         return try {
             // Atomic transaction - insert wallpapers, update timestamp, and update cover
             database.withTransaction {
-                wallpaperDao.insertWallpapers(wallpapers.toEntities())
+                insertWallpapersChunked(wallpapers, onProgress)
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
 
                 // Update album cover if it doesn't have one
@@ -132,13 +138,17 @@ class AlbumRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addFolderToAlbum(albumId: String, folder: Folder): Result<Unit> {
+    override suspend fun addFolderToAlbum(
+        albumId: String,
+        folder: Folder,
+        onProgress: (saved: Int, total: Int) -> Unit
+    ): Result<Unit> {
         return try {
             // Atomic transaction - folder, wallpapers, timestamp, and cover all succeed or all fail
             database.withTransaction {
                 folderDao.insertFolder(folder.toEntity())
                 // Insert folder wallpapers
-                wallpaperDao.insertWallpapers(folder.wallpapers.toEntities())
+                insertWallpapersChunked(folder.wallpapers, onProgress)
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
 
                 // Update album cover if it doesn't have one
@@ -147,6 +157,24 @@ class AlbumRepositoryImpl @Inject constructor(
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
+        }
+    }
+
+    /**
+     * Insert [wallpapers] in chunks, mapping each chunk to entities only as it is written so the
+     * full entity list is never materialized at once, and reporting progress after each chunk.
+     * Must be called inside a transaction so the overall insert stays atomic.
+     */
+    private suspend fun insertWallpapersChunked(
+        wallpapers: List<Wallpaper>,
+        onProgress: (saved: Int, total: Int) -> Unit
+    ) {
+        val total = wallpapers.size
+        var saved = 0
+        wallpapers.chunked(WALLPAPER_INSERT_CHUNK_SIZE).forEach { chunk ->
+            wallpaperDao.insertWallpapers(chunk.toEntities())
+            saved += chunk.size
+            onProgress(saved, total)
         }
     }
 
