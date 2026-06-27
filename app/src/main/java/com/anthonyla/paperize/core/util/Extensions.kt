@@ -58,8 +58,11 @@ data class ScannedImage(
  *
  * Returned URIs are built from the same tree document id used by [DocumentFile], so they
  * are byte-for-byte identical to the previous implementation and remain stable across the app.
+ *
+ * [onProgress] is invoked with the running number of images found, throttled to roughly once
+ * per [PROGRESS_REPORT_INTERVAL] discoveries so callers can show a live count without flooding.
  */
-fun Uri.scanFolderImages(context: Context): List<ScannedImage> {
+fun Uri.scanFolderImages(context: Context, onProgress: ((found: Int) -> Unit)? = null): List<ScannedImage> {
     val rootDocumentId = try {
         DocumentsContract.getTreeDocumentId(this)
     } catch (_: IllegalArgumentException) {
@@ -74,6 +77,7 @@ fun Uri.scanFolderImages(context: Context): List<ScannedImage> {
     )
 
     val results = mutableListOf<ScannedImage>()
+    var lastReported = 0
     val pendingDirs = ArrayDeque<String>()
     pendingDirs.addLast(rootDocumentId)
 
@@ -102,6 +106,10 @@ fun Uri.scanFolderImages(context: Context): List<ScannedImage> {
                                     lastModified = if (cursor.isNull(modifiedColumn)) 0L else cursor.getLong(modifiedColumn)
                                 )
                             )
+                            if (onProgress != null && results.size - lastReported >= PROGRESS_REPORT_INTERVAL) {
+                                lastReported = results.size
+                                onProgress(results.size)
+                            }
                         }
                     }
                 }
@@ -110,8 +118,12 @@ fun Uri.scanFolderImages(context: Context): List<ScannedImage> {
             // Skip directories that can't be read and continue with the rest of the tree.
         }
     }
+    onProgress?.invoke(results.size)
     return results
 }
+
+/** Report scan progress at most once per this many discovered images. */
+private const val PROGRESS_REPORT_INTERVAL = 512
 
 /**
  * UUID generation

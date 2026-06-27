@@ -64,17 +64,28 @@ interface AlbumRepository {
     suspend fun updateAlbumCover(albumId: String, coverUri: String?): Result<Unit>
 
     /**
-     * Add wallpapers to album
+     * Add wallpapers to album.
+     *
+     * [onProgress] is invoked as rows are written, with the number saved so far and the total,
+     * so callers can show import progress.
      */
     suspend fun addWallpapersToAlbum(
         albumId: String,
-        wallpapers: List<Wallpaper>
+        wallpapers: List<Wallpaper>,
+        onProgress: (saved: Int, total: Int) -> Unit = { _, _ -> }
     ): Result<Unit>
 
     /**
-     * Add folder to album
+     * Add folder to album.
+     *
+     * [onProgress] is invoked as the folder's wallpapers are written, with the number saved so far
+     * and the total, so callers can show import progress.
      */
-    suspend fun addFolderToAlbum(albumId: String, folder: Folder): Result<Unit>
+    suspend fun addFolderToAlbum(
+        albumId: String,
+        folder: Folder,
+        onProgress: (saved: Int, total: Int) -> Unit = { _, _ -> }
+    ): Result<Unit>
 
     /**
      * Update folder
