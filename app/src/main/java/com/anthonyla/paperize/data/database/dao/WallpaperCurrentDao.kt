@@ -7,6 +7,7 @@ import androidx.room.Query
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.data.database.entities.WallpaperCurrentEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WallpaperCurrentDao {
@@ -22,6 +23,15 @@ interface WallpaperCurrentDao {
         LIMIT 1
     """)
     suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): WallpaperEntity?
+
+    /** Reactive variant of [getCurrentWallpaper]; re-emits when the recorded wallpaper changes. */
+    @Query("""
+        SELECT w.* FROM wallpapers w
+        INNER JOIN wallpaper_current wc ON w.id = wc.wallpaperId
+        WHERE wc.albumId = :albumId AND wc.screenType = :screenType
+        LIMIT 1
+    """)
+    fun getCurrentWallpaperFlow(albumId: String, screenType: ScreenType): Flow<WallpaperEntity?>
 
     /** Record (or overwrite) the current wallpaper for an album/screen pair. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)

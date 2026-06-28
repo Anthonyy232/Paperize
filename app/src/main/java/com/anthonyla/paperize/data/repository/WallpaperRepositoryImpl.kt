@@ -252,6 +252,9 @@ class WallpaperRepositoryImpl @Inject constructor(
     override suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): Wallpaper? =
         wallpaperCurrentDao.getCurrentWallpaper(albumId, screenType)?.toDomainModel()
 
+    override fun getCurrentWallpaperFlow(albumId: String, screenType: ScreenType): Flow<Wallpaper?> =
+        wallpaperCurrentDao.getCurrentWallpaperFlow(albumId, screenType).map { it?.toDomainModel() }
+
     override suspend fun setCurrentWallpaper(albumId: String, screenType: ScreenType, wallpaperId: String) {
         wallpaperCurrentDao.upsertCurrentWallpaper(
             WallpaperCurrentEntity(albumId = albumId, screenType = screenType, wallpaperId = wallpaperId)
