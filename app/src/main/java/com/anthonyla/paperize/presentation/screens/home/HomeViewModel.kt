@@ -17,11 +17,16 @@ import com.anthonyla.paperize.service.wallpaper.WallpaperChangeService
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -75,6 +80,31 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = null
         )
+
+    /**
+     * URI of the wallpaper Paperize last applied for the home / lock screen, for the in-app preview.
+     * Reading the source URI (rather than WallpaperManager.getDrawable) avoids the storage permission
+     * the preview would otherwise need. Falls back to the BOTH-mode record when home/lock are synced.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentHomeWallpaperUri: StateFlow<String?> = scheduleSettings
+        .flatMapLatest { settings -> currentWallpaperUriFlow(settings.homeAlbumId, ScreenType.HOME) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS), null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentLockWallpaperUri: StateFlow<String?> = scheduleSettings
+        .flatMapLatest { settings -> currentWallpaperUriFlow(settings.lockAlbumId, ScreenType.LOCK) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS), null)
+
+    private fun currentWallpaperUriFlow(albumId: String?, screenType: ScreenType): Flow<String?> =
+        if (albumId == null) {
+            flowOf(null)
+        } else {
+            combine(
+                wallpaperRepository.getCurrentWallpaperFlow(albumId, screenType),
+                wallpaperRepository.getCurrentWallpaperFlow(albumId, ScreenType.BOTH)
+            ) { specific, both -> (specific ?: both)?.uri }
+        }
 
     // Show prompt to select live wallpaper when enabling changer in LIVE mode
     private val _showLiveWallpaperPrompt = MutableStateFlow(false)
