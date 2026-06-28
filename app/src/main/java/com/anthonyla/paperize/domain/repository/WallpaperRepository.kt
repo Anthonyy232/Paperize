@@ -104,6 +104,12 @@ interface WallpaperRepository {
     suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): Wallpaper?
 
     /**
+     * Reactive variant of [getCurrentWallpaper] that re-emits whenever the recorded wallpaper
+     * for this album/screen changes. Used by the in-app current-wallpaper preview.
+     */
+    fun getCurrentWallpaperFlow(albumId: String, screenType: ScreenType): Flow<Wallpaper?>
+
+    /**
      * Record the wallpaper that was just applied for a given album/screen.
      * Called by WallpaperChangeService after a successful setBitmap().
      */
