@@ -2,7 +2,7 @@
 androidGradlePlugin = "9.1.0"
 kotlin = "2.3.20"
 hilt = "2.59.2"
-ksp = "2.3.6"
+ksp = "2.3.10"
 material = "1.13.0"
 coil = "3.4.0"
 
