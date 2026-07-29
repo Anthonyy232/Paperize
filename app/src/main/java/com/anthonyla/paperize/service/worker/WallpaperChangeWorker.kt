@@ -113,14 +113,27 @@ class WallpaperChangeWorker @AssistedInject constructor(
 
                             Log.d(TAG, "Setting both screens - size: ${bitmap.width}x${bitmap.height}, config: ${bitmap.config}")
 
-                            // Set HOME (rendered at parallax canvas size)
-                            wallpaperManager.setBitmap(
-                                bitmap,
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            )
-                            Log.d(TAG, "Home wallpaper set in BOTH mode")
+                            val canSetAtomically =
+                                settings.homeEffects == settings.lockEffects &&
+                                    settings.homeScalingType == settings.lockScalingType
+
+                            if (canSetAtomically) {
+                                wallpaperManager.setBitmap(
+                                    bitmap,
+                                    null,
+                                    true,
+                                    WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                                )
+                                Log.d(TAG, "Home and lock wallpaper set atomically")
+                            } else {
+                                wallpaperManager.setBitmap(
+                                    bitmap,
+                                    null,
+                                    true,
+                                    WallpaperManager.FLAG_SYSTEM
+                                )
+                                Log.d(TAG, "Home wallpaper set in BOTH mode")
+                            }
 
                             // Keep LOCK queue in sync with HOME so that if the user later
                             // switches to separate schedules, both screens continue from
@@ -151,22 +164,23 @@ class WallpaperChangeWorker @AssistedInject constructor(
                             bitmap.recycle()
                         }
 
-                        // Render a separate bitmap for the lock screen at physical
-                        // screen dimensions (no parallax on lock screen).
-                        val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
-                        lockResult.onSuccess { lockBitmap ->
-                            try {
-                                wallpaperManager.setBitmap(
-                                    lockBitmap, null, true, WallpaperManager.FLAG_LOCK
-                                )
-                                Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
-                            } finally {
-                                lockBitmap.recycle()
+                        if (settings.homeEffects != settings.lockEffects ||
+                            settings.homeScalingType != settings.lockScalingType) {
+                            val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
+                            lockResult.onSuccess { lockBitmap ->
+                                try {
+                                    wallpaperManager.setBitmap(
+                                        lockBitmap, null, true, WallpaperManager.FLAG_LOCK
+                                    )
+                                    Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
+                                } finally {
+                                    lockBitmap.recycle()
+                                }
+                            }.onError { error ->
+                                Log.w(TAG, "Lock rerender failed in BOTH mode: ${error.message}")
                             }
-                        }.onError { error ->
-                            Log.w(TAG, "Lock rerender failed in BOTH mode: ${error.message}")
                         }
                     }.onError { error ->
                         if (error is EmptyAlbumException) {
