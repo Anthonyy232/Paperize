@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -70,6 +71,7 @@ fun WallpaperScreen(
     onSelectLiveAlbum: (AlbumSummary?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onUpdateScheduleSettingsDebounced: (ScheduleSettings) -> Unit,
+    onChangeWallpaperNow: () -> Unit,
     homeWallpaperUri: String?,
     lockWallpaperUri: String?,
     modifier: Modifier = Modifier
@@ -629,6 +631,22 @@ fun WallpaperScreen(
                         }
                     }
                 }
+            }
+        }
+
+        if (scheduleSettings.enableChanger) {
+            Button(
+                onClick = onChangeWallpaperNow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        PaddingValues(
+                            horizontal = AppSpacing.small,
+                            vertical = AppSpacing.extraSmall
+                        )
+                    )
+            ) {
+                Text(text = stringResource(R.string.change_wallpaper_now))
             }
         }
 
