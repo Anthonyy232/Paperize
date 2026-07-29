@@ -1,16 +1,30 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:best-practices"],
+  "minimumReleaseAge": "14 days",
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "description": ["Automerge aged low-risk updates after CI passes"],
+      "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true
     },
     {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
+      "description": ["Review Compose as one compatible platform update"],
+      "matchPackageNames": ["androidx.compose:**"],
+      "groupName": "Jetpack Compose",
+      "automerge": false
+    },
+    {
+      "description": ["Coordinate AGP and Gradle compatibility manually"],
+      "matchPackageNames": ["com.android.tools.build:gradle", "gradle"],
+      "groupName": "Android build toolchain",
+      "automerge": false
+    },
+    {
+      "description": ["Require an explicit maintainer decision for major updates"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "automerge": false
     }
   ],
   "platformAutomerge": true

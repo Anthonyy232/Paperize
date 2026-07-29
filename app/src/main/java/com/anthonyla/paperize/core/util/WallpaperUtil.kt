@@ -21,11 +21,13 @@ import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
 import android.graphics.Shader
+import android.hardware.display.DisplayManager
 import android.hardware.HardwareBuffer
 import android.media.ImageReader
 import android.net.Uri
 import android.util.Log
 import android.util.Size
+import android.view.Display
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.compose.ui.util.fastRoundToInt
@@ -126,9 +128,49 @@ object ScreenMetricsCompat {
     fun getScreenSize(context: Context): Size {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val metrics: WindowMetrics = windowManager.currentWindowMetrics
-        return Size(metrics.bounds.width(), metrics.bounds.height())
+        val candidates = buildList {
+            add(metrics.bounds.width() to metrics.bounds.height())
+
+            // Foldables may expose the cover and inner panels as separate internal displays.
+            // Include every supported internal-display mode so a wallpaper changed while folded
+            // is still rendered sharply enough for the larger unfolded panel. External displays
+            // are deliberately excluded so a connected monitor cannot inflate wallpaper memory.
+            val displayManager = context.getSystemService(DisplayManager::class.java)
+            displayManager?.displays
+                ?.asSequence()
+                ?.filter { display ->
+                    display.flags and Display.FLAG_PRESENTATION == 0 &&
+                        display.flags and Display.FLAG_PRIVATE == 0
+                }
+                ?.flatMap { display ->
+                    display.supportedModes.asSequence().map { mode ->
+                        mode.physicalWidth to mode.physicalHeight
+                    }
+                }
+                ?.forEach(::add)
+        }
+        val largest = selectLargestDisplayDimensions(candidates)
+        return largest?.let { Size(it.first, it.second) }
+            ?: Size(metrics.bounds.width(), metrics.bounds.height())
     }
 }
+
+/**
+ * Select the highest-resolution display dimensions.
+ *
+ * Kept platform-independent so foldable sizing behavior is covered by local unit tests.
+ */
+internal fun selectLargestDisplayDimensions(
+    candidates: Iterable<Pair<Int, Int>>
+): Pair<Int, Int>? = candidates
+    .filter { (width, height) -> width > 0 && height > 0 }
+    .maxWithOrNull(
+        compareBy<Pair<Int, Int>>(
+            { (width, height) -> width.toLong() * height.toLong() },
+            { (width, height) -> maxOf(width, height) },
+            { (width, height) -> minOf(width, height) }
+        )
+    )
 
 /**
  * Get device screen size with orientation
@@ -169,8 +211,12 @@ fun getWallpaperRenderSize(context: Context, screenType: com.anthonyla.paperize.
             val desiredW = wm.desiredMinimumWidth
             val desiredH = wm.desiredMinimumHeight
             // desiredMinimumWidth/Height return 0 when the launcher hasn't set a preference yet.
-            // Fall back to physical screen size in that case.
-            if (desiredW > 0 && desiredH > 0) Size(desiredW, desiredH) else screen
+            // Never render below the largest internal panel's resolution on a foldable.
+            if (desiredW > 0 && desiredH > 0) {
+                Size(maxOf(desiredW, screen.width), maxOf(desiredH, screen.height))
+            } else {
+                screen
+            }
         }
         else -> screen
     }
