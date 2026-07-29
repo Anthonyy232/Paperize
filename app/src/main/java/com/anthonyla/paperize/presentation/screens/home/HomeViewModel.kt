@@ -468,6 +468,33 @@ class HomeViewModel @Inject constructor(
         context.startForegroundService(intent)
     }
 
+    /**
+     * Change whichever wallpaper destinations are currently configured.
+     *
+     * Synchronized home/lock settings use one BOTH request; independent schedules are
+     * changed separately. LIVE is routed through the service to reload the renderer.
+     */
+    fun changeWallpaperNowForActiveScreens() {
+        val settings = scheduleSettings.value
+        if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
+            changeWallpaperNow(ScreenType.LIVE)
+            return
+        }
+
+        val homeActive = settings.homeEnabled && settings.homeAlbumId != null
+        val lockActive = settings.lockEnabled && settings.lockAlbumId != null
+        val synchronized = homeActive && lockActive &&
+            settings.homeAlbumId == settings.lockAlbumId &&
+            !settings.separateSchedules
+
+        if (synchronized) {
+            changeWallpaperNow(ScreenType.BOTH)
+        } else {
+            if (homeActive) changeWallpaperNow(ScreenType.HOME)
+            if (lockActive) changeWallpaperNow(ScreenType.LOCK)
+        }
+    }
+
     fun reapplyEffectsNow(screenType: ScreenType) {
         val intent = Intent(context, WallpaperChangeService::class.java).apply {
             action = WallpaperChangeService.ACTION_REAPPLY_EFFECTS

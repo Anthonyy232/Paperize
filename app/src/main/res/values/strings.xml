@@ -210,5 +210,6 @@
   <string name="ignoring">Ignoring (Recommended)</string>
   <string name="optimizing">Optimizing (May delay changes)</string>
   <string name="reliability">Reliability</string>
+  <string name="change_wallpaper_now">Change wallpaper now</string>
 
 </resources>

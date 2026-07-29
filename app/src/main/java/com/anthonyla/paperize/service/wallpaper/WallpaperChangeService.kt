@@ -119,8 +119,11 @@ class WallpaperChangeService : Service() {
 
                 when (screenType) {
                     ScreenType.LIVE -> {
-                        // Live wallpaper changes are handled by the live wallpaper service
-                        Log.d(TAG, "Live wallpaper - no action needed in service")
+                        val reloadIntent = Intent(Constants.ACTION_RELOAD_WALLPAPER).apply {
+                            setPackage(packageName)
+                        }
+                        sendBroadcast(reloadIntent)
+                        Log.d(TAG, "Requested immediate live wallpaper reload")
                     }
                     ScreenType.HOME -> {
                         val homeAlbumId = settings.homeAlbumId
