@@ -13,9 +13,6 @@ object StartupRoute
 object NotificationRoute
 
 @Serializable
-object StoragePermissionRoute
-
-@Serializable
 object WallpaperModeSelectionRoute
 
 @Serializable

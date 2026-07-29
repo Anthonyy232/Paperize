@@ -72,8 +72,8 @@ Help translate Paperize into your language! Currently, most translations are pro
 | Requirement | Version |
 |-------------|---------|
 | Java | 17 |
-| Android Gradle Plugin | 8.7.0+ |
-| Gradle | 9.2.1 |
+| Android Gradle Plugin | 9.1.0 |
+| Gradle | 9.4.1 |
 | Minimum SDK | 31 (Android 12) |
 | Target SDK | 36 |
 

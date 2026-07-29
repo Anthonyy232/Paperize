@@ -155,7 +155,9 @@ abstract class GLWallpaperService : WallpaperService() {
         // where the GL thread held `lock` while acquiring `eventQueue`, and callers held
         // `eventQueue` while trying to acquire `lock` in requestRender().
         private val eventQueue = LinkedBlockingQueue<Runnable>()
-        @Suppress("UseKotlinAny")
+        // java.lang.Object is intentional: this monitor uses wait()/notifyAll(), which
+        // Kotlin's Any does not expose directly.
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val lock = Object()
 
         @Volatile private var shouldExit = false
