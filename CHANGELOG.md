@@ -1,44 +1,25 @@
-# Changelog
+## v4.0.0
 
-## 4.0.0
-
-Paperize 4 is a ground-up Android 12+ rewrite focused on reliable local wallpaper
-rotation, a modern Compose interface, and a hardware-accelerated live wallpaper mode.
-
-### Highlights
-
-- Added static and live wallpaper modes with independent home/lock configuration.
+- Completely rewrote Paperize for Android 12 and newer with a modern Compose interface.
+- Added static and live wallpaper modes with independent home and lock screen settings.
 - Added scaling, blur, darken, vignette, grayscale, adaptive brightness, parallax,
-  double-tap, shuffle, and interval controls.
-- Added an in-app **Change wallpaper now** action and Quick Settings support.
-- Added current-wallpaper previews that do not require restricted wallpaper access.
-- Removed the obsolete all-files storage permission; selected images and folders use
-  Android's scoped document access.
-- Added live progress while importing folders or individual wallpapers.
-- Reworked folder scanning around the Storage Access Framework and refreshes linked
-  folders whenever Paperize starts.
+  double-tap, shuffle, interval, and manual wallpaper controls.
+- Added current-wallpaper previews, Quick Settings support, and progress indicators
+  for large wallpaper and folder imports.
+- Improved folder scanning, queue refreshes, bitmap memory usage, scheduling, and
+  wallpaper rendering reliability.
+- Fixed home and lock screen synchronization, foldable display sizing, EXIF rotation,
+  and FIT, FILL, STRETCH, and NONE scaling behavior.
+- Removed the obsolete all-files storage permission in favor of Android's scoped
+  document access.
+- Updated dependencies and repaired the release workflow for signed, versioned APKs.
 
-### Fixes and reliability
+**Upgrade note:** Updating from Paperize 3 resets local albums and settings once
+because Paperize 4 uses a new storage model. Users of the 4.0.0 alpha are not reset
+again.
 
-- Sets matching home and lock wallpapers atomically when their presentation settings
-  match, preventing one screen from diverging or reverting to the system default.
-- Renders against the largest built-in panel on foldables, even when changed while
-  the device is folded.
-- Correctly handles EXIF-rotated images without applying orientation twice.
-- Preserves distinct FIT, FILL, STRETCH, and NONE behavior on scrolling launchers.
-- Reduces bitmap memory pressure and fixes several bitmap, texture, queue, scheduling,
-  and transient-storage failure paths.
-- Speeds up large folder imports and queue/album refresh operations.
-- Repairs the release workflow so signed APKs are published with a versioned filename.
+## New Contributors
 
-### Dependencies
+* @gpunto made their first contribution in https://github.com/Anthonyy232/Paperize/pull/415
 
-- Updated the stable Jetpack Compose platform, Navigation, Kotlin serialization, and
-  reorderable components.
-- Updated the GitHub release action and made Renovate updates safer and less noisy.
-
-### Upgrade note
-
-Upgrading from Paperize 3 performs a one-time local database/settings reset because
-Paperize 4 uses a new storage model. Albums and schedules must be configured again.
-Users of the 4.0.0 alpha have already completed this migration and are not reset again.
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v3.2.1...v4.0.0
