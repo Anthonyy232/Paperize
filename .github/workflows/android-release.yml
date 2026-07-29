@@ -110,13 +110,19 @@ jobs:
           fi
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
 
+      - name: Name APK for distribution
+        shell: bash
+        run: |
+          mv app/build/outputs/apk/release/app-release.apk \
+            "app/build/outputs/apk/release/paperize-${{ steps.get_version.outputs.VERSION_NAME }}.apk"
+
       - name: Upload APK as a build artifact
         # Archives the generated APK with a dynamic, versioned name. This artifact is essential
         # for passing the APK file to the subsequent `release` job.
         uses: actions/upload-artifact@v6
         with:
           name: paperize-${{ steps.get_version.outputs.VERSION_NAME }}
-          path: app/build/outputs/apk/release/paperize-v*.apk
+          path: app/build/outputs/apk/release/paperize-${{ steps.get_version.outputs.VERSION_NAME }}.apk
           if-no-files-found: error
 
   # ===================================================================

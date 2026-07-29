@@ -24,7 +24,6 @@ import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
 import com.anthonyla.paperize.presentation.screens.settings.SettingsScreen
 import com.anthonyla.paperize.presentation.screens.sort.SortViewScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
-import com.anthonyla.paperize.presentation.screens.storage.StoragePermissionScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
 
 /**
@@ -47,7 +46,6 @@ fun NavigationGraph(
         if (animate) { { enterTransitionBackward() } } else { { EnterTransition.None } }
     val exitBackward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
         if (animate) { { exitTransitionBackward() } } else { { ExitTransition.None } }
-    // Helper functions for permission checks
     val context = androidx.compose.ui.platform.LocalContext.current
     
     NavHost(
@@ -87,10 +85,6 @@ fun NavigationGraph(
                         navController.navigate(NotificationRoute) {
                             popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
                         }
-                    } else if (!PermissionUtil.hasStoragePermission()) {
-                        navController.navigate(StoragePermissionRoute) {
-                            popUpTo<WallpaperModeSelectionRoute> { inclusive = true }
-                        }
                     } else {
                         onFirstLaunchComplete()
                         navController.navigate(HomeRoute) {
@@ -110,32 +104,9 @@ fun NavigationGraph(
         ) {
             NotificationPermissionScreen(
                 onContinue = {
-                    if (!PermissionUtil.hasStoragePermission()) {
-                        navController.navigate(StoragePermissionRoute) {
-                            popUpTo<NotificationRoute> { inclusive = true }
-                        }
-                    } else {
-                        onFirstLaunchComplete()
-                        navController.navigate(HomeRoute) {
-                            popUpTo<NotificationRoute> { inclusive = true }
-                        }
-                    }
-                }
-            )
-        }
-
-        // Storage permission screen
-        composable<StoragePermissionRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
-            StoragePermissionScreen(
-                onContinue = {
                     onFirstLaunchComplete()
                     navController.navigate(HomeRoute) {
-                        popUpTo<StoragePermissionRoute> { inclusive = true }
+                        popUpTo<NotificationRoute> { inclusive = true }
                     }
                 }
             )
