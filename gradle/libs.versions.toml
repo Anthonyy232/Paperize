@@ -57,7 +57,7 @@ lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 toolbar-compose = { module = "me.onebone:toolbar-compose", version = "2.3.5" }
 zoomable = { module = "net.engawapg.lib:zoomable", version = "2.11.1" }
-reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "3.0.0" }
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "3.1.0" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
