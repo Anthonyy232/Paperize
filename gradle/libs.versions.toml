@@ -29,7 +29,7 @@ androidx-material = { module = "androidx.compose.material:material" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 # v4 uses Material 3 expressive APIs that are not available in the stable 1.4 line.
 # Keep this known-good alpha pinned until the expressive API reaches stable.
-androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha16" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha24" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.8" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.4" }
