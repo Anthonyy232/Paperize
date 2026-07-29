@@ -4,7 +4,7 @@ kotlin = "2.3.20"
 hilt = "2.59.2"
 ksp = "2.3.6"
 material = "1.13.0"
-coil = "3.4.0"
+coil = "3.5.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
