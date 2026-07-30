@@ -57,8 +57,9 @@
         <activity
             android:name=".service.shortcut.WallpaperShortcutActivity"
             android:excludeFromRecents="true"
-            android:exported="true"
+            android:exported="false"
             android:noHistory="true"
+            android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
 
         <service
