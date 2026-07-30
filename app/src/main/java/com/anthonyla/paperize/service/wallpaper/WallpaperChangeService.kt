@@ -358,7 +358,7 @@ class WallpaperChangeService : Service() {
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java),
+            Intent().setClassName(packageName, MainActivity::class.java.name),
             PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
@@ -374,7 +374,7 @@ class WallpaperChangeService : Service() {
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java),
+            Intent().setClassName(packageName, MainActivity::class.java.name),
             PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
