@@ -68,6 +68,35 @@ interface WallpaperQueueDao {
     """)
     suspend fun deleteQueueItem(albumId: String, screenType: ScreenType, wallpaperId: String)
 
+    @Query("""
+        SELECT MIN(queuePosition) FROM wallpaper_queue
+        WHERE albumId = :albumId AND screenType = :screenType
+    """)
+    suspend fun getFirstQueuePosition(albumId: String, screenType: ScreenType): Int?
+
+    /**
+     * Restore a dequeued wallpaper to the front after the platform rejected the change.
+     */
+    @Transaction
+    suspend fun restoreQueueItem(
+        albumId: String,
+        screenType: ScreenType,
+        wallpaperId: String
+    ) {
+        deleteQueueItem(albumId, screenType, wallpaperId)
+        val firstPosition = getFirstQueuePosition(albumId, screenType) ?: 0
+        insertQueueItems(
+            listOf(
+                WallpaperQueueEntity(
+                    albumId = albumId,
+                    wallpaperId = wallpaperId,
+                    screenType = screenType,
+                    queuePosition = firstPosition - 1
+                )
+            )
+        )
+    }
+
     /**
      * Clear queue for album and screen type
      */

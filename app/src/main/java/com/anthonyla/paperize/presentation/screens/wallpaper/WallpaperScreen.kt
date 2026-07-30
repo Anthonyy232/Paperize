@@ -727,9 +727,32 @@ fun WallpaperScreen(
                             )
                         }
                     },
-                    // Show separate sliders only when both enabled AND separate schedules is on (Static only)
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) scheduleSettings.homeEffects.darkenPercentage else scheduleSettings.liveEffects.darkenPercentage,
+                    homeChecked = scheduleSettings.homeEffects.enableDarken,
+                    lockChecked = scheduleSettings.lockEffects.enableDarken,
+                    onHomeCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                homeEffects = scheduleSettings.homeEffects.copy(
+                                    enableDarken = enabled
+                                )
+                            )
+                        )
+                    },
+                    onLockCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                lockEffects = scheduleSettings.lockEffects.copy(
+                                    enableDarken = enabled
+                                )
+                            )
+                        )
+                    },
+                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
+                        homeEnabled && lockEnabled,
+                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
+                        if (homeEnabled) scheduleSettings.homeEffects.darkenPercentage
+                        else scheduleSettings.lockEffects.darkenPercentage
+                    } else scheduleSettings.liveEffects.darkenPercentage,
                     lockPercentage = scheduleSettings.lockEffects.darkenPercentage,
                     onPercentageChange = { homePercent, lockPercent ->
                         if (wallpaperMode == WallpaperMode.STATIC) {
@@ -778,9 +801,32 @@ fun WallpaperScreen(
                             )
                         }
                     },
-                    // Show separate sliders only when both enabled AND separate schedules is on (Static only)
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) scheduleSettings.homeEffects.blurPercentage else scheduleSettings.liveEffects.blurPercentage,
+                    homeChecked = scheduleSettings.homeEffects.enableBlur,
+                    lockChecked = scheduleSettings.lockEffects.enableBlur,
+                    onHomeCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                homeEffects = scheduleSettings.homeEffects.copy(
+                                    enableBlur = enabled
+                                )
+                            )
+                        )
+                    },
+                    onLockCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                lockEffects = scheduleSettings.lockEffects.copy(
+                                    enableBlur = enabled
+                                )
+                            )
+                        )
+                    },
+                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
+                        homeEnabled && lockEnabled,
+                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
+                        if (homeEnabled) scheduleSettings.homeEffects.blurPercentage
+                        else scheduleSettings.lockEffects.blurPercentage
+                    } else scheduleSettings.liveEffects.blurPercentage,
                     lockPercentage = scheduleSettings.lockEffects.blurPercentage,
                     onPercentageChange = { homePercent, lockPercent ->
                         if (wallpaperMode == WallpaperMode.STATIC) {
@@ -829,9 +875,32 @@ fun WallpaperScreen(
                             )
                         }
                     },
-                    // Show separate sliders only when both enabled AND separate schedules is on (Static only)
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) scheduleSettings.homeEffects.vignettePercentage else scheduleSettings.liveEffects.vignettePercentage,
+                    homeChecked = scheduleSettings.homeEffects.enableVignette,
+                    lockChecked = scheduleSettings.lockEffects.enableVignette,
+                    onHomeCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                homeEffects = scheduleSettings.homeEffects.copy(
+                                    enableVignette = enabled
+                                )
+                            )
+                        )
+                    },
+                    onLockCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                lockEffects = scheduleSettings.lockEffects.copy(
+                                    enableVignette = enabled
+                                )
+                            )
+                        )
+                    },
+                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
+                        homeEnabled && lockEnabled,
+                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
+                        if (homeEnabled) scheduleSettings.homeEffects.vignettePercentage
+                        else scheduleSettings.lockEffects.vignettePercentage
+                    } else scheduleSettings.liveEffects.vignettePercentage,
                     lockPercentage = scheduleSettings.lockEffects.vignettePercentage,
                     onPercentageChange = { homePercent, lockPercent ->
                         if (wallpaperMode == WallpaperMode.STATIC) {
@@ -880,9 +949,32 @@ fun WallpaperScreen(
                             )
                         }
                     },
-                    // Show separate sliders only when both enabled AND separate schedules is on (Static only)
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled && scheduleSettings.separateSchedules,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) scheduleSettings.homeEffects.grayscalePercentage else scheduleSettings.liveEffects.grayscalePercentage,
+                    homeChecked = scheduleSettings.homeEffects.enableGrayscale,
+                    lockChecked = scheduleSettings.lockEffects.enableGrayscale,
+                    onHomeCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                homeEffects = scheduleSettings.homeEffects.copy(
+                                    enableGrayscale = enabled
+                                )
+                            )
+                        )
+                    },
+                    onLockCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                lockEffects = scheduleSettings.lockEffects.copy(
+                                    enableGrayscale = enabled
+                                )
+                            )
+                        )
+                    },
+                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
+                        homeEnabled && lockEnabled,
+                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
+                        if (homeEnabled) scheduleSettings.homeEffects.grayscalePercentage
+                        else scheduleSettings.lockEffects.grayscalePercentage
+                    } else scheduleSettings.liveEffects.grayscalePercentage,
                     lockPercentage = scheduleSettings.lockEffects.grayscalePercentage,
                     onPercentageChange = { homePercent, lockPercent ->
                         if (wallpaperMode == WallpaperMode.STATIC) {
