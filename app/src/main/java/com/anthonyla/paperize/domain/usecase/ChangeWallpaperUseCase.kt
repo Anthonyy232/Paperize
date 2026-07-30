@@ -2,62 +2,57 @@ package com.anthonyla.paperize.domain.usecase
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.core.net.toUri
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
 import com.anthonyla.paperize.core.util.getWallpaperRenderSize
 import com.anthonyla.paperize.core.util.processBitmap
 import com.anthonyla.paperize.core.util.retrieveBitmap
+import com.anthonyla.paperize.core.util.usesLauncherManagedScrolling
+import com.anthonyla.paperize.domain.model.PreparedWallpaper
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
-import com.anthonyla.paperize.core.constants.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 /**
- * Use case to change wallpaper
+ * Prepares the next wallpaper without marking it as current.
  *
- * Handles the complete wallpaper changing flow:
- * 1. Atomically get and dequeue next wallpaper from queue
- * 2. Validate URI
- * 3. Load and process bitmap
- * 4. Apply effects
- * 5. Refill queue if needed
+ * The queue item is dequeued while it is decoded, but callers must invoke [complete] only after
+ * WallpaperManager confirms the bitmap was applied. If the platform rejects it, [restore] puts
+ * the item back at the front of the queue.
  */
 class ChangeWallpaperUseCase @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val wallpaperRepository: WallpaperRepository,
     private val settingsRepository: SettingsRepository
 ) {
-    suspend operator fun invoke(albumId: String, screenType: ScreenType): Result<Bitmap> {
+    suspend operator fun invoke(
+        albumId: String,
+        screenType: ScreenType
+    ): Result<PreparedWallpaper> {
         return try {
-            // Get settings first - needed for queue building
             val settings = settingsRepository.getScheduleSettings()
 
-            // Check if queue exists, build it if empty
-            val queueCheck = wallpaperRepository.getNextWallpaperInQueue(albumId, screenType)
-            if (queueCheck == null) {
-                // Queue is empty, build it first
-                val buildResult = wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
+            if (wallpaperRepository.getNextWallpaperInQueue(albumId, screenType) == null) {
+                val buildResult = wallpaperRepository.buildWallpaperQueue(
+                    albumId,
+                    screenType,
+                    settings.shuffleEnabled
+                )
                 if (buildResult is Result.Error) {
-                    return Result.Error(Exception(context.getString(R.string.error_failed_to_build_queue)))
+                    return Result.Error(
+                        Exception(context.getString(R.string.error_failed_to_build_queue))
+                    )
                 }
             }
 
-            // Atomically get and dequeue wallpaper, skipping invalid or corrupted ones
-            var finalBitmap: Bitmap? = null
-            var maxRetries = Constants.MAX_WALLPAPER_LOAD_RETRIES
-            var queueRebuildAttempts = 0
-
-            // Get render dimensions once for the retry loop.
-            // HOME/BOTH use the launcher's desired parallax canvas; LOCK uses physical screen.
-            val screenSize = getWallpaperRenderSize(context, screenType)
             val effects = when (screenType) {
                 ScreenType.LIVE -> settings.liveEffects
                 ScreenType.HOME, ScreenType.BOTH -> settings.homeEffects
@@ -68,101 +63,167 @@ class ChangeWallpaperUseCase @Inject constructor(
                 ScreenType.HOME, ScreenType.BOTH -> settings.homeScalingType
                 ScreenType.LOCK -> settings.lockScalingType
             }
+            val preserveSourceOverflow = usesLauncherManagedScrolling(screenType, scaling)
+            val screenSize = getWallpaperRenderSize(context, screenType, scaling)
 
-            while (finalBitmap == null && maxRetries > 0) {
+            var finalBitmap: Bitmap? = null
+            var preparedWallpaperId: String? = null
+            var remainingRetries = Constants.MAX_WALLPAPER_LOAD_RETRIES
+            var queueRebuildAttempts = 0
+
+            while (finalBitmap == null && remainingRetries > 0) {
                 val candidate = wallpaperRepository.getAndDequeueWallpaper(albumId, screenType)
 
                 if (candidate == null) {
                     queueRebuildAttempts++
-                    if (queueRebuildAttempts > 2) {
-                        return Result.Error(EmptyAlbumException(context.getString(R.string.no_wallpapers_in_album)))
+                    if (queueRebuildAttempts > Constants.MAX_QUEUE_REBUILD_ATTEMPTS) {
+                        return Result.Error(
+                            EmptyAlbumException(context.getString(R.string.no_wallpapers_in_album))
+                        )
                     }
-                    val rebuildResult = wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
+                    val rebuildResult = wallpaperRepository.buildWallpaperQueue(
+                        albumId,
+                        screenType,
+                        settings.shuffleEnabled
+                    )
                     if (rebuildResult is Result.Error) {
-                        return Result.Error(Exception(context.getString(R.string.error_failed_to_build_queue)))
+                        return Result.Error(
+                            Exception(context.getString(R.string.error_failed_to_build_queue))
+                        )
                     }
                     continue
                 }
 
-                val uri = candidate.uri.toUri()
-                // Skip the isValid() pre-check — retrieveBitmap returns null on failure,
-                // which is handled below. Avoiding the extra contentResolver.query() saves
-                // one round-trip per wallpaper on the hot path.
                 try {
-                    val bitmap = retrieveBitmap(context, uri, screenSize.width, screenSize.height, scaling)
-                    if (bitmap != null) {
-                        var processedBitmap: Bitmap? = null
-                        try {
-                            processedBitmap = processBitmap(
-                                source = bitmap,
-                                enableDarken = effects.enableDarken,
-                                darkenPercent = effects.darkenPercentage,
-                                enableBlur = effects.enableBlur,
-                                blurPercent = effects.blurPercentage,
-                                enableVignette = effects.enableVignette,
-                                vignettePercent = effects.vignettePercentage,
-                                enableGrayscale = effects.enableGrayscale,
-                                grayscalePercent = effects.grayscalePercentage
-                            )
+                    val bitmap = retrieveBitmap(
+                        context = context,
+                        wallpaperUri = candidate.uri.toUri(),
+                        width = screenSize.width,
+                        height = screenSize.height,
+                        scaling = scaling,
+                        preserveSourceOverflow = preserveSourceOverflow
+                    )
+                    if (bitmap == null) {
+                        // A temporarily inaccessible/corrupt item is skipped for this cycle.
+                        // AlbumRefreshWorker owns permanent pruning.
+                        remainingRetries--
+                        continue
+                    }
 
-                            if (processedBitmap !== bitmap) {
-                                bitmap.recycle()
-                            }
+                    var processedBitmap: Bitmap? = null
+                    try {
+                        processedBitmap = processBitmap(
+                            source = bitmap,
+                            enableDarken = effects.enableDarken,
+                            darkenPercent = effects.darkenPercentage,
+                            enableBlur = effects.enableBlur,
+                            blurPercent = effects.blurPercentage,
+                            enableVignette = effects.enableVignette,
+                            vignettePercent = effects.vignettePercentage,
+                            enableGrayscale = effects.enableGrayscale,
+                            grayscalePercent = effects.grayscalePercentage
+                        )
 
-                            if (settings.adaptiveBrightness) {
-                                val previousBitmap = processedBitmap
-                                processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
-                                if (processedBitmap !== previousBitmap) {
-                                    previousBitmap.recycle()
-                                }
-                            }
+                        if (processedBitmap !== bitmap) bitmap.recycle()
 
-                            finalBitmap = processedBitmap
-
-                            try {
-                                wallpaperRepository.setCurrentWallpaper(albumId, screenType, candidate.id)
-                            } catch (e: Exception) {
-                                android.util.Log.w("ChangeWallpaperUseCase", "Failed to record current wallpaper", e)
-                            }
-                        } catch (e: Exception) {
-                            // Recycle any bitmaps that were allocated before the exception
-                            if (processedBitmap != null && !processedBitmap.isRecycled) {
-                                processedBitmap.recycle()
-                            } else if (!bitmap.isRecycled) {
-                                bitmap.recycle()
-                            }
-                            throw e
+                        if (settings.adaptiveBrightness) {
+                            val previousBitmap = processedBitmap
+                            processedBitmap = adaptiveBrightnessAdjustment(context, processedBitmap)
+                            if (processedBitmap !== previousBitmap) previousBitmap.recycle()
                         }
-                    } else {
-                        // null bitmap — file temporarily inaccessible; skip this cycle.
-                        // Do NOT delete the wallpaper permanently — a transient storage or
-                        // permission issue should not remove it from the user's album.
-                        // RefreshAlbumUseCase is responsible for pruning truly invalid URIs.
-                        maxRetries--
+
+                        finalBitmap = processedBitmap
+                        preparedWallpaperId = candidate.id
+                    } catch (e: Exception) {
+                        if (processedBitmap != null && !processedBitmap.isRecycled) {
+                            processedBitmap.recycle()
+                        } else if (!bitmap.isRecycled) {
+                            bitmap.recycle()
+                        }
+                        throw e
                     }
                 } catch (_: Exception) {
-                    // Error during bitmap processing; skip this wallpaper this cycle.
-                    maxRetries--
+                    remainingRetries--
                 }
             }
 
-            if (finalBitmap == null) {
-                return Result.Error(NoValidWallpaperException(context.getString(R.string.error_no_valid_wallpaper_after_retries)))
-            }
+            val preparedBitmap = finalBitmap
+                ?: return Result.Error(
+                    NoValidWallpaperException(
+                        context.getString(R.string.error_no_valid_wallpaper_after_retries)
+                    )
+                )
 
-            // Best-effort queue refill — do not propagate failure, the bitmap is already ready
-            try {
-                val nextItem = wallpaperRepository.getNextWallpaperInQueue(albumId, screenType)
-                if (nextItem == null) {
-                    wallpaperRepository.buildWallpaperQueue(albumId, screenType, settings.shuffleEnabled)
-                }
-            } catch (e: Exception) {
-                android.util.Log.w("ChangeWallpaperUseCase", "Queue refill failed, will rebuild on next change", e)
-            }
-
-            Result.Success(finalBitmap)
+            Result.Success(
+                PreparedWallpaper(
+                    bitmap = preparedBitmap,
+                    albumId = albumId,
+                    screenType = screenType,
+                    wallpaperId = checkNotNull(preparedWallpaperId),
+                    shuffle = settings.shuffleEnabled
+                )
+            )
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    /**
+     * Record a successfully applied wallpaper and keep the target screen queue in sync.
+     *
+     * [screenType] can differ from the prepared queue when one HOME item was atomically applied to
+     * both screens. The exact item is removed from LOCK rather than blindly dequeuing its head.
+     */
+    suspend fun complete(
+        prepared: PreparedWallpaper,
+        screenType: ScreenType = prepared.screenType
+    ) {
+        try {
+            wallpaperRepository.setCurrentWallpaper(
+                prepared.albumId,
+                screenType,
+                prepared.wallpaperId
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Applied wallpaper could not be recorded as current", e)
+            return
+        }
+
+        try {
+            if (wallpaperRepository.getNextWallpaperInQueue(prepared.albumId, screenType) == null) {
+                wallpaperRepository.buildWallpaperQueue(
+                    prepared.albumId,
+                    screenType,
+                    prepared.shuffle
+                )
+            }
+            // Build first when this is the first synchronized use of a screen queue, then remove
+            // the exact applied item. This prevents the just-applied wallpaper from being
+            // reintroduced at the head of a freshly built queue.
+            wallpaperRepository.removeWallpaperFromQueue(
+                prepared.albumId,
+                screenType,
+                prepared.wallpaperId
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Queue sync failed; it will rebuild on the next change", e)
+        }
+    }
+
+    /** Restore a prepared item after WallpaperManager rejected it. */
+    suspend fun restore(prepared: PreparedWallpaper) {
+        try {
+            wallpaperRepository.restoreWallpaperToQueueFront(
+                prepared.albumId,
+                prepared.screenType,
+                prepared.wallpaperId
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restore rejected wallpaper to its queue", e)
+        }
+    }
+
+    private companion object {
+        const val TAG = "ChangeWallpaperUseCase"
     }
 }

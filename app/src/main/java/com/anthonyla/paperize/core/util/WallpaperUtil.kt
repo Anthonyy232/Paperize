@@ -31,6 +31,7 @@ import android.view.Display
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.compose.ui.util.fastRoundToInt
+import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.WallpaperMediaType
@@ -47,6 +48,8 @@ import com.anthonyla.paperize.core.WallpaperMediaType
  */
 
 private const val TAG = "WallpaperUtil"
+private const val BUILT_IN_DISPLAY_CATEGORY =
+    "android.hardware.display.category.BUILT_IN_DISPLAYS"
 
 /**
  * Get EXIF orientation from URI
@@ -136,18 +139,30 @@ object ScreenMetricsCompat {
             // is still rendered sharply enough for the larger unfolded panel. External displays
             // are deliberately excluded so a connected monitor cannot inflate wallpaper memory.
             val displayManager = context.getSystemService(DisplayManager::class.java)
-            displayManager?.displays
-                ?.asSequence()
-                ?.filter { display ->
-                    display.flags and Display.FLAG_PRESENTATION == 0 &&
-                        display.flags and Display.FLAG_PRIVATE == 0
-                }
-                ?.flatMap { display ->
+            val builtInDisplays = displayManager
+                ?.getDisplays(BUILT_IN_DISPLAY_CATEGORY)
+                .orEmpty()
+            val candidateDisplays = if (builtInDisplays.isNotEmpty()) {
+                // Android 17+ returns all built-in panels, including currently inactive panels.
+                builtInDisplays.asSequence()
+            } else {
+                // Compatibility fallback for releases where the built-in category is unknown.
+                // Exclude presentation and app-owned virtual displays.
+                displayManager?.displays
+                    ?.asSequence()
+                    ?.filter { display ->
+                        display.flags and Display.FLAG_PRESENTATION == 0 &&
+                            display.flags and Display.FLAG_PRIVATE == 0
+                    }
+                    .orEmpty()
+            }
+            candidateDisplays
+                .flatMap { display ->
                     display.supportedModes.asSequence().map { mode ->
                         mode.physicalWidth to mode.physicalHeight
                     }
                 }
-                ?.forEach(::add)
+                .forEach(::add)
         }
         val largest = selectLargestDisplayDimensions(candidates)
         return largest?.let { Size(it.first, it.second) }
@@ -188,25 +203,29 @@ fun getDeviceScreenSize(context: Context): Size {
 /**
  * Get the target render size for a wallpaper bitmap.
  *
- * For the HOME screen (and BOTH), the launcher may request a wider canvas than the physical
- * screen to support horizontal parallax scrolling across multiple home-screen pages (e.g.
- * Pixel Launcher with 3 pages requests ~3× screen width). If we render at physical-screen
- * width and pass a null visibleCropHint to WallpaperManager.setBitmap(), Android scales the
- * bitmap up to fill the launcher's desired width, which also enlarges the height and crops
- * the top/bottom — making "FIT" behave identically to "FILL" from the user's perspective.
+ * For FIT/STRETCH/NONE on HOME (and BOTH), the launcher may request a wider canvas than the
+ * physical screen to support horizontal scrolling across multiple pages. Rendering those modes
+ * to the exact desired canvas prevents WallpaperManager from rescaling them into FILL.
  *
- * Fix: use WallpaperManager.getDesiredMinimumWidth/Height as the render target for HOME/BOTH
- * so the bitmap already fills the full parallax canvas. The launcher then has nothing to scale,
- * and the chosen scaling mode (FIT, FILL, STRETCH, NONE) is preserved correctly.
+ * FILL deliberately uses one physical screen as its minimum viewport and keeps source overflow.
+ * That restores Android's native static-wallpaper behavior: the launcher can traverse a wide
+ * image, but cannot manufacture scroll area beyond the image's real edge.
  *
  * LOCK screen wallpapers are not parallax-scrolled, so the physical screen size is correct.
  * LIVE wallpapers are rendered by GLRenderer directly; they do not go through this path.
  */
-fun getWallpaperRenderSize(context: Context, screenType: com.anthonyla.paperize.core.ScreenType): Size {
+fun getWallpaperRenderSize(
+    context: Context,
+    screenType: com.anthonyla.paperize.core.ScreenType,
+    scaling: ScalingType = ScalingType.FIT
+): Size {
     val screen = getDeviceScreenSize(context)
     return when (screenType) {
         com.anthonyla.paperize.core.ScreenType.HOME,
         com.anthonyla.paperize.core.ScreenType.BOTH -> {
+            if (usesLauncherManagedScrolling(screenType, scaling)) {
+                return screen
+            }
             val wm = WallpaperManager.getInstance(context)
             val desiredW = wm.desiredMinimumWidth
             val desiredH = wm.desiredMinimumHeight
@@ -223,6 +242,19 @@ fun getWallpaperRenderSize(context: Context, screenType: com.anthonyla.paperize.
 }
 
 /**
+ * Whether a static wallpaper should retain source overflow for launcher-managed scrolling.
+ *
+ * FIT/STRETCH/NONE use an exact launcher canvas so Android cannot rescale them into FILL.
+ */
+internal fun usesLauncherManagedScrolling(
+    screenType: com.anthonyla.paperize.core.ScreenType,
+    scaling: ScalingType
+): Boolean =
+    (screenType == com.anthonyla.paperize.core.ScreenType.HOME ||
+        screenType == com.anthonyla.paperize.core.ScreenType.BOTH) &&
+        scaling == ScalingType.FILL
+
+/**
  * Retrieve a bitmap from a URI that is scaled down to the device's screen size.
  *
  * ImageDecoder is the primary path: it auto-applies EXIF orientation and exposes
@@ -235,7 +267,8 @@ fun retrieveBitmap(
     wallpaperUri: Uri,
     width: Int,
     height: Int,
-    scaling: ScalingType = ScalingType.FIT
+    scaling: ScalingType = ScalingType.FIT,
+    preserveSourceOverflow: Boolean = false
 ): Bitmap? {
     // ImageDecoder auto-applies EXIF orientation; info.size is the post-EXIF display size.
     // No separate getImageDimensions() call needed — saves 1-2 stream opens per wallpaper.
@@ -255,7 +288,7 @@ fun retrieveBitmap(
                     val targetW = (srcWidth * scale).fastRoundToInt()
                     val targetH = (srcHeight * scale).fastRoundToInt()
                     decoder.setTargetSize(targetW, targetH)
-                    if (targetW > width || targetH > height) {
+                    if (!preserveSourceOverflow && (targetW > width || targetH > height)) {
                         val cropX = ((targetW - width) / 2).coerceAtLeast(0)
                         val cropY = ((targetH - height) / 2).coerceAtLeast(0)
                         decoder.setCrop(android.graphics.Rect(
@@ -327,7 +360,37 @@ fun retrieveBitmap(
     //   FIT   → decoded bitmap may be narrower/shorter than canvas; center on black canvas.
     //   NONE  → original-size image may be smaller than canvas; center on black canvas.
     //   STRETCH → decoder was told the exact canvas size; no-op.
-    return oriented?.let { finalizeToCanvas(it, width, height, scaling) }
+    return oriented?.let {
+        if (preserveSourceOverflow && scaling == ScalingType.FILL) {
+            scaleToFillPreservingOverflow(it, width, height)
+        } else {
+            finalizeToCanvas(it, width, height, scaling)
+        }
+    }
+}
+
+/**
+ * Scale [source] just enough to cover one screen while retaining any overflow.
+ *
+ * The returned bitmap may be wider than [width] or taller than [height]. That overflow is what a
+ * launcher uses to scroll a static wallpaper without moving past the source image's real edge.
+ */
+private fun scaleToFillPreservingOverflow(
+    source: Bitmap,
+    width: Int,
+    height: Int
+): Bitmap {
+    val scale = maxOf(
+        width.toFloat() / source.width,
+        height.toFloat() / source.height
+    )
+    val targetW = (source.width * scale).fastRoundToInt()
+    val targetH = (source.height * scale).fastRoundToInt()
+    if (targetW == source.width && targetH == source.height) return source
+
+    val scaled = source.scale(targetW, targetH)
+    if (scaled !== source) source.recycle()
+    return scaled
 }
 
 /**

@@ -88,7 +88,7 @@
   <string name="change_on_screen_off">Change on Screen Off</string>
   <string name="change_wallpaper_when_screen_turns_off">Change wallpaper when screen turns off</string>
   <string name="parallax_effect">Parallax Effect</string>
-  <string name="wallpaper_moves_with_screen_scroll">Wallpaper moves with screen scroll</string>
+  <string name="wallpaper_moves_with_screen_scroll">Swipe between home-screen pages to move the wallpaper (launcher support required)</string>
   <string name="live_wallpaper_name">Paperize Live Wallpaper</string>
   <string name="live_wallpaper_description">Dynamic wallpapers with effects and interactive features</string>
     <string name="adaptive_brightness">Adaptive Brightness</string>

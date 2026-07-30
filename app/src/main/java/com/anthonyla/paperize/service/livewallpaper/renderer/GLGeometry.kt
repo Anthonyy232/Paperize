@@ -1,14 +1,77 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 
+import com.anthonyla.paperize.core.ScalingType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Geometry utilities for OpenGL rendering including vertex positions,
  * texture coordinates, and adaptive parallax calculations.
  */
 object GLGeometry {
+
+    data class WallpaperTransform(
+        val scaledWidth: Float,
+        val scaledHeight: Float,
+        val horizontalOffset: Float
+    )
+
+    /**
+     * Calculate live-wallpaper scale and launcher-scroll offset without OpenGL dependencies.
+     */
+    fun calculateWallpaperTransform(
+        viewWidth: Float,
+        viewHeight: Float,
+        imageWidth: Float,
+        imageHeight: Float,
+        scalingType: ScalingType,
+        parallaxEnabled: Boolean,
+        parallaxIntensity: Int,
+        normalizedOffsetX: Float
+    ): WallpaperTransform {
+        require(viewWidth > 0f && viewHeight > 0f)
+        require(imageWidth > 0f && imageHeight > 0f)
+
+        val scaleX = viewWidth / imageWidth
+        val scaleY = viewHeight / imageHeight
+        val (baseScaleX, baseScaleY) = when (scalingType) {
+            ScalingType.FILL -> max(scaleX, scaleY).let { it to it }
+            ScalingType.FIT -> min(scaleX, scaleY).let { it to it }
+            ScalingType.STRETCH -> scaleX to scaleY
+            ScalingType.NONE -> 1f to 1f
+        }
+
+        var effectiveScaleX = baseScaleX
+        var effectiveScaleY = baseScaleY
+        val intensity = if (parallaxEnabled) {
+            parallaxIntensity.coerceIn(0, 100) / 100f
+        } else {
+            0f
+        }
+
+        if (intensity > 0f) {
+            val currentWidth = imageWidth * effectiveScaleX
+            val minimumExtraWidth = viewWidth * intensity * 0.2f
+            if (currentWidth - viewWidth < minimumExtraWidth) {
+                val zoom = (viewWidth + minimumExtraWidth) / currentWidth
+                effectiveScaleX *= zoom
+                effectiveScaleY *= zoom
+            }
+        }
+
+        val scaledWidth = imageWidth * effectiveScaleX
+        val scaledHeight = imageHeight * effectiveScaleY
+        val extraWidth = max(0f, scaledWidth - viewWidth)
+        val offset = normalizedOffsetX.coerceIn(0f, 1f)
+        return WallpaperTransform(
+            scaledWidth = scaledWidth,
+            scaledHeight = scaledHeight,
+            horizontalOffset = extraWidth * intensity * (0.5f - offset)
+        )
+    }
 
     /**
      * Full-screen quad vertices in normalized device coordinates (-1 to 1).

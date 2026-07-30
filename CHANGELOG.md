@@ -1,3 +1,22 @@
+## v4.0.1
+
+- Restored native static FILL scrolling so wide wallpapers move between their real
+  left and right edges without synthetic launcher-sized overflow.
+- Added independent brightness, blur, vignette, and grayscale controls for home
+  and lock screens, including when both screens share one album and schedule.
+- Refreshed folder-backed albums whenever Paperize returns to the foreground so
+  added and removed files appear without restarting the app.
+- Improved foldable sizing on Android 17 by including inactive built-in panels
+  while excluding external displays.
+- Made wallpaper changes commit queue and current-wallpaper state only after
+  Android accepts the bitmap, with rejected changes restored for retry.
+- Corrected live wallpaper parallax enablement, intensity, edge traversal, and
+  launcher-offset clamping, and clarified that it responds to home-page swipes.
+- Added device regressions for EXIF rotation, static FILL overflow, and folded
+  display sizing, plus focused queue and live-renderer unit coverage.
+
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v4.0.0...v4.0.1
+
 ## v4.0.0
 
 - Completely rewrote Paperize for Android 12 and newer with a modern Compose interface.

@@ -347,67 +347,16 @@ class PaperizeWallpaperRenderer(
             return
         }
 
-        // 1. Calculate scale based on ScalingType
-        val scaleX = viewWidth / imageWidth
-        val scaleY = viewHeight / imageHeight
-
-        val (finalScaleX, finalScaleY) = when (currentScalingType) {
-            ScalingType.FILL -> {
-                val scale = kotlin.math.max(scaleX, scaleY)
-                Pair(scale, scale)
-            }
-            ScalingType.FIT -> {
-                val scale = kotlin.math.min(scaleX, scaleY)
-                Pair(scale, scale)
-            }
-            ScalingType.STRETCH -> {
-                Pair(scaleX, scaleY)
-            }
-            ScalingType.NONE -> {
-                Pair(1f, 1f)
-            }
-        }
-
-        var effectiveScaleX = finalScaleX
-        var effectiveScaleY = finalScaleY
-
-        val parallaxEnabled = currentEffects.enableParallax && currentEffects.parallaxIntensity > 0
-        val parallaxIntensity = if (parallaxEnabled) currentEffects.parallaxIntensity / 100f else 0f
-
-        // If parallax is enabled, ensure we have enough width to scroll (overscan).
-        // If image fits perfectly, apply artificial zoom based on intensity.
-        if (parallaxEnabled) {
-            val currentWidth = imageWidth * effectiveScaleX
-            // Target at least 20% overscan at max intensity
-            val minExtraWidth = viewWidth * parallaxIntensity * 0.2f
-            
-            if ((currentWidth - viewWidth) < minExtraWidth) {
-                // Zoom in to create scrollable area
-                val targetWidth = viewWidth + minExtraWidth
-                // Prevent division by zero
-                if (currentWidth > 0) {
-                    val zoomFactor = targetWidth / currentWidth
-                    effectiveScaleX *= zoomFactor
-                    effectiveScaleY *= zoomFactor
-                }
-            }
-        }
-
-        val scaledWidth = imageWidth * effectiveScaleX
-        val scaledHeight = imageHeight * effectiveScaleY
-
-        // 2. Calculate parallax offset
-        // Available scroll range is the difference between scaled image width and screen width
-        val extraWidth = kotlin.math.max(0f, scaledWidth - viewWidth)
-        
-        // Calculate offset based on scroll position (0.0 = left, 1.0 = right)
-        // Center (0.5) is 0 offset
-        // Reverting to: `maxParallaxOffset = extraWidth`.
-        // And relying on the "Zoom" logic to create that width if needed.
-        val maxParallaxOffset = extraWidth
-        val parallaxOffset = maxParallaxOffset * (0.5f - normalOffsetX)
-        
-        // Verbose logging removed to avoid per-frame log spam
+        val transform = GLGeometry.calculateWallpaperTransform(
+            viewWidth = viewWidth,
+            viewHeight = viewHeight,
+            imageWidth = imageWidth,
+            imageHeight = imageHeight,
+            scalingType = currentScalingType,
+            parallaxEnabled = currentEffects.enableParallax,
+            parallaxIntensity = currentEffects.parallaxIntensity,
+            normalizedOffsetX = normalOffsetX
+        )
 
         // 3. Construct Matrix
         // We use an orthographic projection matching the screen dimensions
@@ -423,12 +372,18 @@ class PaperizeWallpaperRenderer(
 
         // Apply Model transformations
         // Translate for parallax
-        Matrix.translateM(matrix, 0, parallaxOffset, 0f, 0f)
+        Matrix.translateM(matrix, 0, transform.horizontalOffset, 0f, 0f)
         
         // Scale to match image size * crop scale
         // The quad is -1 to 1 (size 2), so we need to scale it to match image dimensions
         // Actually, we want to map the quad (-1..1) to the image size (-w/2..w/2)
-        Matrix.scaleM(matrix, 0, scaledWidth / 2f, scaledHeight / 2f, 1f)
+        Matrix.scaleM(
+            matrix,
+            0,
+            transform.scaledWidth / 2f,
+            transform.scaledHeight / 2f,
+            1f
+        )
     }
 
     /**
@@ -734,8 +689,9 @@ class PaperizeWallpaperRenderer(
      * @param offset Normalized offset (0.0 = left, 1.0 = right)
      */
     fun setNormalOffsetX(offset: Float) {
-        if (normalOffsetX != offset) {
-            normalOffsetX = offset
+        val clampedOffset = offset.coerceIn(0f, 1f)
+        if (normalOffsetX != clampedOffset) {
+            normalOffsetX = clampedOffset
             callbacks.requestRender()
         }
     }

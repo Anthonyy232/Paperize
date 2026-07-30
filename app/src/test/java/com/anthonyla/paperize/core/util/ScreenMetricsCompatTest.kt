@@ -1,7 +1,11 @@
 package com.anthonyla.paperize.core.util
 
+import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.ScreenType
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ScreenMetricsCompatTest {
@@ -41,5 +45,19 @@ class ScreenMetricsCompatTest {
         )
 
         assertNull(result)
+    }
+
+    @Test
+    fun `home fill preserves overflow for launcher scrolling`() {
+        assertTrue(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL))
+        assertTrue(usesLauncherManagedScrolling(ScreenType.BOTH, ScalingType.FILL))
+    }
+
+    @Test
+    fun `non-fill and lock rendering use exact canvas`() {
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FIT))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.STRETCH))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.NONE))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.LOCK, ScalingType.FILL))
     }
 }

@@ -13,69 +13,49 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.EmptyAlbumException
+import com.anthonyla.paperize.core.Result as PaperizeResult
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.core.util.setBitmapChecked
+import com.anthonyla.paperize.domain.model.PreparedWallpaper
+import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
-import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
 import com.anthonyla.paperize.presentation.MainActivity
 import com.anthonyla.paperize.service.WallpaperChangeLock
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
-import javax.inject.Inject
 
 /**
- * Foreground service for changing wallpapers
- *
- * Actions:
- * - CHANGE_WALLPAPER: Change wallpaper immediately
+ * Foreground service for immediate wallpaper changes and effect reapplication.
  */
 @AndroidEntryPoint
 class WallpaperChangeService : Service() {
 
-    @Inject
-    lateinit var changeWallpaperUseCase: ChangeWallpaperUseCase
-
-    @Inject
-    lateinit var reapplyEffectsUseCase: ReapplyEffectsUseCase
-
-    @Inject
-    lateinit var wallpaperRepository: WallpaperRepository
-
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
-
-    @Inject
-    lateinit var wallpaperChangeLock: WallpaperChangeLock
+    @Inject lateinit var changeWallpaperUseCase: ChangeWallpaperUseCase
+    @Inject lateinit var reapplyEffectsUseCase: ReapplyEffectsUseCase
+    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var wallpaperChangeLock: WallpaperChangeLock
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     private lateinit var wallpaperManager: WallpaperManager
     private lateinit var notificationManager: NotificationManager
-
-    companion object {
-        private const val TAG = "WallpaperChangeService"
-        const val ACTION_CHANGE_WALLPAPER = Constants.ACTION_CHANGE_WALLPAPER
-        const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
-        const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
-        private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
-    }
 
     override fun onCreate() {
         super.onCreate()
         wallpaperManager = WallpaperManager.getInstance(this)
         notificationManager = getSystemService(NotificationManager::class.java)
-            ?: throw IllegalStateException("NotificationManager not available")
+            ?: error("NotificationManager not available")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Start foreground service. Android 14+ requires specifying the service type.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                 Constants.NOTIFICATION_ID,
@@ -86,347 +66,301 @@ class WallpaperChangeService : Service() {
             startForeground(Constants.NOTIFICATION_ID, createNotification())
         }
 
+        val screenType = intent?.getStringExtra(EXTRA_SCREEN_TYPE)
+            ?.let(ScreenType::fromString)
+            ?: ScreenType.BOTH
         when (intent?.action) {
-            ACTION_CHANGE_WALLPAPER -> {
-                val screenType = intent.getStringExtra(EXTRA_SCREEN_TYPE)?.let {
-                    ScreenType.fromString(it)
-                } ?: ScreenType.BOTH
-                handleChangeWallpaper(screenType, startId)
-            }
-            ACTION_REAPPLY_EFFECTS -> {
-                val screenType = intent.getStringExtra(EXTRA_SCREEN_TYPE)?.let {
-                    ScreenType.fromString(it)
-                } ?: ScreenType.BOTH
-                handleReapplyEffects(screenType, startId)
-            }
+            ACTION_CHANGE_WALLPAPER -> handleChangeWallpaper(screenType, startId)
+            ACTION_REAPPLY_EFFECTS -> handleReapplyEffects(screenType, startId)
             else -> {
-                // Unknown or null action — stop immediately to avoid a stuck foreground service
                 Log.w(TAG, "Unknown action: ${intent?.action}")
                 stopSelf(startId)
             }
         }
-
         return START_NOT_STICKY
     }
 
     private fun handleChangeWallpaper(screenType: ScreenType, startId: Int) {
         serviceScope.launch {
-            // Use mutex to prevent concurrent wallpaper changes
             wallpaperChangeLock.mutex.withLock {
                 try {
-                    // Get schedule settings to determine which albums to use
-                    val settings = settingsRepository.getScheduleSettings()
-
-                when (screenType) {
-                    ScreenType.LIVE -> {
-                        val reloadIntent = Intent(Constants.ACTION_RELOAD_WALLPAPER).apply {
-                            setPackage(packageName)
-                        }
-                        sendBroadcast(reloadIntent)
-                        Log.d(TAG, "Requested immediate live wallpaper reload")
-                    }
-                    ScreenType.HOME -> {
-                        val homeAlbumId = settings.homeAlbumId
-                        if (homeAlbumId != null) {
-                            changeHomeWallpaper(homeAlbumId)
-                        } else {
-                            Log.w(TAG, "No home album selected")
-                        }
-                    }
-                    ScreenType.LOCK -> {
-                        val lockAlbumId = settings.lockAlbumId
-                        if (lockAlbumId != null) {
-                            changeLockWallpaper(lockAlbumId)
-                        } else {
-                            Log.w(TAG, "No lock album selected")
-                        }
-                    }
-                    ScreenType.BOTH -> {
-                        val homeAlbumId = settings.homeAlbumId
-                        val lockAlbumId = settings.lockAlbumId
-
-                        // If same album and not separately scheduled, use same wallpaper
-                        if (homeAlbumId != null && lockAlbumId != null &&
-                            homeAlbumId == lockAlbumId && !settings.separateSchedules) {
-                            // Get one wallpaper and set for both screens
-                            val result = changeWallpaperUseCase(homeAlbumId, ScreenType.HOME)
-                            result.onSuccess { bitmap ->
-                                try {
-                                    // Validate bitmap before setting
-                                    if (bitmap.width <= 0 || bitmap.height <= 0) {
-                                        throw IllegalStateException("Invalid bitmap dimensions: ${bitmap.width}x${bitmap.height}")
-                                    }
-                                    if (bitmap.isRecycled) {
-                                        throw IllegalStateException("Bitmap has been recycled")
-                                    }
-
-                                    val canSetAtomically =
-                                        settings.homeEffects == settings.lockEffects &&
-                                            settings.homeScalingType == settings.lockScalingType
-
-                                    if (canSetAtomically) {
-                                        // A single platform transaction prevents home and lock
-                                        // from diverging (or one side reverting to the stock
-                                        // wallpaper) if a second setBitmap call fails.
-                                        wallpaperManager.setBitmap(
-                                            bitmap,
-                                            null,
-                                            true,
-                                            WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
-                                        )
-                                        Log.d(TAG, "Home and lock wallpaper set atomically")
-                                    } else {
-                                        // Different effects/scaling require distinct render sizes.
-                                        wallpaperManager.setBitmap(
-                                            bitmap,
-                                            null,
-                                            true,
-                                            WallpaperManager.FLAG_SYSTEM
-                                        )
-                                        Log.d(TAG, "Home wallpaper set in BOTH mode")
-                                    }
-
-                                    // Keep LOCK queue in sync with HOME so that if the user later
-                                    // switches to separate schedules, both screens continue from
-                                    // the same queue position rather than LOCK restarting at 0.
-                                    try {
-                                        val homeCurrentId = wallpaperRepository
-                                            .getCurrentWallpaper(homeAlbumId, ScreenType.HOME)?.id
-                                        if (homeCurrentId != null) {
-                                            // Ensure LOCK queue exists (first run in synced mode)
-                                            if (wallpaperRepository.getNextWallpaperInQueue(
-                                                    homeAlbumId, ScreenType.LOCK) == null) {
-                                                wallpaperRepository.buildWallpaperQueue(
-                                                    homeAlbumId, ScreenType.LOCK, settings.shuffleEnabled)
-                                            }
-                                            wallpaperRepository.getAndDequeueWallpaper(
-                                                homeAlbumId, ScreenType.LOCK)
-                                            wallpaperRepository.setCurrentWallpaper(
-                                                homeAlbumId, ScreenType.LOCK, homeCurrentId)
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.w(TAG, "Failed to sync LOCK queue in BOTH mode", e)
-                                    }
-
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Error setting wallpaper for both screens", e)
-                                } finally {
-                                    // Recycle HOME bitmap BEFORE rendering LOCK to avoid
-                                    // holding both in memory (~48MB + ~16MB).
-                                    bitmap.recycle()
-                                }
-
-                                if (settings.homeEffects != settings.lockEffects ||
-                                    settings.homeScalingType != settings.lockScalingType) {
-                                    // Render a separate bitmap only when the user deliberately
-                                    // configured different lock-screen presentation settings.
-                                    val lockResult = reapplyEffectsUseCase(homeAlbumId, ScreenType.LOCK)
-                                    lockResult.onSuccess { lockBitmap ->
-                                        try {
-                                            wallpaperManager.setBitmap(
-                                                lockBitmap, null, true, WallpaperManager.FLAG_LOCK
-                                            )
-                                            Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
-                                        } catch (e: Exception) {
-                                            Log.e(TAG, "Error setting lock wallpaper in BOTH mode", e)
-                                        } finally {
-                                            lockBitmap.recycle()
-                                        }
-                                    }.onError { error ->
-                                        Log.w(TAG, "Lock rerender failed in BOTH mode: ${error.message}")
-                                    }
-                                }
-                            }.onError { error ->
-                                if (error is EmptyAlbumException) {
-                                    handleEmptyAlbumError(ScreenType.BOTH)
-                                } else {
-                                    Log.e(TAG, "Error getting wallpaper bitmap", error)
-                                }
-                            }
-                        } else {
-                            // Different albums or separately scheduled - change independently
-                            if (homeAlbumId != null) {
-                                changeHomeWallpaper(homeAlbumId)
-                            } else {
-                                Log.w(TAG, "No home album selected")
-                            }
-
-                            if (lockAlbumId != null) {
-                                changeLockWallpaper(lockAlbumId)
-                            } else {
-                                Log.w(TAG, "No lock album selected")
-                            }
-                        }
-                    }
-                }
-
-                    stopSelf(startId)
+                    changeWallpaper(screenType, settingsRepository.getScheduleSettings())
                 } catch (e: Exception) {
                     Log.e(TAG, "Error changing wallpaper", e)
+                    showErrorNotification(
+                        getString(R.string.app_name),
+                        e.localizedMessage
+                            ?: getString(R.string.error_no_valid_wallpaper_after_retries)
+                    )
+                } finally {
                     stopSelf(startId)
                 }
             }
         }
     }
 
-    private suspend fun changeHomeWallpaper(albumId: String) {
-        val result = changeWallpaperUseCase(albumId, ScreenType.HOME)
-        result.onSuccess { bitmap ->
-            try {
-                // Validate bitmap before setting
-                if (bitmap.width <= 0 || bitmap.height <= 0) {
-                    throw IllegalStateException("Invalid bitmap dimensions: ${bitmap.width}x${bitmap.height}")
-                }
-                if (bitmap.isRecycled) {
-                    throw IllegalStateException("Bitmap has been recycled")
-                }
-
-                wallpaperManager.setBitmap(
-                    bitmap,
-                    null,
-                    true,
-                    WallpaperManager.FLAG_SYSTEM
+    private suspend fun changeWallpaper(
+        screenType: ScreenType,
+        settings: ScheduleSettings
+    ) {
+        when (screenType) {
+            ScreenType.LIVE -> {
+                sendBroadcast(
+                    Intent(Constants.ACTION_RELOAD_WALLPAPER).setPackage(packageName)
                 )
-                Log.d(TAG, "Home wallpaper changed successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting home wallpaper", e)
-            } finally {
-                // Always recycle bitmap to prevent memory leaks
-                bitmap.recycle()
+                Log.d(TAG, "Requested immediate live wallpaper reload")
             }
-        }.onError { error ->
-            if (error is EmptyAlbumException) {
-                handleEmptyAlbumError(ScreenType.HOME)
-            } else {
-                Log.e(TAG, "Error getting home wallpaper bitmap", error)
+
+            ScreenType.HOME -> settings.homeAlbumId?.let {
+                changeSingle(it, ScreenType.HOME)
+            } ?: Log.w(TAG, "No home album selected")
+
+            ScreenType.LOCK -> settings.lockAlbumId?.let {
+                changeSingle(it, ScreenType.LOCK)
+            } ?: Log.w(TAG, "No lock album selected")
+
+            ScreenType.BOTH -> {
+                val homeAlbumId = settings.homeAlbumId
+                val lockAlbumId = settings.lockAlbumId
+                if (
+                    homeAlbumId != null &&
+                    homeAlbumId == lockAlbumId &&
+                    !settings.separateSchedules
+                ) {
+                    changeSynchronized(homeAlbumId, settings)
+                } else {
+                    homeAlbumId?.let { changeSingle(it, ScreenType.HOME) }
+                        ?: Log.w(TAG, "No home album selected")
+                    lockAlbumId?.let { changeSingle(it, ScreenType.LOCK) }
+                        ?: Log.w(TAG, "No lock album selected")
+                }
             }
         }
     }
 
-    private suspend fun changeLockWallpaper(albumId: String) {
-        val result = changeWallpaperUseCase(albumId, ScreenType.LOCK)
-        result.onSuccess { bitmap ->
-            try {
-                // Validate bitmap before setting
-                if (bitmap.width <= 0 || bitmap.height <= 0) {
-                    throw IllegalStateException("Invalid bitmap dimensions: ${bitmap.width}x${bitmap.height}")
-                }
-                if (bitmap.isRecycled) {
-                    throw IllegalStateException("Bitmap has been recycled")
-                }
+    private suspend fun changeSynchronized(
+        albumId: String,
+        settings: ScheduleSettings
+    ) {
+        when (val result = changeWallpaperUseCase(albumId, ScreenType.HOME)) {
+            is PaperizeResult.Success -> {
+                val prepared = result.data
+                val samePresentation =
+                    settings.homeEffects == settings.lockEffects &&
+                        settings.homeScalingType == settings.lockScalingType
 
-                wallpaperManager.setBitmap(
-                    bitmap,
-                    null,
-                    true,
-                    WallpaperManager.FLAG_LOCK
-                )
-                Log.d(TAG, "Lock wallpaper changed successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting lock wallpaper", e)
-            } finally {
-                // Always recycle bitmap to prevent memory leaks
-                bitmap.recycle()
+                if (samePresentation) {
+                    applyPrepared(
+                        prepared,
+                        WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK,
+                        listOf(ScreenType.HOME, ScreenType.LOCK)
+                    )
+                    Log.d(TAG, "Home and lock wallpaper set atomically")
+                } else {
+                    applyPrepared(
+                        prepared,
+                        WallpaperManager.FLAG_SYSTEM,
+                        listOf(ScreenType.HOME)
+                    )
+                    Log.d(TAG, "Home wallpaper set in BOTH mode")
+
+                    when (
+                        val lockResult = reapplyEffectsUseCase(
+                            albumId,
+                            ScreenType.LOCK,
+                            prepared.wallpaperId
+                        )
+                    ) {
+                        is PaperizeResult.Success -> {
+                            val lockBitmap = lockResult.data
+                            try {
+                                wallpaperManager.setBitmapChecked(
+                                    lockBitmap,
+                                    WallpaperManager.FLAG_LOCK
+                                )
+                                changeWallpaperUseCase.complete(prepared, ScreenType.LOCK)
+                                Log.d(TAG, "Lock wallpaper set separately in BOTH mode")
+                            } finally {
+                                lockBitmap.recycle()
+                            }
+                        }
+
+                        is PaperizeResult.Error -> throw asException(lockResult.exception)
+                        PaperizeResult.Loading -> error("Unexpected loading result")
+                    }
+                }
             }
-        }.onError { error ->
-            if (error is EmptyAlbumException) {
-                handleEmptyAlbumError(ScreenType.LOCK)
-            } else {
-                Log.e(TAG, "Error getting lock wallpaper bitmap", error)
+
+            is PaperizeResult.Error -> {
+                if (result.exception is EmptyAlbumException) {
+                    handleEmptyAlbumError(ScreenType.BOTH)
+                } else {
+                    throw asException(result.exception)
+                }
             }
+
+            PaperizeResult.Loading -> error("Unexpected loading result")
         }
     }
 
-    /**
-     * Reapply current effects to the last-applied wallpaper without advancing the queue.
-     * Falls back to a normal queue advance if no current wallpaper is recorded.
-     */
+    private suspend fun changeSingle(
+        albumId: String,
+        screenType: ScreenType
+    ) {
+        when (val result = changeWallpaperUseCase(albumId, screenType)) {
+            is PaperizeResult.Success -> {
+                val which = when (screenType) {
+                    ScreenType.HOME -> WallpaperManager.FLAG_SYSTEM
+                    ScreenType.LOCK -> WallpaperManager.FLAG_LOCK
+                    else -> error("Unsupported static screen: $screenType")
+                }
+                applyPrepared(result.data, which, listOf(screenType))
+                Log.d(TAG, "$screenType wallpaper changed successfully")
+            }
+
+            is PaperizeResult.Error -> {
+                if (result.exception is EmptyAlbumException) {
+                    handleEmptyAlbumError(screenType)
+                } else {
+                    throw asException(result.exception)
+                }
+            }
+
+            PaperizeResult.Loading -> error("Unexpected loading result")
+        }
+    }
+
+    private suspend fun applyPrepared(
+        prepared: PreparedWallpaper,
+        which: Int,
+        completedScreens: List<ScreenType>
+    ) {
+        var platformAccepted = false
+        try {
+            wallpaperManager.setBitmapChecked(prepared.bitmap, which)
+            platformAccepted = true
+            completedScreens.forEach { screen ->
+                changeWallpaperUseCase.complete(prepared, screen)
+            }
+        } catch (e: Exception) {
+            if (!platformAccepted) {
+                changeWallpaperUseCase.restore(prepared)
+            }
+            throw e
+        } finally {
+            prepared.bitmap.recycle()
+        }
+    }
+
     private fun handleReapplyEffects(screenType: ScreenType, startId: Int) {
         serviceScope.launch {
             wallpaperChangeLock.mutex.withLock {
                 try {
                     val settings = settingsRepository.getScheduleSettings()
                     when (screenType) {
-                        ScreenType.HOME -> {
-                            val albumId = settings.homeAlbumId ?: run {
-                                Log.w(TAG, "No home album selected for reapply"); return@withLock
-                            }
-                            reapplyHome(albumId)
+                        ScreenType.HOME -> settings.homeAlbumId?.let {
+                            reapplySingle(it, ScreenType.HOME)
                         }
-                        ScreenType.LOCK -> {
-                            val albumId = settings.lockAlbumId ?: run {
-                                Log.w(TAG, "No lock album selected for reapply"); return@withLock
-                            }
-                            reapplyLock(albumId)
+
+                        ScreenType.LOCK -> settings.lockAlbumId?.let {
+                            reapplySingle(it, ScreenType.LOCK)
                         }
+
                         ScreenType.BOTH -> {
-                            val homeAlbumId = settings.homeAlbumId
-                            val lockAlbumId = settings.lockAlbumId
-                            if (homeAlbumId != null) reapplyHome(homeAlbumId)
-                            if (lockAlbumId != null) reapplyLock(lockAlbumId)
+                            settings.homeAlbumId?.let {
+                                reapplySingle(it, ScreenType.HOME)
+                            }
+                            settings.lockAlbumId?.let {
+                                reapplySingle(it, ScreenType.LOCK)
+                            }
                         }
-                        ScreenType.LIVE -> Unit // handled by live wallpaper service
+
+                        ScreenType.LIVE -> Unit
                     }
-                    stopSelf(startId)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error reapplying effects", e)
+                    showErrorNotification(
+                        getString(R.string.app_name),
+                        e.localizedMessage
+                            ?: getString(R.string.error_no_valid_wallpaper_after_retries)
+                    )
+                } finally {
                     stopSelf(startId)
                 }
             }
         }
     }
 
-    private suspend fun reapplyHome(albumId: String) {
-        val result = reapplyEffectsUseCase(albumId, ScreenType.HOME)
-        result.onSuccess { bitmap ->
-            try {
-                if (bitmap.width <= 0 || bitmap.height <= 0 || bitmap.isRecycled) {
-                    throw IllegalStateException("Invalid bitmap for reapply")
+    private suspend fun reapplySingle(
+        albumId: String,
+        screenType: ScreenType
+    ) {
+        when (val result = reapplyEffectsUseCase(albumId, screenType)) {
+            is PaperizeResult.Success -> {
+                val bitmap = result.data
+                try {
+                    val which = if (screenType == ScreenType.HOME) {
+                        WallpaperManager.FLAG_SYSTEM
+                    } else {
+                        WallpaperManager.FLAG_LOCK
+                    }
+                    wallpaperManager.setBitmapChecked(bitmap, which)
+                    Log.d(TAG, "$screenType effects reapplied successfully")
+                } finally {
+                    bitmap.recycle()
                 }
-                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
-                Log.d(TAG, "Home effects reapplied successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting home wallpaper during reapply", e)
-            } finally {
-                bitmap.recycle()
             }
-        }.onError { error ->
-            // Current wallpaper not recorded yet — fall back to normal queue advance
-            Log.w(TAG, "Reapply failed for home, falling back to change: ${error.message}")
-            changeHomeWallpaper(albumId)
+
+            is PaperizeResult.Error -> {
+                Log.w(TAG, "Reapply failed for $screenType; advancing queue", result.exception)
+                changeSingle(albumId, screenType)
+            }
+
+            PaperizeResult.Loading -> error("Unexpected loading result")
         }
     }
 
-    private suspend fun reapplyLock(albumId: String) {
-        val result = reapplyEffectsUseCase(albumId, ScreenType.LOCK)
-        result.onSuccess { bitmap ->
-            try {
-                if (bitmap.width <= 0 || bitmap.height <= 0 || bitmap.isRecycled) {
-                    throw IllegalStateException("Invalid bitmap for reapply")
-                }
-                wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
-                Log.d(TAG, "Lock effects reapplied successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting lock wallpaper during reapply", e)
-            } finally {
-                bitmap.recycle()
+    private suspend fun handleEmptyAlbumError(screenType: ScreenType) {
+        val settings = settingsRepository.getScheduleSettings()
+        val updated = when (screenType) {
+            ScreenType.HOME -> {
+                val lockStillActive = settings.lockEnabled && settings.lockAlbumId != null
+                settings.copy(
+                    homeAlbumId = null,
+                    enableChanger = lockStillActive && settings.enableChanger
+                )
             }
-        }.onError { error ->
-            // Current wallpaper not recorded yet — fall back to normal queue advance
-            Log.w(TAG, "Reapply failed for lock, falling back to change: ${error.message}")
-            changeLockWallpaper(albumId)
+
+            ScreenType.LOCK -> {
+                val homeStillActive = settings.homeEnabled && settings.homeAlbumId != null
+                settings.copy(
+                    lockAlbumId = null,
+                    enableChanger = homeStillActive && settings.enableChanger
+                )
+            }
+
+            ScreenType.BOTH -> settings.copy(
+                homeAlbumId = null,
+                lockAlbumId = null,
+                enableChanger = false
+            )
+
+            ScreenType.LIVE -> settings.copy(enableChanger = false)
         }
+        settingsRepository.updateScheduleSettings(updated)
+        showErrorNotification(
+            getString(R.string.no_wallpapers_in_album),
+            getString(R.string.wallpaper_changer_disabled_empty_album)
+        )
     }
 
     private fun createNotification(): Notification {
-        val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            intent,
+            Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
-
         return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.changing_wallpaper))
@@ -436,18 +370,13 @@ class WallpaperChangeService : Service() {
             .build()
     }
 
-    /**
-     * Show an error notification to the user
-     */
     private fun showErrorNotification(title: String, message: String) {
-        val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            intent,
+            Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
-
         val notification = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
@@ -456,54 +385,24 @@ class WallpaperChangeService : Service() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-
         notificationManager.notify(ERROR_NOTIFICATION_ID, notification)
     }
 
-    /**
-     * Handle empty album error scoped to the specific screen that failed.
-     * Only disables the changer globally if all active screens have empty albums.
-     */
-    private suspend fun handleEmptyAlbumError(screenType: ScreenType) {
-        Log.w(TAG, "Album is empty for $screenType")
-
-        val settings = settingsRepository.getScheduleSettings()
-
-        val updatedSettings = when (screenType) {
-            ScreenType.HOME -> {
-                // Disable home screen; only disable changer globally if lock is also inactive
-                val lockStillActive = settings.lockEnabled && settings.lockAlbumId != null
-                settings.copy(
-                    homeAlbumId = null,
-                    enableChanger = if (lockStillActive) settings.enableChanger else false
-                )
-            }
-            ScreenType.LOCK -> {
-                // Disable lock screen; only disable changer globally if home is also inactive
-                val homeStillActive = settings.homeEnabled && settings.homeAlbumId != null
-                settings.copy(
-                    lockAlbumId = null,
-                    enableChanger = if (homeStillActive) settings.enableChanger else false
-                )
-            }
-            ScreenType.BOTH, ScreenType.LIVE -> {
-                // Both screens or live — disable entirely
-                settings.copy(enableChanger = false)
-            }
-        }
-
-        settingsRepository.updateScheduleSettings(updatedSettings)
-
-        showErrorNotification(
-            getString(R.string.no_wallpapers_in_album),
-            getString(R.string.wallpaper_changer_disabled_empty_album)
-        )
-    }
+    private fun asException(throwable: Throwable): Exception =
+        throwable as? Exception ?: RuntimeException(throwable)
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         serviceScope.cancel()
         super.onDestroy()
+    }
+
+    companion object {
+        private const val TAG = "WallpaperChangeService"
+        const val ACTION_CHANGE_WALLPAPER = Constants.ACTION_CHANGE_WALLPAPER
+        const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
+        const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
+        private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
     }
 }

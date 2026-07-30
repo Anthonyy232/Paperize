@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
-import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
@@ -9,6 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -25,12 +26,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 import kotlin.math.roundToInt
 
 /**
- * Setting switch with percentage sliders for home and lock screens
- * Enhanced with Material 3 Expressive design
+ * Effect control with either one switch/slider or independent HOME and LOCK controls.
  */
 @Composable
 fun SettingSwitchWithSlider(
@@ -42,17 +43,25 @@ fun SettingSwitchWithSlider(
     homePercentage: Int,
     lockPercentage: Int,
     onPercentageChange: (Int, Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    homeChecked: Boolean = checked,
+    lockChecked: Boolean = checked,
+    onHomeCheckedChange: (Boolean) -> Unit = onCheckedChange,
+    onLockCheckedChange: (Boolean) -> Unit = onCheckedChange
 ) {
-    var homeValue by remember(homePercentage) { mutableFloatStateOf(homePercentage.toFloat()) }
-    var lockValue by remember(lockPercentage) { mutableFloatStateOf(lockPercentage.toFloat()) }
+    var homeValue by remember(homePercentage) {
+        mutableFloatStateOf(homePercentage.toFloat())
+    }
+    var lockValue by remember(lockPercentage) {
+        mutableFloatStateOf(lockPercentage.toFloat())
+    }
 
-    androidx.compose.material3.Card(
+    Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)),
         shape = MaterialTheme.shapes.medium,
-        colors = androidx.compose.material3.CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
@@ -62,145 +71,162 @@ fun SettingSwitchWithSlider(
                 .padding(AppSpacing.large),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
         ) {
-            // Header with title and switch
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics(mergeDescendants = true) {},
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
-                ) {
+            if (bothEnabled) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)) {
                     Text(
                         text = stringResource(title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    if (!checked) {
+                    Text(
+                        text = stringResource(description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                ScreenEffectControl(
+                    label = R.string.home,
+                    checked = homeChecked,
+                    onCheckedChange = onHomeCheckedChange,
+                    value = homeValue,
+                    onValueChange = {
+                        homeValue = it
+                        onPercentageChange(it.roundToInt(), lockValue.roundToInt())
+                    }
+                )
+                ScreenEffectControl(
+                    label = R.string.lock,
+                    checked = lockChecked,
+                    onCheckedChange = onLockCheckedChange,
+                    value = lockValue,
+                    onValueChange = {
+                        lockValue = it
+                        onPercentageChange(homeValue.roundToInt(), it.roundToInt())
+                    }
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics(mergeDescendants = true) {},
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                    ) {
                         Text(
-                            text = stringResource(description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 3,
+                            text = stringResource(title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
-                    }
-                }
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            }
-
-            // Sliders (shown when enabled)
-            if (checked) {
-                if (bothEnabled) {
-                    // Lock screen slider
-                    Column(modifier = Modifier.padding(horizontal = AppSpacing.small)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(R.string.lock),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = "${lockValue.roundToInt()}%",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Slider(
-                            value = lockValue,
-                            onValueChange = {
-                                lockValue = it
-                                onPercentageChange(homeValue.roundToInt(), it.roundToInt())
-                            },
-                            valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = Constants.SLIDER_EFFECT_STEPS
-                        )
-                    }
-
-                    // Home screen slider
-                    Column(modifier = Modifier.padding(horizontal = AppSpacing.small)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(R.string.home),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = "${homeValue.roundToInt()}%",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Slider(
-                            value = homeValue,
-                            onValueChange = {
-                                homeValue = it
-                                onPercentageChange(it.roundToInt(), lockValue.roundToInt())
-                            },
-                            valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = Constants.SLIDER_EFFECT_STEPS
-                        )
-                    }
-                } else {
-                    // Single slider (for whichever screen is enabled)
-                    Column(modifier = Modifier.padding(horizontal = AppSpacing.small)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        if (!checked) {
                             Text(
                                 text = stringResource(description),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f),
-                                maxLines = 2,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            Text(
-                                text = "${homeValue.roundToInt()}%",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(start = AppSpacing.medium)
-                            )
                         }
-                        Slider(
-                            value = homeValue,
-                            onValueChange = {
-                                homeValue = it
-                                onPercentageChange(it.roundToInt(), it.roundToInt())
-                            },
-                            valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-                            steps = Constants.SLIDER_EFFECT_STEPS
-                        )
                     }
+                    Switch(
+                        checked = checked,
+                        onCheckedChange = onCheckedChange
+                    )
+                }
+
+                if (checked) {
+                    PercentageSlider(
+                        label = description,
+                        value = homeValue,
+                        onValueChange = {
+                            homeValue = it
+                            onPercentageChange(it.roundToInt(), it.roundToInt())
+                        }
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ScreenEffectControl(
+    @StringRes label: Int,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = AppSpacing.small),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(label),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange
+            )
+        }
+        if (checked) {
+            PercentageSlider(
+                label = label,
+                value = value,
+                onValueChange = onValueChange
+            )
+        }
+    }
+}
+
+@Composable
+private fun PercentageSlider(
+    @StringRes label: Int,
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(label),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${value.roundToInt()}%",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = AppSpacing.medium)
+            )
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..
+                Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
+            steps = Constants.SLIDER_EFFECT_STEPS
+        )
     }
 }

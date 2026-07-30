@@ -4,15 +4,13 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import androidx.hilt.work.HiltWorkerFactory
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.service.worker.AlbumRefreshWorker
 import com.anthonyla.paperize.core.util.DataResetManager
+import com.anthonyla.paperize.service.worker.AlbumRefreshScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -23,13 +21,13 @@ import javax.inject.Inject
  * Implements Configuration.Provider for WorkManager with Hilt support
  */
 @HiltAndroidApp
-class PaperizeApplication : Application(), Configuration.Provider {
+class PaperizeApplication : Application(), Configuration.Provider, DefaultLifecycleObserver {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
 
         // Perform one-time data reset for major version upgrades (e.g., v3 -> v4)
         // Must run before any other initialization that accesses DB/preferences
@@ -38,8 +36,9 @@ class PaperizeApplication : Application(), Configuration.Provider {
         // Create notification channel (minSdk is 31, so always supported)
         createNotificationChannel()
 
-        // Trigger album refresh on app cold start to validate and update all albums
-        refreshAlbumsOnStartup()
+        // Process lifecycle distinguishes real background/foreground transitions from activity
+        // recreation, so folder-backed albums are refreshed whenever the user returns to the app.
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
     override val workManagerConfiguration: Configuration
@@ -61,31 +60,7 @@ class PaperizeApplication : Application(), Configuration.Provider {
         notificationManager.createNotificationChannel(channel)
     }
 
-    /**
-     * Refresh all albums on app startup to validate and update wallpapers/folders
-     *
-     * This runs in the background without blocking app startup and ensures:
-     * - Invalid wallpapers/folders are removed
-     * - New wallpapers are discovered in existing folders
-     * - Album covers are up-to-date
-     */
-    private fun refreshAlbumsOnStartup() {
-        val workManager = WorkManager.getInstance(this)
-
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-            .build()
-
-        val refreshWorkRequest = OneTimeWorkRequestBuilder<AlbumRefreshWorker>()
-            .setConstraints(constraints)
-            .addTag("startup_refresh")
-            .build()
-
-        // Use KEEP policy to avoid duplicate refreshes if app is quickly reopened
-        workManager.enqueueUniqueWork(
-            "album_refresh_on_startup",
-            ExistingWorkPolicy.KEEP,
-            refreshWorkRequest
-        )
+    override fun onStart(owner: LifecycleOwner) {
+        AlbumRefreshScheduler.enqueue(this)
     }
 }

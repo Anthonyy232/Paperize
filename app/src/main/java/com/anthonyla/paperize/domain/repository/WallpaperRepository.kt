@@ -77,6 +77,24 @@ interface WallpaperRepository {
     suspend fun getAndDequeueWallpaper(albumId: String, screenType: ScreenType): Wallpaper?
 
     /**
+     * Remove a specific wallpaper from a screen queue.
+     */
+    suspend fun removeWallpaperFromQueue(
+        albumId: String,
+        screenType: ScreenType,
+        wallpaperId: String
+    )
+
+    /**
+     * Restore a prepared wallpaper to the front when applying it did not succeed.
+     */
+    suspend fun restoreWallpaperToQueueFront(
+        albumId: String,
+        screenType: ScreenType,
+        wallpaperId: String
+    )
+
+    /**
      * Build wallpaper queue for album
      */
     suspend fun buildWallpaperQueue(
