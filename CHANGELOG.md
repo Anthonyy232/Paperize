@@ -12,6 +12,8 @@
   automatic routing to the configured static or live wallpaper engine.
 - Added the missing daily album refresh to live schedules and hardened boot
   recovery so valid jobs are restored without duplicates and stale jobs are removed.
+- Removed two unused legacy serialization and document-file dependencies from
+  the release package.
 - Expanded device coverage for every static effect and verified synchronized,
   independent, manual, live, and reboot scheduling paths.
 
