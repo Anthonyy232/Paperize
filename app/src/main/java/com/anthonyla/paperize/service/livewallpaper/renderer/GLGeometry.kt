@@ -19,6 +19,25 @@ object GLGeometry {
         val horizontalOffset: Float
     )
 
+    data class CrossfadeAlphas(
+        val current: Float,
+        val next: Float
+    )
+
+    /**
+     * Alpha values for source-over crossfading.
+     *
+     * The current layer must stay opaque while the next layer fades over it. Fading
+     * both layers produces a visible brightness dip at the midpoint.
+     */
+    fun calculateCrossfadeAlphas(
+        progress: Float,
+        hasNextPicture: Boolean
+    ): CrossfadeAlphas {
+        val nextAlpha = if (hasNextPicture) progress.coerceIn(0f, 1f) else 0f
+        return CrossfadeAlphas(current = 1f, next = nextAlpha)
+    }
+
     /**
      * Calculate live-wallpaper scale and launcher-scroll offset without OpenGL dependencies.
      */

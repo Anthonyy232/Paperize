@@ -11,6 +11,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.service.livewallpaper.gl.GLWallpaperService
@@ -102,6 +103,8 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
         private lateinit var renderController: PaperizeRenderController
         private val engineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         private var currentAlbumId: String? = null
+        @Volatile private var currentWallpaper: Wallpaper? = null
+        private var observedScalingType: ScalingType? = null
         private var hasShownParallaxWarning = false
 
         private val gestureDetector = GestureDetector(
@@ -214,6 +217,8 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                         return@withContext EmptyImageLoader
                     }
 
+                    currentWallpaper = wallpaper
+
                     // Peek at queue to see if it needs refilling (not dequeuing, just checking)
                     val nextInQueue = wallpaperRepository.getNextWallpaperInQueue(albumId, ScreenType.LIVE)
                     if (nextInQueue == null) {
@@ -285,9 +290,31 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                     val effects = settings.liveEffects
                     val scalingType = settings.liveScalingType
 
+                    val albumChanged = albumId != currentAlbumId
+                    if (albumChanged) {
+                        currentWallpaper = null
+                    }
+
                     renderer.updateEffects(effects)
                     renderer.updateScalingType(scalingType)
                     renderer.updateAdaptiveBrightness(settings.adaptiveBrightness)
+
+                    val scalingChanged =
+                        observedScalingType != null && observedScalingType != scalingType
+                    observedScalingType = scalingType
+
+                    if (scalingChanged && !albumChanged) {
+                        currentWallpaper?.let { wallpaper ->
+                            Log.d(TAG, "Live scaling changed; reloading current wallpaper without advancing")
+                            renderer.queueWallpaper(
+                                ContentUriImageLoader(
+                                    contentResolver,
+                                    wallpaper.uri.toUri(),
+                                    scalingType
+                                )
+                            )
+                        }
+                    }
                     
                     // Show Toast warning if parallax is enabled but device has offset issues
                     if (effects.enableParallax && !hasShownParallaxWarning && GLCompatibility.shouldWarnAboutParallax()) {
@@ -302,7 +329,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                     }
                     
                     // Reload if album changed
-                    if (albumId != currentAlbumId) {
+                    if (albumChanged) {
                         Log.d(TAG, "Album changed from $currentAlbumId to $albumId, reloading")
                         currentAlbumId = albumId
                         renderController.reloadCurrentArtwork()
@@ -318,6 +345,11 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
 
         override fun onVisibilityChanged(visible: Boolean) {
             renderController.visible = visible
+            if (visible) {
+                // Re-evaluate draw-time effects such as adaptive brightness after
+                // configuration changes while the wallpaper was hidden.
+                requestRender()
+            }
             super.onVisibilityChanged(visible)
         }
 

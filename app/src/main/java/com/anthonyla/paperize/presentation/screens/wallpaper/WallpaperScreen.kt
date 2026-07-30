@@ -62,7 +62,7 @@ enum class AlbumSelectionContext {
 @Composable
 fun WallpaperScreen(
     albums: List<AlbumSummary>,
-    scheduleSettings: ScheduleSettings,
+    persistedScheduleSettings: ScheduleSettings,
     appSettings: AppSettings,
     wallpaperMode: WallpaperMode,
     onToggleChanger: (Boolean) -> Unit,
@@ -79,12 +79,21 @@ fun WallpaperScreen(
     var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
     var albumSelectionContext by rememberSaveable { mutableStateOf(AlbumSelectionContext.BOTH) }
     var showEmptyAlbumWarning by rememberSaveable { mutableStateOf(false) }
+    var scheduleSettings by remember { mutableStateOf(persistedScheduleSettings) }
+
+    // Keep an immediate local draft so a slider value waiting for the ViewModel debounce
+    // is included in a switch or other setting changed before that debounce expires.
+    LaunchedEffect(persistedScheduleSettings) {
+        scheduleSettings = persistedScheduleSettings
+    }
 
     fun updateSettingsDebounced(newSettings: ScheduleSettings) {
+        scheduleSettings = newSettings
         onUpdateScheduleSettingsDebounced(newSettings)
     }
 
     fun updateSettingsImmediate(newSettings: ScheduleSettings) {
+        scheduleSettings = newSettings
         onUpdateScheduleSettings(newSettings)
     }
 

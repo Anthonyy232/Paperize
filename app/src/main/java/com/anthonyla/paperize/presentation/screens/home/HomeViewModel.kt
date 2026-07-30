@@ -366,6 +366,12 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateScheduleSettings(settings: ScheduleSettings) {
+        pendingSettingsJob?.cancel()
+        pendingSettingsJob = null
+        applyScheduleSettings(settings)
+    }
+
+    private fun applyScheduleSettings(settings: ScheduleSettings) {
         viewModelScope.launch {
             // Check if settings have changed before validation
             val currentSettings = settingsRepository.getScheduleSettings()
@@ -456,7 +462,8 @@ class HomeViewModel @Inject constructor(
         pendingSettingsJob?.cancel()
         pendingSettingsJob = viewModelScope.launch {
             delay(Constants.SETTINGS_DEBOUNCE_MS)
-            updateScheduleSettings(settings)
+            pendingSettingsJob = null
+            applyScheduleSettings(settings)
         }
     }
 
@@ -512,8 +519,10 @@ class HomeViewModel @Inject constructor(
                     ScreenType.LIVE,
                     settings.liveIntervalMinutes
                 )
+                wallpaperScheduler.scheduleAlbumRefresh()
             } else {
                 wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
+                wallpaperScheduler.cancelAlbumRefresh()
             }
             return
         }

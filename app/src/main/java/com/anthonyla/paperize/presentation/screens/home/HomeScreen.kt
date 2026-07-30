@@ -116,7 +116,7 @@ fun HomeScreen(
                             } else {
                                 WallpaperScreen(
                                     albums = albums,
-                                    scheduleSettings = scheduleSettings,
+                                    persistedScheduleSettings = scheduleSettings,
                                     appSettings = appSettings,
                                     wallpaperMode = wallpaperMode!!,
                                     onToggleChanger = { viewModel.toggleWallpaperChanger(it, onlyIfNotScheduled = true) },
