@@ -1,3 +1,24 @@
+## v4.0.2
+
+- Reloaded the current live wallpaper at native resolution after fold, unfold,
+  surface-size, and scaling changes without advancing the wallpaper queue.
+- Made adaptive brightness update the wallpaper already on screen and removed
+  the brightness dip that could occur halfway through live crossfades.
+- Kept live vignette shading continuous across large images split into multiple
+  GPU texture tiles.
+- Prevented a delayed effect-slider save from overwriting a switch or other
+  setting changed immediately afterward.
+- Restored the launcher app shortcut for gesture apps and other launchers, with
+  automatic routing to the configured static or live wallpaper engine.
+- Added the missing daily album refresh to live schedules and hardened boot
+  recovery so valid jobs are restored without duplicates and stale jobs are removed.
+- Removed two unused legacy serialization and document-file dependencies from
+  the release package.
+- Expanded device coverage for every static effect and verified synchronized,
+  independent, manual, live, and reboot scheduling paths.
+
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v4.0.1...v4.0.2
+
 ## v4.0.1
 
 - Restored native static FILL scrolling so wide wallpapers move between their real

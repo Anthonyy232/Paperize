@@ -58,8 +58,11 @@ class BootReceiver : BroadcastReceiver() {
                                     ScreenType.LIVE,
                                     settings.liveIntervalMinutes
                                 )
+                                wallpaperScheduler.scheduleAlbumRefresh()
                                 Log.d(TAG, "Live wallpaper changes scheduled on boot")
                             } else {
+                                wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
+                                wallpaperScheduler.cancelAlbumRefresh()
                                 Log.d(TAG, "Live mode but no album or interval, not scheduling")
                             }
                         } else {
@@ -105,10 +108,12 @@ class BootReceiver : BroadcastReceiver() {
 
                                 Log.d(TAG, "Wallpaper changes rescheduled successfully")
                             } else {
+                                wallpaperScheduler.cancelAllWallpaperChanges()
                                 Log.d(TAG, "Wallpaper changer enabled but required albums not selected, not scheduling")
                             }
                         }
                     } else {
+                        wallpaperScheduler.cancelAllWallpaperChanges()
                         Log.d(TAG, "Wallpaper changer disabled, not scheduling")
                     }
                 } catch (e: Exception) {

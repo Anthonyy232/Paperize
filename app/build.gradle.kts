@@ -32,8 +32,8 @@ android {
         applicationId = "com.anthonyla.paperize"
         minSdk = 31
         targetSdk = 36
-        versionCode = 52
-        versionName = "4.0.1"
+        versionCode = 53
+        versionName = "4.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -105,7 +105,6 @@ dependencies {
     implementation(libs.androidx.animation)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.gson)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.exifinterface)
     implementation(libs.zoomable)
@@ -133,7 +132,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.dfc)
     implementation (libs.kotlinx.serialization.json)
     implementation(libs.toolbar.compose)
 }

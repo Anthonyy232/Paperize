@@ -20,7 +20,12 @@ import kotlin.math.min
  */
 class GLPicture(
     bitmap: Bitmap,
-    val brightnessFactor: Float = 1.0f
+    /**
+     * Luminance of the unmodified source bitmap. The renderer derives the adaptive
+     * brightness multiplier at draw time so toggling the setting affects the image
+     * that is already on screen.
+     */
+    val sourceBrightness: Float
 ) {
 
     companion object {

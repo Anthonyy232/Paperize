@@ -15,10 +15,15 @@ object GLShaders {
         attribute vec4 a_position;
         attribute vec2 a_texCoord;
         varying vec2 v_texCoord;
+        varying vec2 v_imageCoord;
 
         void main() {
             gl_Position = u_mvpMatrix * a_position;
             v_texCoord = a_texCoord;
+            // a_position spans the complete picture even when its texture is split
+            // into tiles. Keep a global image coordinate so image-wide effects do
+            // not restart at every tile boundary.
+            v_imageCoord = vec2(a_position.x * 0.5 + 0.5, 0.5 - a_position.y * 0.5);
         }
     """
 
@@ -132,6 +137,7 @@ object GLShaders {
         uniform float u_grayscaleFactor;
         uniform float u_adaptiveBrightnessFactor;
         varying vec2 v_texCoord;
+        varying vec2 v_imageCoord;
  
         void main() {
             vec4 color = texture2D(u_texture, v_texCoord);
@@ -142,7 +148,7 @@ object GLShaders {
             // 2. Apply vignette — matches CPU vignetteBitmap gradient stops:
             //    [0% dark at center] → [10% dark at 70% of radius] → [80% dark at edge]
             //    radius is normalized to 0.5 UV (image edge along shorter axis)
-            vec2 vignetteCenter = v_texCoord - 0.5;
+            vec2 vignetteCenter = v_imageCoord - 0.5;
             float dist = length(vignetteCenter);
             float t = clamp(dist / 0.5, 0.0, 1.0);
             // Inner segment: 0% → 10% over [0, 0.7]

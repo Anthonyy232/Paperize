@@ -62,6 +62,39 @@ class GLGeometryTest {
         assertEquals(75f, result.horizontalOffset, 0.001f)
     }
 
+    @Test
+    fun `crossfade keeps current opaque while next fades in`() {
+        val start = GLGeometry.calculateCrossfadeAlphas(0f, hasNextPicture = true)
+        val midpoint = GLGeometry.calculateCrossfadeAlphas(0.5f, hasNextPicture = true)
+        val end = GLGeometry.calculateCrossfadeAlphas(1f, hasNextPicture = true)
+
+        assertEquals(1f, start.current, 0.001f)
+        assertEquals(0f, start.next, 0.001f)
+        assertEquals(1f, midpoint.current, 0.001f)
+        assertEquals(0.5f, midpoint.next, 0.001f)
+        assertEquals(1f, end.current, 0.001f)
+        assertEquals(1f, end.next, 0.001f)
+    }
+
+    @Test
+    fun `crossfade clamps progress and disables next alpha when absent`() {
+        assertEquals(
+            0f,
+            GLGeometry.calculateCrossfadeAlphas(-1f, hasNextPicture = true).next,
+            0.001f
+        )
+        assertEquals(
+            1f,
+            GLGeometry.calculateCrossfadeAlphas(2f, hasNextPicture = true).next,
+            0.001f
+        )
+        assertEquals(
+            0f,
+            GLGeometry.calculateCrossfadeAlphas(0.75f, hasNextPicture = false).next,
+            0.001f
+        )
+    }
+
     private fun transform(
         scalingType: ScalingType,
         offset: Float,
