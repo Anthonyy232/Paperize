@@ -8,6 +8,8 @@
   GPU texture tiles.
 - Prevented a delayed effect-slider save from overwriting a switch or other
   setting changed immediately afterward.
+- Restored the launcher app shortcut for gesture apps and other launchers, with
+  automatic routing to the configured static or live wallpaper engine.
 - Added the missing daily album refresh to live schedules and hardened boot
   recovery so valid jobs are restored without duplicates and stale jobs are removed.
 - Expanded device coverage for every static effect and verified synchronized,

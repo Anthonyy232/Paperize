@@ -15,6 +15,7 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.Result as PaperizeResult
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.setBitmapChecked
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
@@ -71,6 +72,8 @@ class WallpaperChangeService : Service() {
             ?: ScreenType.BOTH
         when (intent?.action) {
             ACTION_CHANGE_WALLPAPER -> handleChangeWallpaper(screenType, startId)
+            ACTION_CHANGE_WALLPAPER_AUTO ->
+                handleChangeWallpaper(screenType, startId, respectWallpaperMode = true)
             ACTION_REAPPLY_EFFECTS -> handleReapplyEffects(screenType, startId)
             else -> {
                 Log.w(TAG, "Unknown action: ${intent?.action}")
@@ -80,11 +83,27 @@ class WallpaperChangeService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun handleChangeWallpaper(screenType: ScreenType, startId: Int) {
+    private fun handleChangeWallpaper(
+        screenType: ScreenType,
+        startId: Int,
+        respectWallpaperMode: Boolean = false
+    ) {
         serviceScope.launch {
             wallpaperChangeLock.mutex.withLock {
                 try {
-                    changeWallpaper(screenType, settingsRepository.getScheduleSettings())
+                    val effectiveScreenType =
+                        if (
+                            respectWallpaperMode &&
+                            settingsRepository.getWallpaperMode() == WallpaperMode.LIVE
+                        ) {
+                            ScreenType.LIVE
+                        } else {
+                            screenType
+                        }
+                    changeWallpaper(
+                        effectiveScreenType,
+                        settingsRepository.getScheduleSettings()
+                    )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error changing wallpaper", e)
                     showErrorNotification(
@@ -401,6 +420,8 @@ class WallpaperChangeService : Service() {
     companion object {
         private const val TAG = "WallpaperChangeService"
         const val ACTION_CHANGE_WALLPAPER = Constants.ACTION_CHANGE_WALLPAPER
+        const val ACTION_CHANGE_WALLPAPER_AUTO =
+            "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER_AUTO"
         const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
         const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
         private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
