@@ -161,6 +161,14 @@ class ScheduleSettingsTest {
     }
 
     @Test
+    fun `hasDisplayChanges returns true when home scrolling changes`() {
+        val settings1 = ScheduleSettings(homeScrollingEnabled = false)
+        val settings2 = ScheduleSettings(homeScrollingEnabled = true)
+
+        assertTrue(settings1.hasDisplayChanges(settings2))
+    }
+
+    @Test
     fun `hasDisplayChanges returns true when homeEffects change`() {
         val settings1 = ScheduleSettings(homeEffects = WallpaperEffects(enableBlur = false))
         val settings2 = ScheduleSettings(homeEffects = WallpaperEffects(enableBlur = true))
@@ -227,6 +235,7 @@ class ScheduleSettingsTest {
         assertFalse(settings.shuffleEnabled)
         assertFalse(settings.homeEnabled)
         assertFalse(settings.lockEnabled)
+        assertFalse(settings.homeScrollingEnabled)
         assertNull(settings.homeAlbumId)
         assertNull(settings.lockAlbumId)
         assertEquals(Constants.DEFAULT_INTERVAL_MINUTES, settings.homeIntervalMinutes)

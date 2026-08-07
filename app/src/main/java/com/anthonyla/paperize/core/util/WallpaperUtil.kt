@@ -131,44 +131,48 @@ object ScreenMetricsCompat {
     fun getScreenSize(context: Context): Size {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val metrics: WindowMetrics = windowManager.currentWindowMetrics
-        val candidates = buildList {
-            add(metrics.bounds.width() to metrics.bounds.height())
+        val currentWindow = metrics.bounds.width() to metrics.bounds.height()
 
-            // Foldables may expose the cover and inner panels as separate internal displays.
-            // Include every supported internal-display mode so a wallpaper changed while folded
-            // is still rendered sharply enough for the larger unfolded panel. External displays
-            // are deliberately excluded so a connected monitor cannot inflate wallpaper memory.
-            val displayManager = context.getSystemService(DisplayManager::class.java)
-            val builtInDisplays = displayManager
-                ?.getDisplays(BUILT_IN_DISPLAY_CATEGORY)
-                .orEmpty()
-            val candidateDisplays = if (builtInDisplays.isNotEmpty()) {
-                // Android 17+ returns all built-in panels, including currently inactive panels.
-                builtInDisplays.asSequence()
-            } else {
-                // Compatibility fallback for releases where the built-in category is unknown.
-                // Exclude presentation and app-owned virtual displays.
-                displayManager?.displays
-                    ?.asSequence()
-                    ?.filter { display ->
-                        display.flags and Display.FLAG_PRESENTATION == 0 &&
-                            display.flags and Display.FLAG_PRIVATE == 0
-                    }
-                    .orEmpty()
-            }
-            candidateDisplays
-                .flatMap { display ->
-                    display.supportedModes.asSequence().map { mode ->
-                        mode.physicalWidth to mode.physicalHeight
-                    }
+        // Display.Mode dimensions are reported in the panel's natural orientation. Prefer them
+        // over currentWindowMetrics so a scheduled change while a landscape game is foregrounded
+        // cannot permanently rotate and over-crop the wallpaper bitmap.
+        val displayManager = context.getSystemService(DisplayManager::class.java)
+        val builtInDisplays = displayManager
+            ?.getDisplays(BUILT_IN_DISPLAY_CATEGORY)
+            .orEmpty()
+        val candidateDisplays = if (builtInDisplays.isNotEmpty()) {
+            // Android 17+ returns all built-in panels, including currently inactive panels.
+            builtInDisplays.asSequence()
+        } else {
+            // Compatibility fallback for releases where the built-in category is unknown.
+            // Exclude presentation and app-owned virtual displays.
+            displayManager?.displays
+                ?.asSequence()
+                ?.filter { display ->
+                    display.flags and Display.FLAG_PRESENTATION == 0 &&
+                        display.flags and Display.FLAG_PRIVATE == 0
                 }
-                .forEach(::add)
+                .orEmpty()
         }
-        val largest = selectLargestDisplayDimensions(candidates)
-        return largest?.let { Size(it.first, it.second) }
-            ?: Size(metrics.bounds.width(), metrics.bounds.height())
+        val supportedModes = candidateDisplays
+            .flatMap { display ->
+                display.supportedModes.asSequence().map { mode ->
+                    mode.physicalWidth to mode.physicalHeight
+                }
+            }
+            .toList()
+        val selected = selectWallpaperDisplayDimensions(currentWindow, supportedModes)
+        return Size(selected.first, selected.second)
     }
 }
+
+/** Prefer stable natural-orientation panel modes, falling back to the current window if needed. */
+internal fun selectWallpaperDisplayDimensions(
+    currentWindow: Pair<Int, Int>,
+    supportedModes: Iterable<Pair<Int, Int>>
+): Pair<Int, Int> = selectLargestDisplayDimensions(supportedModes)
+    ?: currentWindow.takeIf { (width, height) -> width > 0 && height > 0 }
+    ?: (1 to 1)
 
 /**
  * Select the highest-resolution display dimensions.
@@ -188,58 +192,23 @@ internal fun selectLargestDisplayDimensions(
     )
 
 /**
- * Get device screen size with orientation
+ * Get the stable natural-orientation size of the largest built-in display panel.
  */
-fun getDeviceScreenSize(context: Context): Size {
-    val orientation = context.resources.configuration.orientation
-    val size = ScreenMetricsCompat.getScreenSize(context)
-    return if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Size(minOf(size.width, size.height), maxOf(size.width, size.height))
-    } else {
-        Size(maxOf(size.width, size.height), minOf(size.width, size.height))
-    }
-}
+fun getDeviceScreenSize(context: Context): Size = ScreenMetricsCompat.getScreenSize(context)
 
 /**
  * Get the target render size for a wallpaper bitmap.
  *
- * For FIT/STRETCH/NONE on HOME (and BOTH), the launcher may request a wider canvas than the
- * physical screen to support horizontal scrolling across multiple pages. Rendering those modes
- * to the exact desired canvas prevents WallpaperManager from rescaling them into FILL.
- *
- * FILL deliberately uses one physical screen as its minimum viewport and keeps source overflow.
- * That restores Android's native static-wallpaper behavior: the launcher can traverse a wide
- * image, but cannot manufacture scroll area beyond the image's real edge.
- *
- * LOCK screen wallpapers are not parallax-scrolled, so the physical screen size is correct.
- * LIVE wallpapers are rendered by GLRenderer directly; they do not go through this path.
+ * Every static scaling mode is rendered against one physical panel. A launcher's desired
+ * wallpaper canvas may be much wider than the display; using it for FIT/NONE creates black-only
+ * viewports and using it for STRETCH distorts the image. Optional FILL scrolling retains real
+ * source overflow after decoding instead of inflating the target canvas.
  */
 fun getWallpaperRenderSize(
     context: Context,
     screenType: com.anthonyla.paperize.core.ScreenType,
     scaling: ScalingType = ScalingType.FIT
-): Size {
-    val screen = getDeviceScreenSize(context)
-    return when (screenType) {
-        com.anthonyla.paperize.core.ScreenType.HOME,
-        com.anthonyla.paperize.core.ScreenType.BOTH -> {
-            if (usesLauncherManagedScrolling(screenType, scaling)) {
-                return screen
-            }
-            val wm = WallpaperManager.getInstance(context)
-            val desiredW = wm.desiredMinimumWidth
-            val desiredH = wm.desiredMinimumHeight
-            // desiredMinimumWidth/Height return 0 when the launcher hasn't set a preference yet.
-            // Never render below the largest internal panel's resolution on a foldable.
-            if (desiredW > 0 && desiredH > 0) {
-                Size(maxOf(desiredW, screen.width), maxOf(desiredH, screen.height))
-            } else {
-                screen
-            }
-        }
-        else -> screen
-    }
-}
+): Size = getDeviceScreenSize(context)
 
 /**
  * Whether a static wallpaper should retain source overflow for launcher-managed scrolling.
@@ -248,9 +217,11 @@ fun getWallpaperRenderSize(
  */
 internal fun usesLauncherManagedScrolling(
     screenType: com.anthonyla.paperize.core.ScreenType,
-    scaling: ScalingType
+    scaling: ScalingType,
+    scrollingEnabled: Boolean
 ): Boolean =
-    (screenType == com.anthonyla.paperize.core.ScreenType.HOME ||
+    scrollingEnabled &&
+        (screenType == com.anthonyla.paperize.core.ScreenType.HOME ||
         screenType == com.anthonyla.paperize.core.ScreenType.BOTH) &&
         scaling == ScalingType.FILL
 

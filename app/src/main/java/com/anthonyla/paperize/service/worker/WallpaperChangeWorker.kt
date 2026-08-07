@@ -112,7 +112,8 @@ class WallpaperChangeWorker @AssistedInject constructor(
                 val prepared = result.data
                 val samePresentation =
                     settings.homeEffects == settings.lockEffects &&
-                        settings.homeScalingType == settings.lockScalingType
+                        settings.homeScalingType == settings.lockScalingType &&
+                        !settings.homeScrollingEnabled
 
                 if (samePresentation) {
                     applyPrepared(
