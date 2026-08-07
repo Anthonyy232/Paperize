@@ -117,37 +117,6 @@ fun WallpaperScreen(
         }
     }
 
-    // Auto-toggle wallpaper changer based on album selection state
-    // Use IDs as source of truth - if ID is set, we trust it's valid
-    // The ID will only be cleared when user explicitly deselects, not due to loading race conditions
-    LaunchedEffect(scheduleSettings.homeAlbumId, scheduleSettings.lockAlbumId, scheduleSettings.liveAlbumId, homeEnabled, lockEnabled, wallpaperMode) {
-        val allRequiredAlbumsSet = if (wallpaperMode == WallpaperMode.STATIC) {
-            when {
-                homeEnabled && lockEnabled -> {
-                    // Both are enabled, require both album IDs to be set
-                    scheduleSettings.homeAlbumId != null && scheduleSettings.lockAlbumId != null
-                }
-                homeEnabled -> {
-                    // Only home is enabled, require home album ID to be set
-                    scheduleSettings.homeAlbumId != null
-                }
-                lockEnabled -> {
-                    // Only lock is enabled, require lock album ID to be set
-                    scheduleSettings.lockAlbumId != null
-                }
-                else -> false // Neither enabled, should be disabled
-            }
-        } else {
-            // Live mode: require live album ID to be set
-            scheduleSettings.liveAlbumId != null
-        }
-
-        // Only update if current state doesn't match desired state (prevents redundant calls)
-        if (allRequiredAlbumsSet != scheduleSettings.enableChanger) {
-            onToggleChanger(allRequiredAlbumsSet)
-        }
-    }
-
     val scalingOptions = listOf(
         stringResource(R.string.fill),
         stringResource(R.string.fit),
@@ -505,6 +474,27 @@ fun WallpaperScreen(
             scheduleSettings.liveAlbumId != null
         }
 
+        val allRequiredAlbumsSelected = if (wallpaperMode == WallpaperMode.STATIC) {
+            when {
+                homeEnabled && lockEnabled ->
+                    scheduleSettings.homeAlbumId != null && scheduleSettings.lockAlbumId != null
+                homeEnabled -> scheduleSettings.homeAlbumId != null
+                lockEnabled -> scheduleSettings.lockAlbumId != null
+                else -> false
+            }
+        } else {
+            scheduleSettings.liveAlbumId != null
+        }
+
+        if (allRequiredAlbumsSelected) {
+            SettingSwitchItem(
+                title = stringResource(R.string.wallpaper_changer),
+                description = stringResource(R.string.wallpaper_changer_description),
+                checked = scheduleSettings.enableChanger,
+                onCheckedChange = onToggleChanger
+            )
+        }
+
         // Time interval pickers (only show if album is selected)
         if (hasAlbumSelected) {
             if (wallpaperMode == WallpaperMode.STATIC) {
@@ -564,6 +554,19 @@ fun WallpaperScreen(
         HorizontalDivider(modifier = Modifier.padding(vertical = AppSpacing.small))
 
         // Current Wallpaper Preview (Static Mode Only)
+        if (wallpaperMode == WallpaperMode.STATIC) {
+            SettingSwitchItem(
+                title = stringResource(R.string.horizontal_wallpaper_scrolling),
+                description = stringResource(R.string.horizontal_wallpaper_scrolling_description),
+                checked = scheduleSettings.homeScrollingEnabled,
+                onCheckedChange = { enabled ->
+                    updateSettingsImmediate(
+                        scheduleSettings.copy(homeScrollingEnabled = enabled)
+                    )
+                }
+            )
+        }
+
         if (wallpaperMode == WallpaperMode.STATIC) {
             CurrentWallpaperPreview(
                 homeWallpaperUri = homeWallpaperUri,
@@ -643,7 +646,7 @@ fun WallpaperScreen(
             }
         }
 
-        if (scheduleSettings.enableChanger) {
+        if (hasAlbumSelected) {
             Button(
                 onClick = onChangeWallpaperNow,
                 modifier = Modifier

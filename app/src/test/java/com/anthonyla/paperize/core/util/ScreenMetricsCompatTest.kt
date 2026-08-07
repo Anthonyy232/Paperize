@@ -48,16 +48,37 @@ class ScreenMetricsCompatTest {
     }
 
     @Test
-    fun `home fill preserves overflow for launcher scrolling`() {
-        assertTrue(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL))
-        assertTrue(usesLauncherManagedScrolling(ScreenType.BOTH, ScalingType.FILL))
+    fun `natural display mode wins while current window is landscape`() {
+        val result = selectWallpaperDisplayDimensions(
+            currentWindow = 2400 to 1080,
+            supportedModes = listOf(1080 to 2400)
+        )
+
+        assertEquals(1080 to 2400, result)
+    }
+
+    @Test
+    fun `current window is used when display modes are unavailable`() {
+        val result = selectWallpaperDisplayDimensions(
+            currentWindow = 1920 to 1080,
+            supportedModes = emptyList()
+        )
+
+        assertEquals(1920 to 1080, result)
+    }
+
+    @Test
+    fun `home fill preserves overflow only when scrolling is enabled`() {
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL, false))
+        assertTrue(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL, true))
+        assertTrue(usesLauncherManagedScrolling(ScreenType.BOTH, ScalingType.FILL, true))
     }
 
     @Test
     fun `non-fill and lock rendering use exact canvas`() {
-        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FIT))
-        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.STRETCH))
-        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.NONE))
-        assertFalse(usesLauncherManagedScrolling(ScreenType.LOCK, ScalingType.FILL))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FIT, true))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.STRETCH, true))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.NONE, true))
+        assertFalse(usesLauncherManagedScrolling(ScreenType.LOCK, ScalingType.FILL, true))
     }
 }

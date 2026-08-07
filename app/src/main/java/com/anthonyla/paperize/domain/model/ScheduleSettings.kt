@@ -19,6 +19,7 @@ data class ScheduleSettings(
     val liveIntervalMinutes: Int = Constants.DEFAULT_INTERVAL_MINUTES,
     val homeScalingType: ScalingType = ScalingType.FILL,
     val lockScalingType: ScalingType = ScalingType.FILL,
+    val homeScrollingEnabled: Boolean = false,
     val homeEffects: WallpaperEffects = WallpaperEffects.none(),
     val lockEffects: WallpaperEffects = WallpaperEffects.none(),
     val liveAlbumId: String? = null,
@@ -67,6 +68,7 @@ data class ScheduleSettings(
     fun hasDisplayChanges(other: ScheduleSettings): Boolean {
         return homeScalingType != other.homeScalingType ||
                lockScalingType != other.lockScalingType ||
+               homeScrollingEnabled != other.homeScrollingEnabled ||
                homeEffects != other.homeEffects ||
                lockEffects != other.lockEffects ||
                liveEffects != other.liveEffects ||

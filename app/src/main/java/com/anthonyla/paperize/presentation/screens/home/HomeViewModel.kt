@@ -300,9 +300,6 @@ class HomeViewModel @Inject constructor(
             } else if (updated.enableChanger) {
                 // Album selected and changer is enabled - schedule alarms
                 scheduleAlarms(updated)
-            } else {
-                // Album selected but changer is not enabled - enable it
-                toggleWallpaperChanger(true)
             }
         }
     }

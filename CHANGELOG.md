@@ -1,3 +1,19 @@
+## v4.0.3
+
+- Kept scheduled static changes in the device's natural orientation, even when a
+  landscape game or app is in the foreground.
+- Rendered FIT, FILL, STRETCH, and NONE against one physical display panel to fix
+  black canvases, excessive stretching, zoom, and inconsistent home/lock alignment.
+- Restored centered static FILL behavior by default and added an explicit horizontal
+  scrolling option for users who want wide wallpapers to move across home pages.
+- Added a persistent pause/resume control that keeps selected albums intact, while
+  leaving manual static and live wallpaper changes available when paused.
+- Removed the unnecessary network-state permission and unused network image loader.
+- Updated Hilt and the coroutine test library and expanded rotation, scaling,
+  scrolling, pause/resume, static-effect, live-renderer, and scheduler verification.
+
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v4.0.2...v4.0.3
+
 ## v4.0.2
 
 - Reloaded the current live wallpaper at native resolution after fold, unfold,

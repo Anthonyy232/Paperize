@@ -118,6 +118,10 @@
 
   <!-- UI Labels and Status -->
   <string name="enabled">Enabled</string>
+  <string name="wallpaper_changer">Wallpaper changing</string>
+  <string name="wallpaper_changer_description">Pause or resume scheduled changes without clearing your albums.</string>
+  <string name="horizontal_wallpaper_scrolling">Horizontal scrolling</string>
+  <string name="horizontal_wallpaper_scrolling_description">Allow wide Fill wallpapers to move between home-screen pages. Lock-screen wallpapers remain centered.</string>
   <string name="disabled">Disabled</string>
   <string name="lock_album_label">Lock Album</string>
   <string name="home_album_label">Home Album</string>

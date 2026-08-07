@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
+import android.content.res.Configuration
 import androidx.exifinterface.media.ExifInterface
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -85,6 +86,27 @@ class WallpaperUtilInstrumentedTest {
     }
 
     @Test
+    fun everyStaticScalingModeProducesOneExactScreenCanvas() {
+        val image = createJpeg(width = 160, height = 90)
+
+        ScalingType.entries.forEach { scaling ->
+            val result = retrieveBitmap(
+                context = context,
+                wallpaperUri = Uri.fromFile(image),
+                width = 120,
+                height = 200,
+                scaling = scaling,
+                preserveSourceOverflow = false
+            )
+
+            assertNotNull("Expected a bitmap for $scaling", result)
+            assertEquals("Unexpected width for $scaling", 120, result?.width)
+            assertEquals("Unexpected height for $scaling", 200, result?.height)
+            result?.recycle()
+        }
+    }
+
+    @Test
     fun android17FoldableSizingIncludesInactiveBuiltInPanel() {
         assumeTrue(Build.VERSION.SDK_INT >= 37)
         val displayManager = context.getSystemService(DisplayManager::class.java)
@@ -105,6 +127,19 @@ class WallpaperUtilInstrumentedTest {
         assertNotNull(expected)
         assertEquals(expected?.first, actual.width)
         assertEquals(expected?.second, actual.height)
+    }
+
+    @Test
+    fun staticRenderSizeDoesNotRotateWithForegroundAppConfiguration() {
+        val landscapeConfiguration = Configuration(context.resources.configuration).apply {
+            orientation = Configuration.ORIENTATION_LANDSCAPE
+        }
+        val landscapeContext = context.createConfigurationContext(landscapeConfiguration)
+        val naturalPanel = ScreenMetricsCompat.getScreenSize(context)
+        val renderSize = getDeviceScreenSize(landscapeContext)
+
+        assertEquals(naturalPanel.width, renderSize.width)
+        assertEquals(naturalPanel.height, renderSize.height)
     }
 
     @Test

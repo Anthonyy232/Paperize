@@ -54,7 +54,11 @@ class ReapplyEffectsUseCase @Inject constructor(
                 ScreenType.HOME, ScreenType.BOTH -> settings.homeScalingType
                 ScreenType.LOCK -> settings.lockScalingType
             }
-            val preserveSourceOverflow = usesLauncherManagedScrolling(screenType, scaling)
+            val preserveSourceOverflow = usesLauncherManagedScrolling(
+                screenType,
+                scaling,
+                settings.homeScrollingEnabled
+            )
             val screenSize = getWallpaperRenderSize(context, screenType, scaling)
 
             val uri = current.uri.toUri()
