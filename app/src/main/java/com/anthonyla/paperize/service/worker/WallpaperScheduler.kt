@@ -10,7 +10,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.first
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.domain.model.ScheduleSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,7 +54,8 @@ class WallpaperScheduler @Inject constructor(
         screenType: ScreenType,
         intervalMinutes: Int,
         networkRequired: Boolean = false,
-        requireCharging: Boolean = false
+        requireCharging: Boolean = false,
+        resetInterval: Boolean = false
     ) {
 
         val adjustedInterval = intervalMinutes.toLong().coerceAtLeast(Constants.MIN_INTERVAL_MINUTES.toLong())
@@ -81,15 +84,39 @@ class WallpaperScheduler @Inject constructor(
             .addTag(getWorkTag(screenType))
             .build()
 
-        // Enqueue work with UPDATE policy to update existing work without triggering immediate run
-        // Only runs immediately on first setup when no existing work exists
+        // UPDATE preserves the existing period for settings edits. A successful manual change uses
+        // CANCEL_AND_REENQUEUE so the next automatic change waits for one complete interval.
         workManager.enqueueUniquePeriodicWork(
             workName,
-            ExistingPeriodicWorkPolicy.UPDATE,
+            if (resetInterval) {
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
+            } else {
+                ExistingPeriodicWorkPolicy.UPDATE
+            },
             workRequest
         )
 
         Log.d(TAG, "Scheduled $screenType wallpaper change every $adjustedInterval minutes")
+    }
+
+    /** Reset only the automatic schedules affected by a successful manual change. */
+    fun resetAfterManualChange(
+        screenType: ScreenType,
+        settings: ScheduleSettings,
+        wallpaperMode: WallpaperMode
+    ) {
+        scheduledScreensToReset(screenType, settings, wallpaperMode).forEach { scheduledScreen ->
+            val interval = when (scheduledScreen) {
+                ScreenType.HOME, ScreenType.BOTH -> settings.homeIntervalMinutes
+                ScreenType.LOCK -> settings.lockIntervalMinutes
+                ScreenType.LIVE -> settings.liveIntervalMinutes
+            }
+            scheduleWallpaperChange(
+                screenType = scheduledScreen,
+                intervalMinutes = interval,
+                resetInterval = true
+            )
+        }
     }
 
     /**
@@ -323,6 +350,46 @@ class WallpaperScheduler @Inject constructor(
         return workInfos.any { workInfo ->
             workInfo.state == androidx.work.WorkInfo.State.ENQUEUED ||
             workInfo.state == androidx.work.WorkInfo.State.RUNNING
+        }
+    }
+}
+
+/** Pure scheduling policy shared with tests. */
+internal fun scheduledScreensToReset(
+    manualScreen: ScreenType,
+    settings: ScheduleSettings,
+    wallpaperMode: WallpaperMode
+): Set<ScreenType> {
+    if (!settings.enableChanger) return emptySet()
+
+    if (wallpaperMode == WallpaperMode.LIVE) {
+        return if (
+            manualScreen == ScreenType.LIVE &&
+            settings.liveAlbumId != null &&
+            settings.liveIntervalMinutes >= Constants.MIN_INTERVAL_MINUTES
+        ) {
+            setOf(ScreenType.LIVE)
+        } else {
+            emptySet()
+        }
+    }
+
+    if (manualScreen == ScreenType.LIVE) return emptySet()
+
+    val homeActive = settings.homeEnabled && settings.homeAlbumId != null
+    val lockActive = settings.lockEnabled && settings.lockAlbumId != null
+    val synchronized = homeActive && lockActive &&
+        settings.homeAlbumId == settings.lockAlbumId &&
+        !settings.separateSchedules
+
+    if (synchronized) return setOf(ScreenType.BOTH)
+
+    return buildSet {
+        if ((manualScreen == ScreenType.HOME || manualScreen == ScreenType.BOTH) && homeActive) {
+            add(ScreenType.HOME)
+        }
+        if ((manualScreen == ScreenType.LOCK || manualScreen == ScreenType.BOTH) && lockActive) {
+            add(ScreenType.LOCK)
         }
     }
 }

@@ -48,7 +48,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 fun AlbumViewScreen(
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
-    onNavigateToWallpaperView: (String, String) -> Unit,
+    onNavigateToWallpaperView: (String, String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AlbumViewViewModel = hiltViewModel()
 ) {
@@ -221,7 +221,11 @@ fun AlbumViewScreen(
                         if (isSelectionMode) {
                             viewModel.toggleWallpaperSelection(wallpaper.id)
                         } else {
-                            onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName)
+                            onNavigateToWallpaperView(
+                                wallpaper.id,
+                                wallpaper.uri,
+                                wallpaper.fileName
+                            )
                         }
                     },
                     onLongClick = {

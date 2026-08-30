@@ -26,7 +26,7 @@ class ScheduleSettingsTest {
         
         assertEquals(Constants.MIN_INTERVAL_MINUTES, validated.homeIntervalMinutes)
         assertEquals(Constants.MIN_INTERVAL_MINUTES, validated.lockIntervalMinutes)
-        assertEquals(Constants.MIN_INTERVAL_MINUTES, validated.liveIntervalMinutes)
+        assertEquals(Constants.MIN_LIVE_INTERVAL_MINUTES, validated.liveIntervalMinutes)
     }
 
     @Test
@@ -42,6 +42,15 @@ class ScheduleSettingsTest {
         assertEquals(60, validated.homeIntervalMinutes)
         assertEquals(120, validated.lockIntervalMinutes)
         assertEquals(30, validated.liveIntervalMinutes)
+    }
+
+    @Test
+    fun `visible live timer is used only below WorkManager minimum`() {
+        assertFalse(usesVisibleLiveTimer(0))
+        assertTrue(usesVisibleLiveTimer(1))
+        assertTrue(usesVisibleLiveTimer(14))
+        assertFalse(usesVisibleLiveTimer(15))
+        assertFalse(usesVisibleLiveTimer(60))
     }
 
     @Test

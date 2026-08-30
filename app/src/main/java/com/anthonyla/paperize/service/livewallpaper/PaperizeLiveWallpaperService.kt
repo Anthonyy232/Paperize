@@ -12,6 +12,9 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.service.livewallpaper.gl.GLWallpaperService
@@ -27,11 +30,14 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -106,6 +112,10 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
         @Volatile private var currentWallpaper: Wallpaper? = null
         private var observedScalingType: ScalingType? = null
         private var hasShownParallaxWarning = false
+        private var engineVisible = false
+        private var latestSettings = ScheduleSettings.default()
+        private var latestWallpaperMode = WallpaperMode.STATIC
+        private var liveIntervalJob: Job? = null
 
         private val gestureDetector = GestureDetector(
             this@PaperizeLiveWallpaperService,
@@ -122,6 +132,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                 if (intent?.action == Constants.ACTION_RELOAD_WALLPAPER) {
                     Log.d(TAG, "Received reload broadcast")
                     renderController.reloadCurrentArtwork(com.anthonyla.paperize.service.livewallpaper.renderer.ReloadImmediate)
+                    restartLiveIntervalTimer()
                 }
             }
         }
@@ -280,6 +291,15 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                 }.catch { e ->
                     Log.e(TAG, "Error observing settings", e)
                 }.collect { (settings, mode) ->
+                    val timerConfigurationChanged =
+                        latestWallpaperMode != mode ||
+                            latestSettings.enableChanger != settings.enableChanger ||
+                            latestSettings.liveAlbumId != settings.liveAlbumId ||
+                            latestSettings.liveIntervalMinutes != settings.liveIntervalMinutes
+                    latestSettings = settings
+                    latestWallpaperMode = mode
+                    if (timerConfigurationChanged) restartLiveIntervalTimer()
+
                     // Only process settings in LIVE mode
                     // In STATIC mode, the static wallpaper worker handles HOME/LOCK screens
                     if (mode != com.anthonyla.paperize.core.WallpaperMode.LIVE) {
@@ -344,12 +364,14 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
+            engineVisible = visible
             renderController.visible = visible
             if (visible) {
                 // Re-evaluate draw-time effects such as adaptive brightness after
                 // configuration changes while the wallpaper was hidden.
                 requestRender()
             }
+            restartLiveIntervalTimer()
             super.onVisibilityChanged(visible)
         }
 
@@ -412,6 +434,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
 
                 if (doubleTapEnabled) {
                     renderController.reloadCurrentArtwork(com.anthonyla.paperize.service.livewallpaper.renderer.ReloadImmediate)
+                    restartLiveIntervalTimer()
                 }
             }
         }
@@ -423,6 +446,32 @@ class PaperizeLiveWallpaperService : GLWallpaperService(), LifecycleOwner {
                     Log.d(TAG, "Screen off - changing wallpaper")
                     // Use forceReload to bypass visibility check and load while screen is off
                     renderController.forceReloadCurrentArtwork()
+                }
+            }
+        }
+
+        private fun restartLiveIntervalTimer() {
+            liveIntervalJob?.cancel()
+            liveIntervalJob = null
+
+            val intervalMinutes = latestSettings.liveIntervalMinutes
+            val shouldRun =
+                engineVisible &&
+                    !isPreview &&
+                    latestWallpaperMode == WallpaperMode.LIVE &&
+                    latestSettings.enableChanger &&
+                    latestSettings.liveAlbumId != null &&
+                    usesVisibleLiveTimer(intervalMinutes)
+            if (!shouldRun) return
+
+            liveIntervalJob = engineScope.launch {
+                val intervalMillis = intervalMinutes.toLong() * 60_000L
+                while (isActive) {
+                    delay(intervalMillis)
+                    Log.d(TAG, "Visible live interval elapsed; changing wallpaper")
+                    renderController.reloadCurrentArtwork(
+                        com.anthonyla.paperize.service.livewallpaper.renderer.ReloadImmediate
+                    )
                 }
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +40,8 @@ fun TimeIntervalPicker(
     title: String,
     minutes: Int,
     onMinutesChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES
 ) {
     // Decompose incoming minutes value into days, hours, minutes
     val initialDays = minutes / Constants.MINUTES_PER_DAY
@@ -57,7 +59,7 @@ fun TimeIntervalPicker(
     var minuteInput by remember(minutes) { mutableStateOf(initialMins.toString()) }
 
     // Debounce state - tracks when user last made a change; reset when external `minutes` prop changes
-    var lastChangeTimestamp by remember(minutes) { mutableStateOf(0L) }
+    var lastChangeTimestamp by remember(minutes) { mutableLongStateOf(0L) }
 
     // Debounced update - only fires after user stops typing
     LaunchedEffect(dayValue, hourValue, minuteValue, lastChangeTimestamp) {
@@ -65,7 +67,7 @@ fun TimeIntervalPicker(
             delay(Constants.DEBOUNCE_DELAY_MS)
             val total = (dayValue * Constants.MINUTES_PER_DAY) + (hourValue * Constants.MINUTES_PER_HOUR) + minuteValue
             // Clamp between minimum and maximum interval
-            val clamped = min(max(total, Constants.MIN_INTERVAL_MINUTES), Constants.MAX_INTERVAL_MINUTES)
+            val clamped = min(max(total, minimumMinutes), Constants.MAX_INTERVAL_MINUTES)
             onMinutesChange(clamped)
         }
     }

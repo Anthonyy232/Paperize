@@ -542,11 +542,18 @@ fun WallpaperScreen(
                 TimeIntervalPicker(
                     title = stringResource(R.string.interval_text),
                     minutes = scheduleSettings.liveIntervalMinutes,
+                    minimumMinutes = Constants.MIN_LIVE_INTERVAL_MINUTES,
                     onMinutesChange = { minutes ->
                         onUpdateScheduleSettings(
                             scheduleSettings.copy(liveIntervalMinutes = minutes)
                         )
                     }
+                )
+                Text(
+                    text = stringResource(R.string.live_short_interval_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = AppSpacing.large)
                 )
             }
         }

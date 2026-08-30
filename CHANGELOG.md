@@ -1,3 +1,19 @@
+## v4.1.0
+
+- Added a Set wallpaper action to image previews, with separate home, lock, and
+  combined home-and-lock targets that preserve each screen's scaling and effects.
+- Reset the affected automatic countdown after a successful manual change from
+  Paperize, its launcher shortcut, or its Quick Settings tile.
+- Added live-wallpaper intervals as short as one minute while the wallpaper is
+  visible, with lifecycle-aware pausing and timer resets after manual changes.
+- Replaced the undersized status-bar asset with a dedicated notification icon.
+- Updated Paperize for the Android 17 SDK and refreshed Kotlin, Gradle, Compose,
+  AndroidX, Material, Coil, Zoomable, and GitHub Actions dependencies.
+- Expanded emulator coverage for Android wallpaper colors, every static and live
+  visual effect, OpenGL shaders, scheduling policy, and foldable display sizing.
+
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v4.0.3...v4.1.0
+
 ## v4.0.3
 
 - Kept scheduled static changes in the device's natural orientation, even when a

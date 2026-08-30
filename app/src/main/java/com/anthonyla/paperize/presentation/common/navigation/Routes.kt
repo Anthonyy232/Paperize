@@ -25,7 +25,11 @@ data class AlbumRoute(val albumId: String)
 data class FolderRoute(val folderId: String)
 
 @Serializable
-data class WallpaperViewRoute(val wallpaperUri: String, val wallpaperName: String)
+data class WallpaperViewRoute(
+    val wallpaperId: String,
+    val wallpaperUri: String,
+    val wallpaperName: String
+)
 
 @Serializable
 data class SortRoute(val albumId: String)

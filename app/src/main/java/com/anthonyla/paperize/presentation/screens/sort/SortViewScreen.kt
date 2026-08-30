@@ -332,7 +332,7 @@ fun SortViewScreen(
                                                     .clip(AppShapes.imageShape)
                                             )
                                         },
-                                        headlineContent = {
+                                        content = {
                                             Text(
                                                 text = currentFolder.name,
                                                 maxLines = 2,

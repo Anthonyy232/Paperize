@@ -181,12 +181,25 @@ class ChangeWallpaperUseCase @Inject constructor(
     suspend fun complete(
         prepared: PreparedWallpaper,
         screenType: ScreenType = prepared.screenType
+    ) = completeSpecific(
+        albumId = prepared.albumId,
+        screenType = screenType,
+        wallpaperId = prepared.wallpaperId,
+        shuffle = prepared.shuffle
+    )
+
+    /** Record a user-selected wallpaper and remove that exact item from the next-change queue. */
+    suspend fun completeSpecific(
+        albumId: String,
+        screenType: ScreenType,
+        wallpaperId: String,
+        shuffle: Boolean
     ) {
         try {
             wallpaperRepository.setCurrentWallpaper(
-                prepared.albumId,
+                albumId,
                 screenType,
-                prepared.wallpaperId
+                wallpaperId
             )
         } catch (e: Exception) {
             Log.e(TAG, "Applied wallpaper could not be recorded as current", e)
@@ -194,20 +207,20 @@ class ChangeWallpaperUseCase @Inject constructor(
         }
 
         try {
-            if (wallpaperRepository.getNextWallpaperInQueue(prepared.albumId, screenType) == null) {
+            if (wallpaperRepository.getNextWallpaperInQueue(albumId, screenType) == null) {
                 wallpaperRepository.buildWallpaperQueue(
-                    prepared.albumId,
+                    albumId,
                     screenType,
-                    prepared.shuffle
+                    shuffle
                 )
             }
             // Build first when this is the first synchronized use of a screen queue, then remove
             // the exact applied item. This prevents the just-applied wallpaper from being
             // reintroduced at the head of a freshly built queue.
             wallpaperRepository.removeWallpaperFromQueue(
-                prepared.albumId,
+                albumId,
                 screenType,
-                prepared.wallpaperId
+                wallpaperId
             )
         } catch (e: Exception) {
             Log.w(TAG, "Queue sync failed; it will rebuild on the next change", e)

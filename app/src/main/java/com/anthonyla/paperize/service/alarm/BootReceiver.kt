@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,10 +55,14 @@ class BootReceiver : BroadcastReceiver() {
                         if (wallpaperMode == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
                             // LIVE mode: schedule live wallpaper changes
                             if (settings.liveAlbumId != null && settings.liveIntervalMinutes > 0) {
-                                wallpaperScheduler.scheduleWallpaperChange(
-                                    ScreenType.LIVE,
-                                    settings.liveIntervalMinutes
-                                )
+                                if (settings.liveIntervalMinutes >= Constants.MIN_INTERVAL_MINUTES) {
+                                    wallpaperScheduler.scheduleWallpaperChange(
+                                        ScreenType.LIVE,
+                                        settings.liveIntervalMinutes
+                                    )
+                                } else {
+                                    wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
+                                }
                                 wallpaperScheduler.scheduleAlbumRefresh()
                                 Log.d(TAG, "Live wallpaper changes scheduled on boot")
                             } else {
