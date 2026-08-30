@@ -33,7 +33,7 @@ data class ScheduleSettings(
     fun validate(): ScheduleSettings = copy(
         homeIntervalMinutes = homeIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
         lockIntervalMinutes = lockIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
-        liveIntervalMinutes = liveIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
+        liveIntervalMinutes = liveIntervalMinutes.coerceAtLeast(Constants.MIN_LIVE_INTERVAL_MINUTES),
         homeEffects = homeEffects.validate(),
         lockEffects = lockEffects.validate(),
         liveEffects = liveEffects.validate()
@@ -80,3 +80,10 @@ data class ScheduleSettings(
         fun default() = ScheduleSettings()
     }
 }
+
+/**
+ * WorkManager cannot run periodic jobs more often than every 15 minutes. Short live-wallpaper
+ * intervals are therefore driven by the visible wallpaper engine and stop when it is hidden.
+ */
+fun usesVisibleLiveTimer(intervalMinutes: Int): Boolean =
+    intervalMinutes in Constants.MIN_LIVE_INTERVAL_MINUTES until Constants.MIN_INTERVAL_MINUTES

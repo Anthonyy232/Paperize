@@ -69,6 +69,25 @@ class ChangeWallpaperUseCaseTest {
         }
     }
 
+    @Test
+    fun `complete specific records selected item and respects shuffle`() = runTest {
+        coEvery {
+            repository.getNextWallpaperInQueue("album", ScreenType.HOME)
+        } returns null
+        coEvery {
+            repository.buildWallpaperQueue("album", ScreenType.HOME, true)
+        } returns Result.Success(Unit)
+
+        useCase.completeSpecific("album", ScreenType.HOME, "selected", shuffle = true)
+
+        coVerifyOrder {
+            repository.setCurrentWallpaper("album", ScreenType.HOME, "selected")
+            repository.getNextWallpaperInQueue("album", ScreenType.HOME)
+            repository.buildWallpaperQueue("album", ScreenType.HOME, true)
+            repository.removeWallpaperFromQueue("album", ScreenType.HOME, "selected")
+        }
+    }
+
     private fun preparedWallpaper() = PreparedWallpaper(
         bitmap = mockk<Bitmap>(relaxed = true),
         albumId = "album",

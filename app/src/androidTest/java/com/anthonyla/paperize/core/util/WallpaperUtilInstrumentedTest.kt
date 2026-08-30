@@ -1,11 +1,13 @@
 package com.anthonyla.paperize.core.util
 
+import android.app.WallpaperManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
-import android.content.res.Configuration
+import android.os.SystemClock
 import androidx.exifinterface.media.ExifInterface
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -223,6 +225,55 @@ class WallpaperUtilInstrumentedTest {
         assertTrue("Expected blurred boundary, got $boundary", boundary in 2..253)
         if (result !== source) source.recycle()
         result.recycle()
+    }
+
+    @Test
+    fun staticWallpaperChangesRefreshAospWallpaperColors() {
+        assumeTrue(
+            "Wallpaper color extraction test is destructive and must run only on an emulator",
+            Build.FINGERPRINT.contains("/emu") ||
+                Build.FINGERPRINT.contains("generic") ||
+                Build.MODEL.contains("Emulator", ignoreCase = true) ||
+                Build.MODEL.contains("sdk", ignoreCase = true)
+        )
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        val red = mutableBitmap(256, 256, Color.rgb(230, 20, 20))
+        val blue = mutableBitmap(256, 256, Color.rgb(20, 20, 230))
+
+        try {
+            wallpaperManager.setBitmapChecked(red, WallpaperManager.FLAG_SYSTEM)
+            val redPrimary = awaitPrimaryWallpaperColor(wallpaperManager) { color ->
+                Color.red(color) > Color.blue(color) * 2
+            }
+
+            wallpaperManager.setBitmapChecked(blue, WallpaperManager.FLAG_SYSTEM)
+            val bluePrimary = awaitPrimaryWallpaperColor(wallpaperManager) { color ->
+                Color.blue(color) > Color.red(color) * 2
+            }
+
+            assertTrue(Color.red(redPrimary) > Color.blue(redPrimary))
+            assertTrue(Color.blue(bluePrimary) > Color.red(bluePrimary))
+        } finally {
+            red.recycle()
+            blue.recycle()
+        }
+    }
+
+    private fun awaitPrimaryWallpaperColor(
+        wallpaperManager: WallpaperManager,
+        predicate: (Int) -> Boolean
+    ): Int {
+        val deadline = SystemClock.uptimeMillis() + 10_000L
+        var lastColor: Int? = null
+        while (SystemClock.uptimeMillis() < deadline) {
+            lastColor = wallpaperManager
+                .getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+                ?.primaryColor
+                ?.toArgb()
+            if (lastColor != null && predicate(lastColor)) return lastColor
+            SystemClock.sleep(100L)
+        }
+        throw AssertionError("Wallpaper colors did not refresh; last primary color was $lastColor")
     }
 
     private fun mutableBitmap(width: Int, height: Int, color: Int): Bitmap =

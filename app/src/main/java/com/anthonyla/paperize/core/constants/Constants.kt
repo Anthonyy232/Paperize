@@ -17,6 +17,8 @@ object Constants {
 
     // Services
     const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER"
+    const val ACTION_APPLY_SPECIFIC_WALLPAPER =
+        "com.anthonyla.paperize.ACTION_APPLY_SPECIFIC_WALLPAPER"
     const val ACTION_REAPPLY_EFFECTS = "com.anthonyla.paperize.ACTION_REAPPLY_EFFECTS"
     const val ACTION_RELOAD_WALLPAPER = "com.anthonyla.paperize.ACTION_RELOAD_WALLPAPER"
 
@@ -35,6 +37,7 @@ object Constants {
 
     // Intents
     const val EXTRA_SCREEN_TYPE = "screen_type"
+    const val EXTRA_WALLPAPER_ID = "wallpaper_id"
 
     // Wallpaper
     const val DEFAULT_BLUR_PERCENTAGE = 0
@@ -49,6 +52,7 @@ object Constants {
     const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
 
     // Scheduling
+    const val MIN_LIVE_INTERVAL_MINUTES = 1
     const val MIN_INTERVAL_MINUTES = 15
     const val MAX_INTERVAL_MINUTES = 43200  // 30 days in minutes
     const val DEFAULT_INTERVAL_MINUTES = 60

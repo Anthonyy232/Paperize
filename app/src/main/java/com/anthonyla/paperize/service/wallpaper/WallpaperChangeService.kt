@@ -7,6 +7,7 @@ import android.app.Service
 import android.app.WallpaperManager
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -21,10 +22,12 @@ import com.anthonyla.paperize.core.util.setBitmapChecked
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
+import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
 import com.anthonyla.paperize.presentation.MainActivity
 import com.anthonyla.paperize.service.WallpaperChangeLock
+import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +47,8 @@ class WallpaperChangeService : Service() {
     @Inject lateinit var reapplyEffectsUseCase: ReapplyEffectsUseCase
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var wallpaperChangeLock: WallpaperChangeLock
+    @Inject lateinit var wallpaperScheduler: WallpaperScheduler
+    @Inject lateinit var wallpaperRepository: WallpaperRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var wallpaperManager: WallpaperManager
@@ -74,6 +79,11 @@ class WallpaperChangeService : Service() {
             ACTION_CHANGE_WALLPAPER -> handleChangeWallpaper(screenType, startId)
             ACTION_CHANGE_WALLPAPER_AUTO ->
                 handleChangeWallpaper(screenType, startId, respectWallpaperMode = true)
+            ACTION_APPLY_SPECIFIC_WALLPAPER -> handleApplySpecificWallpaper(
+                wallpaperId = intent.getStringExtra(EXTRA_WALLPAPER_ID),
+                screenType = screenType,
+                startId = startId
+            )
             ACTION_REAPPLY_EFFECTS -> handleReapplyEffects(screenType, startId)
             else -> {
                 Log.w(TAG, "Unknown action: ${intent?.action}")
@@ -91,19 +101,24 @@ class WallpaperChangeService : Service() {
         serviceScope.launch {
             wallpaperChangeLock.mutex.withLock {
                 try {
+                    val wallpaperMode = settingsRepository.getWallpaperMode()
                     val effectiveScreenType =
                         if (
                             respectWallpaperMode &&
-                            settingsRepository.getWallpaperMode() == WallpaperMode.LIVE
+                            wallpaperMode == WallpaperMode.LIVE
                         ) {
                             ScreenType.LIVE
                         } else {
                             screenType
                         }
-                    changeWallpaper(
-                        effectiveScreenType,
-                        settingsRepository.getScheduleSettings()
-                    )
+                    val settings = settingsRepository.getScheduleSettings()
+                    if (changeWallpaper(effectiveScreenType, settings)) {
+                        wallpaperScheduler.resetAfterManualChange(
+                            effectiveScreenType,
+                            settings,
+                            wallpaperMode
+                        )
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error changing wallpaper", e)
                     showErrorNotification(
@@ -121,22 +136,23 @@ class WallpaperChangeService : Service() {
     private suspend fun changeWallpaper(
         screenType: ScreenType,
         settings: ScheduleSettings
-    ) {
+    ): Boolean =
         when (screenType) {
             ScreenType.LIVE -> {
                 sendBroadcast(
                     Intent(Constants.ACTION_RELOAD_WALLPAPER).setPackage(packageName)
                 )
                 Log.d(TAG, "Requested immediate live wallpaper reload")
+                true
             }
 
             ScreenType.HOME -> settings.homeAlbumId?.let {
                 changeSingle(it, ScreenType.HOME)
-            } ?: Log.w(TAG, "No home album selected")
+            } ?: false.also { Log.w(TAG, "No home album selected") }
 
             ScreenType.LOCK -> settings.lockAlbumId?.let {
                 changeSingle(it, ScreenType.LOCK)
-            } ?: Log.w(TAG, "No lock album selected")
+            } ?: false.also { Log.w(TAG, "No lock album selected") }
 
             ScreenType.BOTH -> {
                 val homeAlbumId = settings.homeAlbumId
@@ -148,19 +164,20 @@ class WallpaperChangeService : Service() {
                 ) {
                     changeSynchronized(homeAlbumId, settings)
                 } else {
-                    homeAlbumId?.let { changeSingle(it, ScreenType.HOME) }
+                    var changed = false
+                    homeAlbumId?.let { changed = changeSingle(it, ScreenType.HOME) || changed }
                         ?: Log.w(TAG, "No home album selected")
-                    lockAlbumId?.let { changeSingle(it, ScreenType.LOCK) }
+                    lockAlbumId?.let { changed = changeSingle(it, ScreenType.LOCK) || changed }
                         ?: Log.w(TAG, "No lock album selected")
+                    changed
                 }
             }
         }
-    }
 
     private suspend fun changeSynchronized(
         albumId: String,
         settings: ScheduleSettings
-    ) {
+    ): Boolean =
         when (val result = changeWallpaperUseCase(albumId, ScreenType.HOME)) {
             is PaperizeResult.Success -> {
                 val prepared = result.data
@@ -209,11 +226,13 @@ class WallpaperChangeService : Service() {
                         PaperizeResult.Loading -> error("Unexpected loading result")
                     }
                 }
+                true
             }
 
             is PaperizeResult.Error -> {
                 if (result.exception is EmptyAlbumException) {
                     handleEmptyAlbumError(ScreenType.BOTH)
+                    false
                 } else {
                     throw asException(result.exception)
                 }
@@ -221,12 +240,11 @@ class WallpaperChangeService : Service() {
 
             PaperizeResult.Loading -> error("Unexpected loading result")
         }
-    }
 
     private suspend fun changeSingle(
         albumId: String,
         screenType: ScreenType
-    ) {
+    ): Boolean =
         when (val result = changeWallpaperUseCase(albumId, screenType)) {
             is PaperizeResult.Success -> {
                 val which = when (screenType) {
@@ -236,11 +254,13 @@ class WallpaperChangeService : Service() {
                 }
                 applyPrepared(result.data, which, listOf(screenType))
                 Log.d(TAG, "$screenType wallpaper changed successfully")
+                true
             }
 
             is PaperizeResult.Error -> {
                 if (result.exception is EmptyAlbumException) {
                     handleEmptyAlbumError(screenType)
+                    false
                 } else {
                     throw asException(result.exception)
                 }
@@ -248,7 +268,6 @@ class WallpaperChangeService : Service() {
 
             PaperizeResult.Loading -> error("Unexpected loading result")
         }
-    }
 
     private suspend fun applyPrepared(
         prepared: PreparedWallpaper,
@@ -270,6 +289,140 @@ class WallpaperChangeService : Service() {
         } finally {
             prepared.bitmap.recycle()
         }
+    }
+
+    private fun handleApplySpecificWallpaper(
+        wallpaperId: String?,
+        screenType: ScreenType,
+        startId: Int
+    ) {
+        serviceScope.launch {
+            wallpaperChangeLock.mutex.withLock {
+                try {
+                    require(!wallpaperId.isNullOrBlank()) { getString(R.string.wallpaper_not_found) }
+                    require(screenType != ScreenType.LIVE) { getString(R.string.static_mode_required) }
+                    val wallpaperMode = settingsRepository.getWallpaperMode()
+                    require(wallpaperMode == WallpaperMode.STATIC) {
+                        getString(R.string.static_mode_required)
+                    }
+                    val wallpaper = wallpaperRepository.getWallpaperById(wallpaperId)
+                        ?: error(getString(R.string.wallpaper_not_found))
+                    val settings = settingsRepository.getScheduleSettings()
+
+                    applySpecificWallpaper(
+                        albumId = wallpaper.albumId,
+                        wallpaperId = wallpaper.id,
+                        screenType = screenType,
+                        settings = settings
+                    )
+                    wallpaperScheduler.resetAfterManualChange(
+                        screenType = screenType,
+                        settings = settings,
+                        wallpaperMode = wallpaperMode
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error applying selected wallpaper", e)
+                    showErrorNotification(
+                        getString(R.string.app_name),
+                        e.localizedMessage ?: getString(R.string.error_no_valid_wallpaper_after_retries)
+                    )
+                } finally {
+                    stopSelf(startId)
+                }
+            }
+        }
+    }
+
+    private suspend fun applySpecificWallpaper(
+        albumId: String,
+        wallpaperId: String,
+        screenType: ScreenType,
+        settings: ScheduleSettings
+    ) {
+        when (screenType) {
+            ScreenType.HOME, ScreenType.LOCK -> applySpecificSingle(
+                albumId,
+                wallpaperId,
+                screenType,
+                settings.shuffleEnabled
+            )
+
+            ScreenType.BOTH -> {
+                val samePresentation =
+                    settings.homeEffects == settings.lockEffects &&
+                        settings.homeScalingType == settings.lockScalingType &&
+                        !settings.homeScrollingEnabled
+                if (samePresentation) {
+                    val bitmap = renderSpecific(albumId, wallpaperId, ScreenType.HOME)
+                    try {
+                        wallpaperManager.setBitmapChecked(
+                            bitmap,
+                            WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                        )
+                        changeWallpaperUseCase.completeSpecific(
+                            albumId,
+                            ScreenType.HOME,
+                            wallpaperId,
+                            settings.shuffleEnabled
+                        )
+                        changeWallpaperUseCase.completeSpecific(
+                            albumId,
+                            ScreenType.LOCK,
+                            wallpaperId,
+                            settings.shuffleEnabled
+                        )
+                    } finally {
+                        bitmap.recycle()
+                    }
+                } else {
+                    applySpecificSingle(
+                        albumId,
+                        wallpaperId,
+                        ScreenType.HOME,
+                        settings.shuffleEnabled
+                    )
+                    applySpecificSingle(
+                        albumId,
+                        wallpaperId,
+                        ScreenType.LOCK,
+                        settings.shuffleEnabled
+                    )
+                }
+            }
+
+            ScreenType.LIVE -> error(getString(R.string.static_mode_required))
+        }
+        Log.d(TAG, "Selected wallpaper applied to $screenType")
+    }
+
+    private suspend fun applySpecificSingle(
+        albumId: String,
+        wallpaperId: String,
+        screenType: ScreenType,
+        shuffle: Boolean
+    ) {
+        val bitmap = renderSpecific(albumId, wallpaperId, screenType)
+        try {
+            val which = if (screenType == ScreenType.HOME) {
+                WallpaperManager.FLAG_SYSTEM
+            } else {
+                WallpaperManager.FLAG_LOCK
+            }
+            wallpaperManager.setBitmapChecked(bitmap, which)
+            changeWallpaperUseCase.completeSpecific(albumId, screenType, wallpaperId, shuffle)
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
+    private suspend fun renderSpecific(
+        albumId: String,
+        wallpaperId: String,
+        screenType: ScreenType
+    ): Bitmap = when (val result = reapplyEffectsUseCase(albumId, screenType, wallpaperId)) {
+        is PaperizeResult.Success -> result.data
+        is PaperizeResult.Error -> throw asException(result.exception)
+        PaperizeResult.Loading -> error("Unexpected loading result")
     }
 
     private fun handleReapplyEffects(screenType: ScreenType, startId: Int) {
@@ -384,7 +537,7 @@ class WallpaperChangeService : Service() {
         return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.changing_wallpaper))
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
@@ -400,7 +553,7 @@ class WallpaperChangeService : Service() {
         val notification = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -423,8 +576,10 @@ class WallpaperChangeService : Service() {
         const val ACTION_CHANGE_WALLPAPER = Constants.ACTION_CHANGE_WALLPAPER
         const val ACTION_CHANGE_WALLPAPER_AUTO =
             "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER_AUTO"
+        const val ACTION_APPLY_SPECIFIC_WALLPAPER = Constants.ACTION_APPLY_SPECIFIC_WALLPAPER
         const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
         const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
+        const val EXTRA_WALLPAPER_ID = Constants.EXTRA_WALLPAPER_ID
         private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
     }
 }

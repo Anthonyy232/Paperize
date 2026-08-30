@@ -142,8 +142,10 @@ fun NavigationGraph(
                 onNavigateToFolder = { folderId ->
                     navController.navigate(FolderRoute(folderId))
                 },
-                onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
-                    navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
+                onNavigateToWallpaperView = { wallpaperId, wallpaperUri, wallpaperName ->
+                    navController.navigate(
+                        WallpaperViewRoute(wallpaperId, wallpaperUri, wallpaperName)
+                    )
                 }
             )
         }
@@ -172,8 +174,10 @@ fun NavigationGraph(
             backStackEntry.toRoute<FolderRoute>()
             FolderViewScreen(
                 onBackClick = { navController.popBackStack() },
-                onNavigateToWallpaperView = { wallpaperUri, wallpaperName ->
-                    navController.navigate(WallpaperViewRoute(wallpaperUri, wallpaperName))
+                onNavigateToWallpaperView = { wallpaperId, wallpaperUri, wallpaperName ->
+                    navController.navigate(
+                        WallpaperViewRoute(wallpaperId, wallpaperUri, wallpaperName)
+                    )
                 }
             )
         }

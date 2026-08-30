@@ -512,10 +512,15 @@ class HomeViewModel @Inject constructor(
         if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
             // LIVE mode: schedule live wallpaper changes
             if (settings.liveAlbumId != null && settings.liveIntervalMinutes > 0) {
-                wallpaperScheduler.scheduleWallpaperChange(
-                    ScreenType.LIVE,
-                    settings.liveIntervalMinutes
-                )
+                if (settings.liveIntervalMinutes >= Constants.MIN_INTERVAL_MINUTES) {
+                    wallpaperScheduler.scheduleWallpaperChange(
+                        ScreenType.LIVE,
+                        settings.liveIntervalMinutes
+                    )
+                } else {
+                    // The visible live-wallpaper engine owns sub-15-minute intervals.
+                    wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
+                }
                 wallpaperScheduler.scheduleAlbumRefresh()
             } else {
                 wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)

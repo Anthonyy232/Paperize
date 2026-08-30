@@ -13,8 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,7 +42,10 @@ fun SortBottomSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -59,7 +63,7 @@ fun SortBottomSheet(
 
             // Name Ascending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_name_asc)) },
+                content = { Text(stringResource(R.string.sort_name_asc)) },
                 leadingContent = {
                     Icon(Icons.Default.SortByAlpha, contentDescription = null)
                 },
@@ -71,7 +75,7 @@ fun SortBottomSheet(
 
             // Name Descending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_name_desc)) },
+                content = { Text(stringResource(R.string.sort_name_desc)) },
                 leadingContent = {
                     Icon(Icons.Default.SortByAlpha, contentDescription = null)
                 },
@@ -85,7 +89,7 @@ fun SortBottomSheet(
 
             // Date Added Ascending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_date_added_asc)) },
+                content = { Text(stringResource(R.string.sort_date_added_asc)) },
                 leadingContent = {
                     Icon(Icons.Default.AccessTime, contentDescription = null)
                 },
@@ -97,7 +101,7 @@ fun SortBottomSheet(
 
             // Date Added Descending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_date_added_desc)) },
+                content = { Text(stringResource(R.string.sort_date_added_desc)) },
                 leadingContent = {
                     Icon(Icons.Default.AccessTime, contentDescription = null)
                 },
@@ -111,7 +115,7 @@ fun SortBottomSheet(
 
             // Date Modified Ascending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_date_modified_asc)) },
+                content = { Text(stringResource(R.string.sort_date_modified_asc)) },
                 leadingContent = {
                     Icon(Icons.Default.AccessTime, contentDescription = null)
                 },
@@ -123,7 +127,7 @@ fun SortBottomSheet(
 
             // Date Modified Descending
             ListItem(
-                headlineContent = { Text(stringResource(R.string.sort_date_modified_desc)) },
+                content = { Text(stringResource(R.string.sort_date_modified_desc)) },
                 leadingContent = {
                     Icon(Icons.Default.AccessTime, contentDescription = null)
                 },

@@ -149,6 +149,7 @@
   <string name="mins">Mins</string>
   <string name="total_interval">Total: </string>
   <string name="time_unit_min">min</string>
+  <string name="live_short_interval_note">Intervals under 15 minutes run only while Paperize is the visible live wallpaper.</string>
 
     <!-- Notification Service -->
   <string name="notification_channel_description">Wallpaper change notifications</string>
@@ -158,6 +159,8 @@
   <!-- Error Messages -->
   <string name="error_failed_to_build_queue">Failed to build wallpaper queue</string>
   <string name="error_no_valid_wallpaper_after_retries">Could not find a valid wallpaper after retries</string>
+  <string name="wallpaper_not_found">This wallpaper is no longer available.</string>
+  <string name="static_mode_required">Switch to static wallpaper mode before applying an individual wallpaper.</string>
 
     <!-- OEM Compatibility Warnings -->
   <string name="parallax_may_not_work">Parallax effect may not work with your OEM or launcher.</string>
@@ -211,6 +214,9 @@
   <string name="optimizing">Optimizing (May delay changes)</string>
   <string name="reliability">Reliability</string>
   <string name="change_wallpaper_now">Change wallpaper now</string>
+  <string name="set_wallpaper">Set wallpaper</string>
+  <string name="home_and_lock_screens">Home and lock screens</string>
+  <string name="individual_wallpaper_static_only">Switch to static mode to set an individual wallpaper.</string>
   <string name="change_next_wallpaper_shortcut">Change to the next configured wallpaper</string>
 
 </resources>

@@ -34,7 +34,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 @Composable
 fun FolderViewScreen(
     onBackClick: () -> Unit,
-    onNavigateToWallpaperView: (String, String) -> Unit,
+    onNavigateToWallpaperView: (String, String, String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FolderViewViewModel = hiltViewModel()
 ) {
@@ -84,7 +84,13 @@ fun FolderViewScreen(
                     wallpaperUri = wallpaper.uri,
                     isSelected = false,
                     isSelectionMode = false,
-                    onClick = { onNavigateToWallpaperView(wallpaper.uri, wallpaper.fileName) },
+                    onClick = {
+                        onNavigateToWallpaperView(
+                            wallpaper.id,
+                            wallpaper.uri,
+                            wallpaper.fileName
+                        )
+                    },
                     onLongClick = { /* No selection in folder view */ },
                     modifier = Modifier
                         .fillMaxWidth()
