@@ -82,17 +82,22 @@ class WallpaperScheduler @Inject constructor(
             .setConstraints(constraints)
             .setInputData(inputData)
             .addTag(getWorkTag(screenType))
+            .apply {
+                // New periodic work otherwise runs immediately. Unlike an initial delay, this
+                // one-run deadline also survives unrelated UPDATE requests from settings edits.
+                if (resetInterval) {
+                    setNextScheduleTimeOverride(
+                        System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(adjustedInterval)
+                    )
+                }
+            }
             .build()
 
-        // UPDATE preserves the existing period for settings edits. A successful manual change uses
-        // CANCEL_AND_REENQUEUE so the next automatic change waits for one complete interval.
+        // Preserve the existing work and explicitly move only the next run after a manual change.
+        // Replacing periodic work starts a new first period, which can otherwise run immediately.
         workManager.enqueueUniquePeriodicWork(
             workName,
-            if (resetInterval) {
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
-            } else {
-                ExistingPeriodicWorkPolicy.UPDATE
-            },
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
 
