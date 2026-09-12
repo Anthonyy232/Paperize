@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Paperize</string>
+  <string name="import_adding_folder">正在添加文件夹…</string>
+  <string name="import_adding_wallpapers">正在添加壁纸…</string>
+  <string name="import_scanning">正在扫描… 已找到 %1$d 张</string>
+  <string name="import_saving">正在保存 %1$d / %2$d</string>
+  <string name="home">主页</string>
+  <string name="settings_screen">设置</string>
+  <string name="wallpaper">壁纸</string>
+  <string name="library">图库</string>
+  <string name="back">返回</string>
+    <string name="add_folder">添加文件夹</string>
+  <string name="add_album">添加相册</string>
+  <string name="enter_the_name_of_the_album">输入相册名称</string>
+  <string name="album_name">相册名称</string>
+  <string name="cancel">取消</string>
+  <string name="save">保存</string>
+  <string name="delete_album">删除</string>
+  <string name="change_name">重命名</string>
+  <string name="no_album_selected">未选择相册</string>
+  <string name="currently_selected_album">当前选中的相册</string>
+  <string name="agree">同意</string>
+  <string name="welcome">欢迎</string>
+    <string name="continue_button">开始使用</string>
+  <string name="allow">允许</string>
+  <string name="privacy_policy">隐私政策</string>
+  <string name="reset_to_default">恢复默认</string>
+  <string name="reset_all_data">重置所有数据</string>
+  <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">确定要将所有设置和数据恢复默认吗？</string>
+  <string name="confirm">确定</string>
+    <string name="selected_count">已选择 %1$s</string>
+  <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">请阅读并同意以下隐私声明后使用本应用。</string>
+  <string name="privacy_notice">隐私声明</string>
+    <string name="are_you_sure_you_want_to_delete_this">确定要删除吗？</string>
+  <string name="delete_album_question">删除相册？</string>
+  <string name="animation">动画</string>
+  <string name="increase_visual_appeal">提升视觉观感</string>
+  <string name="dark_mode">深色模式</string>
+  <string name="easier_on_the_eyes">更护眼</string>
+  <string name="material_you">Material You</string>
+  <string name="dynamic_theming">动态取色</string>
+  <string name="click_here_to_view_our_privacy_policy">点击此处查看我们的隐私政策</string>
+  <string name="appearance">外观</string>
+  <string name="about">关于</string>
+    <plurals name="wallpaper_count" comment="wallpaper_count [one] [other]">
+    <item quantity="other">%d 张壁纸</item>
+  </plurals>
+  <string name="privacy_intro_title">简介</string>
+  <string name="privacy_intro_content">欢迎使用 %1$s！本隐私声明说明我们在你使用本应用时如何收集、使用和保护你的个人信息。使用 %1$s 即表示你同意本声明所述的条款。</string>
+  <string name="privacy_data_collection_title">数据收集</string>
+  <string name="privacy_data_collection_content">通知：%1$s 会请求发送通知的权限，用于显示壁纸更换、后台操作和错误通知。它不会读取其他应用的通知，也不会根据这些通知推荐壁纸。\n\n本地文件：%1$s 会访问你选择的图片和文件夹，以便将图片设为壁纸。我们不会把这些文件上传或传输到任何外部服务器。</string>
+  <string name="privacy_information_usage_title">信息使用</string>
+  <string name="privacy_information_usage_content">个人数据：我们不收集或存储任何个人数据，例如姓名、电子邮箱地址或电话号码。\n\n使用情况分析：%1$s 不会跟踪你的使用行为，也不会收集分析数据。</string>
+  <string name="privacy_data_security_title">数据安全</string>
+  <string name="privacy_data_security_content">设备本地存储：%1$s 使用的所有数据都保留在你的设备上。我们不会向外部传输或存储任何数据。</string>
+  <string name="no_albums_found">未找到相册</string>
+  <string name="empty_album">空相册</string>
+  <string name="empty_album_message">这个相册里还没有壁纸。请先向相册中添加壁纸，然后再选择它。</string>
+  <string name="ok">确定</string>
+    <string name="fill">填充</string>
+  <string name="fit">适应</string>
+  <string name="stretch">拉伸</string>
+  <string name="change_brightness">亮度效果</string>
+  <string name="home_screen_btn">主屏幕</string>
+  <string name="lock_screen_btn">锁屏</string>
+  <string name="individual_scheduling">分别定时</string>
+  <string name="show_interval_sliders">显示间隔滑块</string>
+  <string name="interval_text">时间间隔</string>
+  <string name="change_blur">模糊效果</string>
+    <string name="lock">锁屏</string>
+  <string name="change_vignette">暗角效果</string>
+  <string name="none">无</string>
+  <string name="gray_filter">灰度滤镜</string>
+  <string name="folders">文件夹</string>
+  <string name="wallpapers_sort">壁纸</string>
+  <string name="close">关闭</string>
+  <string name="shuffle">随机</string>
+  <string name="days_txt">天</string>
+  <string name="hours_txt">小时</string>
+    <string name="change_the_image_brightness">调整画面亮度</string>
+  <string name="add_blur_to_the_image">为画面添加模糊</string>
+  <string name="darken_the_edges_of_the_image">压暗画面边缘</string>
+  <string name="make_the_colors_grayscale">将画面变为灰度</string>
+  <string name="double_tap_to_change">双击切换</string>
+  <string name="double_tap_wallpaper_to_change_it">双击壁纸即可切换</string>
+  <string name="change_on_screen_off">息屏时切换</string>
+  <string name="change_wallpaper_when_screen_turns_off">息屏时更换壁纸</string>
+  <string name="parallax_effect">视差效果</string>
+  <string name="wallpaper_moves_with_screen_scroll">在桌面页面之间滑动可移动壁纸（需要桌面支持）</string>
+  <string name="live_wallpaper_name">Paperize 动态壁纸</string>
+  <string name="live_wallpaper_description">带特效与交互功能的动态壁纸</string>
+    <string name="adaptive_brightness">自适应亮度</string>
+  <string name="adjust_brightness_based_on_mode">根据深色/浅色模式调整亮度</string>
+  <string name="randomly_shuffle_the_wallpapers">随机打乱壁纸顺序</string>
+  <string name="changing_wallpaper">正在更换壁纸…</string>
+  <string name="add_wallpapers">添加壁纸</string>
+  <string name="select_album">选择相册</string>
+  <string name="sort">排序</string>
+  <string name="notification_permission_title">开启通知</string>
+  <string name="notification_permission_description">允许 Paperize 发送壁纸更换通知，以及在后台运行时显示通知。你可以随时在设置中更改。</string>
+  <string name="skip">跳过</string>
+  <string name="permission_granted">已授予权限</string>
+
+  <!-- Content Descriptions for Accessibility -->
+  <string name="content_desc_clear_selection">清除选择</string>
+  <string name="content_desc_select_all">全选</string>
+  <string name="content_desc_delete_selected">删除所选</string>
+  <string name="content_desc_expand">展开</string>
+  <string name="content_desc_collapse">收起</string>
+  <string name="content_desc_sort_items">排序项目</string>
+  <string name="content_desc_save">保存</string>
+  <string name="content_desc_current_lock_wallpaper">当前锁屏壁纸</string>
+  <string name="content_desc_current_home_wallpaper">当前主屏幕壁纸</string>
+  <string name="content_desc_selected">已选择</string>
+  <string name="content_desc_not_selected">未选择</string>
+
+  <!-- UI Labels and Status -->
+  <string name="enabled">已启用</string>
+  <string name="wallpaper_changer">壁纸更换</string>
+  <string name="wallpaper_changer_description">暂停或恢复定时切换，不会清除你的相册。</string>
+  <string name="horizontal_wallpaper_scrolling">横向滚动</string>
+  <string name="horizontal_wallpaper_scrolling_description">允许宽幅「填充」壁纸在桌面页面之间移动。锁屏壁纸保持居中。</string>
+  <string name="disabled">已禁用</string>
+  <string name="lock_album_label">锁屏相册</string>
+  <string name="home_album_label">主屏幕相册</string>
+  <string name="scaling">缩放</string>
+  <string name="wallpaper_effects_title">壁纸效果</string>
+  <string name="visual_effects">视觉效果</string>
+  <string name="interactive_effects">交互效果</string>
+  <string name="current_wallpapers">当前壁纸</string>
+
+  <!-- Tab Titles -->
+
+  <!-- Sort Options -->
+  <string name="sort_name_asc">名称（A-Z）</string>
+  <string name="sort_name_desc">名称（Z-A）</string>
+  <string name="sort_date_added_asc">添加日期（最早优先）</string>
+  <string name="sort_date_added_desc">添加日期（最新优先）</string>
+  <string name="sort_date_modified_asc">修改日期（最早优先）</string>
+  <string name="sort_date_modified_desc">修改日期（最新优先）</string>
+  <string name="sort_a_z">按 A-Z 排序</string>
+  <string name="sort_z_a">按 Z-A 排序</string>
+  <string name="sort_by_newest">按最新排序</string>
+  <string name="sort_by_oldest">按最早排序</string>
+
+  <!-- Time Interval Picker -->
+  <string name="mins">分钟</string>
+  <string name="total_interval">总计： </string>
+  <string name="time_unit_min">分</string>
+  <string name="live_short_interval_note">低于 15 分钟的间隔仅在 Paperize 作为可见的动态壁纸运行时生效。</string>
+
+    <!-- Notification Service -->
+  <string name="notification_channel_description">壁纸更换通知</string>
+  <string name="no_wallpapers_in_album">相册中没有壁纸</string>
+  <string name="wallpaper_changer_disabled_empty_album">相册为空，壁纸更换已停用。</string>
+
+  <!-- Error Messages -->
+  <string name="error_failed_to_build_queue">无法构建壁纸队列</string>
+  <string name="error_no_valid_wallpaper_after_retries">多次重试后仍未找到有效壁纸</string>
+  <string name="wallpaper_not_found">这张壁纸已不可用。</string>
+  <string name="static_mode_required">应用单张壁纸前，请先切换到静态壁纸模式。</string>
+
+    <!-- OEM Compatibility Warnings -->
+  <string name="parallax_may_not_work">视差效果在你的系统或桌面上可能无法生效。</string>
+
+  <!-- Plurals -->
+    <plurals name="time_unit_hours">
+    <item quantity="other">小时</item>
+  </plurals>
+  <plurals name="time_unit_days">
+    <item quantity="other">天</item>
+  </plurals>
+
+  <!-- Material 3 Expressive UI Strings -->
+  <string name="create_first_album_hint">点击 + 创建你的第一个相册</string>
+
+  <!-- Album Labels -->
+  <string name="album_suffix"> 相册</string>
+  <!-- Wallpaper Mode Selection -->
+  <string name="choose_wallpaper_mode">选择壁纸模式</string>
+  <string name="change_later_in_settings">之后可以在设置中更改</string>
+  <string name="static_mode">静态模式</string>
+  <string name="static_mode_description">使用系统壁纸管理器进行经典的壁纸切换。简单省电，仅支持静态图片。</string>
+  <string name="live_wallpaper_mode">动态壁纸模式</string>
+  <string name="live_wallpaper_mode_description">带硬件加速特效与交互功能（双击、视差）的高级动态壁纸。</string>
+
+  <!-- Live Wallpaper Selection Dialog -->
+  <string name="select_live_wallpaper">选择动态壁纸</string>
+  <string name="select_live_wallpaper_instruction">若想以动态壁纸模式使用 Paperize，你需要在系统设置中把它选为动态壁纸。</string>
+    <string name="open_wallpaper_picker">打开壁纸选择器</string>
+  <string name="later">稍后</string>
+
+  <!-- Settings Mode Switcher -->
+  <string name="wallpaper_mode_setting">壁纸模式</string>
+  <string name="current_mode">当前模式</string>
+  <string name="mode_static">静态</string>
+  <string name="mode_live_wallpaper">动态壁纸</string>
+  <string name="switch_button">切换</string>
+  <string name="mode_switch_warning">切换模式将重置所有相册、壁纸和设置，此操作无法撤销。</string>
+  <string name="switch_mode_dialog_title">切换到%1$s模式？</string>
+  <string name="switch_mode_dialog_description">这将重置所有相册、壁纸和定时设置，此操作无法撤销。\n\n你需要重新添加相册并配置壁纸设置。</string>
+  <string name="switch_mode_button">切换模式</string>
+  <string name="open_wallpaper_picker_instruction_newline">\n点击下方的「打开壁纸选择器」，在可用动态壁纸列表中选择 Paperize。</string>
+  <string name="loading_placeholder">…</string>
+  <string name="album_name_exists_error">已存在同名相册</string>
+  <string name="battery_optimization">电池优化</string>
+  <string name="battery_optimization_description">关闭电池优化，以确保后台壁纸切换稳定可靠。</string>
+  <string name="check_status">检查状态</string>
+  <string name="ignoring">已忽略（推荐）</string>
+  <string name="optimizing">优化中（可能延迟切换）</string>
+  <string name="reliability">可靠性</string>
+  <string name="change_wallpaper_now">立即更换壁纸</string>
+  <string name="set_wallpaper">设为壁纸</string>
+  <string name="home_and_lock_screens">主屏幕和锁屏</string>
+  <string name="individual_wallpaper_static_only">请切换到静态模式以设置单张壁纸。</string>
+  <string name="change_next_wallpaper_shortcut">切换到下一张已配置的壁纸</string>
+
+</resources>

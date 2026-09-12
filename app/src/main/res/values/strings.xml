@@ -50,7 +50,7 @@
   <string name="privacy_intro_title">Introduction</string>
   <string name="privacy_intro_content">Welcome to %1$s! This privacy notice outlines how we collect, use, and protect your personal information when you use our mobile application. By using %1$s, you agree to the terms described in this notice.</string>
   <string name="privacy_data_collection_title">Data Collection</string>
-  <string name="privacy_data_collection_content">Notification Access: %1$s requests notification access to provide you with personalized wallpaper recommendations based on your notifications. We do not store any notification content or personally identifiable information (PII) outside of your device.\n\nLocal Files: %1$s accesses files stored on your device to allow you to set them as wallpapers. We do not upload or transfer these files to any external servers.</string>
+  <string name="privacy_data_collection_content">Notifications: %1$s requests permission to display its own wallpaper-change, background-operation, and error notifications. It does not read notifications from other apps or use them to recommend wallpapers.\n\nLocal Files: %1$s accesses the images and folders you select so it can set them as wallpapers. We do not upload or transfer these files to any external servers.</string>
   <string name="privacy_information_usage_title">Information Usage</string>
   <string name="privacy_information_usage_content">Personal Data: We do not collect or store any personal data such as names, email addresses, or phone numbers.\n\nUsage Analytics: %1$s does not track your usage behavior or collect analytics data.</string>
   <string name="privacy_data_security_title">Data Security</string>
