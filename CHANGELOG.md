@@ -1,3 +1,16 @@
+## v4.1.1
+
+- Added Simplified Chinese translations for setup, settings, wallpaper controls,
+  notifications, and accessibility labels, with Android app-language support.
+- Corrected the privacy notice to explain that Paperize displays its own
+  notifications and does not read notifications from other apps.
+
+## New Contributors
+
+* @zxiaoshen made their first contribution in https://github.com/Anthonyy232/Paperize/pull/605
+
+**Full Changelog**: https://github.com/Anthonyy232/Paperize/compare/v4.1.0...v4.1.1
+
 ## v4.1.0
 
 - Added a Set wallpaper action to image previews, with separate home, lock, and
