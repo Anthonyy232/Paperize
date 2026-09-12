@@ -1,5 +1,7 @@
 ## v4.1.1
 
+- Fixed manual changes triggering an immediate extra automatic change by deferring
+  the next run for the full interval and preserving it across settings updates.
 - Added Simplified Chinese translations for setup, settings, wallpaper controls,
   notifications, and accessibility labels, with Android app-language support.
 - Corrected the privacy notice to explain that Paperize displays its own
