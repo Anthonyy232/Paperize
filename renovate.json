@@ -16,8 +16,24 @@
     },
     {
       "description": ["Coordinate AGP and Gradle compatibility manually"],
-      "matchPackageNames": ["com.android.tools.build:gradle", "gradle"],
+      "matchDepNames": [
+        "com.android.application",
+        "com.android.library",
+        "com.android.test",
+        "com.android.tools.build:gradle",
+        "gradle"
+      ],
       "groupName": "Android build toolchain",
+      "automerge": false
+    },
+    {
+      "description": ["Keep the shared Kotlin version together and verify CodeQL support before merging"],
+      "matchDepNames": [
+        "org.jetbrains.kotlin.android",
+        "org.jetbrains.kotlin.plugin.compose",
+        "org.jetbrains.kotlin.plugin.serialization"
+      ],
+      "groupName": "Kotlin compiler plugins",
       "automerge": false
     },
     {
