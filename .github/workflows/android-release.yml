@@ -4,7 +4,7 @@
 # Automates the testing, building and release process for the Paperize Android application.
 #
 # Workflow Architecture:
-#   1. Test:    Runs unit tests to ensure code quality.
+#   1. Test:    Runs unit tests and Android lint to ensure code quality.
 #   2. Build:   Compiles and signs the release APK (depends on test passing).
 #   3. Release: Publishes the APK to a draft GitHub Release, but only for version tags.
 #
@@ -34,7 +34,7 @@ jobs:
   # ===================================================================
   # JOB: test
   #
-  # Runs unit tests to ensure code quality before building.
+  # Runs unit tests and Android lint to ensure code quality before building.
   # ===================================================================
   test:
     name: Run Unit Tests
@@ -55,6 +55,9 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew clean test
+
+      - name: Run Android lint
+        run: ./gradlew :app:lintDebug
 
   # ===================================================================
   # JOB: build
