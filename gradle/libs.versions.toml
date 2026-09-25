@@ -34,7 +34,7 @@ androidx-material3 = { module = "androidx.compose.material3:material3", version 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.10.1" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.4" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.8.4" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version = "2.8.5" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version = "2.8.4" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
