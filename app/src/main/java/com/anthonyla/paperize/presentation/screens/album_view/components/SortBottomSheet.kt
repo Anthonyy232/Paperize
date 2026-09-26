@@ -1,6 +1,11 @@
 package com.anthonyla.paperize.presentation.screens.album_view.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,24 +25,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-enum class SortOption {
-    NAME_ASC,
-    NAME_DESC,
-    DATE_ADDED_ASC,
-    DATE_ADDED_DESC,
-    DATE_MODIFIED_ASC,
-    DATE_MODIFIED_DESC
+enum class SortOption(val labelRes: Int) {
+    NAME_ASC(R.string.sort_name_asc),
+    NAME_DESC(R.string.sort_name_desc),
+    DATE_ADDED_ASC(R.string.sort_date_added_asc),
+    DATE_ADDED_DESC(R.string.sort_date_added_desc),
+    DATE_MODIFIED_ASC(R.string.sort_date_modified_asc),
+    DATE_MODIFIED_DESC(R.string.sort_date_modified_desc);
+
+    val wallpaperComparator: Comparator<Wallpaper>
+        get() = when (this) {
+            NAME_ASC -> compareBy { it.fileName.lowercase() }
+            NAME_DESC -> compareByDescending { it.fileName.lowercase() }
+            DATE_ADDED_ASC -> compareBy { it.addedAt }
+            DATE_ADDED_DESC -> compareByDescending { it.addedAt }
+            DATE_MODIFIED_ASC -> compareBy { it.dateModified }
+            DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
+        }
 }
 
-/**
- * Bottom sheet for sorting wallpapers and folders
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortBottomSheet(
+    selectedOption: SortOption,
     onSortSelected: (SortOption) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -52,7 +66,7 @@ fun SortBottomSheet(
         sheetState = sheetState,
         modifier = modifier
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).selectableGroup()) {
             Text(
                 text = stringResource(R.string.sort),
                 style = MaterialTheme.typography.titleLarge,
@@ -61,83 +75,30 @@ fun SortBottomSheet(
 
             HorizontalDivider()
 
-            // Name Ascending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_name_asc)) },
-                leadingContent = {
-                    Icon(Icons.Default.SortByAlpha, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.NAME_ASC)
-                    onDismiss()
-                }
-            )
-
-            // Name Descending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_name_desc)) },
-                leadingContent = {
-                    Icon(Icons.Default.SortByAlpha, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.NAME_DESC)
-                    onDismiss()
-                }
-            )
-
-            HorizontalDivider()
-
-            // Date Added Ascending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_date_added_asc)) },
-                leadingContent = {
-                    Icon(Icons.Default.AccessTime, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.DATE_ADDED_ASC)
-                    onDismiss()
-                }
-            )
-
-            // Date Added Descending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_date_added_desc)) },
-                leadingContent = {
-                    Icon(Icons.Default.AccessTime, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.DATE_ADDED_DESC)
-                    onDismiss()
-                }
-            )
-
-            HorizontalDivider()
-
-            // Date Modified Ascending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_date_modified_asc)) },
-                leadingContent = {
-                    Icon(Icons.Default.AccessTime, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.DATE_MODIFIED_ASC)
-                    onDismiss()
-                }
-            )
-
-            // Date Modified Descending
-            ListItem(
-                content = { Text(stringResource(R.string.sort_date_modified_desc)) },
-                leadingContent = {
-                    Icon(Icons.Default.AccessTime, contentDescription = null)
-                },
-                modifier = Modifier.clickable {
-                    onSortSelected(SortOption.DATE_MODIFIED_DESC)
-                    onDismiss()
-                }
-            )
-
-            // Bottom padding
+            SortOption.entries.forEachIndexed { index, option ->
+                if (index > 0 && index % 2 == 0) HorizontalDivider()
+                ListItem(
+                    content = { Text(stringResource(option.labelRes)) },
+                    leadingContent = {
+                        Icon(
+                            if (option == SortOption.NAME_ASC || option == SortOption.NAME_DESC)
+                                Icons.Default.SortByAlpha else Icons.Default.AccessTime,
+                            contentDescription = null
+                        )
+                    },
+                    trailingContent = {
+                        RadioButton(selected = selectedOption == option, onClick = null)
+                    },
+                    modifier = Modifier.selectable(
+                        selected = selectedOption == option,
+                        role = Role.RadioButton,
+                        onClick = {
+                            onSortSelected(option)
+                            onDismiss()
+                        }
+                    )
+                )
+            }
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = 16.dp))
         }
     }

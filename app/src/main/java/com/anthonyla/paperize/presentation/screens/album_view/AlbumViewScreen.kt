@@ -1,12 +1,12 @@
 package com.anthonyla.paperize.presentation.screens.album_view
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +20,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,13 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import android.net.Uri
 import com.anthonyla.paperize.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
+import com.anthonyla.paperize.presentation.common.components.EmptyCollection
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
 import com.anthonyla.paperize.presentation.screens.album_view.components.ImportProgressDialog
@@ -52,34 +55,45 @@ fun AlbumViewScreen(
     modifier: Modifier = Modifier,
     viewModel: AlbumViewViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val lazyListState = rememberLazyGridState()
 
     val album by viewModel.album.collectAsStateWithLifecycle()
-    val folders by viewModel.folders.collectAsStateWithLifecycle()
-    val wallpapers by viewModel.wallpapers.collectAsStateWithLifecycle()
+    val folders = album?.folders.orEmpty()
+    val wallpapers = album?.wallpapers.orEmpty()
 
-    // Selection state
     val selectedWallpapers by viewModel.selectedWallpapers.collectAsStateWithLifecycle()
     val selectedFolders by viewModel.selectedFolders.collectAsStateWithLifecycle()
-    val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
+    val isSelectionMode = selectedWallpapers.isNotEmpty() || selectedFolders.isNotEmpty()
     val importProgress by viewModel.importProgress.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
+    val isDeleting by viewModel.isDeleting.collectAsStateWithLifecycle()
+    val albumDeleted by viewModel.albumDeleted.collectAsStateWithLifecycle()
+    var showDeleteAlbumDialog by rememberSaveable { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val messageText = message?.let { stringResource(it) }
+    LaunchedEffect(messageText) {
+        messageText?.let {
+            if (message == R.string.delete_album_failed) showDeleteAlbumDialog = false
+            snackbarHostState.showSnackbar(it)
+            viewModel.dismissMessage()
+        }
+    }
+    LaunchedEffect(albumDeleted) {
+        if (albumDeleted) onBackClick()
+    }
     val selectedCount = selectedWallpapers.size + selectedFolders.size
 
-    // Check if all items are selected
     val totalItemsCount = wallpapers.size + folders.size
     val allSelected = selectedCount == totalItemsCount && totalItemsCount > 0
 
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
-    var showDeleteAlbumDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteSelectedDialog by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
 
-    // Handle back press when in selection mode
     BackHandler(enabled = isSelectionMode) {
         viewModel.clearSelection()
     }
 
-    // Sort wallpapers and folders
     val sortedFolders = remember(folders, sortOption) {
         when (sortOption) {
             SortOption.NAME_ASC -> folders.sortedBy { it.name.lowercase() }
@@ -92,14 +106,7 @@ fun AlbumViewScreen(
     }
 
     val sortedWallpapers = remember(wallpapers, sortOption) {
-        when (sortOption) {
-            SortOption.NAME_ASC -> wallpapers.sortedBy { it.fileName.lowercase() }
-            SortOption.NAME_DESC -> wallpapers.sortedByDescending { it.fileName.lowercase() }
-            SortOption.DATE_ADDED_ASC -> wallpapers.sortedBy { it.addedAt }
-            SortOption.DATE_ADDED_DESC -> wallpapers.sortedByDescending { it.addedAt }
-            SortOption.DATE_MODIFIED_ASC -> wallpapers.sortedBy { it.dateModified }
-            SortOption.DATE_MODIFIED_DESC -> wallpapers.sortedByDescending { it.dateModified }
-        }
+        wallpapers.sortedWith(sortOption.wallpaperComparator)
     }
 
     val commonItemModifier = remember {
@@ -108,39 +115,20 @@ fun AlbumViewScreen(
             .aspectRatio(Constants.WALLPAPER_ASPECT_RATIO)
     }
 
-    // Image picker
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uris: List<Uri> ->
-        if (uris.isNotEmpty()) {
-            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            uris.forEach { uri ->
-                try {
-                    context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                } catch (_: Exception) {
-                    // Handle permission failure
-                }
-            }
-            viewModel.addWallpapers(uris.map { it.toString() })
-        }
+        viewModel.addWallpapers(uris.map { it.toString() })
     }
 
-    // Folder picker
     val folderPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? ->
-        uri?.let {
-            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            try {
-                context.contentResolver.takePersistableUriPermission(it, takeFlags)
-                viewModel.addFolder(it.toString())
-            } catch (_: Exception) {
-                // Handle permission failure
-            }
-        }
+        uri?.let { viewModel.addFolder(it.toString()) }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AlbumViewTopBar(
                 title = album?.name ?: "",
@@ -151,13 +139,12 @@ fun AlbumViewScreen(
                 onSortClick = { showSortSheet = true },
                 onDeleteAlbum = { showDeleteAlbumDialog = true },
                 onSelectAll = { if (allSelected) viewModel.clearSelection() else viewModel.selectAll() },
-                onDeleteSelected = { viewModel.deleteSelected() },
+                onDeleteSelected = { if (!isDeleting) showDeleteSelectedDialog = true },
                 onClearSelection = { viewModel.clearSelection() }
             )
         },
         floatingActionButton = {
-            // Hide FAB when in selection mode
-            if (!isSelectionMode) {
+            if (!isSelectionMode && totalItemsCount > 0) {
                 AddAlbumAnimatedFab(
                     isLoading = importProgress !is ImportProgress.Idle,
                     onImageClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
@@ -166,6 +153,21 @@ fun AlbumViewScreen(
             }
         }
     ) { paddingValues ->
+        if (album != null && totalItemsCount == 0) {
+            EmptyCollection(
+                title = stringResource(R.string.folder_empty_title),
+                hint = stringResource(R.string.album_empty_hint),
+                modifier = modifier.padding(paddingValues)
+            ) {
+                FilledTonalButton(onClick = { imagePickerLauncher.launch(arrayOf("image/*")) }) {
+                    Text(stringResource(R.string.add_wallpapers))
+                }
+                TextButton(onClick = { folderPickerLauncher.launch(null) }) {
+                    Text(stringResource(R.string.add_folder))
+                }
+            }
+            return@Scaffold
+        }
         LazyVerticalGrid(
             state = lazyListState,
             modifier = modifier
@@ -176,7 +178,6 @@ fun AlbumViewScreen(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing)
         ) {
-            // Folders
             items(
                 items = sortedFolders,
                 key = { folder -> "folder-${folder.id}" }
@@ -196,25 +197,22 @@ fun AlbumViewScreen(
                         viewModel.toggleFolderSelection(folder.id)
                     },
                     modifier = commonItemModifier
-                        .then(
-                            Modifier.animateItem(
-                                placementSpec = tween(
-                                    durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                )
+                        .animateItem(
+                            placementSpec = tween(
+                                durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
+                                easing = FastOutSlowInEasing
                             )
                         )
                 )
             }
 
-            // Wallpapers
             items(
                 items = sortedWallpapers,
                 key = { wallpaper -> "wallpaper-${wallpaper.id}" }
             ) { wallpaper ->
                 WallpaperItem(
                     wallpaperUri = wallpaper.uri,
+                    wallpaperName = wallpaper.displayFileName,
                     isSelected = wallpaper.id in selectedWallpapers,
                     isSelectionMode = isSelectionMode,
                     onClick = {
@@ -232,13 +230,10 @@ fun AlbumViewScreen(
                         viewModel.toggleWallpaperSelection(wallpaper.id)
                     },
                     modifier = commonItemModifier
-                        .then(
-                            Modifier.animateItem(
-                                placementSpec = tween(
-                                    durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                    delayMillis = 0,
-                                    easing = FastOutSlowInEasing
-                                )
+                        .animateItem(
+                            placementSpec = tween(
+                                durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
+                                easing = FastOutSlowInEasing
                             )
                         )
                 )
@@ -246,33 +241,50 @@ fun AlbumViewScreen(
         }
     }
 
-    // Sort Bottom Sheet
     if (showSortSheet) {
         SortBottomSheet(
+            selectedOption = sortOption,
             onSortSelected = { sortOption = it },
             onDismiss = { showSortSheet = false }
         )
     }
 
-    // Import progress (add folder / add wallpapers)
-    ImportProgressDialog(progress = importProgress)
+    ImportProgressDialog(progress = importProgress, onCancel = viewModel::cancelImport)
 
-    // Delete Album Confirmation Dialog
+    if (showDeleteSelectedDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteSelectedDialog = false },
+            title = { Text(stringResource(R.string.remove_selected_title, selectedCount)) },
+            text = { Text(stringResource(R.string.remove_selected_hint)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteSelectedDialog = false
+                    viewModel.deleteSelected()
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteSelectedDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     if (showDeleteAlbumDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteAlbumDialog = false },
+            onDismissRequest = { if (!isDeleting) showDeleteAlbumDialog = false },
             title = { Text(stringResource(R.string.delete_album_question)) },
             text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this)) },
             confirmButton = {
                 TextButton(
+                    enabled = !isDeleting,
                     onClick = {
                         viewModel.deleteAlbum()
-                        onBackClick()
                     }
-                ) { Text(stringResource(R.string.confirm)) }
+                ) { Text(stringResource(if (isDeleting) R.string.deleting_album else R.string.confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteAlbumDialog = false }) {
+                TextButton(enabled = !isDeleting, onClick = { showDeleteAlbumDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

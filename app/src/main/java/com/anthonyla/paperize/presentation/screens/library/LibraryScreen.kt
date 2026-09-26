@@ -23,6 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,23 +32,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.Result
+import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.AddAlbumDialog
 import com.anthonyla.paperize.presentation.screens.library.components.AlbumItem
 import com.anthonyla.paperize.presentation.theme.AppGrid
 import com.anthonyla.paperize.presentation.theme.AppSpacing
+import kotlinx.coroutines.launch
 
 @Composable
 fun LibraryScreen(
     albums: List<AlbumSummary>,
     onViewAlbum: (String) -> Unit,
-    onCreateAlbum: (String) -> Unit,
+    onCreateAlbum: suspend (String) -> Result<Album>,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyGridState()
     var showAddAlbumDialog by rememberSaveable { mutableStateOf(false) }
-    var albumNameError by rememberSaveable { mutableStateOf<String?>(null) }
-    val albumNameExistsError = stringResource(R.string.album_name_exists_error)
+    var albumNameError by rememberSaveable { mutableStateOf<Int?>(null) }
+    var isSaving by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -126,17 +132,25 @@ fun LibraryScreen(
                 albumNameError = null
             },
             onConfirm = { name ->
-                // Check if album with this name already exists
-                val isDuplicate = albums.any { it.name.equals(name, ignoreCase = true) }
-                if (isDuplicate) {
-                    albumNameError = albumNameExistsError
+                if (albums.any { it.name.equals(name, ignoreCase = true) }) {
+                    albumNameError = R.string.album_name_exists_error
                 } else {
-                    onCreateAlbum(name)
-                    showAddAlbumDialog = false
+                    isSaving = true
                     albumNameError = null
+                    scope.launch {
+                        try {
+                            when (onCreateAlbum(name)) {
+                                is Result.Success -> showAddAlbumDialog = false
+                                is Result.Error -> albumNameError = R.string.album_create_failed
+                            }
+                        } finally {
+                            isSaving = false
+                        }
+                    }
                 }
             },
-            errorMessage = albumNameError
+            errorMessage = albumNameError?.let { stringResource(it) },
+            isSaving = isSaving
         )
     }
 }

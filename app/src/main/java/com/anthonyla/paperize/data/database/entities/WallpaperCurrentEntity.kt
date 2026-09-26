@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.data.database.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -33,12 +32,10 @@ import com.anthonyla.paperize.core.ScreenType
     indices = [Index(value = ["wallpaperId"])]
 )
 data class WallpaperCurrentEntity(
-    @ColumnInfo(name = "albumId")
     val albumId: String,
 
     val screenType: ScreenType,
 
-    @ColumnInfo(name = "wallpaperId")
     val wallpaperId: String,
 
     val appliedAt: Long = System.currentTimeMillis()

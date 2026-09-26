@@ -1,9 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.theme.AppBorderWidths
-import com.anthonyla.paperize.core.constants.Constants
 
-import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,13 +29,8 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,12 +39,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.net.toUri
-import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Size
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
+import com.anthonyla.paperize.presentation.theme.AppBorderWidths
+import com.anthonyla.paperize.presentation.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.theme.AppShapes
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
@@ -60,7 +55,7 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 @Composable
 fun AlbumSelectionBottomSheet(
     albums: List<AlbumSummary>,
-    selectedAlbums: List<AlbumSummary>,
+    selectedAlbumId: String?,
     onAlbumSelect: (AlbumSummary) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -85,7 +80,7 @@ fun AlbumSelectionBottomSheet(
 
             LazyColumn {
                 items(albums, key = { it.id }) { album ->
-                    val isSelected = selectedAlbums.any { it.id == album.id }
+                    val isSelected = selectedAlbumId == album.id
                     AlbumSelectionItem(
                         album = album,
                         isSelected = isSelected,
@@ -121,12 +116,11 @@ private fun AlbumSelectionItem(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var showCoverUri by remember(album.coverUri) { mutableStateOf(false) }
-    LaunchedEffect(album.coverUri) {
-        showCoverUri = withContext(Dispatchers.IO) {
-            !album.coverUri.isNullOrEmpty() && isValidUri(context, album.coverUri)
-        }
-    }
+    val cover = rememberAsyncImagePainter(
+        ImageRequest.Builder(context).data(album.coverUri).size(Size(Constants.LIST_THUMBNAIL_SIZE, Constants.LIST_THUMBNAIL_SIZE)).build(),
+        contentScale = ContentScale.Crop
+    )
+    val coverState by cover.state.collectAsState()
 
     Row(
         modifier = modifier
@@ -136,7 +130,6 @@ private fun AlbumSelectionItem(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Album cover thumbnail
         Box(
             modifier = Modifier
                 .size(AppIconSizes.extraLarge)
@@ -149,13 +142,10 @@ private fun AlbumSelectionItem(
                 .clip(AppShapes.imageShape),
             contentAlignment = Alignment.Center
         ) {
-            if (showCoverUri) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(album.coverUri!!.toUri())
-                        .size(Size(Constants.LIST_THUMBNAIL_SIZE, Constants.LIST_THUMBNAIL_SIZE))  // Small thumbnail for list item
-                        .build(),
-                    contentDescription = album.name,
+            if (coverState is AsyncImagePainter.State.Success) {
+                Image(
+                        painter = cover,
+                        contentDescription = album.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(AppIconSizes.extraLarge)
                 )
@@ -171,7 +161,6 @@ private fun AlbumSelectionItem(
 
         Spacer(modifier = Modifier.width(AppSpacing.large))
 
-        // Album info
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = album.name,
@@ -188,24 +177,10 @@ private fun AlbumSelectionItem(
             )
         }
 
-        // Selection indicator
         Icon(
             imageVector = if (isSelected) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
             contentDescription = if (isSelected) stringResource(R.string.currently_selected_album) else null,
             tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-/**
- * Check if URI is valid and accessible
- */
-private fun isValidUri(context: Context, uriString: String?): Boolean {
-    if (uriString.isNullOrEmpty()) return false
-    return try {
-        val uri = uriString.toUri()
-        context.contentResolver.openInputStream(uri)?.use { true } ?: false
-    } catch (_: Exception) {
-        false
     }
 }

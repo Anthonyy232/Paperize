@@ -14,20 +14,17 @@ import com.anthonyla.paperize.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar(
-    showSelectionModeAppBar: Boolean,
     onSettingsClick: () -> Unit
 ) {
-    if (!showSelectionModeAppBar) {
-        CenterAlignedTopAppBar(
-            title = { Text(stringResource(R.string.app_name)) },
-            actions = {
-                IconButton(onClick = onSettingsClick) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.settings_screen)
-                    )
-                }
+    CenterAlignedTopAppBar(
+        title = { Text(stringResource(R.string.app_name)) },
+        actions = {
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.settings_screen)
+                )
             }
-        )
-    }
+        }
+    )
 }

@@ -1,39 +1,6 @@
 package com.anthonyla.paperize.core.util
 
-/**
- * Utility object for building and managing wallpaper queues
- * Extracted from WallpaperRepositoryImpl for testability
- * 
- * Note: The DAO-specific operations remain in the repository,
- * but the pure logic functions are extracted here for testing.
- */
 object QueueBuilder {
-
-    /**
-     * Build a queue of wallpaper IDs based on display order (sequential mode)
-     * @param wallpaperIds List of wallpaper IDs with their display orders
-     * @return List of IDs sorted by display order
-     */
-    fun buildSequentialQueue(wallpaperIds: List<Pair<String, Int>>): List<String> {
-        return wallpaperIds.sortedBy { it.second }.map { it.first }
-    }
-
-    /**
-     * Build a shuffled queue of wallpaper IDs
-     * @param wallpaperIds List of wallpaper IDs to shuffle
-     * @return Shuffled list of IDs
-     */
-    fun buildShuffledQueue(wallpaperIds: List<String>): List<String> {
-        return wallpaperIds.shuffled()
-    }
-
-    /**
-     * Merge existing queue with new wallpapers while preserving existing order
-     * Used when new wallpapers are added to an album during shuffle mode
-     * @param existingQueueIds Current queue order (filtered to valid IDs)
-     * @param allWallpaperIds All current wallpaper IDs in the album
-     * @return Combined list with existing order preserved, new IDs shuffled at end
-     */
     fun mergeWithExistingQueue(
         existingQueueIds: List<String>,
         allWallpaperIds: List<String>
@@ -43,46 +10,5 @@ object QueueBuilder {
         val existingValid = existingQueueIds.filter { it in allSet }
         val newWallpaperIds = allWallpaperIds.filter { it !in existingSet }
         return existingValid + newWallpaperIds.shuffled()
-    }
-
-    /**
-     * Deterministic version of mergeWithExistingQueue for testing
-     * New wallpapers are appended in their original order instead of shuffled
-     */
-    fun mergeWithExistingQueueDeterministic(
-        existingQueueIds: List<String>,
-        allWallpaperIds: List<String>
-    ): List<String> {
-        val allSet = allWallpaperIds.toHashSet()
-        val existingSet = existingQueueIds.toHashSet()
-        val existingValid = existingQueueIds.filter { it in allSet }
-        val newWallpaperIds = allWallpaperIds.filter { it !in existingSet }
-        return existingValid + newWallpaperIds
-    }
-
-    /**
-     * Build a wallpaper queue based on shuffle and existing queues
-     * @param wallpapers Current list of wallpapers in the album
-     * @param shuffle Whether shuffle is enabled
-     * @param otherScreenQueue Optional existing queue for another screen type to synchronize with
-     * @return List of wallpaper IDs for the new queue
-     */
-    fun buildQueue(
-        wallpapers: List<com.anthonyla.paperize.domain.model.Wallpaper>,
-        shuffle: Boolean,
-        otherScreenQueue: List<String>? = null
-    ): List<String> {
-        return if (shuffle) {
-            if (otherScreenQueue != null && otherScreenQueue.isNotEmpty()) {
-                // Synchronize with existing queue from another screen
-                mergeWithExistingQueue(otherScreenQueue, wallpapers.map { it.id })
-            } else {
-                // New shuffled order
-                buildShuffledQueue(wallpapers.map { it.id })
-            }
-        } else {
-            // Sequential order by displayOrder
-            buildSequentialQueue(wallpapers.map { it.id to it.displayOrder })
-        }
     }
 }

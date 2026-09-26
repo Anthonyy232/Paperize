@@ -21,11 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.R
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
@@ -39,7 +39,6 @@ fun FolderItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Animate selection state changes
     val transition = updateTransition(isSelected, label = "FolderItemSelection")
     val paddingTransition by transition.animateDp(label = "padding") { selected ->
         if (selected) 5.dp else 0.dp
@@ -50,6 +49,7 @@ fun FolderItem(
 
     Card(
         modifier = modifier
+            .semantics { if (isSelectionMode) selected = isSelected }
             .padding(paddingTransition)
             .combinedClickable(
                 onClick = onClick,
@@ -70,7 +70,7 @@ fun FolderItem(
         ) {
             Icon(
                 imageVector = Icons.Default.Folder,
-                contentDescription = folder.displayName,
+                contentDescription = null,
                 modifier = Modifier.fillMaxSize(0.5f),
                 tint = if (isSelected) {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
@@ -89,27 +89,13 @@ fun FolderItem(
                     .padding(AppSpacing.small)
             )
 
-            // Selection indicator
             if (isSelectionMode) {
-                if (isSelected) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = stringResource(R.string.content_desc_selected),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(AppSpacing.small)
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.RadioButtonUnchecked,
-                        contentDescription = stringResource(R.string.content_desc_not_selected),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(AppSpacing.small)
-                    )
-                }
+                Icon(
+                    imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(AppSpacing.small)
+                )
             }
         }
     }

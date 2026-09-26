@@ -39,7 +39,7 @@ class WallpaperSchedulerInstrumentedTest {
     @Before
     @After
     fun clearTestSchedules() {
-        targets.values.forEach { name ->
+        (targets.values + Constants.WORK_NAME_REFRESH).forEach { name ->
             workManager.cancelUniqueWork(name).result.get(10, TimeUnit.SECONDS)
         }
     }
@@ -111,6 +111,46 @@ class WallpaperSchedulerInstrumentedTest {
         assertTrue(newHome.nextScheduleTimeMillis >= before + TimeUnit.MINUTES.toMillis(60))
         assertEquals(lock.id, sameLock.id)
         assertEquals(lock.nextScheduleTimeMillis, sameLock.nextScheduleTimeMillis)
+    }
+
+    @Test
+    fun startupKeepsExistingCountdownsAndSwitchesBetweenCombinedAndSeparateJobs() = runBlocking {
+        scheduler.scheduleWallpaperChange(ScreenType.HOME, 60, resetInterval = true)
+        scheduler.scheduleWallpaperChange(ScreenType.LOCK, 90, resetInterval = true)
+        val home = awaitEnqueued(Constants.WORK_NAME_HOME)
+        val lock = awaitEnqueued(Constants.WORK_NAME_LOCK)
+
+        val settings = ScheduleSettings(
+            enableChanger = true, homeEnabled = true, lockEnabled = true,
+            homeAlbumId = "home", lockAlbumId = "lock", separateSchedules = true,
+            homeIntervalMinutes = 15, lockIntervalMinutes = 15
+        )
+        scheduler.updateSchedules(settings, WallpaperMode.STATIC, onlyIfNotScheduled = true)
+        awaitEnqueued(Constants.WORK_NAME_REFRESH)
+        for ((name, previous) in listOf(Constants.WORK_NAME_HOME to home, Constants.WORK_NAME_LOCK to lock)) {
+            val kept = awaitEnqueued(name)
+            assertEquals(previous.id, kept.id)
+            assertEquals(previous.generation, kept.generation)
+            assertEquals(previous.nextScheduleTimeMillis, kept.nextScheduleTimeMillis)
+        }
+
+        scheduler.updateSchedules(settings.copy(homeIntervalMinutes = 60, lockAlbumId = "home", separateSchedules = false), WallpaperMode.STATIC, onlyIfNotScheduled = true)
+        awaitEnqueued(Constants.WORK_NAME_BOTH)
+        awaitCancelled(Constants.WORK_NAME_HOME)
+        awaitCancelled(Constants.WORK_NAME_LOCK)
+
+        scheduler.updateSchedules(settings.copy(homeIntervalMinutes = 30, lockIntervalMinutes = 45), WallpaperMode.STATIC, onlyIfNotScheduled = true)
+        val newHome = awaitEnqueued(Constants.WORK_NAME_HOME)
+        val newLock = awaitEnqueued(Constants.WORK_NAME_LOCK)
+        awaitCancelled(Constants.WORK_NAME_BOTH)
+        assertTrue(home.id != newHome.id)
+        assertTrue(lock.id != newLock.id)
+    }
+
+    private suspend fun awaitCancelled(name: String) = withTimeout(10_000) {
+        workManager.getWorkInfosForUniqueWorkFlow(name).first { infos ->
+            infos.isNotEmpty() && infos.all { it.state == WorkInfo.State.CANCELLED }
+        }
     }
 
     private suspend fun awaitEnqueued(

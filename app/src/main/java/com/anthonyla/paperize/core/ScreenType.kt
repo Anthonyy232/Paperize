@@ -1,8 +1,5 @@
 package com.anthonyla.paperize.core
 
-/**
- * Screen types for wallpaper setting
- */
 enum class ScreenType {
     HOME,
     LOCK,

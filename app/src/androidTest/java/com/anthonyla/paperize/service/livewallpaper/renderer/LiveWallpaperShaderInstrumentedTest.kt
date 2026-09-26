@@ -17,6 +17,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -88,11 +89,92 @@ class LiveWallpaperShaderInstrumentedTest {
     }
 
     @Test
+    fun wallpaperConfigSupportsEs2WindowSurfaces() {
+        val egl = javax.microedition.khronos.egl.EGLContext.getEGL() as javax.microedition.khronos.egl.EGL10
+        val eglDisplay = egl.eglGetCurrentDisplay()
+        val config = com.anthonyla.paperize.service.livewallpaper.gl.WallpaperEglConfigChooser()
+            .chooseConfig(egl, eglDisplay)
+        val attribute = IntArray(1)
+        assertTrue(egl.eglGetConfigAttrib(eglDisplay, config, EGL14.EGL_RENDERABLE_TYPE, attribute))
+        assertTrue(attribute[0] and EGL14.EGL_OPENGL_ES2_BIT != 0)
+        assertTrue(egl.eglGetConfigAttrib(eglDisplay, config, EGL14.EGL_SURFACE_TYPE, attribute))
+        assertTrue(attribute[0] and EGL14.EGL_WINDOW_BIT != 0)
+    }
+
+    @Test
+    fun rendererDrawsTheFinalCrossfadeFrameAndRejectsSupersededUploads() {
+        val app = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        val uploads = java.util.concurrent.LinkedBlockingQueue<() -> Unit>()
+        var renderRequests = 0
+        val renderer = PaperizeWallpaperRenderer(app, object : PaperizeWallpaperRenderer.Callbacks {
+            override fun queueEventOnGlThread(event: () -> Unit): Boolean = uploads.offer(event)
+            override fun requestRender() { renderRequests++ }
+        })
+        val egl = javax.microedition.khronos.egl.EGLContext.getEGL() as javax.microedition.khronos.egl.EGL10
+        val gl = egl.eglGetCurrentContext().gl as javax.microedition.khronos.opengles.GL10
+        val config = com.anthonyla.paperize.service.livewallpaper.gl.WallpaperEglConfigChooser()
+            .chooseConfig(egl, egl.eglGetCurrentDisplay())
+        val file = java.io.File.createTempFile("live-renderer", ".png", app.cacheDir)
+        val replacement = java.io.File.createTempFile("live-renderer-next", ".png", app.cacheDir)
+        try {
+            val bitmap = solidBitmap(Color.WHITE)
+            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            bitmap.recycle()
+            val loader = ContentUriImageLoader(app.contentResolver, android.net.Uri.fromFile(file))
+            renderer.onSurfaceCreated(gl, config)
+            renderer.onSurfaceChanged(gl, SIZE, SIZE)
+            renderer.queueWallpaper(loader)
+            val staleUpload = checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS))
+            renderer.queueWallpaper(loader)
+            val activeUpload = checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS))
+            staleUpload()
+            assertEquals(0, renderRequests)
+            activeUpload()
+            renderer.onDrawFrame(gl)
+            android.os.SystemClock.sleep(com.anthonyla.paperize.core.constants.Constants.CROSSFADE_DURATION_MS.toLong() + 50L)
+            val requestsBeforeFinalFrame = renderRequests
+            renderer.onDrawFrame(gl)
+            assertEquals(requestsBeforeFinalFrame, renderRequests)
+            assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) >= 253)
+
+            renderer.updateEffects(com.anthonyla.paperize.domain.model.WallpaperEffects(
+                enableBlur = true, blurPercentage = 50
+            ))
+            renderer.onDrawFrame(gl)
+            assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) >= 253)
+
+            val red = solidBitmap(Color.RED)
+            replacement.outputStream().use { red.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            red.recycle()
+            renderer.queueWallpaper(ContentUriImageLoader(app.contentResolver, android.net.Uri.fromFile(replacement)))
+            val uploadBeforeResize = checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS))
+            renderer.onSurfaceChanged(gl, SIZE, SIZE - 2)
+            uploadBeforeResize()
+            checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS)).invoke()
+            renderer.onDrawFrame(gl)
+            assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) >= 253)
+            assertTrue(Color.green(readPixel(SIZE / 2, SIZE / 2)) <= 2)
+
+            destroyGlContext()
+            createGlContext()
+            renderer.onSurfaceCreated(gl, config)
+            renderer.onSurfaceChanged(gl, SIZE, SIZE)
+            checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS)).invoke()
+            renderer.onDrawFrame(gl)
+            assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) >= 253)
+            assertTrue(Color.green(readPixel(SIZE / 2, SIZE / 2)) <= 2)
+            GLUtil.checkGLError("recreated wallpaper surface")
+        } finally {
+            renderer.destroy()
+            file.delete()
+            replacement.delete()
+        }
+    }
+
+    @Test
     fun everyLiveWallpaperShaderCompilesAndLinksOnDevice() {
         listOf(
-            GLShaders.SIMPLE_FRAGMENT_SHADER,
-            GLShaders.BLUR_HORIZONTAL_FRAGMENT_SHADER,
-            GLShaders.BLUR_VERTICAL_FRAGMENT_SHADER,
+            GLShaders.BLUR_FRAGMENT_SHADER,
             GLShaders.EFFECTS_FRAGMENT_SHADER
         ).forEach { fragmentShader ->
             val program = GLUtil.createProgram(GLShaders.VERTEX_SHADER, fragmentShader)
@@ -142,23 +224,18 @@ class LiveWallpaperShaderInstrumentedTest {
         val horizontalTexture = createTexture(horizontal)
         val verticalTexture = createTexture(vertical)
 
-        val horizontalProgram = GLUtil.createProgram(
+        val blurProgram = GLUtil.createProgram(
             GLShaders.VERTEX_SHADER,
-            GLShaders.BLUR_HORIZONTAL_FRAGMENT_SHADER
-        )
-        val verticalProgram = GLUtil.createProgram(
-            GLShaders.VERTEX_SHADER,
-            GLShaders.BLUR_VERTICAL_FRAGMENT_SHADER
+            GLShaders.BLUR_FRAGMENT_SHADER
         )
         try {
-            drawBlur(horizontalProgram, horizontalTexture)
+            drawBlur(blurProgram, horizontalTexture, 1f, 0f)
             assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) in 10..245)
 
-            drawBlur(verticalProgram, verticalTexture)
+            drawBlur(blurProgram, verticalTexture, 0f, 1f)
             assertTrue(Color.red(readPixel(SIZE / 2, SIZE / 2)) in 10..245)
         } finally {
-            GLES20.glDeleteProgram(horizontalProgram)
-            GLES20.glDeleteProgram(verticalProgram)
+            GLES20.glDeleteProgram(blurProgram)
             GLES20.glDeleteTextures(2, intArrayOf(horizontalTexture, verticalTexture), 0)
         }
     }
@@ -183,10 +260,11 @@ class LiveWallpaperShaderInstrumentedTest {
         finishDraw(program)
     }
 
-    private fun drawBlur(program: Int, texture: Int) {
+    private fun drawBlur(program: Int, texture: Int, x: Float, y: Float) {
         prepareDraw(program, texture)
         GLES20.glUniform2f(GLES20.glGetUniformLocation(program, "u_resolution"), SIZE.toFloat(), SIZE.toFloat())
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "u_blurRadius"), 4f)
+        GLES20.glUniform2f(GLES20.glGetUniformLocation(program, "u_direction"), x, y)
         finishDraw(program)
     }
 

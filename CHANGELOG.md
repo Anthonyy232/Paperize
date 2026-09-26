@@ -1,3 +1,23 @@
+## v4.2.0
+
+### Library and albums
+- Make image imports and folder refreshes cancellable and transactional, with accurate progress and useful failure feedback.
+- Preserve library entries when a document provider is temporarily unavailable, avoid duplicate imports, and refresh folder metadata and covers consistently.
+- Preserve library data when upgrading older database versions.
+- Improve album deletion, selection cleanup, sorting, and empty-album actions.
+
+### Wallpaper reliability
+- Keep home and lock schedules consistent across restarts, manual changes, and settings edits.
+- Prevent rapid settings edits from overwriting newer album selections or pause/resume actions.
+- Share wallpaper application and rendering between manual changes and scheduled jobs, with consistent failure recovery.
+- Correct static image sizing, thin-image decoding, and FIT/STRETCH fallback rendering.
+
+### Live wallpaper and interface
+- Fix crossfade completion and preserve pending wallpaper changes when folding, resizing, or recreating the rendering surface.
+- Improve OpenGL resource cleanup, blur rendering, and memory use.
+- Respect animation settings in previews and improve sorting accessibility and settings feedback.
+- Remove redundant UI, unused dependencies, obsolete compatibility code, and low-value tests and comments.
+
 ## v4.1.1
 
 - Fixed manual changes triggering an immediate extra automatic change by deferring

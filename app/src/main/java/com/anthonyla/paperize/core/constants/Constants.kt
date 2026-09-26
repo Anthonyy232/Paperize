@@ -1,8 +1,5 @@
 package com.anthonyla.paperize.core.constants
 
-/**
- * Application-wide constants
- */
 object Constants {
     // Database
     const val DATABASE_NAME = "paperize_database"
@@ -77,7 +74,6 @@ object Constants {
     // Image processing
     const val MAX_BLUR_RADIUS = 25.0f
     const val BRIGHTNESS_SAMPLE_SIZE = 10  // Pixel sample size for brightness calculation
-    const val DEFAULT_BRIGHTNESS = 0.5f  // Default brightness fallback
 
     // Luminance coefficients (ITU-R BT.709 standard)
     const val LUMINANCE_RED = 0.2126
@@ -115,23 +111,17 @@ object Constants {
     )
 
     // Renderer
-    /** Crossfade animation duration in milliseconds - consistent across all refresh rates */
     const val CROSSFADE_DURATION_MS = 750f
     const val RELOAD_THROTTLE_MS = 250L
     const val BLUR_MIN_THRESHOLD = 0.01f
     const val PERCENTAGE_DIVISOR = 100f
     const val GL_ES_VERSION = 2
-    const val SURFACE_POLL_INTERVAL_MS = 50L
-    const val SURFACE_WAIT_TIMEOUT_MS = 1000L  // Max wait for GL surface dimensions before falling back to display metrics
 
     // Wallpaper loading
     const val MAX_WALLPAPER_LOAD_RETRIES = 10
     const val MAX_QUEUE_REBUILD_ATTEMPTS = 2
 }
 
-/**
- * Preference keys for DataStore
- */
 object PreferenceKeys {
     // Theme
     const val DARK_MODE = "dark_mode"

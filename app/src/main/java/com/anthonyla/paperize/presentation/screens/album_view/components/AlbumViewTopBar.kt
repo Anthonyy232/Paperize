@@ -32,7 +32,6 @@ fun AlbumViewTopBar(
     onClearSelection: () -> Unit
 ) {
     if (isSelectionMode) {
-        // Selection mode topbar
         TopAppBar(
             title = {
                 Text(
@@ -65,7 +64,6 @@ fun AlbumViewTopBar(
             }
         )
     } else {
-        // Normal mode topbar
         TopAppBar(
             title = {
                 Text(

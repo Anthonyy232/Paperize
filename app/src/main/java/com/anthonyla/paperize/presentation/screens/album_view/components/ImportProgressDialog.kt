@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,18 +25,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.screens.album_view.ImportProgress
 
-/**
- * Non-dismissable modal shown while a folder/wallpaper import is running, displaying a live count
- * (and a determinate bar once the total is known) instead of a bare spinner.
- *
- * Renders nothing when [progress] is [ImportProgress.Idle].
- */
 @Composable
-fun ImportProgressDialog(progress: ImportProgress) {
+fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
     if (progress is ImportProgress.Idle) return
 
     Dialog(
-        onDismissRequest = { /* Block dismissal while importing */ },
+        onDismissRequest = {},
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
     ) {
         Surface(
@@ -91,7 +85,10 @@ fun ImportProgressDialog(progress: ImportProgress) {
                         )
                     }
 
-                    ImportProgress.Idle -> Unit // unreachable, guarded above
+                    ImportProgress.Idle -> Unit
+                }
+                TextButton(onClick = onCancel, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         }

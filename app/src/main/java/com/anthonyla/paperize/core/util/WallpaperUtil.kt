@@ -5,6 +5,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import androidx.core.graphics.createBitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
@@ -20,6 +21,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
+import android.graphics.RectF
 import android.graphics.Shader
 import android.hardware.display.DisplayManager
 import android.hardware.HardwareBuffer
@@ -34,26 +36,11 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
-import com.anthonyla.paperize.core.WallpaperMediaType
-
-/**
- * Wallpaper utility functions for bitmap processing and effects
- *
- * Improvements:
- * - Added EXIF orientation handling
- * - API-safe blur with fallback for Android < S
- * - Memory management with bitmap recycling
- * - Effect enable flags respected
- * - Quality optimization options
- */
 
 private const val TAG = "WallpaperUtil"
 private const val BUILT_IN_DISPLAY_CATEGORY =
     "android.hardware.display.category.BUILT_IN_DISPLAYS"
 
-/**
- * Get EXIF orientation from URI
- */
 fun Uri.getExifOrientation(context: Context): Int {
     return try {
         context.contentResolver.openInputStream(this)?.use { inputStream ->
@@ -66,9 +53,6 @@ fun Uri.getExifOrientation(context: Context): Int {
     }
 }
 
-/**
- * Create transformation matrix for EXIF orientation
- */
 fun getExifTransformationMatrix(orientation: Int, width: Int, height: Int): Matrix {
     val matrix = Matrix()
 
@@ -106,9 +90,6 @@ fun getExifTransformationMatrix(orientation: Int, width: Int, height: Int): Matr
     return matrix
 }
 
-/**
- * Calculate the inSampleSize for the image
- */
 fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
     if (imageSize.width == 0 || imageSize.height == 0) return 1
     if (width == 0 || height == 0) return 1
@@ -124,9 +105,6 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
     return 1
 }
 
-/**
- * Get device screen size without orientation
- */
 object ScreenMetricsCompat {
     fun getScreenSize(context: Context): Size {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -166,7 +144,6 @@ object ScreenMetricsCompat {
     }
 }
 
-/** Prefer stable natural-orientation panel modes, falling back to the current window if needed. */
 internal fun selectWallpaperDisplayDimensions(
     currentWindow: Pair<Int, Int>,
     supportedModes: Iterable<Pair<Int, Int>>
@@ -174,11 +151,6 @@ internal fun selectWallpaperDisplayDimensions(
     ?: currentWindow.takeIf { (width, height) -> width > 0 && height > 0 }
     ?: (1 to 1)
 
-/**
- * Select the highest-resolution display dimensions.
- *
- * Kept platform-independent so foldable sizing behavior is covered by local unit tests.
- */
 internal fun selectLargestDisplayDimensions(
     candidates: Iterable<Pair<Int, Int>>
 ): Pair<Int, Int>? = candidates
@@ -191,24 +163,7 @@ internal fun selectLargestDisplayDimensions(
         )
     )
 
-/**
- * Get the stable natural-orientation size of the largest built-in display panel.
- */
 fun getDeviceScreenSize(context: Context): Size = ScreenMetricsCompat.getScreenSize(context)
-
-/**
- * Get the target render size for a wallpaper bitmap.
- *
- * Every static scaling mode is rendered against one physical panel. A launcher's desired
- * wallpaper canvas may be much wider than the display; using it for FIT/NONE creates black-only
- * viewports and using it for STRETCH distorts the image. Optional FILL scrolling retains real
- * source overflow after decoding instead of inflating the target canvas.
- */
-fun getWallpaperRenderSize(
-    context: Context,
-    screenType: com.anthonyla.paperize.core.ScreenType,
-    scaling: ScalingType = ScalingType.FIT
-): Size = getDeviceScreenSize(context)
 
 /**
  * Whether a static wallpaper should retain source overflow for launcher-managed scrolling.
@@ -225,14 +180,6 @@ internal fun usesLauncherManagedScrolling(
         screenType == com.anthonyla.paperize.core.ScreenType.BOTH) &&
         scaling == ScalingType.FILL
 
-/**
- * Retrieve a bitmap from a URI that is scaled down to the device's screen size.
- *
- * ImageDecoder is the primary path: it auto-applies EXIF orientation and exposes
- * post-EXIF dimensions in the callback via info.size, so we no longer need a
- * separate getImageDimensions() pre-read. The BitmapFactory fallback computes its
- * own inSampleSize inline to avoid an extra stream open on the happy path.
- */
 fun retrieveBitmap(
     context: Context,
     wallpaperUri: Uri,
@@ -241,52 +188,22 @@ fun retrieveBitmap(
     scaling: ScalingType = ScalingType.FIT,
     preserveSourceOverflow: Boolean = false
 ): Bitmap? {
-    // ImageDecoder auto-applies EXIF orientation; info.size is the post-EXIF display size.
-    // No separate getImageDimensions() call needed — saves 1-2 stream opens per wallpaper.
+    // ImageDecoder reports dimensions after applying EXIF orientation.
     var decodedWithImageDecoder = false
     val bitmap = try {
         val source = ImageDecoder.createSource(context.contentResolver, wallpaperUri)
         val result = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-            val srcWidth = info.size.width
-            val srcHeight = info.size.height
-
-            when (scaling) {
-                ScalingType.FILL -> {
-                    // Scale to fill, then crop to canvas during decode.
-                    // setCrop avoids allocating the full fill-scale bitmap (which can be
-                    // much taller/wider than the canvas) — major OOM prevention.
-                    val scale = maxOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
-                    val targetW = (srcWidth * scale).fastRoundToInt()
-                    val targetH = (srcHeight * scale).fastRoundToInt()
-                    decoder.setTargetSize(targetW, targetH)
-                    if (!preserveSourceOverflow && (targetW > width || targetH > height)) {
-                        val cropX = ((targetW - width) / 2).coerceAtLeast(0)
-                        val cropY = ((targetH - height) / 2).coerceAtLeast(0)
-                        decoder.setCrop(android.graphics.Rect(
-                            cropX, cropY, cropX + width, cropY + height
-                        ))
-                    }
-                }
-                ScalingType.FIT -> {
-                    val scale = minOf(width.toFloat() / srcWidth, height.toFloat() / srcHeight)
-                    decoder.setTargetSize(
-                        (srcWidth * scale).fastRoundToInt(),
-                        (srcHeight * scale).fastRoundToInt()
-                    )
-                }
-                ScalingType.STRETCH -> decoder.setTargetSize(width, height)
-                ScalingType.NONE -> {
-                    val maxWidth = width * 2
-                    val maxHeight = height * 2
-                    if (srcWidth > maxWidth || srcHeight > maxHeight) {
-                        val scale = minOf(maxWidth.toFloat() / srcWidth, maxHeight.toFloat() / srcHeight)
-                        decoder.setTargetSize(
-                            (srcWidth * scale).fastRoundToInt(),
-                            (srcHeight * scale).fastRoundToInt()
-                        )
-                    }
-                    // else: decode at original resolution
-                }
+            val (targetW, targetH) = calculateDecodeSize(
+                info.size.width, info.size.height, width, height, scaling
+            )
+            decoder.setTargetSize(targetW, targetH)
+            // Crop during decode to avoid allocating fill-scale overflow.
+            if (scaling == ScalingType.FILL && !preserveSourceOverflow &&
+                (targetW > width || targetH > height)
+            ) {
+                val cropX = ((targetW - width) / 2).coerceAtLeast(0)
+                val cropY = ((targetH - height) / 2).coerceAtLeast(0)
+                decoder.setCrop(android.graphics.Rect(cropX, cropY, cropX + width, cropY + height))
             }
 
             decoder.isMutableRequired = true
@@ -297,8 +214,6 @@ fun retrieveBitmap(
     } catch (e: Exception) {
         Log.w(TAG, "ImageDecoder failed, falling back to BitmapFactory: $e")
         try {
-            // Compute inSampleSize from a bounds-only pass, then decode in a second pass.
-            // Two opens only on the rare fallback path — the primary ImageDecoder path is free.
             val sampleSize = context.contentResolver.openInputStream(wallpaperUri)?.use { stream ->
                 val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeStream(stream, null, opts)
@@ -324,13 +239,7 @@ fun retrieveBitmap(
     // Only apply EXIF orientation for the BitmapFactory path — ImageDecoder already handles it
     val oriented = if (decodedWithImageDecoder) bitmap else bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
 
-    // Composite onto an exact (width × height) canvas so WallpaperManager.setBitmap() receives
-    // a bitmap that already matches the desired canvas dimensions.  Without this step the launcher
-    // still has to scale/position the bitmap, which undoes the scaling mode the user chose:
-    //   FILL  → decoded bitmap may be taller than canvas; center-crop to canvas size.
-    //   FIT   → decoded bitmap may be narrower/shorter than canvas; center on black canvas.
-    //   NONE  → original-size image may be smaller than canvas; center on black canvas.
-    //   STRETCH → decoder was told the exact canvas size; no-op.
+    // An exact canvas prevents the launcher from undoing the selected scaling mode.
     return oriented?.let {
         if (preserveSourceOverflow && scaling == ScalingType.FILL) {
             scaleToFillPreservingOverflow(it, width, height)
@@ -364,73 +273,29 @@ private fun scaleToFillPreservingOverflow(
     return scaled
 }
 
-/**
- * Produce a bitmap of exactly [canvasW] × [canvasH] pixels according to [scaling]:
- *
- * - FILL:    the source already fills (or overflows) the canvas because [retrieveBitmap]
- *            decoded it at fill-scale.  Center-crop any overflow.
- * - FIT:     the source fits within the canvas but may leave empty margins.
- *            Draw it centered on a black [canvasW]×[canvasH] bitmap.
- * - STRETCH: [retrieveBitmap] decoded to the exact canvas size; nothing to do.
- * - NONE:    the source is at most canvas-sized (possibly smaller).
- *            Draw it centered on a black [canvasW]×[canvasH] bitmap.
- */
-private fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scaling: ScalingType): Bitmap {
-    val sw = source.width
-    val sh = source.height
-
-    return when (scaling) {
-        ScalingType.FILL -> {
-            // Primary path (ImageDecoder): source was decoded at fill-scale so it is
-            // >= canvasW wide AND >= canvasH tall.  Center-crop to exact canvas size.
-            // Fallback path (BitmapFactory): source may be smaller if the image needed
-            // upscaling — scale up first, then center-crop.
-            val fillSrc = if (sw < canvasW || sh < canvasH) {
-                val scale = maxOf(canvasW.toFloat() / sw, canvasH.toFloat() / sh)
-                val scaledW = (sw * scale).fastRoundToInt()
-                val scaledH = (sh * scale).fastRoundToInt()
-                val scaled = Bitmap.createScaledBitmap(source, scaledW, scaledH, true)
-                if (scaled !== source) source.recycle()
-                scaled
-            } else source
-            val fsw = fillSrc.width
-            val fsh = fillSrc.height
-            if (fsw == canvasW && fsh == canvasH) return fillSrc
-            val x = ((fsw - canvasW) / 2).coerceAtLeast(0)
-            val y = ((fsh - canvasH) / 2).coerceAtLeast(0)
-            val cropped = Bitmap.createBitmap(fillSrc, x, y, canvasW, canvasH)
-            if (cropped !== fillSrc) fillSrc.recycle()
-            cropped
-        }
-
-        ScalingType.FIT, ScalingType.NONE -> {
-            // FIT / NONE: source fits within the canvas; center it on a black background.
-            if (sw == canvasW && sh == canvasH) return source
-            compositeCenter(source, canvasW, canvasH)
-        }
-
-        ScalingType.STRETCH -> source // decoder was given exact canvas dimensions
+/** Render either decoder's output onto the requested canvas; consumes [source]. */
+internal fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scaling: ScalingType): Bitmap {
+    if (source.width == canvasW && source.height == canvasH) return source
+    val widthRatio = canvasW.toFloat() / source.width
+    val heightRatio = canvasH.toFloat() / source.height
+    val scale = when (scaling) {
+        ScalingType.FILL -> maxOf(widthRatio, heightRatio)
+        ScalingType.FIT -> minOf(widthRatio, heightRatio)
+        ScalingType.NONE, ScalingType.STRETCH -> 1f
     }
-}
-
-/**
- * Draw [source] centered on a new [canvasW]×[canvasH] black bitmap and return the result.
- * [source] is recycled unless it is the same object as the returned bitmap.
- */
-private fun compositeCenter(source: Bitmap, canvasW: Int, canvasH: Int): Bitmap {
-    val canvas = Bitmap.createBitmap(canvasW, canvasH, Bitmap.Config.ARGB_8888)
-    val c = Canvas(canvas)
-    c.drawColor(Color.BLACK)
-    val offsetX = ((canvasW - source.width) / 2f).coerceAtLeast(0f)
-    val offsetY = ((canvasH - source.height) / 2f).coerceAtLeast(0f)
-    c.drawBitmap(source, offsetX, offsetY, null)
+    val width = if (scaling == ScalingType.STRETCH) canvasW.toFloat() else source.width * scale
+    val height = if (scaling == ScalingType.STRETCH) canvasH.toFloat() else source.height * scale
+    val left = (canvasW - width) / 2f
+    val top = (canvasH - height) / 2f
+    val result = createBitmap(canvasW, canvasH)
+    Canvas(result).apply {
+        drawColor(Color.BLACK)
+        drawBitmap(source, null, RectF(left, top, left + width, top + height), Paint(Paint.FILTER_BITMAP_FLAG))
+    }
     source.recycle()
-    return canvas
+    return result
 }
 
-/**
- * Apply EXIF orientation to bitmap
- */
 private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bitmap {
     val orientation = uri.getExifOrientation(context)
     if (orientation == ExifInterface.ORIENTATION_UNDEFINED || orientation == ExifInterface.ORIENTATION_NORMAL) {
@@ -453,120 +318,48 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
     }
 }
 
-
-
-
 /**
  * Darken the bitmap by a certain percentage
  * @param darkenPercent 0-100 (0 is original brightness, 100 is completely dark/black)
  */
-fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap {
-    if (!source.isMutable) {
-        Log.w(TAG, "darkenBitmap received an immutable bitmap. Creating a mutable copy.")
-        val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        // Do not recycle source here — caller owns the lifecycle and handles recycling
-        return darkenBitmap(mutableCopy, darkenPercent)
-    }
-
-    // Convert darkenPercent to brightness factor (invert)
-    val targetBrightnessFactor = (100 - darkenPercent.coerceIn(0, 100)) / 100f
-    if (targetBrightnessFactor >= 1.0f) {
-        return source
-    }
-
-    val paint = Paint().apply {
-        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply {
-            setScale(targetBrightnessFactor, targetBrightnessFactor, targetBrightnessFactor, 1f)
-        })
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
-    }
-    Canvas(source).drawBitmap(source, 0f, 0f, paint)
-    return source
-}
+fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap =
+    adjustBitmapBrightness(source, (100 - darkenPercent.coerceIn(0, 100)) / 100f)
 
 /**
  * Blur the bitmap using GPU acceleration
  * @param percent 0-100
  */
-fun blurBitmapHardware(source: Bitmap, percent: Int): Bitmap {
-    val clampedPercent = percent.coerceIn(0, 100)
-    if (clampedPercent == 0) {
-        return source
-    }
-
-    val maxBlurRadius = Constants.MAX_BLUR_RADIUS
-    val radius = (clampedPercent / 100.0f) * maxBlurRadius
-
-    val imageReader = ImageReader.newInstance(
-        source.width, source.height,
-        PixelFormat.RGBA_8888, 1,
-        HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE or HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
-    )
-
-    val renderNode = RenderNode("BlurEffect")
-    val hardwareRenderer = HardwareRenderer()
-
-    var resultBitmap: Bitmap?
-    try {
-        hardwareRenderer.setSurface(imageReader.surface)
-        hardwareRenderer.setContentRoot(renderNode)
-        renderNode.setPosition(0, 0, source.width, source.height)
-
-        val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
-        renderNode.setRenderEffect(blurEffect)
-
-        val canvas = renderNode.beginRecording()
-        canvas.drawBitmap(source, 0f, 0f, null)
-        renderNode.endRecording()
-
-        hardwareRenderer.createRenderRequest()
-            .setWaitForPresent(true)
-            .syncAndDraw()
-
-        val image = imageReader.acquireNextImage()
-            ?: throw IllegalStateException("Failed to acquire blurred image")
-
-        try {
-            val hardwareBuffer = image.hardwareBuffer
-                ?: throw IllegalStateException("Failed to acquire hardware buffer")
-
-            try {
-                val hardwareBitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, null)
-                    ?: throw IllegalStateException("Failed to create bitmap from hardware buffer")
-
-                // Convert hardware bitmap to regular bitmap for further processing
-                // Use mutable=true to allow subsequent effects to modify in-place
-                resultBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                    ?: throw IllegalStateException("Failed to copy hardware bitmap to software bitmap")
-
-                hardwareBitmap.recycle()
-            } finally {
-                hardwareBuffer.close()
-            }
-        } finally {
-            image.close()
-        }
-
+fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
+    if (percent <= 0) return source
+    return try {
+        processBitmapGpu(source, false, 0, true, percent, false, 0, false, 0)
     } catch (e: Exception) {
-        Log.e(TAG, "Error blurring bitmap: $e")
-        return source
+        Log.e(TAG, "Error blurring bitmap", e)
+        source
     } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM blurring bitmap: $e")
-        return source
-    } finally {
-        hardwareRenderer.destroy()
-        renderNode.discardDisplayList()
-        imageReader.close()
+        Log.e(TAG, "OOM blurring bitmap", e)
+        source
     }
-
-    return resultBitmap
 }
 
-/**
- * Blur bitmap using GPU acceleration
- */
-fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
-    return blurBitmapHardware(source, percent)
+private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) {
+    val centerX = width / 2f
+    val centerY = height / 2f
+    val radius = (kotlin.math.hypot(centerX, centerY) *
+        (1 - percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))
+        .coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        shader = RadialGradient(
+            centerX, centerY, radius,
+            intArrayOf(
+                Color.TRANSPARENT,
+                Color.argb((Constants.VIGNETTE_INNER_ALPHA * 255).toInt(), 0, 0, 0),
+                Color.argb((Constants.VIGNETTE_OUTER_ALPHA * 255).toInt(), 0, 0, 0)
+            ),
+            Constants.VIGNETTE_GRADIENT_POSITIONS, Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 }
 
 /**
@@ -583,29 +376,7 @@ fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
     }
 
     return try {
-        val canvas = Canvas(source)
-        // Use corner-to-center diagonal so the vignette darkens uniformly in all directions
-        val halfW = source.width / 2f
-        val halfH = source.height / 2f
-        val diagonal = kotlin.math.sqrt(halfW * halfW + halfH * halfH)
-        val rad = (diagonal * (1 - (percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))).coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
-        val centerX = source.width / 2f
-        val centerY = source.height / 2f
-
-        val colors = intArrayOf(
-            Color.TRANSPARENT,
-            Color.argb((Constants.VIGNETTE_INNER_ALPHA * 255).toInt(), 0, 0, 0),
-            Color.argb((Constants.VIGNETTE_OUTER_ALPHA * 255).toInt(), 0, 0, 0)
-        )
-        val pos = Constants.VIGNETTE_GRADIENT_POSITIONS
-
-        val vignettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = RadialGradient(
-                centerX, centerY, rad,
-                colors, pos, Shader.TileMode.CLAMP
-            )
-        }
-        canvas.drawRect(0f, 0f, source.width.toFloat(), source.height.toFloat(), vignettePaint)
+        drawVignette(Canvas(source), source.width, source.height, percent)
         source
     } catch (e: Exception) {
         Log.e(TAG, "Error applying vignette: $e")
@@ -630,7 +401,6 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
     }
 
     val factor = percent.coerceIn(0, 100) / 100f
-    if (factor <= 0f) return source
 
     val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
     val paint = Paint().apply {
@@ -640,14 +410,6 @@ fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
 
     Canvas(source).drawBitmap(source, 0f, 0f, paint)
     return source
-}
-
-/**
- * Calculate brightness estimate of bitmap (0.0 - 1.0)
- * Uses luminance calculation based on RGB values
- */
-fun calculateBitmapBrightness(bitmap: Bitmap): Float {
-    return BrightnessCalculator.calculateBitmapBrightness(bitmap)
 }
 
 /**
@@ -673,14 +435,6 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
     return source
 }
 
-
-/**
- * Get adaptive brightness multiplier factor based on system dark/light mode
- * 
- * @param context Application context
- * @param brightness Current image brightness (0.0 to 1.0)
- * @return Multiplier factor to apply to colors
- */
 fun getAdaptiveBrightnessMultiplier(context: Context, brightness: Float): Float {
     val isDarkMode = (context.resources.configuration.uiMode and
         Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
@@ -704,16 +458,6 @@ fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {
     }
 }
 
-/**
- * Process bitmap with all effects - now respects enable flags
- * Properly manages bitmap lifecycle by recycling intermediate results
- *
- * Uses a GPU-accelerated pipeline via [RenderEffect] chaining when possible (API 31+).
- * All colour-filter effects (darken, grayscale) and blur are composed into a single
- * RenderNode draw call so there is only **one** GPU→CPU copy at the end.
- * Vignette is drawn on the same RenderNode canvas before read-back.
- * Falls back to the sequential CPU path on error.
- */
 fun processBitmap(
     source: Bitmap,
     enableDarken: Boolean = false,
@@ -725,14 +469,12 @@ fun processBitmap(
     enableGrayscale: Boolean = false,
     grayscalePercent: Int = 0
 ): Bitmap {
-    // Fast path – nothing to do
     val hasDarken = enableDarken && darkenPercent > 0
     val hasBlur = enableBlur && blurPercent > 0
     val hasVignette = enableVignette && vignettePercent > 0
     val hasGrayscale = enableGrayscale && grayscalePercent > 0
     if (!hasDarken && !hasBlur && !hasVignette && !hasGrayscale) return source
 
-    // Try GPU-chained path
     try {
         return processBitmapGpu(
             source,
@@ -747,7 +489,6 @@ fun processBitmap(
         Log.w(TAG, "OOM in GPU effects pipeline, falling back to CPU: $e")
     }
 
-    // CPU fallback
     return processBitmapCpu(
         source,
         hasDarken, darkenPercent,
@@ -785,7 +526,6 @@ private fun processBitmapGpu(
         hardwareRenderer.setContentRoot(renderNode)
         renderNode.setPosition(0, 0, w, h)
 
-        // --- Build chained RenderEffect (darken → blur → grayscale) ---
         var effect: RenderEffect? = null
 
         if (hasDarken) {
@@ -820,56 +560,28 @@ private fun processBitmapGpu(
             renderNode.setRenderEffect(effect)
         }
 
-        // --- Record canvas commands ---
         val canvas = renderNode.beginRecording()
         canvas.drawBitmap(source, 0f, 0f, null)
 
-        // Vignette is an overlay drawn on top of the source in the same pass
         if (hasVignette) {
-            val halfW = w / 2f
-            val halfH = h / 2f
-            val diagonal = kotlin.math.sqrt(halfW * halfW + halfH * halfH)
-            val rad = (diagonal * (1 - (vignettePercent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR)))
-                .coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
-            val colors = intArrayOf(
-                Color.TRANSPARENT,
-                Color.argb((Constants.VIGNETTE_INNER_ALPHA * 255).toInt(), 0, 0, 0),
-                Color.argb((Constants.VIGNETTE_OUTER_ALPHA * 255).toInt(), 0, 0, 0)
-            )
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                shader = RadialGradient(
-                    halfW, halfH, rad,
-                    colors, Constants.VIGNETTE_GRADIENT_POSITIONS, Shader.TileMode.CLAMP
-                )
-            }
-            canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), paint)
+            drawVignette(canvas, w, h, vignettePercent)
         }
 
         renderNode.endRecording()
 
-        // --- Single GPU render + single read-back ---
         hardwareRenderer.createRenderRequest()
             .setWaitForPresent(true)
             .syncAndDraw()
 
-        val image = imageReader.acquireNextImage()
-            ?: throw IllegalStateException("Failed to acquire image after GPU render")
-
-        try {
-            val hwBuffer = image.hardwareBuffer
-                ?: throw IllegalStateException("Failed to acquire hardware buffer")
-            try {
-                val hwBitmap = Bitmap.wrapHardwareBuffer(hwBuffer, null)
-                    ?: throw IllegalStateException("Failed to wrap hardware buffer")
-                val result = hwBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                    ?: throw IllegalStateException("Failed to copy hardware bitmap")
-                hwBitmap.recycle()
-                return result
-            } finally {
-                hwBuffer.close()
+        return checkNotNull(imageReader.acquireNextImage()) { "Failed to acquire rendered image" }.use { image ->
+            checkNotNull(image.hardwareBuffer) { "Failed to acquire hardware buffer" }.use { buffer ->
+                val bitmap = checkNotNull(Bitmap.wrapHardwareBuffer(buffer, null)) { "Failed to wrap hardware buffer" }
+                try {
+                    checkNotNull(bitmap.copy(Bitmap.Config.ARGB_8888, true)) { "Failed to copy hardware bitmap" }
+                } finally {
+                    bitmap.recycle()
+                }
             }
-        } finally {
-            image.close()
         }
     } finally {
         hardwareRenderer.destroy()
@@ -878,9 +590,6 @@ private fun processBitmapGpu(
     }
 }
 
-/**
- * CPU fallback: applies effects sequentially (original implementation).
- */
 private fun processBitmapCpu(
     source: Bitmap,
     hasDarken: Boolean, darkenPercent: Int,
@@ -921,47 +630,6 @@ private fun processBitmapCpu(
     return result
 }
 
-/**
- * Detect media type from URI
- *
- * Examines the file extension and MIME type to determine the media type.
- * Returns null if the media type cannot be determined or is unsupported.
- */
-fun Uri.detectMediaType(context: Context): WallpaperMediaType? {
-    try {
-        // First try to get file extension from path
-        val path = this.path
-        if (path != null) {
-            val extension = path.substringAfterLast('.', "")
-            if (extension.isNotEmpty()) {
-                val mediaType = WallpaperMediaType.fromExtension(extension)
-                if (mediaType != null) {
-                    return mediaType
-                }
-            }
-        }
-
-        // Fallback: Try to get MIME type from content resolver
-        val mimeType = context.contentResolver.getType(this)
-        if (mimeType != null) {
-            return when {
-                mimeType.startsWith("image/") -> WallpaperMediaType.IMAGE
-                else -> null
-            }
-        }
-
-        // If all else fails, assume IMAGE for backward compatibility
-        return WallpaperMediaType.IMAGE
-    } catch (e: Exception) {
-        Log.e(TAG, "Error detecting media type for URI: $this", e)
-        return WallpaperMediaType.IMAGE  // Default to IMAGE on error
-    }
-}
-
-/**
- * Check if Paperize live wallpaper is currently active/selected
- * Returns true if the Paperize live wallpaper service is the current wallpaper
- */
 fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
     return try {
         // If we are checking from within the service itself (e.g. preview mode), we are active
@@ -973,13 +641,11 @@ fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
         val wallpaperManager = WallpaperManager.getInstance(context)
         val wallpaperInfo = wallpaperManager.wallpaperInfo
 
-        // If wallpaperInfo is null, user has a static wallpaper (not a live wallpaper)
         if (wallpaperInfo == null) {
             Log.d(TAG, "isPaperizeLiveWallpaperActive: wallpaperInfo is null (static wallpaper), returning false")
             return false
         }
 
-        // Check if the service component matches Paperize live wallpaper
         val expectedComponent = android.content.ComponentName(
             context.packageName,
             "com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService"

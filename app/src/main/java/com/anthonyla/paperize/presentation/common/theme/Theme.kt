@@ -1,11 +1,9 @@
 package com.anthonyla.paperize.presentation.common.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -13,7 +11,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -92,10 +89,6 @@ private val DarkColors = darkColorScheme(
     surfaceContainerLowest = md_theme_dark_surfaceContainerLowest,
 )
 
-/**
- * App theming for dynamic theming when supported and dark mode.
- * Migrated to Material 3 Expressive design system with enhanced motion, typography, and shapes.
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PaperizeTheme(
@@ -104,21 +97,17 @@ fun PaperizeTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val isDarkMode = isDarkMode(darkMode = darkMode)
-    val isDynamicTheming = isDynamicTheming(dynamicTheming = dynamicTheming)
+    val isDarkMode = darkMode ?: isSystemInDarkTheme()
 
-    // Dynamic theming (Material You) is always supported (minSdk 31)
     val colors = when {
-        isDynamicTheming && isDarkMode -> dynamicDarkColorScheme(context)
-        isDynamicTheming && !isDarkMode -> dynamicLightColorScheme(context)
+        dynamicTheming && isDarkMode -> dynamicDarkColorScheme(context)
+        dynamicTheming && !isDarkMode -> dynamicLightColorScheme(context)
         isDarkMode -> DarkColors
         else -> LightColors
     }
 
-    // Use expressive motion scheme for enhanced animations and transitions
     val motionScheme = MotionScheme.expressive()
 
-    // Set the status bar color and system bar style to transparent
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -136,18 +125,3 @@ fun PaperizeTheme(
         content = content
     )
 }
-
-@Composable
-private fun isDarkMode(darkMode: Boolean?): Boolean =
-    when(darkMode) {
-        true -> true
-        false -> false
-        else -> isSystemInDarkTheme()
-    }
-
-@Composable
-private fun isDynamicTheming(dynamicTheming: Boolean): Boolean =
-    when(dynamicTheming) {
-        true -> true
-        false -> false
-    }

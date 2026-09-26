@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.isPaperizeLiveWallpaperActive
@@ -12,7 +13,7 @@ import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.CreateAlbumUseCase
-import com.anthonyla.paperize.domain.usecase.GetAlbumSummariesUseCase
+import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.service.wallpaper.WallpaperChangeService
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,20 +25,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
-/**
- * ViewModel for Home screen
- */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    getAlbumSummariesUseCase: GetAlbumSummariesUseCase,
+    albumRepository: AlbumRepository,
     private val createAlbumUseCase: CreateAlbumUseCase,
     private val settingsRepository: SettingsRepository,
     private val wallpaperScheduler: WallpaperScheduler,
@@ -48,12 +50,18 @@ class HomeViewModel @Inject constructor(
         private const val TAG = "HomeViewModel"
     }
 
+    private val settingsMutex = Mutex()
+
+    // Keep settings writes and their scheduling side effects ordered during rapid UI changes.
+    private fun launchSettingsUpdate(action: suspend () -> Unit) = viewModelScope.launch {
+        settingsMutex.withLock { action() }
+    }
+
     init {
-        // Check if Paperize live wallpaper was replaced/disabled on startup
         checkLiveWallpaperStatus()
     }
 
-    val albums: StateFlow<List<AlbumSummary>> = getAlbumSummariesUseCase()
+    val albums: StateFlow<List<AlbumSummary>> = albumRepository.getAlbumSummaries()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
@@ -64,14 +72,14 @@ class HomeViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
-            initialValue = ScheduleSettings.default()
+            initialValue = ScheduleSettings()
         )
 
     val appSettings = settingsRepository.getAppSettingsFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
-            initialValue = com.anthonyla.paperize.domain.model.AppSettings.default()
+            initialValue = com.anthonyla.paperize.domain.model.AppSettings()
         )
 
     val wallpaperMode = settingsRepository.getWallpaperModeFlow()
@@ -88,12 +96,16 @@ class HomeViewModel @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentHomeWallpaperUri: StateFlow<String?> = scheduleSettings
-        .flatMapLatest { settings -> currentWallpaperUriFlow(settings.homeAlbumId, ScreenType.HOME) }
+        .map { it.homeAlbumId }
+        .distinctUntilChanged()
+        .flatMapLatest { albumId -> currentWallpaperUriFlow(albumId, ScreenType.HOME) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS), null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentLockWallpaperUri: StateFlow<String?> = scheduleSettings
-        .flatMapLatest { settings -> currentWallpaperUriFlow(settings.lockAlbumId, ScreenType.LOCK) }
+        .map { it.lockAlbumId }
+        .distinctUntilChanged()
+        .flatMapLatest { albumId -> currentWallpaperUriFlow(albumId, ScreenType.LOCK) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS), null)
 
     private fun currentWallpaperUriFlow(albumId: String?, screenType: ScreenType): Flow<String?> =
@@ -106,7 +118,6 @@ class HomeViewModel @Inject constructor(
             ) { specific, both -> (specific ?: both)?.uri }
         }
 
-    // Show prompt to select live wallpaper when enabling changer in LIVE mode
     private val _showLiveWallpaperPrompt = MutableStateFlow(false)
     val showLiveWallpaperPrompt: StateFlow<Boolean> = _showLiveWallpaperPrompt
 
@@ -114,28 +125,20 @@ class HomeViewModel @Inject constructor(
         _showLiveWallpaperPrompt.value = false
     }
 
-    /**
-     * Check if Paperize live wallpaper is still active on app startup.
-     * If the user was in LIVE mode with an album selected but Paperize is no longer
-     * the active live wallpaper (e.g., user switched to a different wallpaper),
-     * clear the live album selection and disable the changer.
-     */
     private fun checkLiveWallpaperStatus() {
-        viewModelScope.launch {
+        launchSettingsUpdate {
             val mode = settingsRepository.getWallpaperMode()
             val settings = settingsRepository.getScheduleSettings()
-            
-            // Only check if we're in LIVE mode and have an album selected
-            if (mode == com.anthonyla.paperize.core.WallpaperMode.LIVE && 
-                settings.liveAlbumId != null && 
+
+            if (mode == WallpaperMode.LIVE &&
+                settings.liveAlbumId != null &&
                 settings.enableChanger) {
-                
+
                 val isActive = isPaperizeLiveWallpaperActive(context)
                 Log.d(TAG, "Startup check: LIVE mode with album selected, isPaperizeLiveWallpaperActive=$isActive")
-                
+
                 if (!isActive) {
                     Log.w(TAG, "Paperize live wallpaper was replaced/disabled - clearing live album selection")
-                    // Clear the live album selection and disable changer
                     settingsRepository.updateLiveAlbumId(null)
                     settingsRepository.updateEnableChanger(false)
                     wallpaperScheduler.cancelAllWallpaperChanges()
@@ -144,221 +147,53 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun createAlbum(name: String) {
-        viewModelScope.launch {
-            when (val result = createAlbumUseCase(name)) {
-                is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                is com.anthonyla.paperize.core.Result.Error -> { 
-                    Log.e(TAG, "Error creating album", result.exception)
-                }
-                is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
+    suspend fun createAlbum(name: String) = createAlbumUseCase(name)
+
+    fun selectHomeAlbum(album: AlbumSummary?) = selectAlbum(album, ScreenType.HOME, settingsRepository::updateHomeAlbumId)
+
+    fun selectLockAlbum(album: AlbumSummary?) = selectAlbum(album, ScreenType.LOCK, settingsRepository::updateLockAlbumId)
+
+    fun selectLiveAlbum(album: AlbumSummary?) = selectAlbum(album, ScreenType.LIVE, settingsRepository::updateLiveAlbumId)
+
+    private fun selectAlbum(
+        album: AlbumSummary?,
+        screen: ScreenType,
+        updateSelection: suspend (String?) -> Unit
+    ) {
+        launchSettingsUpdate {
+            updateSelection(album?.id)
+            val mode = settingsRepository.getWallpaperMode()
+            var updated = settingsRepository.getScheduleSettings()
+            if (album == null && updated.activeScreens(mode).isEmpty()) {
+                settingsRepository.updateEnableChanger(false)
+                updated = updated.copy(enableChanger = false)
             }
-        }
-    }
-
-    fun selectHomeAlbum(album: AlbumSummary?) {
-        viewModelScope.launch {
-            // Use atomic update to prevent race conditions with selectLockAlbum()
-            settingsRepository.updateHomeAlbumId(album?.id)
-
-            // Read updated settings after atomic write
-            val updated = settingsRepository.getScheduleSettings()
-
-            // If unselecting and no albums left, disable changer and cancel alarms
-            if (album == null && updated.lockAlbumId == null) {
-                toggleWallpaperChanger(false)
-            } else if (album != null && updated.enableChanger) {
-                // Check if we have all required albums before triggering wallpaper change
-                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
-                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
-                val hasRequiredAlbums = when {
-                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
-                    updated.homeEnabled -> homeActive
-                    updated.lockEnabled -> lockActive
-                    else -> false
-                }
-
-                // Only change wallpaper and schedule if all required albums are selected
-                if (hasRequiredAlbums) {
-                    // In LIVE mode, don't trigger immediate wallpaper change - the live wallpaper service handles it
-                    // In STATIC mode, trigger immediate change to update the wallpaper
-                    if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                        val screenType = if (
-                            updated.homeAlbumId == updated.lockAlbumId &&
-                            updated.homeAlbumId != null &&
-                            !updated.separateSchedules &&
-                            updated.homeEnabled &&
-                            updated.lockEnabled
-                        ) {
-                            // Same album for both screens and not separately scheduled - use BOTH
-                            ScreenType.BOTH
-                        } else {
-                            ScreenType.HOME
-                        }
-                        changeWallpaperNow(screenType)
-                    }
-                    scheduleAlarms(updated)
-                } else {
-                    // Not all required albums selected - cancel any existing schedules
-                    wallpaperScheduler.cancelAllWallpaperChanges()
-                }
-            } else if (updated.enableChanger) {
-                // Album was unselected - check if we still have all required albums
-                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
-                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
-                val hasRequiredAlbums = when {
-                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
-                    updated.homeEnabled -> homeActive
-                    updated.lockEnabled -> lockActive
-                    else -> false
-                }
-
-                if (hasRequiredAlbums) {
-                    scheduleAlarms(updated)
-                } else {
-                    wallpaperScheduler.cancelAllWallpaperChanges()
-                }
-            }
-        }
-    }
-
-    fun selectLockAlbum(album: AlbumSummary?) {
-        viewModelScope.launch {
-            // Use atomic update to prevent race conditions with selectHomeAlbum()
-            settingsRepository.updateLockAlbumId(album?.id)
-
-            // Read updated settings after atomic write
-            val updated = settingsRepository.getScheduleSettings()
-
-            // If unselecting and no albums left, disable changer and cancel alarms
-            if (album == null && updated.homeAlbumId == null) {
-                toggleWallpaperChanger(false)
-            } else if (album != null && updated.enableChanger) {
-                // Check if we have all required albums before triggering wallpaper change
-                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
-                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
-                val hasRequiredAlbums = when {
-                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
-                    updated.homeEnabled -> homeActive
-                    updated.lockEnabled -> lockActive
-                    else -> false
-                }
-
-                // Only change wallpaper and schedule if all required albums are selected
-                if (hasRequiredAlbums) {
-                    // In LIVE mode, don't trigger immediate wallpaper change - the live wallpaper service handles it
-                    // In STATIC mode, trigger immediate change to update the wallpaper
-                    if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                        val screenType = if (
-                            updated.homeAlbumId == updated.lockAlbumId &&
-                            updated.lockAlbumId != null &&
-                            !updated.separateSchedules &&
-                            updated.homeEnabled &&
-                            updated.lockEnabled
-                        ) {
-                            // Same album for both screens and not separately scheduled - use BOTH
-                            ScreenType.BOTH
-                        } else {
-                            ScreenType.LOCK
-                        }
-                        changeWallpaperNow(screenType)
-                    }
-                    scheduleAlarms(updated)
-                } else {
-                    // Not all required albums selected - cancel any existing schedules
-                    wallpaperScheduler.cancelAllWallpaperChanges()
-                }
-            } else if (updated.enableChanger) {
-                // Album was unselected - check if we still have all required albums
-                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
-                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
-                val hasRequiredAlbums = when {
-                    updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
-                    updated.homeEnabled -> homeActive
-                    updated.lockEnabled -> lockActive
-                    else -> false
-                }
-
-                if (hasRequiredAlbums) {
-                    scheduleAlarms(updated)
-                } else {
-                    wallpaperScheduler.cancelAllWallpaperChanges()
-                }
-            }
-        }
-    }
-
-    fun selectLiveAlbum(album: AlbumSummary?) {
-        viewModelScope.launch {
-            settingsRepository.updateLiveAlbumId(album?.id)
-
-            val updated = settingsRepository.getScheduleSettings()
-
-            // If unselecting, disable changer
-            if (album == null) {
-                toggleWallpaperChanger(false)
-            } else if (updated.enableChanger) {
-                // Album selected and changer is enabled - schedule alarms
-                scheduleAlarms(updated)
+            wallpaperScheduler.updateSchedules(updated, mode)
+            if (album != null && updated.enableChanger && updated.hasRequiredAlbums(mode) && mode == WallpaperMode.STATIC) {
+                val target = if (ScreenType.BOTH in updated.activeScreens(mode)) ScreenType.BOTH else screen
+                changeWallpaperNow(target)
             }
         }
     }
 
     fun toggleWallpaperChanger(enabled: Boolean, onlyIfNotScheduled: Boolean = false) {
-        viewModelScope.launch {
-            // Use atomic update to prevent race conditions with album selection updates
+        launchSettingsUpdate {
             settingsRepository.updateEnableChanger(enabled)
-
-            // Read updated settings after atomic write
             val updated = settingsRepository.getScheduleSettings()
-
-            if (enabled) {
-                // Check if we have all required albums before changing wallpaper
-                val homeActive = updated.homeEnabled && updated.homeAlbumId != null
-                val lockActive = updated.lockEnabled && updated.lockAlbumId != null
-                val hasRequiredAlbums = if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                    when {
-                        updated.homeEnabled && updated.lockEnabled -> homeActive && lockActive
-                        updated.homeEnabled -> homeActive
-                        updated.lockEnabled -> lockActive
-                        else -> false
-                    }
-                } else {
-                    updated.liveAlbumId != null
+            val mode = settingsRepository.getWallpaperMode()
+            wallpaperScheduler.updateSchedules(updated, mode, onlyIfNotScheduled)
+            if (enabled && updated.hasRequiredAlbums(mode)) {
+                if (!onlyIfNotScheduled && mode == WallpaperMode.STATIC) {
+                    updated.activeScreens(mode).forEach(::changeWallpaperNow)
                 }
-
-                // Only change wallpaper and schedule if all required albums are selected
-                if (hasRequiredAlbums) {
-                    // Only change wallpaper now if this is not a "check if scheduled" call
-                    // In LIVE mode, skip immediate wallpaper changes - the live wallpaper service handles it
-                    if (!onlyIfNotScheduled && wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                        val isSynced = homeActive && lockActive &&
-                                       updated.homeAlbumId == updated.lockAlbumId &&
-                                       !updated.separateSchedules
-                        if (isSynced) {
-                            changeWallpaperNow(ScreenType.BOTH)
-                        } else {
-                            if (homeActive) changeWallpaperNow(ScreenType.HOME)
-                            if (lockActive) changeWallpaperNow(ScreenType.LOCK)
-                        }
-                    }
-                    scheduleAlarms(updated, onlyIfNotScheduled)
-
-                    // Show live wallpaper selection prompt if in LIVE mode and Paperize is NOT already active
-                    if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
-                        val isActive = isPaperizeLiveWallpaperActive(context)
-                        Log.d(TAG, "toggleWallpaperChanger: LIVE mode, isPaperizeLiveWallpaperActive=$isActive")
-                        if (!isActive) {
-                            _showLiveWallpaperPrompt.value = true
-                        }
-                    }
-                } else {
-                    // Not all required albums selected - cancel any existing schedules
-                    wallpaperScheduler.cancelAllWallpaperChanges()
-                }
-            } else {
-                wallpaperScheduler.cancelAllWallpaperChanges()
+                promptForLiveWallpaper(mode)
             }
+        }
+    }
+
+    private fun promptForLiveWallpaper(mode: WallpaperMode) {
+        if (mode == WallpaperMode.LIVE && !isPaperizeLiveWallpaperActive(context)) {
+            _showLiveWallpaperPrompt.value = true
         }
     }
 
@@ -369,86 +204,33 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun applyScheduleSettings(settings: ScheduleSettings) {
-        viewModelScope.launch {
-            // Check if settings have changed before validation
-            val currentSettings = settingsRepository.getScheduleSettings()
-            val shuffleChanged = currentSettings.shuffleEnabled != settings.shuffleEnabled
-
-            // Check if screen toggles (homeEnabled/lockEnabled) have changed
-            val screenToggleChanged = currentSettings.homeEnabled != settings.homeEnabled ||
-                                     currentSettings.lockEnabled != settings.lockEnabled
-
-            // If a screen was disabled, clear only that screen's album selection.
-            // Clearing both when only one changes would lose the other screen's selection.
-            val settingsWithClearedAlbums = if (screenToggleChanged) {
+        launchSettingsUpdate {
+            lateinit var currentSettings: ScheduleSettings
+            val validated = settingsRepository.updateScheduleSettings { current ->
+                currentSettings = current
+                // Album selection and pause/resume have their own actions. A delayed effect edit
+                // must not overwrite changes those actions made after this draft was captured.
                 settings.copy(
-                    homeAlbumId = if (!settings.homeEnabled) null else settings.homeAlbumId,
-                    lockAlbumId = if (!settings.lockEnabled) null else settings.lockAlbumId
-                )
-            } else {
-                settings
+                    enableChanger = current.enableChanger,
+                    homeAlbumId = if (settings.homeEnabled) current.homeAlbumId else null,
+                    lockAlbumId = if (settings.lockEnabled) current.lockAlbumId else null,
+                    liveAlbumId = current.liveAlbumId
+                ).validate()
             }
-
-            val validated = settingsWithClearedAlbums.validate()
-
-            // Check what changed
+            val shuffleChanged = currentSettings.shuffleEnabled != validated.shuffleEnabled
             val schedulingChanged = validated.hasSchedulingChanges(currentSettings)
             val displayChanged = validated.hasDisplayChanges(currentSettings)
 
-            settingsRepository.updateScheduleSettings(validated)
-
-            // If shuffle setting changed, clear all queues to force rebuild with new mode
             if (shuffleChanged) {
                 wallpaperRepository.clearAllQueues()
             }
 
-            val homeActive = validated.homeEnabled && validated.homeAlbumId != null
-            val lockActive = validated.lockEnabled && validated.lockAlbumId != null
-
-            // Determine if we have the required albums selected
-            val hasRequiredAlbums = if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                when {
-                    validated.homeEnabled && validated.lockEnabled -> homeActive && lockActive
-                    validated.homeEnabled -> homeActive
-                    validated.lockEnabled -> lockActive
-                    else -> false
-                }
-            } else {
-                validated.liveAlbumId != null
+            val mode = settingsRepository.getWallpaperMode()
+            if (schedulingChanged) {
+                wallpaperScheduler.updateSchedules(validated, mode)
             }
-
-            // Handle scheduling changes (interval, screen enable/disable, etc.)
-            if (validated.enableChanger && hasRequiredAlbums && schedulingChanged) {
-                scheduleAlarms(validated)
-
-                // Show live wallpaper selection prompt if in LIVE mode, changer was just enabled, and Paperize is NOT already active
-                if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE &&
-                    !currentSettings.enableChanger && validated.enableChanger) {
-                    val isActive = isPaperizeLiveWallpaperActive(context)
-                    Log.d(TAG, "updateScheduleSettings: LIVE mode, changer just enabled, isPaperizeLiveWallpaperActive=$isActive")
-                    if (!isActive) {
-                        _showLiveWallpaperPrompt.value = true
-                    }
-                }
-            } else if (validated.enableChanger && !hasRequiredAlbums) {
-                // Changer enabled but required albums not selected - cancel existing schedules
-                wallpaperScheduler.cancelAllWallpaperChanges()
-            }
-
-            // Handle display changes (scaling, effects, adaptive brightness)
-            // Reapply current wallpaper immediately to show the effect
-            // In LIVE mode, skip immediate wallpaper changes - the live wallpaper service handles it
-            if (validated.enableChanger && hasRequiredAlbums && displayChanged &&
-                wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.STATIC) {
-                val isSynced = homeActive && lockActive &&
-                               validated.homeAlbumId == validated.lockAlbumId &&
-                               !validated.separateSchedules
-                if (isSynced) {
-                    reapplyEffectsNow(ScreenType.BOTH)
-                } else {
-                    if (homeActive) reapplyEffectsNow(ScreenType.HOME)
-                    if (lockActive) reapplyEffectsNow(ScreenType.LOCK)
-                }
+            if (validated.enableChanger && validated.hasRequiredAlbums(mode) && displayChanged && mode == WallpaperMode.STATIC) {
+                validated.activeScreens(mode).forEach(::reapplyEffectsNow)
             }
         }
     }
@@ -479,24 +261,8 @@ class HomeViewModel @Inject constructor(
      * changed separately. LIVE is routed through the service to reload the renderer.
      */
     fun changeWallpaperNowForActiveScreens() {
-        val settings = scheduleSettings.value
-        if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
-            changeWallpaperNow(ScreenType.LIVE)
-            return
-        }
-
-        val homeActive = settings.homeEnabled && settings.homeAlbumId != null
-        val lockActive = settings.lockEnabled && settings.lockAlbumId != null
-        val synchronized = homeActive && lockActive &&
-            settings.homeAlbumId == settings.lockAlbumId &&
-            !settings.separateSchedules
-
-        if (synchronized) {
-            changeWallpaperNow(ScreenType.BOTH)
-        } else {
-            if (homeActive) changeWallpaperNow(ScreenType.HOME)
-            if (lockActive) changeWallpaperNow(ScreenType.LOCK)
-        }
+        val mode = wallpaperMode.value ?: return
+        scheduleSettings.value.activeScreens(mode).forEach(::changeWallpaperNow)
     }
 
     fun reapplyEffectsNow(screenType: ScreenType) {
@@ -507,72 +273,4 @@ class HomeViewModel @Inject constructor(
         context.startForegroundService(intent)
     }
 
-    private suspend fun scheduleAlarms(settings: ScheduleSettings, onlyIfNotScheduled: Boolean = false) {
-        // Check if we're in LIVE mode
-        if (wallpaperMode.value == com.anthonyla.paperize.core.WallpaperMode.LIVE) {
-            // LIVE mode: schedule live wallpaper changes
-            if (settings.liveAlbumId != null && settings.liveIntervalMinutes > 0) {
-                if (settings.liveIntervalMinutes >= Constants.MIN_INTERVAL_MINUTES) {
-                    wallpaperScheduler.scheduleWallpaperChange(
-                        ScreenType.LIVE,
-                        settings.liveIntervalMinutes
-                    )
-                } else {
-                    // The visible live-wallpaper engine owns sub-15-minute intervals.
-                    wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
-                }
-                wallpaperScheduler.scheduleAlbumRefresh()
-            } else {
-                wallpaperScheduler.cancelWallpaperChange(ScreenType.LIVE)
-                wallpaperScheduler.cancelAlbumRefresh()
-            }
-            return
-        }
-
-        // STATIC mode: existing logic
-        val homeActive = settings.homeEnabled && settings.homeAlbumId != null
-        val lockActive = settings.lockEnabled && settings.lockAlbumId != null
-
-        // Determine intervals based on active screens and schedule settings
-        val homeInterval: Int
-        val lockInterval: Int
-
-        if (settings.homeEnabled && settings.lockEnabled) {
-            // Both screens enabled - require both albums selected before scheduling
-            if (homeActive && lockActive) {
-                if (settings.separateSchedules) {
-                    // Separate intervals for each screen
-                    homeInterval = settings.homeIntervalMinutes
-                    lockInterval = settings.lockIntervalMinutes
-                } else {
-                    // Same interval for both screens
-                    homeInterval = settings.homeIntervalMinutes
-                    lockInterval = settings.homeIntervalMinutes
-                }
-            } else {
-                // Both enabled but not both selected - don't schedule anything
-                homeInterval = 0
-                lockInterval = 0
-            }
-        } else {
-            // Only one screen enabled - schedule only if that screen has an album
-            homeInterval = if (homeActive) settings.homeIntervalMinutes else 0
-            lockInterval = if (lockActive) settings.lockIntervalMinutes else 0
-        }
-
-        // Determine if screens should be synchronized (same wallpaper)
-        // This happens when: both enabled, same album, not separate schedules
-        val shouldSync = settings.homeEnabled && settings.lockEnabled &&
-                        settings.homeAlbumId != null &&
-                        settings.homeAlbumId == settings.lockAlbumId &&
-                        !settings.separateSchedules
-
-        // Schedule using WorkManager (handles cancellation automatically)
-        wallpaperScheduler.scheduleWallpaperChanges(
-            homeIntervalMinutes = homeInterval,
-            lockIntervalMinutes = lockInterval,
-            synchronized = shouldSync,
-            onlyIfNotScheduled = onlyIfNotScheduled
-        )
-    }
 }

@@ -14,12 +14,6 @@ import com.anthonyla.paperize.service.worker.AlbumRefreshScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
-/**
- * Application class for Paperize
- *
- * Annotated with @HiltAndroidApp to enable dependency injection
- * Implements Configuration.Provider for WorkManager with Hilt support
- */
 @HiltAndroidApp
 class PaperizeApplication : Application(), Configuration.Provider, DefaultLifecycleObserver {
 
@@ -33,7 +27,6 @@ class PaperizeApplication : Application(), Configuration.Provider, DefaultLifecy
         // Must run before any other initialization that accesses DB/preferences
         DataResetManager.performResetIfNeeded(this)
 
-        // Create notification channel (minSdk is 31, so always supported)
         createNotificationChannel()
 
         // Process lifecycle distinguishes real background/foreground transitions from activity

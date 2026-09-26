@@ -1,8 +1,5 @@
 package com.anthonyla.paperize.data.database.entities
 
-/**
- * Entity for holding lightweight album summary query results
- */
 data class AlbumSummaryEntity(
     val id: String,
     val name: String,

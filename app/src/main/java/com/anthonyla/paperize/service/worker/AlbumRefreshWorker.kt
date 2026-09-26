@@ -7,39 +7,25 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.anthonyla.paperize.core.Result as CoreResult
 import com.anthonyla.paperize.domain.repository.AlbumRepository
-import com.anthonyla.paperize.domain.usecase.RefreshAlbumUseCase
+import com.anthonyla.paperize.domain.usecase.RefreshFolderUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * Background worker that validates and refreshes all albums daily
- *
- * - Runs once daily (typically at 3 AM)
- * - Validates all wallpaper and folder URIs in all albums
- * - Removes invalid entries (deleted files, permission changes, etc.)
- * - Rescans all folders for new wallpapers and adds them to albums
- * - Only runs when wallpaper changer is enabled
- */
 @HiltWorker
 class AlbumRefreshWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val albumRepository: AlbumRepository,
-    private val wallpaperRepository: com.anthonyla.paperize.domain.repository.WallpaperRepository,
-    private val refreshAlbumUseCase: RefreshAlbumUseCase
+    private val refreshFolderUseCase: RefreshFolderUseCase
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): androidx.work.ListenableWorker.Result {
         return try {
             Log.d(TAG, "Starting daily album refresh")
 
-            // Get all albums from Flow
-            val albums = albumRepository.getAllAlbums().first()
+            val albums = albumRepository.getAlbumSummaries().first()
 
             if (albums.isEmpty()) {
                 Log.d(TAG, "No albums to refresh")
@@ -47,15 +33,11 @@ class AlbumRefreshWorker @AssistedInject constructor(
             }
 
             var totalRemoved = 0
-            val totalAdded = AtomicInteger(0)
-            val failedCount = AtomicInteger(0)
+            var totalAdded = 0
+            var failedCount = 0
 
-            // Refresh each album
             albums.forEach { album ->
-                val albumHasNewWallpapers = AtomicBoolean(false)
-
-                // Step 1: Validate and remove invalid URIs
-                when (val result = refreshAlbumUseCase(album.id)) {
+                when (val result = albumRepository.pruneMissingEntries(album.id)) {
                     is CoreResult.Success -> {
                         val removedCount = result.data
                         totalRemoved += removedCount
@@ -65,77 +47,27 @@ class AlbumRefreshWorker @AssistedInject constructor(
                     }
                     is CoreResult.Error -> {
                         Log.e(TAG, "Error validating album '${album.name}'", result.exception)
-                        failedCount.incrementAndGet()
-                    }
-                    is CoreResult.Loading -> {
-                        /* Loading state not used */
+                        failedCount++
                     }
                 }
 
-                // Step 2: Rescan all folders for new wallpapers (Parallelized)
-                coroutineScope {
-                    album.folders.map { folder ->
-                        async {
-                            // Load existing URIs for this folder once — avoids one DB query per scanned wallpaper
-                            val existingUris = wallpaperRepository.getExistingWallpaperUris(album.id, folder.id)
-
-                            when (val scanResult = wallpaperRepository.scanFolderForWallpapers(android.net.Uri.parse(folder.uri))) {
-                                is CoreResult.Success -> {
-                                    val scannedWallpapers = scanResult.data
-
-                                    // Find and add new wallpapers not already in album
-                                    scannedWallpapers.forEach { wallpaper ->
-                                        if (wallpaper.uri !in existingUris) {
-                                            val wallpaperToAdd = wallpaper.copy(
-                                                albumId = album.id,
-                                                folderId = folder.id
-                                            )
-
-                                            when (wallpaperRepository.addWallpaper(wallpaperToAdd)) {
-                                                is CoreResult.Success -> {
-                                                    totalAdded.incrementAndGet()
-                                                    albumHasNewWallpapers.set(true)
-                                                }
-                                                is CoreResult.Error -> {
-                                                    Log.e(TAG, "Error adding wallpaper to album '${album.name}'")
-                                                    failedCount.incrementAndGet()
-                                                }
-                                                is CoreResult.Loading -> { /* Not used */ }
-                                            }
-                                        }
-                                    }
-                                }
-                                is CoreResult.Error -> {
-                                    Log.e(TAG, "Error scanning folder '${folder.name}' in album '${album.name}'", scanResult.exception)
-                                }
-                                is CoreResult.Loading -> { /* Not used */ }
-                            }
-                        }
-                    }.forEach { it.await() }
-                }
-
-                // Step 3: Clear and rebuild queues and refresh covers if new wallpapers were added
-                if (albumHasNewWallpapers.get()) {
-                    // Clear queues so they are rebuilt on next change, including new wallpapers
-                    wallpaperRepository.clearQueuesForAlbum(album.id)
-                    when (albumRepository.refreshFolderCovers(album.id)) {
-                        is CoreResult.Success -> {
-                            Log.d(TAG, "Album '${album.name}': folder covers refreshed")
-                        }
+                // Reload after validation, which may have removed folders from the snapshot.
+                val currentAlbum = albumRepository.getAlbumById(album.id).first()
+                currentAlbum?.folders.orEmpty().forEach { folder ->
+                    when (val result = refreshFolderUseCase(folder.id)) {
+                        is CoreResult.Success -> totalAdded += result.data
                         is CoreResult.Error -> {
-                            Log.e(TAG, "Error refreshing folder covers for album '${album.name}'")
-                        }
-                        is CoreResult.Loading -> {
-                            /* Loading state not used */
+                            Log.e(TAG, "Error refreshing folder '${folder.name}'", result.exception)
+                            failedCount++
                         }
                     }
                 }
             }
+            Log.d(TAG, "Daily album refresh completed: removed $totalRemoved items, added $totalAdded new wallpapers across ${albums.size} albums ($failedCount failures)")
 
-            Log.d(TAG, "Daily album refresh completed: removed $totalRemoved items, added ${totalAdded.get()} new wallpapers across ${albums.size} albums (${failedCount.get()} failures)")
-
-            // Return success even if some albums failed (partial success)
             androidx.work.ListenableWorker.Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Error during album refresh", e)
             androidx.work.ListenableWorker.Result.failure()

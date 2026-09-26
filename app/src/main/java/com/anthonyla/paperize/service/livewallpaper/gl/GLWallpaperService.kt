@@ -1,10 +1,11 @@
 package com.anthonyla.paperize.service.livewallpaper.gl
 
+import android.opengl.EGL14
 import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.SurfaceHolder
-import java.util.concurrent.LinkedBlockingQueue
+import com.anthonyla.paperize.core.constants.Constants
 import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
@@ -21,24 +22,12 @@ abstract class GLWallpaperService : WallpaperService() {
 
     companion object {
         private const val TAG = "GLWallpaperService"
-        const val RENDERMODE_WHEN_DIRTY = 0
-        const val RENDERMODE_CONTINUOUSLY = 1
     }
 
-    /**
-     * Abstract engine that supports OpenGL ES rendering.
-     * Subclasses should override onCreateEngine() to return an instance.
-     */
     abstract inner class GLEngine : Engine() {
 
-        private var glThread: GLThread? = null
+        @Volatile private var glThread: GLThread? = null
         private var renderer: GLSurfaceView.Renderer? = null
-        private var eglContextClientVersion = 2
-        private var internalRenderMode = RENDERMODE_WHEN_DIRTY
-
-        // EGL configuration
-        private var eglConfigChooser: EGLConfigChooser? = null
-
         /**
          * Set the renderer for this engine.
          * Must be called before surface is created.
@@ -47,68 +36,19 @@ abstract class GLWallpaperService : WallpaperService() {
             this.renderer = renderer
         }
 
-        /**
-         * Set the OpenGL ES context client version (2 or 3).
-         * Must be called before surface is created.
-         */
-        fun setEGLContextClientVersion(version: Int) {
-            this.eglContextClientVersion = version
-        }
-
-
-        /**
-         * Simplified EGL config chooser for RGB888 with no depth/stencil.
-         */
-        fun setEGLConfigChooser(
-            redSize: Int,
-            greenSize: Int,
-            blueSize: Int,
-            alphaSize: Int,
-            depthSize: Int,
-            stencilSize: Int
-        ) {
-            this.eglConfigChooser = SimpleEGLConfigChooser(
-                redSize, greenSize, blueSize, alphaSize, depthSize, stencilSize, eglContextClientVersion
-            )
-        }
-
-        /**
-         * Set the render mode: RENDERMODE_WHEN_DIRTY or RENDERMODE_CONTINUOUSLY.
-         */
-        fun setRenderMode(mode: Int) {
-            this.internalRenderMode = mode
-        }
-
-        /**
-         * Request a render. Only has effect if render mode is RENDERMODE_WHEN_DIRTY.
-         */
         fun requestRender() {
             glThread?.requestRender()
         }
 
-        /**
-         * Queue a runnable to be run on the GL thread.
-         */
-        fun queueEvent(runnable: Runnable) {
-            glThread?.queueEvent(runnable)
-        }
+        fun queueEvent(runnable: Runnable): Boolean = glThread?.queueEvent(runnable) ?: false
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
 
-            val configChooser = eglConfigChooser ?: SimpleEGLConfigChooser(
-                8, 8, 8, 0, 0, 0, eglContextClientVersion
-            )
-
             glThread = GLThread(
                 holder = holder,
-                renderer = renderer ?: throw IllegalStateException("Renderer not set"),
-                configChooser = configChooser,
-                eglContextClientVersion = eglContextClientVersion
-            ).apply {
-                renderMode = this@GLEngine.internalRenderMode
-                start()
-            }
+                renderer = checkNotNull(renderer) { "Renderer not set" }
+            ).apply { start() }
         }
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -138,35 +78,23 @@ abstract class GLWallpaperService : WallpaperService() {
         }
     }
 
-    /**
-     * GL rendering thread.
-     */
     private class GLThread(
         private val holder: SurfaceHolder,
-        private val renderer: GLSurfaceView.Renderer,
-        private val configChooser: EGLConfigChooser,
-        private val eglContextClientVersion: Int
+        private val renderer: GLSurfaceView.Renderer
     ) : Thread("GLThread") {
 
-        @Volatile var renderMode = RENDERMODE_WHEN_DIRTY
-
-        // LinkedBlockingQueue is thread-safe — no explicit synchronization needed.
-        // Using a single lock for render signalling eliminates the previous AB-BA deadlock
-        // where the GL thread held `lock` while acquiring `eventQueue`, and callers held
-        // `eventQueue` while trying to acquire `lock` in requestRender().
-        private val eventQueue = LinkedBlockingQueue<Runnable>()
+        private val eventQueue = ArrayDeque<Runnable>()
         // java.lang.Object is intentional: this monitor uses wait()/notifyAll(), which
         // Kotlin's Any does not expose directly.
         @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val lock = Object()
 
-        @Volatile private var shouldExit = false
-        @Volatile private var paused = false
-        @Volatile private var hasSurface = true
-        @Volatile private var width = 0
-        @Volatile private var height = 0
-        @Volatile private var requestRender = true
-        @Volatile private var sizeChanged = true
+        private var shouldExit = false
+        private var paused = false
+        private var width = 0
+        private var height = 0
+        private var requestRender = true
+        private var sizeChanged = true
 
         private var egl: EGL10? = null
         private var eglDisplay: EGLDisplay? = null
@@ -181,9 +109,12 @@ abstract class GLWallpaperService : WallpaperService() {
             }
         }
 
-        fun queueEvent(runnable: Runnable) {
+        fun queueEvent(runnable: Runnable): Boolean = synchronized(lock) {
+            if (shouldExit) return false
             eventQueue.add(runnable)
-            requestRender()
+            requestRender = true
+            lock.notifyAll()
+            true
         }
 
         fun onWindowResize(width: Int, height: Int) {
@@ -229,57 +160,49 @@ abstract class GLWallpaperService : WallpaperService() {
 
                 while (true) {
                     var event: Runnable? = null
+                    var newSize: Pair<Int, Int>? = null
 
                     synchronized(lock) {
                         while (true) {
-                            if (shouldExit) {
-                                cleanupGL()
-                                return
-                            }
-
-                            // Process events — LinkedBlockingQueue.poll() is non-blocking and thread-safe
-                            val polled = eventQueue.poll()
+                            val polled = eventQueue.removeFirstOrNull()
                             if (polled != null) {
                                 event = polled
                                 break
                             }
 
-                            // Check if we should render
-                            val readyToDraw = hasSurface && !paused
-                            if (readyToDraw && (renderMode == RENDERMODE_CONTINUOUSLY || requestRender)) {
+                            // Drain accepted events (including renderer cleanup) before releasing EGL.
+                            if (shouldExit) return
+
+                            if (!paused && width > 0 && height > 0 && requestRender) {
                                 requestRender = false
+                                if (sizeChanged) {
+                                    newSize = width to height
+                                    sizeChanged = false
+                                }
                                 break
                             }
 
-                            // Wait for event
                             lock.wait()
                         }
                     }
 
-                    // Execute event
                     event?.let {
                         it.run()
                         continue
                     }
 
-                    // Handle size change
-                    if (sizeChanged) {
+                    newSize?.let { (width, height) ->
                         gl?.let { renderer.onSurfaceChanged(it, width, height) }
-                        sizeChanged = false
                     }
 
-                    // Render frame
                     gl?.let { renderer.onDrawFrame(it) }
 
-                    // Swap buffers
                     egl?.let { eglInstance ->
                         if (!eglInstance.eglSwapBuffers(eglDisplay, eglSurface)) {
                             Log.w(TAG, "eglSwapBuffers failed")
                         }
                     }
 
-                    // Yield to avoid hogging CPU
-                    sleep(1)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "GL thread error", e)
@@ -301,11 +224,10 @@ abstract class GLWallpaperService : WallpaperService() {
                 throw RuntimeException("eglInitialize failed")
             }
 
-            val eglConfig = configChooser.chooseConfig(egl!!, eglDisplay!!)
+            val eglConfig = WallpaperEglConfigChooser().chooseConfig(egl!!, eglDisplay!!)
 
             val attribList = intArrayOf(
-                0x3098, // EGL_CONTEXT_CLIENT_VERSION
-                eglContextClientVersion,
+                EGL14.EGL_CONTEXT_CLIENT_VERSION, Constants.GL_ES_VERSION,
                 EGL10.EGL_NONE
             )
 
@@ -363,103 +285,27 @@ abstract class GLWallpaperService : WallpaperService() {
         }
     }
 
-    /**
-     * Interface for choosing EGL configuration.
-     */
-    interface EGLConfigChooser {
-        fun chooseConfig(egl: EGL10, display: EGLDisplay): EGLConfig
-    }
+}
 
-    /**
-     * Enhanced EGL config chooser with multiple fallback options.
-     * Tries progressively simpler configurations to maximize compatibility
-     * across different GPU vendors (Adreno, Mali, PowerVR, etc.)
-     */
-    private class SimpleEGLConfigChooser(
-        private val redSize: Int,
-        private val greenSize: Int,
-        private val blueSize: Int,
-        private val alphaSize: Int,
-        private val depthSize: Int,
-        private val stencilSize: Int,
-        private val eglContextClientVersion: Int
-    ) : EGLConfigChooser {
-
-        override fun chooseConfig(egl: EGL10, display: EGLDisplay): EGLConfig {
-            val renderableType = if (eglContextClientVersion >= 3) {
-                0x0040 // EGL_OPENGL_ES3_BIT
-            } else {
-                0x0004 // EGL_OPENGL_ES2_BIT
-            }
-
-            // Log device info for debugging
-            GLCompatibility.logDeviceInfo()
-
-            // Build list of configs to try in order of preference
-            val configSpecs = mutableListOf<IntArray>()
-
-            // Config 1: Full spec with EGL_RENDERABLE_TYPE (most common/preferred)
-            configSpecs.add(intArrayOf(
-                EGL10.EGL_RED_SIZE, redSize,
-                EGL10.EGL_GREEN_SIZE, greenSize,
-                EGL10.EGL_BLUE_SIZE, blueSize,
-                EGL10.EGL_ALPHA_SIZE, alphaSize,
-                EGL10.EGL_DEPTH_SIZE, depthSize,
-                EGL10.EGL_STENCIL_SIZE, stencilSize,
-                0x3142, renderableType, // EGL_RENDERABLE_TYPE
-                EGL10.EGL_NONE
-            ))
-
-            // Config 2: Without EGL_RENDERABLE_TYPE (older devices)
-            configSpecs.add(intArrayOf(
-                EGL10.EGL_RED_SIZE, redSize,
-                EGL10.EGL_GREEN_SIZE, greenSize,
-                EGL10.EGL_BLUE_SIZE, blueSize,
-                EGL10.EGL_ALPHA_SIZE, alphaSize,
-                EGL10.EGL_DEPTH_SIZE, depthSize,
-                EGL10.EGL_STENCIL_SIZE, stencilSize,
-                EGL10.EGL_NONE
-            ))
-
-            // Config 3: RGB565 (no alpha) - Mali GPU fallback
-            if (GLCompatibility.isLowEndGPU()) {
-                configSpecs.add(intArrayOf(
-                    EGL10.EGL_RED_SIZE, 5,
-                    EGL10.EGL_GREEN_SIZE, 6,
-                    EGL10.EGL_BLUE_SIZE, 5,
-                    EGL10.EGL_ALPHA_SIZE, 0,
-                    EGL10.EGL_DEPTH_SIZE, 0,
-                    EGL10.EGL_STENCIL_SIZE, 0,
-                    EGL10.EGL_NONE
-                ))
-                Log.d(TAG, "Added RGB565 fallback config for low-end GPU")
-            }
-
-            // Config 4: Minimal config (last resort)
-            configSpecs.add(intArrayOf(
+internal class WallpaperEglConfigChooser : GLSurfaceView.EGLConfigChooser {
+    override fun chooseConfig(egl: EGL10, display: EGLDisplay): EGLConfig {
+        val colorSpecs = listOf(
+            intArrayOf(EGL10.EGL_RED_SIZE, 8, EGL10.EGL_GREEN_SIZE, 8, EGL10.EGL_BLUE_SIZE, 8),
+            intArrayOf(EGL10.EGL_RED_SIZE, 5, EGL10.EGL_GREEN_SIZE, 6, EGL10.EGL_BLUE_SIZE, 5),
+            intArrayOf()
+        )
+        val configs = arrayOfNulls<EGLConfig>(1)
+        val count = IntArray(1)
+        for (colors in colorSpecs) {
+            val attributes = colors + intArrayOf(
                 EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
+                EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
                 EGL10.EGL_NONE
-            ))
-
-            val numConfig = IntArray(1)
-            
-            for ((index, configSpec) in configSpecs.withIndex()) {
-                if (egl.eglChooseConfig(display, configSpec, null, 0, numConfig)) {
-                    if (numConfig[0] > 0) {
-                        val configs = arrayOfNulls<EGLConfig>(numConfig[0])
-                        if (egl.eglChooseConfig(display, configSpec, configs, numConfig[0], numConfig)) {
-                            val config = configs[0]
-                            if (config != null) {
-                                Log.d(TAG, "EGL config chosen using fallback level $index")
-                                return config
-                            }
-                        }
-                    }
-                }
-                Log.w(TAG, "EGL config fallback $index failed, trying next...")
+            )
+            if (egl.eglChooseConfig(display, attributes, configs, 1, count) && count[0] > 0) {
+                return checkNotNull(configs[0])
             }
-
-            throw RuntimeException("No compatible EGL config found after all fallbacks")
         }
+        error("No compatible OpenGL ES 2 window config")
     }
 }

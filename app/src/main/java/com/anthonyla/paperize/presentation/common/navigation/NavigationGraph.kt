@@ -26,9 +26,6 @@ import com.anthonyla.paperize.presentation.screens.sort.SortViewScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
 
-/**
- * Navigation graph for Paperize
- */
 @Composable
 fun NavigationGraph(
     modifier: Modifier = Modifier,
@@ -37,7 +34,6 @@ fun NavigationGraph(
     animate: Boolean = true,
     onFirstLaunchComplete: () -> Unit = {}
 ) {
-    // Conditional transitions based on animate setting
     val enterForward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
         if (animate) { { enterTransitionForward() } } else { { EnterTransition.None } }
     val exitForward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
@@ -51,15 +47,13 @@ fun NavigationGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = enterForward,
+        exitTransition = exitForward,
+        popEnterTransition = enterBackward,
+        popExitTransition = exitBackward
     ) {
-        // Startup screen (first launch)
-        composable<StartupRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<StartupRoute> {
             StartupScreen(
                 onAgree = {
                     navController.navigate(WallpaperModeSelectionRoute) {
@@ -72,13 +66,7 @@ fun NavigationGraph(
             )
         }
 
-        // Wallpaper mode selection screen
-        composable<WallpaperModeSelectionRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<WallpaperModeSelectionRoute> {
             com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection.WallpaperModeSelectionScreen(
                 onModeSelected = {
                     if (!PermissionUtil.hasNotificationPermission(context)) {
@@ -95,13 +83,7 @@ fun NavigationGraph(
             )
         }
 
-        // Notification permission screen
-        composable<NotificationRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<NotificationRoute> {
             NotificationPermissionScreen(
                 onContinue = {
                     onFirstLaunchComplete()
@@ -112,13 +94,7 @@ fun NavigationGraph(
             )
         }
 
-        // Home screen (main screen with tabs)
-        composable<HomeRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<HomeRoute> {
             HomeScreen(
                 onNavigateToSettings = {
                     navController.navigate(SettingsRoute)
@@ -129,14 +105,7 @@ fun NavigationGraph(
             )
         }
 
-        // Album screen
-        composable<AlbumRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) { backStackEntry ->
-            backStackEntry.toRoute<AlbumRoute>()
+        composable<AlbumRoute> {
             AlbumViewScreen(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToFolder = { folderId ->
@@ -150,28 +119,14 @@ fun NavigationGraph(
             )
         }
 
-        // Sort screen
-        composable<SortRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) { backStackEntry ->
-            backStackEntry.toRoute<SortRoute>()
+        composable<SortRoute> {
             SortViewScreen(
                 onSaveClick = { navController.popBackStack() },
                 onBackClick = { navController.popBackStack() }
             )
         }
 
-        // Folder screen
-        composable<FolderRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) { backStackEntry ->
-            backStackEntry.toRoute<FolderRoute>()
+        composable<FolderRoute> {
             FolderViewScreen(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToWallpaperView = { wallpaperId, wallpaperUri, wallpaperName ->
@@ -182,13 +137,7 @@ fun NavigationGraph(
             )
         }
 
-        // Wallpaper preview screen
-        composable<WallpaperViewRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) { backStackEntry ->
+        composable<WallpaperViewRoute> { backStackEntry ->
             val route = backStackEntry.toRoute<WallpaperViewRoute>()
             WallpaperViewScreen(
                 wallpaperUri = route.wallpaperUri,
@@ -197,26 +146,14 @@ fun NavigationGraph(
             )
         }
 
-        // Settings screen
-        composable<SettingsRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToPrivacy = { navController.navigate(PrivacyRoute) }
             )
         }
 
-        // Privacy screen
-        composable<PrivacyRoute>(
-            enterTransition = enterForward,
-            exitTransition = exitForward,
-            popEnterTransition = enterBackward,
-            popExitTransition = exitBackward
-        ) {
+        composable<PrivacyRoute> {
             PrivacyScreen(
                 onNavigateBack = { navController.popBackStack() }
             )

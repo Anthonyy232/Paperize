@@ -20,12 +20,9 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -62,21 +59,11 @@ fun HomeScreen(
         libraryTitle = stringResource(R.string.library)
     )
 
-    // Persist the initial tab index across navigation
-    val initialTab = rememberSaveable { mutableIntStateOf(0) }
-    val pagerState = rememberPagerState(initialTab.intValue) { tabItems.size }
-
-    // Save current tab when it changes
-    LaunchedEffect(pagerState.currentPage) {
-        initialTab.intValue = pagerState.currentPage
-    }
-
-
+    val pagerState = rememberPagerState { tabItems.size }
 
     Scaffold(
         topBar = {
             HomeTopBar(
-                showSelectionModeAppBar = false,
                 onSettingsClick = onNavigateToSettings
             )
         }
@@ -90,7 +77,6 @@ fun HomeScreen(
                         Tab(
                             selected = (index == pagerState.currentPage),
                             onClick = {
-                                // Animate to the selected page when tab is clicked
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(index)
                                 }
@@ -143,9 +129,7 @@ fun HomeScreen(
             }
         }
 
-
-    // Live Wallpaper Selection Prompt
-    if (wallpaperMode != null && showLiveWallpaperPrompt && wallpaperMode == WallpaperMode.LIVE) {
+    if (showLiveWallpaperPrompt && wallpaperMode == WallpaperMode.LIVE) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLiveWallpaperPrompt() },
             title = {
@@ -171,7 +155,6 @@ fun HomeScreen(
                     onClick = {
                         viewModel.dismissLiveWallpaperPrompt()
                         try {
-                            // Open live wallpaper chooser with Paperize pre-selected
                             val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
                                 putExtra(
                                     WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
@@ -183,12 +166,10 @@ fun HomeScreen(
                             }
                             context.startActivity(intent)
                         } catch (_: Exception) {
-                            // Fallback: Open general wallpaper settings
                             try {
                                 val fallbackIntent = Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER)
                                 context.startActivity(fallbackIntent)
                             } catch (_: Exception) {
-                                // Last resort: Open wallpaper settings
                                 val settingsIntent = Intent(android.provider.Settings.ACTION_SETTINGS)
                                 context.startActivity(settingsIntent)
                             }

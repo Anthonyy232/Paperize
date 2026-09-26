@@ -1,8 +1,5 @@
 package com.anthonyla.paperize.presentation.common.navigation.util
 
-/**
- * Constants for navigation animations
- */
 object NavConstants {
     /** Duration of navigation animations in milliseconds */
     const val NAVIGATION_TIME: Int = 300

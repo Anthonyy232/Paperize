@@ -24,7 +24,6 @@ interface WallpaperCurrentDao {
     """)
     suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): WallpaperEntity?
 
-    /** Reactive variant of [getCurrentWallpaper]; re-emits when the recorded wallpaper changes. */
     @Query("""
         SELECT w.* FROM wallpapers w
         INNER JOIN wallpaper_current wc ON w.id = wc.wallpaperId
@@ -33,7 +32,6 @@ interface WallpaperCurrentDao {
     """)
     fun getCurrentWallpaperFlow(albumId: String, screenType: ScreenType): Flow<WallpaperEntity?>
 
-    /** Record (or overwrite) the current wallpaper for an album/screen pair. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertCurrentWallpaper(entity: WallpaperCurrentEntity)
 }
