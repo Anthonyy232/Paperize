@@ -113,8 +113,8 @@ class AlbumViewViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteAlbumUseCase(albumId)
-                    .onSuccess { _albumDeleted.value = true }
-                    .onError { throw it }
+                    .getOrThrow()
+                _albumDeleted.value = true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

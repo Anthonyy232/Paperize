@@ -4,10 +4,6 @@ import com.anthonyla.paperize.data.database.entities.FolderEntity
 import com.anthonyla.paperize.data.database.relations.FolderWithWallpapers
 import com.anthonyla.paperize.domain.model.Folder
 
-/**
- * Mappers for Folder entity <-> domain model conversion
- */
-
 fun FolderEntity.toDomainModel(
     wallpapers: List<com.anthonyla.paperize.domain.model.Wallpaper> = emptyList()
 ): Folder = Folder(
@@ -36,7 +32,3 @@ fun Folder.toEntity(): FolderEntity = FolderEntity(
 fun FolderWithWallpapers.toDomainModel(): Folder = folder.toDomainModel(
     wallpapers = wallpapers.map { it.toDomainModel() }
 )
-
-fun List<FolderEntity>.toDomainModels(): List<Folder> = map { it.toDomainModel() }
-
-fun List<FolderWithWallpapers>.toDomainModelsFromRelations(): List<Folder> = map { it.toDomainModel() }

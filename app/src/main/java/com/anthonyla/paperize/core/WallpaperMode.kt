@@ -29,10 +29,6 @@ enum class WallpaperMode {
     LIVE;
 
     companion object {
-        /**
-         * Convert string to WallpaperMode
-         * Defaults to STATIC if string is null or doesn't match any mode
-         */
         fun fromString(value: String?): WallpaperMode {
             return entries.find { it.name.equals(value, ignoreCase = true) } ?: STATIC
         }

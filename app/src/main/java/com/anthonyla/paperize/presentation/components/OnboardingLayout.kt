@@ -132,7 +132,6 @@ fun OnboardingLayout(
 
                 Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
-                // Actions now part of the scrollable content to handle small heights (landscape)
                 AnimatedVisibility(
                     visible = visible,
                     enter = fadeIn(animationSpec = tween(500, delayMillis = 300)) + 

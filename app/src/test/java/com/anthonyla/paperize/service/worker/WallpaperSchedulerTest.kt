@@ -23,12 +23,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import kotlinx.coroutines.test.runTest
 
 class WallpaperSchedulerTest {
     private val context = mockk<Context>()
     private val workManager = mockk<WorkManager>()
     private val operation = mockk<Operation>()
     private val enqueued = mutableListOf<Triple<String, ExistingPeriodicWorkPolicy, PeriodicWorkRequest>>()
+    private val cancelled = mutableListOf<String>()
     private lateinit var scheduler: WallpaperScheduler
 
     @Before
@@ -41,11 +43,36 @@ class WallpaperSchedulerTest {
             enqueued += Triple(firstArg(), secondArg(), thirdArg())
             operation
         }
+        every { workManager.cancelUniqueWork(any()) } answers {
+            cancelled += firstArg<String>()
+            operation
+        }
         scheduler = WallpaperScheduler(context)
     }
 
     @After
     fun tearDown() = unmockkAll()
+
+    @Test fun `missing required album cancels every schedule including refresh`() = runTest {
+        scheduler.updateSchedules(
+            ScheduleSettings(enableChanger = true, homeEnabled = true, lockEnabled = true, homeAlbumId = "home"),
+            WallpaperMode.STATIC
+        )
+        assertTrue(enqueued.isEmpty())
+        assertEquals(setOf(Constants.WORK_NAME_HOME, Constants.WORK_NAME_LOCK, Constants.WORK_NAME_BOTH,
+            Constants.WORK_NAME_LIVE, Constants.WORK_NAME_REFRESH), cancelled.toSet())
+    }
+
+    @Test fun `short live intervals cancel static jobs and keep only library refresh`() = runTest {
+        scheduler.updateSchedules(
+            ScheduleSettings(enableChanger = true, liveAlbumId = "live", liveIntervalMinutes = 1),
+            WallpaperMode.LIVE, onlyIfNotScheduled = true
+        )
+        assertEquals(Constants.WORK_NAME_REFRESH, enqueued.single().first)
+        assertEquals(ExistingPeriodicWorkPolicy.KEEP, enqueued.single().second)
+        assertEquals(setOf(Constants.WORK_NAME_HOME, Constants.WORK_NAME_LOCK, Constants.WORK_NAME_BOTH,
+            Constants.WORK_NAME_LIVE), cancelled.toSet())
+    }
 
     @Test
     fun `manual resets defer the next run for a full interval for every target`() {
@@ -84,6 +111,36 @@ class WallpaperSchedulerTest {
         assertEquals(minimumMillis, request.workSpec.intervalDuration)
         assertTrue(request.workSpec.calculateNextRunTime() >= before + minimumMillis)
         assertTrue(request.workSpec.calculateNextRunTime() <= System.currentTimeMillis() + minimumMillis)
+    }
+
+    @Test
+    fun `manual lock reset honors the shared interval even with a stale independent value`() {
+        scheduler.resetAfterManualChange(
+            ScreenType.LOCK,
+            ScheduleSettings(
+                enableChanger = true, separateSchedules = false,
+                homeEnabled = true, lockEnabled = true, homeAlbumId = "home", lockAlbumId = "lock",
+                homeIntervalMinutes = 30, lockIntervalMinutes = 90
+            ),
+            WallpaperMode.STATIC
+        )
+        val (name, _, request) = enqueued.single()
+        assertEquals(Constants.WORK_NAME_LOCK, name)
+        assertEquals(TimeUnit.MINUTES.toMillis(30), request.workSpec.intervalDuration)
+    }
+
+    @Test
+    fun `lock-only reset uses the interval shown by the single picker`() {
+        scheduler.resetAfterManualChange(
+            ScreenType.LOCK,
+            ScheduleSettings(
+                enableChanger = true, separateSchedules = true,
+                homeEnabled = false, lockEnabled = true, lockAlbumId = "lock",
+                homeIntervalMinutes = 30, lockIntervalMinutes = 90
+            ),
+            WallpaperMode.STATIC
+        )
+        assertEquals(TimeUnit.MINUTES.toMillis(30), enqueued.single().third.workSpec.intervalDuration)
     }
 
     @Test

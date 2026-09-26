@@ -1,45 +1,36 @@
 package com.anthonyla.paperize.presentation.screens.sort
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.util.WallpaperSorter
 import com.anthonyla.paperize.domain.repository.AlbumRepository
-import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.presentation.common.navigation.SortRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-/**
- * ViewModel for the sort view screen to hold the folders and wallpapers
- */
 @HiltViewModel
 class SortViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val albumRepository: AlbumRepository,
-    private val wallpaperRepository: WallpaperRepository
+    private val albumRepository: AlbumRepository
 ) : ViewModel() {
 
     companion object {
         private const val TAG = "SortViewModel"
     }
 
-    private val sortRoute = savedStateHandle.toRoute<SortRoute>()
-    private val albumId: String = sortRoute.albumId
+    private val albumId = savedStateHandle.toRoute<SortRoute>().albumId
 
     private val _state = MutableStateFlow(SortState())
-    val state = _state.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
-        initialValue = SortState()
-    )
+    val state = _state.asStateFlow()
 
     init {
         loadAlbumData()
@@ -47,65 +38,53 @@ class SortViewModel @Inject constructor(
 
     private fun loadAlbumData() {
         viewModelScope.launch {
-            val album = albumRepository.getAlbumById(albumId).first()
-            val wallpapers = wallpaperRepository.getDirectWallpapersByAlbum(albumId).first()
-
-            _state.value = _state.value.copy(
-                folders = album?.folders ?: emptyList(),
-                wallpapers = wallpapers
-            )
+            try {
+                val album = checkNotNull(albumRepository.getAlbumById(albumId).first())
+                _state.value = _state.value.copy(
+                    folders = album.folders.sortedBy { it.displayOrder }.map { folder ->
+                        folder.copy(wallpapers = folder.wallpapers.sortedBy { it.displayOrder })
+                    },
+                    wallpapers = album.wallpapers.sortedBy { it.displayOrder },
+                    isLoading = false
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading sort data", e)
+                _state.value = _state.value.copy(error = R.string.sort_load_failed)
+            }
         }
     }
 
+    fun dismissError() { _state.value = _state.value.copy(error = null) }
+
     fun saveChanges() {
+        val snapshot = _state.value
+        if (snapshot.isLoading || snapshot.isSaving || snapshot.saved) return
+        _state.value = snapshot.copy(isSaving = true, error = null)
         viewModelScope.launch {
-            var hasError = false
-
-            // Update folders with new display orders
-            _state.value.folders.forEach { folder ->
-                when (val result = albumRepository.updateFolder(folder)) {
-                    is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                    is com.anthonyla.paperize.core.Result.Error -> {
-                        hasError = true
-                        Log.e(TAG, "Error updating folder", result.exception)
-                    }
-                    is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
-                }
-            }
-
-            // Update wallpapers with new display orders
-            _state.value.wallpapers.forEach { wallpaper ->
-                when (val result = wallpaperRepository.updateWallpaper(wallpaper)) {
-                    is com.anthonyla.paperize.core.Result.Success -> { /* Success */ }
-                    is com.anthonyla.paperize.core.Result.Error -> {
-                        hasError = true
-                        Log.e(TAG, "Error updating wallpaper", result.exception)
-                    }
-                    is com.anthonyla.paperize.core.Result.Loading -> { /* Loading state not used */ }
-                }
-            }
-
-            // Clear queues for this album to force rebuild with new sort order
-            // This ensures the wallpaper changer respects the new order immediately
-            if (!hasError) {
-                wallpaperRepository.clearQueuesForAlbum(albumId)
+            try {
+                albumRepository.reorderAlbum(albumId, snapshot.folders, snapshot.wallpapers)
+                    .getOrThrow()
+                _state.value = _state.value.copy(saved = true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving order", e)
+                _state.value = _state.value.copy(error = R.string.sort_save_failed)
+            } finally {
+                _state.value = _state.value.copy(isSaving = false)
             }
         }
     }
 
     fun onEvent(event: SortEvent) {
+        if (_state.value.isLoading || _state.value.isSaving || _state.value.saved) return
         when (event) {
-            is SortEvent.LoadSortView -> {
-                _state.value = _state.value.copy(
-                    folders = event.folders,
-                    wallpapers = event.wallpapers
-                )
-            }
-
             is SortEvent.ShiftFolder -> {
                 val fromUri = event.from.key as? String ?: return
                 val toUri = event.to.key as? String ?: return
-                val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftFolder(
+                val updatedFolders = WallpaperSorter.shiftFolder(
                     folders = state.value.folders,
                     fromUri = fromUri,
                     toUri = toUri
@@ -116,7 +95,7 @@ class SortViewModel @Inject constructor(
             is SortEvent.ShiftFolderWallpaper -> {
                 val fromUri = event.from.key as? String ?: return
                 val toUri = event.to.key as? String ?: return
-                val updatedFolders = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaperInFolder(
+                val updatedFolders = WallpaperSorter.shiftWallpaperInFolder(
                     folders = state.value.folders,
                     folderId = event.folderId,
                     fromUri = fromUri,
@@ -128,7 +107,7 @@ class SortViewModel @Inject constructor(
             is SortEvent.ShiftWallpaper -> {
                 val fromUri = event.from.key as? String ?: return
                 val toUri = event.to.key as? String ?: return
-                val updatedWallpapers = com.anthonyla.paperize.core.util.WallpaperSorter.shiftWallpaper(
+                val updatedWallpapers = WallpaperSorter.shiftWallpaper(
                     wallpapers = state.value.wallpapers,
                     fromUri = fromUri,
                     toUri = toUri
@@ -136,12 +115,8 @@ class SortViewModel @Inject constructor(
                 _state.value = _state.value.copy(wallpapers = updatedWallpapers)
             }
 
-            is SortEvent.Reset -> {
-                _state.value = SortState()
-            }
-
             is SortEvent.SortAlphabetically -> {
-                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllAlphabetically(
+                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllAlphabetically(
                     folders = state.value.folders,
                     wallpapers = state.value.wallpapers,
                     ascending = true
@@ -153,7 +128,7 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortAlphabeticallyReverse -> {
-                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllAlphabetically(
+                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllAlphabetically(
                     folders = state.value.folders,
                     wallpapers = state.value.wallpapers,
                     ascending = false
@@ -165,7 +140,7 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortByLastModified -> {
-                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllByDateModified(
+                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllByDateModified(
                     folders = state.value.folders,
                     wallpapers = state.value.wallpapers,
                     ascending = true
@@ -177,7 +152,7 @@ class SortViewModel @Inject constructor(
             }
 
             is SortEvent.SortByLastModifiedReverse -> {
-                val (sortedFolders, sortedWallpapers) = com.anthonyla.paperize.core.util.WallpaperSorter.sortAllByDateModified(
+                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllByDateModified(
                     folders = state.value.folders,
                     wallpapers = state.value.wallpapers,
                     ascending = false

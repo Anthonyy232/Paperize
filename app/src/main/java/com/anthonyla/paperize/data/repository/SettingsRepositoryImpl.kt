@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.data.repository
 
+import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.data.datastore.PreferencesManager
 import com.anthonyla.paperize.domain.model.AppSettings
@@ -9,9 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of SettingsRepository
- */
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     private val preferencesManager: PreferencesManager
@@ -22,9 +20,6 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override fun getAppSettingsFlow(): Flow<AppSettings> =
         preferencesManager.getAppSettingsFlow()
-
-    override suspend fun updateAppSettings(settings: AppSettings) =
-        preferencesManager.updateAppSettings(settings)
 
     override suspend fun getWallpaperMode(): WallpaperMode =
         preferencesManager.getWallpaperMode()
@@ -44,6 +39,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateScheduleSettings(settings: ScheduleSettings) =
         preferencesManager.updateScheduleSettings(settings)
 
+    override suspend fun updateScheduleSettings(transform: (ScheduleSettings) -> ScheduleSettings): ScheduleSettings =
+        preferencesManager.updateScheduleSettings(transform)
+
     override suspend fun clearAllSettings() =
         preferencesManager.clear()
 
@@ -62,7 +60,8 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearAlbumSelectionsIfMatches(albumId: String): Boolean =
         preferencesManager.clearAlbumSelectionsIfMatches(albumId)
 
-    // ============ Atomic AppSettings Operations ============
+    override suspend fun clearEmptyAlbumSelection(albumId: String, screen: ScreenType) =
+        preferencesManager.clearEmptyAlbumSelection(albumId, screen)
 
     override suspend fun updateDarkMode(enabled: Boolean) =
         preferencesManager.updateDarkMode(enabled)
@@ -75,8 +74,6 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun updateFirstLaunch(isFirstLaunch: Boolean) =
         preferencesManager.updateFirstLaunch(isFirstLaunch)
-
-    // ============ Atomic ScheduleSettings Operations ============
 
     override suspend fun updateEnableChanger(enabled: Boolean) =
         preferencesManager.updateEnableChanger(enabled)

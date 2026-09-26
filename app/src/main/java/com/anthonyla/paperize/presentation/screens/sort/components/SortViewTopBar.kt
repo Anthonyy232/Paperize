@@ -29,13 +29,11 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-/**
- * Top bar for the sort view screen
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortViewTopBar(
     title: String,
+    enabled: Boolean = true,
     onBackClick: () -> Unit,
     onSaveClick: () -> Unit,
     onSortAlphabetically: () -> Unit,
@@ -64,6 +62,7 @@ fun SortViewTopBar(
         actions = {
             Row {
                 IconButton(
+                    enabled = enabled,
                     onClick = { showSortMenu = true },
                     modifier = Modifier
                         .padding(AppSpacing.large)
@@ -113,6 +112,7 @@ fun SortViewTopBar(
                     }
                 }
                 IconButton(
+                    enabled = enabled,
                     onClick = onSaveClick,
                     modifier = Modifier
                         .padding(AppSpacing.large)

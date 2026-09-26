@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.CancellationSignal
 import android.provider.DocumentsContract
-import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.core.constants.Constants
 import android.database.Cursor
 import java.io.IOException
@@ -31,10 +30,6 @@ fun Uri.isValid(contentResolver: ContentResolver): Boolean {
             false
         }
     }
-}
-
-fun Uri.getFileName(context: Context): String? {
-    return DocumentFile.fromSingleUri(context, this)?.name
 }
 
 /** Only a successful, complete query with no rows proves that a document was removed. */

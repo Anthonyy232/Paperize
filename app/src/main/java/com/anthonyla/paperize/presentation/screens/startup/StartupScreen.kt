@@ -1,12 +1,10 @@
 package com.anthonyla.paperize.presentation.screens.startup
 
-import android.graphics.Canvas
-import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.appcompat.content.res.AppCompatResources
 import com.anthonyla.paperize.presentation.components.OnboardingLayout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -36,10 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-/**
- * Startup screen shown on first launch - Enhanced with Material 3 Expressive design
- * Displays privacy policy and asks for agreement
- */
 @Composable
 fun StartupScreen(
     onAgree: () -> Unit,
@@ -47,18 +41,12 @@ fun StartupScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val appIcon = remember {
-        val drawable = AppCompatResources.getDrawable(context, R.mipmap.ic_launcher_round)
-        if (drawable != null) {
-            val size = 192 // Use a fixed high resolution size
-            val bitmap = createBitmap(size, size)
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, size, size)
-            drawable.draw(canvas)
-            bitmap.asImageBitmap()
-        } else null
+    val appIcon = remember(context) {
+        AppCompatResources.getDrawable(context, R.mipmap.ic_launcher_round)
+            ?.toBitmap(width = 192, height = 192)
+            ?.asImageBitmap()
     }
-    
+
     OnboardingLayout(
         title = stringResource(R.string.app_name),
         modifier = modifier,
@@ -86,11 +74,9 @@ fun StartupScreen(
                 
                 Spacer(modifier = Modifier.height(AppSpacing.small))
 
-                // Cleaner privacy notice
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onPrivacyClick() },
+                    onClick = onPrivacyClick,
+                    modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)

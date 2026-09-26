@@ -106,14 +106,7 @@ fun AlbumViewScreen(
     }
 
     val sortedWallpapers = remember(wallpapers, sortOption) {
-        when (sortOption) {
-            SortOption.NAME_ASC -> wallpapers.sortedBy { it.fileName.lowercase() }
-            SortOption.NAME_DESC -> wallpapers.sortedByDescending { it.fileName.lowercase() }
-            SortOption.DATE_ADDED_ASC -> wallpapers.sortedBy { it.addedAt }
-            SortOption.DATE_ADDED_DESC -> wallpapers.sortedByDescending { it.addedAt }
-            SortOption.DATE_MODIFIED_ASC -> wallpapers.sortedBy { it.dateModified }
-            SortOption.DATE_MODIFIED_DESC -> wallpapers.sortedByDescending { it.dateModified }
-        }
+        wallpapers.sortedWith(sortOption.wallpaperComparator)
     }
 
     val commonItemModifier = remember {

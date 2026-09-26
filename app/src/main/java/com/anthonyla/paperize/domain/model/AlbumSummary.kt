@@ -14,12 +14,6 @@ data class AlbumSummary(
     val createdAt: Long,
     val modifiedAt: Long
 ) {
-    /**
-     * Check if album is empty without a full object load
-     */
-    val isEmpty: Boolean
-        get() = wallpaperCount == 0
-
     companion object {
         fun empty(id: String = "", name: String = "") = AlbumSummary(
             id = id,

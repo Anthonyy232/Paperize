@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.data.database.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -8,11 +7,6 @@ import androidx.room.PrimaryKey
 import com.anthonyla.paperize.core.WallpaperMediaType
 import com.anthonyla.paperize.core.WallpaperSourceType
 
-/**
- * Room entity for Wallpaper
- *
- * Properly indexed foreign key to Album and optional foreign key to Folder
- */
 @Entity(
     tableName = "wallpapers",
     foreignKeys = [
@@ -39,10 +33,8 @@ data class WallpaperEntity(
     @PrimaryKey
     val id: String,
 
-    @ColumnInfo(name = "albumId")
     val albumId: String,
 
-    @ColumnInfo(name = "folderId")
     val folderId: String? = null,
 
     val uri: String,

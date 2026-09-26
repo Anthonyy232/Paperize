@@ -11,21 +11,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 
-/**
- * Shared horizontal transition for entering screens
- *
- * Creates a smooth slide-in animation from the specified offset with a delayed fade-in effect.
- * The fade-in starts after the outgoing screen begins to fade out, creating a seamless transition.
- *
- * @param initial Lambda that calculates the initial horizontal offset based on screen width
- * @param durationMillis Total animation duration in milliseconds (default from NavConstants)
- * @return Combined enter transition with slide and fade animations
- */
+/** Slides in with a delayed fade so the outgoing screen fades first. */
 fun sharedXTransitionIn(
     initial: (fullWidth: Int) -> Int,
     durationMillis: Int = NavConstants.NAVIGATION_TIME,
 ): EnterTransition {
-    // Calculate timing for outgoing and incoming animations
     val outgoingDuration = (durationMillis * NavConstants.OFFSET_LIMIT).toInt()
     val incomingDuration = durationMillis - outgoingDuration
 
@@ -44,21 +34,11 @@ fun sharedXTransitionIn(
     )
 }
 
-/**
- * Shared horizontal transition for exiting screens
- *
- * Creates a smooth slide-out animation to the specified offset with an immediate fade-out effect.
- * The fade-out starts immediately to make way for the incoming screen.
- *
- * @param target Lambda that calculates the target horizontal offset based on screen width
- * @param durationMillis Total animation duration in milliseconds (default from NavConstants)
- * @return Combined exit transition with slide and fade animations
- */
+/** Slides out while fading immediately to make room for the incoming screen. */
 fun sharedXTransitionOut(
     target: (fullWidth: Int) -> Int,
     durationMillis: Int = NavConstants.NAVIGATION_TIME,
 ): ExitTransition {
-    // Calculate timing for outgoing fade animation
     val outgoingDuration = (durationMillis * NavConstants.OFFSET_LIMIT).toInt()
 
     return slideOutHorizontally(

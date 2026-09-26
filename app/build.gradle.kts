@@ -28,12 +28,14 @@ android {
         }
     }
 
+    sourceSets.getByName("androidTest").assets.directories.add("$projectDir/schemas")
+
     defaultConfig {
         applicationId = "com.anthonyla.paperize"
         minSdk = 31
         targetSdk = 36
-        versionCode = 56
-        versionName = "4.1.1"
+        versionCode = 57
+        versionName = "4.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -60,7 +62,6 @@ android {
 
     buildFeatures {
         compose = true
-        viewBinding = true
         buildConfig = true
     }
 
@@ -93,11 +94,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.google.material)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.material)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
-    implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -109,10 +108,7 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
-    implementation(libs.lottie.compose)
-    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.foundation)
-    implementation(libs.lazycolumnscrollbar)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.reorderable)
     testImplementation(libs.junit)
@@ -132,5 +128,4 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation (libs.kotlinx.serialization.json)
-    implementation(libs.toolbar.compose)
 }

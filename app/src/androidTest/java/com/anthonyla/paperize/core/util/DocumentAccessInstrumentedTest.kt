@@ -19,7 +19,6 @@ import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
-import com.anthonyla.paperize.data.repository.WallpaperRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -127,21 +126,50 @@ class DocumentAccessInstrumentedTest {
         assertEquals(0L, cancelled.count)
     }
 
-    @Test fun cleanupCountsDuplicateRowsAndPreservesOtherAlbums() = runBlocking {
+    @Test fun cleanupHandlesDuplicateUrisAndConcurrentReorderingWithoutTouchingOtherAlbums() = runBlocking {
         val db = Room.inMemoryDatabaseBuilder(context, PaperizeDatabase::class.java).build()
         try {
-            db.albumDao().insertAlbum(AlbumEntity("one", "One", null, 0L, 0L))
+            db.albumDao().insertAlbum(AlbumEntity("one", "One", documentUri.toString(), 0L, 0L))
             db.albumDao().insertAlbum(AlbumEntity("two", "Two", null, 0L, 0L))
             val uri = documentUri.toString()
             val missing = WallpaperEntity("first", "one", null, uri, "photo.png", 0L)
-            // More than one page of duplicate URIs caught the old offset/counting bug.
-            db.wallpaperDao().insertWallpapers((0..104).map { missing.copy(id = "missing-$it") })
+            db.wallpaperDao().insertWallpapers((0..504).map { missing.copy(id = "missing-$it") })
             db.wallpaperDao().insertWallpaper(missing.copy(id = "other-album", albumId = "two"))
-            provider.answer = { MatrixCursor(arrayOf(OpenableColumns.DISPLAY_NAME)) }
-            val repository = WallpaperRepositoryImpl(context, db.wallpaperDao(), db.wallpaperQueueDao(), db.wallpaperCurrentDao())
-            assertEquals(Result.Success(105), repository.validateAndRemoveInvalidWallpapers("one"))
+            provider.answer = {
+                if (provider.queries == 1) {
+                    // Move an unread image before the first page while that page is being scanned.
+                    db.openHelper.writableDatabase.execSQL("UPDATE wallpapers SET displayOrder = -1 WHERE id = 'missing-99'")
+                }
+                MatrixCursor(arrayOf(OpenableColumns.DISPLAY_NAME))
+            }
+            val repository = com.anthonyla.paperize.data.repository.AlbumRepositoryImpl(
+                com.anthonyla.paperize.data.source.AndroidDocumentSource(context), db)
+            assertEquals(Result.Success(505), repository.pruneMissingEntries("one"))
             assertEquals(0, db.wallpaperDao().getWallpaperCountByAlbum("one"))
+            assertNull(db.albumDao().getAlbumById("one")?.coverUri)
             assertNotNull(db.wallpaperDao().getWallpaperById("other-album"))
+        } finally { db.close() }
+    }
+
+    @Test fun cancelledCleanupDoesNotLeavePartialDeletions() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(context, PaperizeDatabase::class.java).build()
+        try {
+            db.albumDao().insertAlbum(AlbumEntity("album", "Album", "content://test/document/first"))
+            db.wallpaperDao().insertWallpapers(listOf("first", "second").map {
+                WallpaperEntity(it, "album", null, "content://test/document/$it", "$it.png", 0L)
+            })
+            provider.answer = {
+                if (provider.queries == 2) throw kotlinx.coroutines.CancellationException()
+                MatrixCursor(arrayOf(OpenableColumns.DISPLAY_NAME))
+            }
+            val repository = com.anthonyla.paperize.data.repository.AlbumRepositoryImpl(
+                com.anthonyla.paperize.data.source.AndroidDocumentSource(context), db)
+            try {
+                repository.pruneMissingEntries("album")
+                fail("Expected cancellation")
+            } catch (_: kotlinx.coroutines.CancellationException) { }
+            assertEquals(2, db.wallpaperDao().getWallpaperCountByAlbum("album"))
+            assertEquals("content://test/document/first", db.albumDao().getAlbumById("album")?.coverUri)
         } finally { db.close() }
     }
 

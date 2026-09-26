@@ -4,8 +4,6 @@ import com.anthonyla.paperize.presentation.components.OnboardingLayout
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Wallpaper
@@ -16,23 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.presentation.screens.settings.SettingsViewModel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-/**
- * Wallpaper mode selection screen shown during onboarding
- * Allows user to choose between STATIC and LIVE wallpaper modes
- */
 @Composable
 fun WallpaperModeSelectionScreen(
     onModeSelected: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: WallpaperModeSelectionViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
+    val isResetting by viewModel.isResetting.collectAsStateWithLifecycle()
+    val resetFailed by viewModel.resetFailed.collectAsStateWithLifecycle()
     var selectedMode by remember { mutableStateOf<WallpaperMode?>(null) }
 
     OnboardingLayout(
@@ -60,7 +57,6 @@ fun WallpaperModeSelectionScreen(
 
                 Spacer(modifier = Modifier.height(AppSpacing.small))
 
-                // Static Mode Card
                 ModeSelectionCard(
                     title = stringResource(R.string.static_mode),
                     description = stringResource(R.string.static_mode_description),
@@ -69,7 +65,6 @@ fun WallpaperModeSelectionScreen(
                     onClick = { selectedMode = WallpaperMode.STATIC }
                 )
 
-                // Live Mode Card
                 ModeSelectionCard(
                     title = stringResource(R.string.live_wallpaper_mode),
                     description = stringResource(R.string.live_wallpaper_mode_description),
@@ -80,16 +75,17 @@ fun WallpaperModeSelectionScreen(
             }
         },
         actions = {
+            if (resetFailed) Text(stringResource(R.string.reset_failed), color = MaterialTheme.colorScheme.error)
+            if (isResetting) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             Button(
                 onClick = {
                     selectedMode?.let { mode ->
-                        viewModel.setWallpaperMode(mode)
-                        onModeSelected()
+                        viewModel.switchWallpaperMode(mode, onModeSelected)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.large,
-                enabled = selectedMode != null
+                enabled = selectedMode != null && !isResetting
             ) {
                 Text(
                     text = stringResource(R.string.continue_button),
@@ -173,7 +169,7 @@ private fun ModeSelectionCard(
                 Spacer(modifier = Modifier.width(AppSpacing.small))
                 RadioButton(
                     selected = true,
-                    onClick = onClick
+                    onClick = null
                 )
             }
         }

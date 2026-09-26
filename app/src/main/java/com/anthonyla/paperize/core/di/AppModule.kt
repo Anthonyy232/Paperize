@@ -5,18 +5,15 @@ import android.content.Context
 import androidx.room.Room
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.data.database.PaperizeDatabase
-import com.anthonyla.paperize.data.database.dao.AlbumDao
-import com.anthonyla.paperize.data.database.dao.FolderDao
-import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
-import com.anthonyla.paperize.data.database.dao.WallpaperDao
-import com.anthonyla.paperize.data.database.dao.WallpaperQueueDao
 import com.anthonyla.paperize.data.datastore.PreferencesManager
 import com.anthonyla.paperize.data.repository.AlbumRepositoryImpl
 import com.anthonyla.paperize.data.repository.SettingsRepositoryImpl
 import com.anthonyla.paperize.data.repository.WallpaperRepositoryImpl
+import com.anthonyla.paperize.data.source.AndroidDocumentSource
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
+import com.anthonyla.paperize.domain.source.DocumentSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,18 +21,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Hilt dependency injection module
- *
- * Provides all application-wide dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    /**
-     * Provide Room database
-     */
+    @Provides
+    fun provideWallpaperManager(@ApplicationContext context: Context): android.app.WallpaperManager =
+        android.app.WallpaperManager.getInstance(context)
+
+    @Provides
+    fun provideDocumentSource(source: AndroidDocumentSource): DocumentSource = source
+
     @Provides
     @Singleton
     fun providePaperizeDatabase(app: Application): PaperizeDatabase {
@@ -44,72 +40,21 @@ object AppModule {
             PaperizeDatabase::class.java,
             Constants.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration(dropAllTables = true)
+            .addMigrations(*com.anthonyla.paperize.data.database.LIBRARY_MIGRATIONS)
             .build()
     }
 
-    /**
-     * Provide DAOs
-     */
-    @Provides
-    @Singleton
-    fun provideAlbumDao(database: PaperizeDatabase): AlbumDao =
-        database.albumDao()
-
-    @Provides
-    @Singleton
-    fun provideWallpaperDao(database: PaperizeDatabase): WallpaperDao =
-        database.wallpaperDao()
-
-    @Provides
-    @Singleton
-    fun provideFolderDao(database: PaperizeDatabase): FolderDao =
-        database.folderDao()
-
-    @Provides
-    @Singleton
-    fun provideWallpaperQueueDao(database: PaperizeDatabase): WallpaperQueueDao =
-        database.wallpaperQueueDao()
-
-    @Provides
-    @Singleton
-    fun provideWallpaperCurrentDao(database: PaperizeDatabase): WallpaperCurrentDao =
-        database.wallpaperCurrentDao()
-
-    /**
-     * Provide PreferencesManager
-     */
     @Provides
     @Singleton
     fun providePreferencesManager(@ApplicationContext context: Context): PreferencesManager =
         PreferencesManager(context)
 
-    /**
-     * Provide Repositories
-     */
     @Provides
-    @Singleton
-    fun provideAlbumRepository(
-        @ApplicationContext context: Context,
-        database: PaperizeDatabase,
-        albumDao: AlbumDao,
-        wallpaperDao: WallpaperDao,
-        folderDao: FolderDao,
-        wallpaperRepository: dagger.Lazy<WallpaperRepository>
-    ): AlbumRepository = AlbumRepositoryImpl(context, database, albumDao, wallpaperDao, folderDao, wallpaperRepository)
+    fun provideAlbumRepository(repository: AlbumRepositoryImpl): AlbumRepository = repository
 
     @Provides
-    @Singleton
-    fun provideWallpaperRepository(
-        @ApplicationContext context: Context,
-        wallpaperDao: WallpaperDao,
-        wallpaperQueueDao: WallpaperQueueDao,
-        wallpaperCurrentDao: WallpaperCurrentDao
-    ): WallpaperRepository = WallpaperRepositoryImpl(context, wallpaperDao, wallpaperQueueDao, wallpaperCurrentDao)
+    fun provideWallpaperRepository(repository: WallpaperRepositoryImpl): WallpaperRepository = repository
 
     @Provides
-    @Singleton
-    fun provideSettingsRepository(
-        preferencesManager: PreferencesManager
-    ): SettingsRepository = SettingsRepositoryImpl(preferencesManager)
+    fun provideSettingsRepository(repository: SettingsRepositoryImpl): SettingsRepository = repository
 }

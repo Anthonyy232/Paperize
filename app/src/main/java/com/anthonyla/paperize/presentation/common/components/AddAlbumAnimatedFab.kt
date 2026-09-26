@@ -25,18 +25,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 
-/**
- * Material 3 Expressive FAB Menu for adding images and folders to albums
- *
- * Migrated to use FloatingActionButtonMenu, ToggleFloatingActionButton, and
- * FloatingActionButtonMenuItem from Material 3 Expressive design system.
- *
- * Features:
- * - Physics-based animations from expressive motion scheme
- * - Staggered menu item reveal animations
- * - Smooth icon morphing between Add and Close
- * - Accessibility support with proper traversal and custom actions
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AddAlbumAnimatedFab(
@@ -47,7 +35,6 @@ fun AddAlbumAnimatedFab(
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    // Collapse menu when back button is pressed
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
 
     FloatingActionButtonMenu(
@@ -58,7 +45,6 @@ fun AddAlbumAnimatedFab(
                 checked = fabMenuExpanded,
                 onCheckedChange = { if (!isLoading) fabMenuExpanded = !fabMenuExpanded }
             ) {
-                // Animate between Add and Close icons based on checked progress
                 val imageVector by remember {
                     derivedStateOf {
                         if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
@@ -76,7 +62,6 @@ fun AddAlbumAnimatedFab(
             }
         }
     ) {
-        // Menu items are revealed with staggered animation when menu expands
         FloatingActionButtonMenuItem(
             onClick = {
                 onImageClick()

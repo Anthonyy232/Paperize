@@ -2,10 +2,6 @@ package com.anthonyla.paperize.presentation.common.navigation
 
 import kotlinx.serialization.Serializable
 
-/**
- * Type-safe navigation routes using kotlinx.serialization
- */
-
 @Serializable
 object StartupRoute
 

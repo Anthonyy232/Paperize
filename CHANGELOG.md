@@ -1,18 +1,22 @@
-## Unreleased
+## v4.2.0
 
-- Made imports cancellable, moved file-provider queries off the UI thread, and
-  added visible errors for inaccessible selections and incomplete folder scans.
-- Prevented duplicate imports and fixed folder wallpaper source metadata.
-- Preserved albums during temporary storage-provider failures and scoped missing
-  wallpaper cleanup to the album being refreshed.
-- Made album deletion wait for completion and clear saved album selections;
-  added confirmation and failure feedback when removing selected items.
-- Added import actions to empty albums, enabled folder sorting, and made the
-  active sort order visible and accessible. Wallpaper thumbnails now expose file names and selection state to screen readers.
-- Added manual folder refresh with progress and error feedback, sharing batch
-  imports and duplicate detection with the daily background refresh.
-- Updated folder covers atomically during imports and consistently selected
-  covers by display order.
+### Library and albums
+- Make image imports and folder refreshes cancellable and transactional, with accurate progress and useful failure feedback.
+- Preserve library entries when a document provider is temporarily unavailable, avoid duplicate imports, and refresh folder metadata and covers consistently.
+- Preserve library data when upgrading older database versions.
+- Improve album deletion, selection cleanup, sorting, and empty-album actions.
+
+### Wallpaper reliability
+- Keep home and lock schedules consistent across restarts, manual changes, and settings edits.
+- Prevent rapid settings edits from overwriting newer album selections or pause/resume actions.
+- Share wallpaper application and rendering between manual changes and scheduled jobs, with consistent failure recovery.
+- Correct static image sizing, thin-image decoding, and FIT/STRETCH fallback rendering.
+
+### Live wallpaper and interface
+- Fix crossfade completion and preserve pending wallpaper changes when folding, resizing, or recreating the rendering surface.
+- Improve OpenGL resource cleanup, blur rendering, and memory use.
+- Respect animation settings in previews and improve sorting accessibility and settings feedback.
+- Remove redundant UI, unused dependencies, obsolete compatibility code, and low-value tests and comments.
 
 ## v4.1.1
 

@@ -3,10 +3,6 @@ import com.anthonyla.paperize.presentation.theme.AppMaxWidths
 import com.anthonyla.paperize.presentation.theme.AppBorderWidths
 import com.anthonyla.paperize.core.constants.Constants
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -42,25 +38,15 @@ import coil3.size.Size
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Displays the home and lock wallpapers Paperize last applied.
- *
- * The images are loaded from the recorded source URIs ([homeWallpaperUri]/[lockWallpaperUri]) via
- * Coil, rather than read back from WallpaperManager.getDrawable(): the latter is privacy-restricted
- * on modern Android and returns null without the optional all-files-access permission, which left
- * the preview blank. The URIs already carry the album's persisted read access, so no extra
- * permission is needed. They update reactively whenever Paperize changes the wallpaper.
- *
- * Note: this shows the source image, not the exact cropped/scaled/effected on-screen result.
- *
- * Adapts to the device screen aspect ratio and respects the app's animate setting.
+/** Shows the last applied source URIs; WallpaperManager readback is restricted on modern Android.
+ * Cropping and effects applied to the actual wallpaper are not included in this preview.
  */
 @Composable
 fun CurrentWallpaperPreview(
     homeWallpaperUri: String?,
     lockWallpaperUri: String?,
-    animate: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    animate: Boolean = true
 ) {
     val configuration = LocalConfiguration.current
 
@@ -99,7 +85,6 @@ fun CurrentWallpaperPreview(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
-                // Lock wallpaper preview (on the left)
                 WallpaperPreviewBox(
                     wallpaperUri = lockWallpaperUri,
                     aspectRatio = screenAspectRatio,
@@ -108,7 +93,6 @@ fun CurrentWallpaperPreview(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Home wallpaper preview (on the right)
                 WallpaperPreviewBox(
                     wallpaperUri = homeWallpaperUri,
                     aspectRatio = screenAspectRatio,
@@ -121,10 +105,6 @@ fun CurrentWallpaperPreview(
     }
 }
 
-/**
- * A single wallpaper preview. Shows a placeholder background until [wallpaperUri] is non-null,
- * then fades in the image. Uses the device screen aspect ratio to avoid layout jumps.
- */
 @Composable
 private fun WallpaperPreviewBox(
     wallpaperUri: String?,
@@ -146,23 +126,15 @@ private fun WallpaperPreviewBox(
             .clip(AppShapes.imageShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
-        AnimatedVisibility(
-            visible = wallpaperUri != null,
-            enter = fadeIn(animationSpec = tween(if (animate) Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS.toInt() else 0)),
-            exit = fadeOut(animationSpec = tween(if (animate) Constants.PERMISSION_SCREEN_TRANSITION_DELAY_MS.toInt() else 0))
-        ) {
-            wallpaperUri?.let { uri ->
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(uri)
-                        .size(Size(Constants.PREVIEW_THUMBNAIL_WIDTH, Constants.PREVIEW_THUMBNAIL_HEIGHT))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = contentDescription,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.matchParentSize()
-                )
-            }
-        }
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(wallpaperUri)
+                .size(Size(Constants.PREVIEW_THUMBNAIL_WIDTH, Constants.PREVIEW_THUMBNAIL_HEIGHT))
+                .crossfade(animate)
+                .build(),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
     }
 }

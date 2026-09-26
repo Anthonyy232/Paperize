@@ -3,16 +3,9 @@ package com.anthonyla.paperize.core.util
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.constants.Constants
 
-/**
- * Utility class for brightness calculations and adaptive adjustments.
- * Extracted from WallpaperUtil for better testability.
- */
 object BrightnessCalculator {
 
-    /**
-     * Calculate relative luminance of a single pixel using ITU-R BT.709 standard.
-     * Use bitwise operations to avoid dependency on android.graphics.Color in core logic tests.
-     */
+    /** Estimates luminance with BT.709 coefficients; channels remain in their encoded color space. */
     fun calculateLuminance(pixel: Int): Double {
         val r = ((pixel shr 16) and 0xFF) / 255.0
         val g = ((pixel shr 8) and 0xFF) / 255.0
@@ -21,19 +14,11 @@ object BrightnessCalculator {
         return Constants.LUMINANCE_RED * r + Constants.LUMINANCE_GREEN * g + Constants.LUMINANCE_BLUE * b
     }
 
-    /**
-     * Calculate brightness estimate of bitmap (0.0 - 1.0).
-     *
-     * Reads one sampled row at a time using [Bitmap.getPixels] so the entire
-     * sample set is fetched with (height / sampleSize) JNI calls instead of
-     * (width / sampleSize) × (height / sampleSize) individual pixel lookups.
-     * A reusable row buffer keeps allocations to one IntArray(width).
-     */
+    /** Samples rows in bulk to avoid a JNI call for every pixel. Returns brightness in 0..1. */
     fun calculateBitmapBrightness(bitmap: Bitmap): Float {
         val sampleSize = Constants.BRIGHTNESS_SAMPLE_SIZE
         val w = bitmap.width
         val h = bitmap.height
-        if (w <= 0 || h <= 0) return Constants.DEFAULT_BRIGHTNESS
 
         val rowBuffer = IntArray(w)
         var totalLuminance = 0.0
@@ -47,20 +32,9 @@ object BrightnessCalculator {
             }
         }
 
-        return if (pixelCount > 0) {
-            (totalLuminance / pixelCount).toFloat()
-        } else {
-            Constants.DEFAULT_BRIGHTNESS
-        }
+        return (totalLuminance / pixelCount).toFloat()
     }
 
-    /**
-     * Get adaptive brightness multiplier factor based on system dark/light mode.
-     *
-     * @param isDarkMode Whether the system is in dark mode
-     * @param brightness Current image brightness (0.0 to 1.0)
-     * @return Multiplier factor to apply to colors
-     */
     fun getAdaptiveMultiplier(isDarkMode: Boolean, brightness: Float): Float {
         val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
         val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
@@ -71,11 +45,8 @@ object BrightnessCalculator {
         if (brightness < 0.01f) return 1.0f
 
         return when {
-            // In dark mode with very bright image: darken it
             isDarkMode && brightness > lightBrightnessMin -> targetBrightnessDark / brightness
-            // In light mode with very dark image: brighten it
             !isDarkMode && brightness < darkBrightnessMax -> targetBrightnessLight / brightness
-            // No adjustment needed
             else -> 1.0f
         }
     }

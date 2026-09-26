@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper
-import com.anthonyla.paperize.core.constants.Constants
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,14 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,22 +37,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
+import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.AlbumSelectionBottomSheet
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.CurrentWallpaperPreview
-import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitch
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.TimeIntervalPicker
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-enum class AlbumSelectionContext {
-    HOME, LOCK, BOTH, LIVE
+private enum class AlbumSelectionContext {
+    HOME, LOCK, LIVE
 }
 
 @Composable
@@ -76,8 +73,7 @@ fun WallpaperScreen(
     lockWallpaperUri: String?,
     modifier: Modifier = Modifier
 ) {
-    var showAlbumSelectionSheet by rememberSaveable { mutableStateOf(false) }
-    var albumSelectionContext by rememberSaveable { mutableStateOf(AlbumSelectionContext.BOTH) }
+    var albumSelectionContext by rememberSaveable { mutableStateOf<AlbumSelectionContext?>(null) }
     var showEmptyAlbumWarning by rememberSaveable { mutableStateOf(false) }
     var scheduleSettings by remember { mutableStateOf(persistedScheduleSettings) }
 
@@ -100,41 +96,36 @@ fun WallpaperScreen(
     val homeEnabled = scheduleSettings.homeEnabled
     val lockEnabled = scheduleSettings.lockEnabled
 
-    // Get currently selected albums by ID
-    val homeAlbum by remember(albums, scheduleSettings.homeAlbumId) {
-        derivedStateOf {
-            scheduleSettings.homeAlbumId?.let { id -> albums.find { it.id == id } }
-        }
+    val primaryEffects = when {
+        wallpaperMode == WallpaperMode.LIVE -> scheduleSettings.liveEffects
+        homeEnabled -> scheduleSettings.homeEffects
+        else -> scheduleSettings.lockEffects
     }
-    val lockAlbum by remember(albums, scheduleSettings.lockAlbumId) {
-        derivedStateOf {
-            scheduleSettings.lockAlbumId?.let { id -> albums.find { it.id == id } }
+    val bothEnabled = wallpaperMode == WallpaperMode.STATIC && homeEnabled && lockEnabled
+
+    fun updateEffects(
+        home: (WallpaperEffects) -> WallpaperEffects,
+        lock: (WallpaperEffects) -> WallpaperEffects = home,
+        debounced: Boolean = false
+    ) {
+        val updated = if (wallpaperMode == WallpaperMode.LIVE) {
+            scheduleSettings.copy(liveEffects = home(scheduleSettings.liveEffects))
+        } else {
+            scheduleSettings.copy(
+                homeEffects = if (homeEnabled) home(scheduleSettings.homeEffects) else scheduleSettings.homeEffects,
+                lockEffects = if (lockEnabled) lock(scheduleSettings.lockEffects) else scheduleSettings.lockEffects
+            )
         }
-    }
-    val liveAlbum by remember(albums, scheduleSettings.liveAlbumId) {
-        derivedStateOf {
-            scheduleSettings.liveAlbumId?.let { id -> albums.find { it.id == id } }
-        }
+        if (debounced) updateSettingsDebounced(updated) else updateSettingsImmediate(updated)
     }
 
     val scalingOptions = listOf(
-        stringResource(R.string.fill),
-        stringResource(R.string.fit),
-        stringResource(R.string.stretch),
-        stringResource(R.string.none)
+        ScalingType.FILL to stringResource(R.string.fill),
+        ScalingType.FIT to stringResource(R.string.fit),
+        ScalingType.STRETCH to stringResource(R.string.stretch),
+        ScalingType.NONE to stringResource(R.string.none)
     )
-
-    val scalingTypeFromSettings = if (wallpaperMode == WallpaperMode.LIVE) scheduleSettings.liveScalingType else scheduleSettings.homeScalingType
-    var selectedScalingIndex by remember(scalingTypeFromSettings) {
-        mutableIntStateOf(
-            when (scalingTypeFromSettings) {
-                ScalingType.FILL -> 0
-                ScalingType.FIT -> 1
-                ScalingType.STRETCH -> 2
-                ScalingType.NONE -> 3
-            }
-        )
-    }
+    val selectedScaling = if (wallpaperMode == WallpaperMode.LIVE) scheduleSettings.liveScalingType else scheduleSettings.homeScalingType
 
     Column(
         modifier = modifier
@@ -143,318 +134,39 @@ fun WallpaperScreen(
             .padding(start = AppSpacing.small, end = AppSpacing.small, bottom = AppSpacing.small),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
-        // Home and Lock Screen Toggles - Enhanced with better styling
-        // Only show in Static Mode
         if (wallpaperMode == WallpaperMode.STATIC) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
             ) {
-                Card(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        updateSettingsImmediate(scheduleSettings.copy(lockEnabled = !lockEnabled))
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (lockEnabled)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(AppSpacing.large),
-                        verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
-                    ) {
-                        Icon(
-                            Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = if (lockEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.lock),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (lockEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = if (lockEnabled) stringResource(R.string.enabled) else stringResource(R.string.disabled),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (lockEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                Card(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        updateSettingsImmediate(scheduleSettings.copy(homeEnabled = !homeEnabled))
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (homeEnabled)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(AppSpacing.large),
-                        verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
-                    ) {
-                        Icon(
-                            Icons.Default.Home,
-                            contentDescription = null,
-                            tint = if (homeEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.home),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (homeEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = if (homeEnabled) stringResource(R.string.enabled) else stringResource(R.string.disabled),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (homeEnabled)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
+                ScreenToggleCard(
+                    title = stringResource(R.string.lock), icon = Icons.Default.Lock, enabled = lockEnabled,
+                    onClick = { updateSettingsImmediate(scheduleSettings.copy(lockEnabled = !lockEnabled)) },
+                    modifier = Modifier.weight(1f)
+                )
+                ScreenToggleCard(
+                    title = stringResource(R.string.home), icon = Icons.Default.Home, enabled = homeEnabled,
+                    onClick = { updateSettingsImmediate(scheduleSettings.copy(homeEnabled = !homeEnabled)) },
+                    modifier = Modifier.weight(1f)
+                )
             }
+            if (lockEnabled) AlbumSelector(
+                albumId = scheduleSettings.lockAlbumId, albums = albums,
+                label = stringResource(R.string.lock_album_label),
+                onClick = { albumSelectionContext = AlbumSelectionContext.LOCK }
+            )
+            if (homeEnabled) AlbumSelector(
+                albumId = scheduleSettings.homeAlbumId, albums = albums,
+                label = stringResource(R.string.home_album_label),
+                onClick = { albumSelectionContext = AlbumSelectionContext.HOME }
+            )
+        } else {
+            AlbumSelector(
+                albumId = scheduleSettings.liveAlbumId, albums = albums,
+                label = stringResource(R.string.currently_selected_album),
+                onClick = { albumSelectionContext = AlbumSelectionContext.LIVE }
+            )
         }
-
-        // Album Selection - Enhanced with better card styling
-        // Only show album selection when at least one screen is enabled
-        if (wallpaperMode == WallpaperMode.STATIC && (homeEnabled || lockEnabled)) {
-            if (homeEnabled && lockEnabled) {
-                // Lock Screen Album
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = AppSpacing.small),
-                    onClick = {
-                        albumSelectionContext = AlbumSelectionContext.LOCK
-                        showAlbumSelectionSheet = true
-                    },
-                    shape = MaterialTheme.shapes.medium,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppSpacing.large),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = lockAlbum?.name ?: if (scheduleSettings.lockAlbumId != null) {
-                                    stringResource(R.string.loading_placeholder)
-                                } else {
-                                    stringResource(R.string.no_album_selected)
-                                },
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = stringResource(R.string.lock_album_label),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                // Home Screen Album
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = AppSpacing.small),
-                    onClick = {
-                        albumSelectionContext = AlbumSelectionContext.HOME
-                        showAlbumSelectionSheet = true
-                    },
-                    shape = MaterialTheme.shapes.medium,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppSpacing.large),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = homeAlbum?.name ?: if (scheduleSettings.homeAlbumId != null) {
-                                    stringResource(R.string.loading_placeholder)
-                                } else {
-                                    stringResource(R.string.no_album_selected)
-                                },
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = stringResource(R.string.home_album_label),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            } else {
-                // Single album selector when only one screen enabled
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = AppSpacing.small),
-                    onClick = {
-                        albumSelectionContext = AlbumSelectionContext.BOTH
-                        showAlbumSelectionSheet = true
-                    }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppSpacing.large),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            val currentAlbum = if (homeEnabled) homeAlbum else lockAlbum
-                            val currentAlbumId = if (homeEnabled) scheduleSettings.homeAlbumId else scheduleSettings.lockAlbumId
-                            Text(
-                                text = currentAlbum?.name ?: if (currentAlbumId != null) {
-                                    stringResource(R.string.loading_placeholder)
-                                } else {
-                                    stringResource(R.string.no_album_selected)
-                                },
-                                style = MaterialTheme.typography.titleMedium,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = when {
-                                    homeEnabled && !lockEnabled -> stringResource(R.string.home) + stringResource(R.string.album_suffix)
-                                    !homeEnabled && lockEnabled -> stringResource(R.string.lock) + stringResource(R.string.album_suffix)
-                                    else -> stringResource(R.string.currently_selected_album)
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        } else if (wallpaperMode == WallpaperMode.LIVE) {
-            // Live Mode: Single Album Selector
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = AppSpacing.small, start = AppSpacing.small, end = AppSpacing.small),
-                onClick = {
-                    albumSelectionContext = AlbumSelectionContext.LIVE
-                    showAlbumSelectionSheet = true
-                }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppSpacing.large),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = liveAlbum?.name ?: if (scheduleSettings.liveAlbumId != null) {
-                                stringResource(R.string.loading_placeholder)
-                            } else {
-                                stringResource(R.string.no_album_selected)
-                            },
-                            style = MaterialTheme.typography.titleMedium,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = stringResource(R.string.currently_selected_album),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        // Individual scheduling (only show if both screens enabled and changer is enabled)
         if (wallpaperMode == WallpaperMode.STATIC && scheduleSettings.enableChanger && homeEnabled && lockEnabled) {
             SettingSwitchItem(
                 title = stringResource(R.string.individual_scheduling),
@@ -466,25 +178,8 @@ fun WallpaperScreen(
             )
         }
 
-        // Check if an album is selected (at least one screen enabled with album ID set)
-        val hasAlbumSelected = if (wallpaperMode == WallpaperMode.STATIC) {
-            (homeEnabled && scheduleSettings.homeAlbumId != null) ||
-            (lockEnabled && scheduleSettings.lockAlbumId != null)
-        } else {
-            scheduleSettings.liveAlbumId != null
-        }
-
-        val allRequiredAlbumsSelected = if (wallpaperMode == WallpaperMode.STATIC) {
-            when {
-                homeEnabled && lockEnabled ->
-                    scheduleSettings.homeAlbumId != null && scheduleSettings.lockAlbumId != null
-                homeEnabled -> scheduleSettings.homeAlbumId != null
-                lockEnabled -> scheduleSettings.lockAlbumId != null
-                else -> false
-            }
-        } else {
-            scheduleSettings.liveAlbumId != null
-        }
+        val hasAlbumSelected = scheduleSettings.activeScreens(wallpaperMode).isNotEmpty()
+        val allRequiredAlbumsSelected = scheduleSettings.hasRequiredAlbums(wallpaperMode)
 
         if (allRequiredAlbumsSelected) {
             SettingSwitchItem(
@@ -494,8 +189,6 @@ fun WallpaperScreen(
                 onCheckedChange = onToggleChanger
             )
         }
-
-        // Time interval pickers (only show if album is selected)
         if (hasAlbumSelected) {
             if (wallpaperMode == WallpaperMode.STATIC) {
                 if (!scheduleSettings.separateSchedules || !homeEnabled || !lockEnabled) {
@@ -512,39 +205,32 @@ fun WallpaperScreen(
                         }
                     )
                 } else {
-                    // Lock screen interval picker first (when individual scheduling is enabled)
-                    if (lockEnabled) {
-                        TimeIntervalPicker(
-                            title = stringResource(R.string.lock_screen_btn),
-                            minutes = scheduleSettings.lockIntervalMinutes,
-                            onMinutesChange = { minutes ->
-                                onUpdateScheduleSettings(
-                                    scheduleSettings.copy(lockIntervalMinutes = minutes)
-                                )
-                            }
-                        )
-                    }
-                    // Home screen interval picker second
-                    if (homeEnabled) {
-                        TimeIntervalPicker(
-                            title = stringResource(R.string.home_screen_btn),
-                            minutes = scheduleSettings.homeIntervalMinutes,
-                            onMinutesChange = { minutes ->
-                                onUpdateScheduleSettings(
-                                    scheduleSettings.copy(homeIntervalMinutes = minutes)
-                                )
-                            }
-                        )
-                    }
+                    TimeIntervalPicker(
+                        title = stringResource(R.string.lock_screen_btn),
+                        minutes = scheduleSettings.lockIntervalMinutes,
+                        onMinutesChange = { minutes ->
+                            updateSettingsImmediate(
+                                scheduleSettings.copy(lockIntervalMinutes = minutes)
+                            )
+                        }
+                    )
+                    TimeIntervalPicker(
+                        title = stringResource(R.string.home_screen_btn),
+                        minutes = scheduleSettings.homeIntervalMinutes,
+                        onMinutesChange = { minutes ->
+                            updateSettingsImmediate(
+                                scheduleSettings.copy(homeIntervalMinutes = minutes)
+                            )
+                        }
+                    )
                 }
             } else {
-                // Live Mode: Single Interval Picker
                 TimeIntervalPicker(
                     title = stringResource(R.string.interval_text),
                     minutes = scheduleSettings.liveIntervalMinutes,
                     minimumMinutes = Constants.MIN_LIVE_INTERVAL_MINUTES,
                     onMinutesChange = { minutes ->
-                        onUpdateScheduleSettings(
+                        updateSettingsImmediate(
                             scheduleSettings.copy(liveIntervalMinutes = minutes)
                         )
                     }
@@ -559,8 +245,6 @@ fun WallpaperScreen(
         }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = AppSpacing.small))
-
-        // Current Wallpaper Preview (Static Mode Only)
         if (wallpaperMode == WallpaperMode.STATIC) {
             SettingSwitchItem(
                 title = stringResource(R.string.horizontal_wallpaper_scrolling),
@@ -582,8 +266,6 @@ fun WallpaperScreen(
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = AppSpacing.small))
         }
-
-        // Effects Section Header
         Text(
             text = stringResource(R.string.wallpaper_effects_title),
             style = MaterialTheme.typography.titleLarge,
@@ -592,8 +274,6 @@ fun WallpaperScreen(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
-
-        // Scaling Options Card
         Card(
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
@@ -615,21 +295,14 @@ fun WallpaperScreen(
                     overflow = TextOverflow.Ellipsis
                 )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    scalingOptions.forEachIndexed { index, label ->
+                    scalingOptions.forEachIndexed { index, (scalingType, label) ->
                         SegmentedButton(
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index,
                                 count = scalingOptions.size
                             ),
                             onClick = {
-                                selectedScalingIndex = index
-                                val scalingType = when (index) {
-                                    0 -> ScalingType.FILL
-                                    1 -> ScalingType.FIT
-                                    2 -> ScalingType.STRETCH
-                                    else -> ScalingType.NONE
-                                }
-                                onUpdateScheduleSettings(
+                                updateSettingsImmediate(
                                     if (wallpaperMode == WallpaperMode.LIVE) {
                                         scheduleSettings.copy(liveScalingType = scalingType)
                                     } else {
@@ -640,7 +313,7 @@ fun WallpaperScreen(
                                     }
                                 )
                             },
-                            selected = index == selectedScalingIndex
+                            selected = scalingType == selectedScaling
                         ) {
                             Text(
                                 text = label,
@@ -668,33 +341,15 @@ fun WallpaperScreen(
                 Text(text = stringResource(R.string.change_wallpaper_now))
             }
         }
-
-        // Shuffle Card
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
-        ) {
-            Column(
-                modifier = Modifier.padding(AppSpacing.large),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-            ) {
-                SettingSwitch(
-                    title = R.string.shuffle,
-                    description = if (scheduleSettings.shuffleEnabled && !scheduleSettings.separateSchedules) null else R.string.randomly_shuffle_the_wallpapers,
-                    checked = scheduleSettings.shuffleEnabled,
-                    onCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(shuffleEnabled = enabled))
-                    }
-                )
+        SettingSwitchItem(
+            title = stringResource(R.string.shuffle),
+            description = if (scheduleSettings.shuffleEnabled && !scheduleSettings.separateSchedules) null else stringResource(R.string.randomly_shuffle_the_wallpapers),
+            checked = scheduleSettings.shuffleEnabled,
+            onCheckedChange = { enabled ->
+                updateSettingsImmediate(scheduleSettings.copy(shuffleEnabled = enabled))
             }
-        }
+        )
 
-        // Visual Effects Group
         Card(
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
@@ -717,306 +372,92 @@ fun WallpaperScreen(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Darken/Brightness
                 SettingSwitchWithSlider(
                     title = R.string.change_brightness,
                     description = R.string.change_the_image_brightness,
-                    checked = if (wallpaperMode == WallpaperMode.STATIC) {
-                        when {
-                            homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableDarken && scheduleSettings.lockEffects.enableDarken
-                            homeEnabled -> scheduleSettings.homeEffects.enableDarken
-                            else -> scheduleSettings.lockEffects.enableDarken
-                        }
-                    } else {
-                        scheduleSettings.liveEffects.enableDarken
-                    },
-                    onCheckedChange = { enabled ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableDarken = enabled) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableDarken = enabled) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableDarken = enabled)
-                                )
-                            )
-                        }
-                    },
+                    checked = primaryEffects.enableDarken,
+                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableDarken = enabled) }) },
                     homeChecked = scheduleSettings.homeEffects.enableDarken,
                     lockChecked = scheduleSettings.lockEffects.enableDarken,
                     onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                homeEffects = scheduleSettings.homeEffects.copy(
-                                    enableDarken = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableDarken = enabled)))
                     },
                     onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                lockEffects = scheduleSettings.lockEffects.copy(
-                                    enableDarken = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableDarken = enabled)))
                     },
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
-                        homeEnabled && lockEnabled,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
-                        if (homeEnabled) scheduleSettings.homeEffects.darkenPercentage
-                        else scheduleSettings.lockEffects.darkenPercentage
-                    } else scheduleSettings.liveEffects.darkenPercentage,
+                    bothEnabled = bothEnabled,
+                    homePercentage = primaryEffects.darkenPercentage,
                     lockPercentage = scheduleSettings.lockEffects.darkenPercentage,
-                    onPercentageChange = { homePercent, lockPercent ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(darkenPercentage = homePercent) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(darkenPercentage = lockPercent) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(darkenPercentage = homePercent)
-                                )
-                            )
-                        }
+                    onPercentageChange = { home, lock ->
+                        updateEffects({ it.copy(darkenPercentage = home) }, { it.copy(darkenPercentage = lock) }, debounced = true)
                     }
                 )
 
-                // Blur
                 SettingSwitchWithSlider(
                     title = R.string.change_blur,
                     description = R.string.add_blur_to_the_image,
-                    checked = if (wallpaperMode == WallpaperMode.STATIC) {
-                        when {
-                            homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableBlur && scheduleSettings.lockEffects.enableBlur
-                            homeEnabled -> scheduleSettings.homeEffects.enableBlur
-                            else -> scheduleSettings.lockEffects.enableBlur
-                        }
-                    } else {
-                        scheduleSettings.liveEffects.enableBlur
-                    },
-                    onCheckedChange = { enabled ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableBlur = enabled) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableBlur = enabled) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableBlur = enabled)
-                                )
-                            )
-                        }
-                    },
+                    checked = primaryEffects.enableBlur,
+                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableBlur = enabled) }) },
                     homeChecked = scheduleSettings.homeEffects.enableBlur,
                     lockChecked = scheduleSettings.lockEffects.enableBlur,
                     onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                homeEffects = scheduleSettings.homeEffects.copy(
-                                    enableBlur = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableBlur = enabled)))
                     },
                     onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                lockEffects = scheduleSettings.lockEffects.copy(
-                                    enableBlur = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableBlur = enabled)))
                     },
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
-                        homeEnabled && lockEnabled,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
-                        if (homeEnabled) scheduleSettings.homeEffects.blurPercentage
-                        else scheduleSettings.lockEffects.blurPercentage
-                    } else scheduleSettings.liveEffects.blurPercentage,
+                    bothEnabled = bothEnabled,
+                    homePercentage = primaryEffects.blurPercentage,
                     lockPercentage = scheduleSettings.lockEffects.blurPercentage,
-                    onPercentageChange = { homePercent, lockPercent ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(blurPercentage = homePercent) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(blurPercentage = lockPercent) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(blurPercentage = homePercent)
-                                )
-                            )
-                        }
+                    onPercentageChange = { home, lock ->
+                        updateEffects({ it.copy(blurPercentage = home) }, { it.copy(blurPercentage = lock) }, debounced = true)
                     }
                 )
 
-                // Vignette
                 SettingSwitchWithSlider(
                     title = R.string.change_vignette,
                     description = R.string.darken_the_edges_of_the_image,
-                    checked = if (wallpaperMode == WallpaperMode.STATIC) {
-                        when {
-                            homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableVignette && scheduleSettings.lockEffects.enableVignette
-                            homeEnabled -> scheduleSettings.homeEffects.enableVignette
-                            else -> scheduleSettings.lockEffects.enableVignette
-                        }
-                    } else {
-                        scheduleSettings.liveEffects.enableVignette
-                    },
-                    onCheckedChange = { enabled ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableVignette = enabled) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableVignette = enabled) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableVignette = enabled)
-                                )
-                            )
-                        }
-                    },
+                    checked = primaryEffects.enableVignette,
+                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableVignette = enabled) }) },
                     homeChecked = scheduleSettings.homeEffects.enableVignette,
                     lockChecked = scheduleSettings.lockEffects.enableVignette,
                     onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                homeEffects = scheduleSettings.homeEffects.copy(
-                                    enableVignette = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableVignette = enabled)))
                     },
                     onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                lockEffects = scheduleSettings.lockEffects.copy(
-                                    enableVignette = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableVignette = enabled)))
                     },
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
-                        homeEnabled && lockEnabled,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
-                        if (homeEnabled) scheduleSettings.homeEffects.vignettePercentage
-                        else scheduleSettings.lockEffects.vignettePercentage
-                    } else scheduleSettings.liveEffects.vignettePercentage,
+                    bothEnabled = bothEnabled,
+                    homePercentage = primaryEffects.vignettePercentage,
                     lockPercentage = scheduleSettings.lockEffects.vignettePercentage,
-                    onPercentageChange = { homePercent, lockPercent ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(vignettePercentage = homePercent) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(vignettePercentage = lockPercent) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(vignettePercentage = homePercent)
-                                )
-                            )
-                        }
+                    onPercentageChange = { home, lock ->
+                        updateEffects({ it.copy(vignettePercentage = home) }, { it.copy(vignettePercentage = lock) }, debounced = true)
                     }
                 )
 
-                // Grayscale
                 SettingSwitchWithSlider(
                     title = R.string.gray_filter,
                     description = R.string.make_the_colors_grayscale,
-                    checked = if (wallpaperMode == WallpaperMode.STATIC) {
-                        when {
-                            homeEnabled && lockEnabled -> scheduleSettings.homeEffects.enableGrayscale && scheduleSettings.lockEffects.enableGrayscale
-                            homeEnabled -> scheduleSettings.homeEffects.enableGrayscale
-                            else -> scheduleSettings.lockEffects.enableGrayscale
-                        }
-                    } else {
-                        scheduleSettings.liveEffects.enableGrayscale
-                    },
-                    onCheckedChange = { enabled ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(enableGrayscale = enabled) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(enableGrayscale = enabled) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableGrayscale = enabled)
-                                )
-                            )
-                        }
-                    },
+                    checked = primaryEffects.enableGrayscale,
+                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableGrayscale = enabled) }) },
                     homeChecked = scheduleSettings.homeEffects.enableGrayscale,
                     lockChecked = scheduleSettings.lockEffects.enableGrayscale,
                     onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                homeEffects = scheduleSettings.homeEffects.copy(
-                                    enableGrayscale = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableGrayscale = enabled)))
                     },
                     onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(
-                            scheduleSettings.copy(
-                                lockEffects = scheduleSettings.lockEffects.copy(
-                                    enableGrayscale = enabled
-                                )
-                            )
-                        )
+                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableGrayscale = enabled)))
                     },
-                    bothEnabled = wallpaperMode == WallpaperMode.STATIC &&
-                        homeEnabled && lockEnabled,
-                    homePercentage = if (wallpaperMode == WallpaperMode.STATIC) {
-                        if (homeEnabled) scheduleSettings.homeEffects.grayscalePercentage
-                        else scheduleSettings.lockEffects.grayscalePercentage
-                    } else scheduleSettings.liveEffects.grayscalePercentage,
+                    bothEnabled = bothEnabled,
+                    homePercentage = primaryEffects.grayscalePercentage,
                     lockPercentage = scheduleSettings.lockEffects.grayscalePercentage,
-                    onPercentageChange = { homePercent, lockPercent ->
-                        if (wallpaperMode == WallpaperMode.STATIC) {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    homeEffects = if (homeEnabled) scheduleSettings.homeEffects.copy(grayscalePercentage = homePercent) else scheduleSettings.homeEffects,
-                                    lockEffects = if (lockEnabled) scheduleSettings.lockEffects.copy(grayscalePercentage = lockPercent) else scheduleSettings.lockEffects
-                                )
-                            )
-                        } else {
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(grayscalePercentage = homePercent)
-                                )
-                            )
-                        }
+                    onPercentageChange = { home, lock ->
+                        updateEffects({ it.copy(grayscalePercentage = home) }, { it.copy(grayscalePercentage = lock) }, debounced = true)
                     }
                 )
-
-                // Adaptive Brightness
-                SettingSwitch(
-                    title = R.string.adaptive_brightness,
-                    description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else R.string.adjust_brightness_based_on_mode,
+                SettingSwitchItem(
+                    title = stringResource(R.string.adaptive_brightness),
+                    description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else stringResource(R.string.adjust_brightness_based_on_mode),
                     checked = scheduleSettings.adaptiveBrightness,
                     onCheckedChange = { enabled ->
                         updateSettingsImmediate(scheduleSettings.copy(adaptiveBrightness = enabled))
@@ -1024,8 +465,6 @@ fun WallpaperScreen(
                 )
             }
         }
-
-        // Interactive Effects Group (Live Wallpaper Mode Only)
         if (wallpaperMode == WallpaperMode.LIVE) {
             Card(
                 shape = MaterialTheme.shapes.medium,
@@ -1048,11 +487,9 @@ fun WallpaperScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-
-                    // Double-tap to change wallpaper
-                    SettingSwitch(
-                        title = R.string.double_tap_to_change,
-                        description = if (scheduleSettings.liveEffects.enableDoubleTap) null else R.string.double_tap_wallpaper_to_change_it,
+                    SettingSwitchItem(
+                        title = stringResource(R.string.double_tap_to_change),
+                        description = if (scheduleSettings.liveEffects.enableDoubleTap) null else stringResource(R.string.double_tap_wallpaper_to_change_it),
                         checked = scheduleSettings.liveEffects.enableDoubleTap,
                         onCheckedChange = { enabled ->
                             updateSettingsImmediate(
@@ -1062,11 +499,9 @@ fun WallpaperScreen(
                             )
                         }
                     )
-
-                    // Change wallpaper on screen off
-                    SettingSwitch(
-                        title = R.string.change_on_screen_off,
-                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOff) null else R.string.change_wallpaper_when_screen_turns_off,
+                    SettingSwitchItem(
+                        title = stringResource(R.string.change_on_screen_off),
+                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOff) null else stringResource(R.string.change_wallpaper_when_screen_turns_off),
                         checked = scheduleSettings.liveEffects.enableChangeOnScreenOff,
                         onCheckedChange = { enabled ->
                             updateSettingsImmediate(
@@ -1076,8 +511,6 @@ fun WallpaperScreen(
                             )
                         }
                     )
-
-                    // Parallax effect
                     SettingSwitchWithSlider(
                         title = R.string.parallax_effect,
                         description = R.string.wallpaper_moves_with_screen_scroll,
@@ -1105,102 +538,28 @@ fun WallpaperScreen(
         }
     }
 
-    if (showAlbumSelectionSheet) {
+    albumSelectionContext?.let { selection ->
+        val selectedId = when (selection) {
+            AlbumSelectionContext.HOME -> scheduleSettings.homeAlbumId
+            AlbumSelectionContext.LOCK -> scheduleSettings.lockAlbumId
+            AlbumSelectionContext.LIVE -> scheduleSettings.liveAlbumId
+        }
+        val selectAlbum = when (selection) {
+            AlbumSelectionContext.HOME -> onSelectHomeAlbum
+            AlbumSelectionContext.LOCK -> onSelectLockAlbum
+            AlbumSelectionContext.LIVE -> onSelectLiveAlbum
+        }
         AlbumSelectionBottomSheet(
             albums = albums,
-            selectedAlbums = when (albumSelectionContext) {
-                AlbumSelectionContext.LIVE -> {
-                    // Use ID as source of truth - if ID is set, ensure we mark it as selected
-                    scheduleSettings.liveAlbumId?.let { id ->
-                        // Try to find full album, or create stub with ID for selection marking
-                        albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(AlbumSummary.empty(id = id))
-                    } ?: emptyList()
-                }
-                AlbumSelectionContext.HOME -> {
-                    // Use ID as source of truth - if ID is set, ensure we mark it as selected
-                    scheduleSettings.homeAlbumId?.let { id ->
-                        // Try to find full album, or create stub with ID for selection marking
-                        albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(AlbumSummary.empty(id = id))
-                    } ?: emptyList()
-                }
-                AlbumSelectionContext.LOCK -> {
-                    // Use ID as source of truth - if ID is set, ensure we mark it as selected
-                    scheduleSettings.lockAlbumId?.let { id ->
-                        // Try to find full album, or create stub with ID for selection marking
-                        albums.find { it.id == id }?.let { listOf(it) }
-                            ?: listOf(AlbumSummary.empty(id = id))
-                    } ?: emptyList()
-                }
-                AlbumSelectionContext.BOTH -> {
-                    // When only one screen enabled, show that screen's selected album
-                    when {
-                        homeEnabled -> {
-                            scheduleSettings.homeAlbumId?.let { id ->
-                                albums.find { it.id == id }?.let { listOf(it) }
-                                    ?: listOf(AlbumSummary.empty(id = id))
-                            } ?: emptyList()
-                        }
-                        lockEnabled -> {
-                            scheduleSettings.lockAlbumId?.let { id ->
-                                albums.find { it.id == id }?.let { listOf(it) }
-                                    ?: listOf(AlbumSummary.empty(id = id))
-                            } ?: emptyList()
-                        }
-                        else -> emptyList()
-                    }
-                }
-            },
+            selectedAlbumId = selectedId,
             onAlbumSelect = { album ->
-                // Check if album is empty (has 0 wallpapers)
-                if (album.wallpaperCount == 0) {
-                    showEmptyAlbumWarning = true
-                } else {
-                    when (albumSelectionContext) {
-                        AlbumSelectionContext.LIVE -> {
-                            // Toggle selection using ID as source of truth
-                            val isCurrentlySelected = scheduleSettings.liveAlbumId == album.id
-                            if (isCurrentlySelected) {
-                                onSelectLiveAlbum(null)
-                            } else {
-                                onSelectLiveAlbum(album)
-                            }
-                        }
-                        AlbumSelectionContext.HOME -> {
-                            // Toggle selection using ID as source of truth
-                            val isCurrentlySelected = scheduleSettings.homeAlbumId == album.id
-                            if (isCurrentlySelected) {
-                                onSelectHomeAlbum(null)
-                            } else {
-                                onSelectHomeAlbum(album)
-                            }
-                        }
-                        AlbumSelectionContext.LOCK -> {
-                            // Toggle selection using ID as source of truth
-                            val isCurrentlySelected = scheduleSettings.lockAlbumId == album.id
-                            if (isCurrentlySelected) {
-                                onSelectLockAlbum(null)
-                            } else {
-                                onSelectLockAlbum(album)
-                            }
-                        }
-                        AlbumSelectionContext.BOTH -> {
-                            // Toggle selection for the enabled screen(s) using IDs as source of truth
-                            val isCurrentlySelected = (homeEnabled && scheduleSettings.homeAlbumId == album.id) ||
-                                                     (lockEnabled && scheduleSettings.lockAlbumId == album.id)
-                            if (isCurrentlySelected) {
-                                if (homeEnabled) onSelectHomeAlbum(null)
-                                if (lockEnabled) onSelectLockAlbum(null)
-                            } else {
-                                if (homeEnabled) onSelectHomeAlbum(album)
-                                if (lockEnabled) onSelectLockAlbum(album)
-                            }
-                        }
-                    }
+                when {
+                    album.id == selectedId -> selectAlbum(null)
+                    album.wallpaperCount == 0 -> showEmptyAlbumWarning = true
+                    else -> selectAlbum(album)
                 }
             },
-            onDismiss = { showAlbumSelectionSheet = false }
+            onDismiss = { albumSelectionContext = null }
         )
     }
 
@@ -1231,5 +590,56 @@ fun WallpaperScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ScreenToggleCard(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(Modifier.padding(AppSpacing.large), verticalArrangement = Arrangement.spacedBy(AppSpacing.small)) {
+            val contentColor = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            Icon(icon, contentDescription = null, tint = contentColor)
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+                color = if (enabled) contentColor else MaterialTheme.colorScheme.onSurface,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(if (enabled) R.string.enabled else R.string.disabled),
+                style = MaterialTheme.typography.bodySmall, color = contentColor,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun AlbumSelector(albumId: String?, albums: List<AlbumSummary>, label: String, onClick: () -> Unit) {
+    val album = albums.find { it.id == albumId }
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.small),
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+    ) {
+        Row(Modifier.fillMaxWidth().padding(AppSpacing.large), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(album?.name ?: stringResource(if (albumId == null) R.string.no_album_selected else R.string.loading_placeholder),
+                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
     }
 }

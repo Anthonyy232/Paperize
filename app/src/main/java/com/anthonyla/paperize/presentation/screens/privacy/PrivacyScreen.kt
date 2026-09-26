@@ -13,9 +13,6 @@ import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
-/**
- * Privacy policy screen
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyScreen(

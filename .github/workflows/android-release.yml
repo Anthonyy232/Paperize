@@ -1,23 +1,3 @@
-# ===================================================================
-# Paperize CI/CD Pipeline
-#
-# Automates the testing, building and release process for the Paperize Android application.
-#
-# Workflow Architecture:
-#   1. Test:    Runs unit tests and Android lint to ensure code quality.
-#   2. Build:   Compiles and signs the release APK (depends on test passing).
-#   3. Release: Publishes the APK to a draft GitHub Release, but only for version tags.
-#
-# Triggering Conditions:
-#   - On push to `master`:
-#     - Executes the `test` and `build` jobs.
-#     - Produces a versioned build artifact for testing and internal distribution.
-#   - On push of a tag (e.g., `v1.2.3`):
-#     - Executes all jobs: `test`, `build` and `release`.
-#     - Creates a formal, versioned draft release on GitHub with the signed APK attached.
-#   - On pull requests to `master`:
-#     - Executes only the `test` job to validate changes before merge.
-# ===================================================================
 name: Paperize CI/CD Pipeline
 
 on:
@@ -31,11 +11,6 @@ permissions:
   contents: read
 
 jobs:
-  # ===================================================================
-  # JOB: test
-  #
-  # Runs unit tests and Android lint to ensure code quality before building.
-  # ===================================================================
   test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
@@ -59,13 +34,6 @@ jobs:
       - name: Run Android lint
         run: ./gradlew :app:lintDebug
 
-  # ===================================================================
-  # JOB: build
-  #
-  # Compiles, signs, and packages the release APK. This job produces a
-  # versioned artifact that is used for both internal testing and the final release.
-  # Only runs after tests pass.
-  # ===================================================================
   build:
     name: Build Signed APK
     runs-on: ubuntu-latest
@@ -83,11 +51,9 @@ jobs:
           cache: gradle
 
       - name: Grant execute permission for gradlew
-        # The gradlew wrapper requires execute permissions to run on the Linux-based runner.
         run: chmod +x gradlew
 
       - name: Decode Base64 Keystore
-        # Reconstructs the binary .jks keystore file from the Base64 encoded secret.
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
         run: |
@@ -102,9 +68,6 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Get Version Name
-        # Determines the application version for artifact naming.
-        # - For tag pushes (e.g., 'v1.2.3'), it uses the tag name directly.
-        # - For master branch pushes, it parses the `versionName` from the app's build.gradle.kts file.
         id: get_version
         shell: bash
         run: |
@@ -123,20 +86,12 @@ jobs:
             "app/build/outputs/apk/release/paperize-${{ steps.get_version.outputs.VERSION_NAME }}.apk"
 
       - name: Upload APK as a build artifact
-        # Archives the generated APK with a dynamic, versioned name. This artifact is essential
-        # for passing the APK file to the subsequent `release` job.
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: paperize-${{ steps.get_version.outputs.VERSION_NAME }}
           path: app/build/outputs/apk/release/paperize-${{ steps.get_version.outputs.VERSION_NAME }}.apk
           if-no-files-found: error
 
-  # ===================================================================
-  # JOB: release
-  #
-  # Creates a draft GitHub Release and attaches the signed APK. This job is
-  # conditional and will only execute for pushes that include a version tag.
-  # ===================================================================
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -146,8 +101,6 @@ jobs:
       contents: write
     steps:
       - name: Download signed APK artifact
-        # Downloads the versioned artifact produced by the `build` job. The pattern ensures
-        # it finds the correct artifact regardless of the specific version number.
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: paperize-v*
@@ -155,8 +108,6 @@ jobs:
           merge-multiple: true
 
       - name: Create Draft Release
-        # Publishes a new release to GitHub. `draft: true` ensures the release is not made
-        # public until it has been manually reviewed and published.
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           files: ./apk-artifact/paperize-v*.apk

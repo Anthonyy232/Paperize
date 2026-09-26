@@ -1,8 +1,5 @@
 package com.anthonyla.paperize.core
 
-/**
- * Wallpaper scaling options
- */
 enum class ScalingType {
     /**
      * Fill the screen, cropping if necessary
@@ -14,9 +11,6 @@ enum class ScalingType {
      */
     FIT,
 
-    /**
-     * Stretch the image to fill the screen
-     */
     STRETCH,
 
     /**

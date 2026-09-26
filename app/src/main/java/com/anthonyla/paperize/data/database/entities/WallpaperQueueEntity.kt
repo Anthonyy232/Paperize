@@ -1,18 +1,11 @@
 package com.anthonyla.paperize.data.database.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.anthonyla.paperize.core.ScreenType
 
-/**
- * Room entity for Wallpaper Queue
- *
- * Properly manages wallpaper queues instead of storing them as JSON lists in Album
- * Separate queues for HOME and LOCK screens
- */
 @Entity(
     tableName = "wallpaper_queue",
     foreignKeys = [
@@ -39,10 +32,8 @@ data class WallpaperQueueEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
-    @ColumnInfo(name = "albumId")
     val albumId: String,
 
-    @ColumnInfo(name = "wallpaperId")
     val wallpaperId: String,
 
     val screenType: ScreenType,

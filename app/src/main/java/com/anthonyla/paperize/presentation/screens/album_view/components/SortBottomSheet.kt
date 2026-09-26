@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.theme.AppSpacing
 
@@ -34,12 +35,19 @@ enum class SortOption(val labelRes: Int) {
     DATE_ADDED_ASC(R.string.sort_date_added_asc),
     DATE_ADDED_DESC(R.string.sort_date_added_desc),
     DATE_MODIFIED_ASC(R.string.sort_date_modified_asc),
-    DATE_MODIFIED_DESC(R.string.sort_date_modified_desc)
+    DATE_MODIFIED_DESC(R.string.sort_date_modified_desc);
+
+    val wallpaperComparator: Comparator<Wallpaper>
+        get() = when (this) {
+            NAME_ASC -> compareBy { it.fileName.lowercase() }
+            NAME_DESC -> compareByDescending { it.fileName.lowercase() }
+            DATE_ADDED_ASC -> compareBy { it.addedAt }
+            DATE_ADDED_DESC -> compareByDescending { it.addedAt }
+            DATE_MODIFIED_ASC -> compareBy { it.dateModified }
+            DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
+        }
 }
 
-/**
- * Bottom sheet for sorting wallpapers and folders
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortBottomSheet(
@@ -91,7 +99,6 @@ fun SortBottomSheet(
                     )
                 )
             }
-            // Bottom padding
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = 16.dp))
         }
     }

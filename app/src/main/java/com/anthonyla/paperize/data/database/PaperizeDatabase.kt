@@ -16,19 +16,6 @@ import com.anthonyla.paperize.data.database.entities.WallpaperEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperQueueEntity
 import com.anthonyla.paperize.core.constants.Constants
 
-/**
- * Paperize Room Database
- *
- * **MAJOR ARCHITECTURAL IMPROVEMENT:**
- * - Properly normalized schema (no nested collections in entities)
- * - NO CursorWindow reflection hack needed!
- * - Proper foreign keys with cascade delete
- * - Indexed columns for performance
- * - Separate queue management table
- * - Room migrations support (no destructive migrations!)
- *
- * Version: 1
- */
 @Database(
     entities = [
         AlbumEntity::class,

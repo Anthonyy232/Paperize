@@ -34,6 +34,27 @@ class WallpaperUtilInstrumentedTest {
     }
 
     @Test
+    fun narrowImagesRetainAtLeastOnePixelInBothDecodePaths() {
+        val image = createJpeg(width = 1, height = 1000)
+        val uri = Uri.fromFile(image)
+        for (scaling in listOf(ScalingType.FIT, ScalingType.NONE)) {
+            val live = com.anthonyla.paperize.service.livewallpaper.renderer.ContentUriImageLoader(
+                context.contentResolver, uri, scaling
+            ).load(20, 20)
+            assertNotNull(live)
+            assertEquals(1, live?.width)
+            assertEquals(if (scaling == ScalingType.FIT) 20 else 40, live?.height)
+            live?.recycle()
+
+            val static = retrieveBitmap(context, uri, 20, 20, scaling)
+            assertNotNull(static)
+            assertEquals(20, static?.width)
+            assertEquals(20, static?.height)
+            static?.recycle()
+        }
+    }
+
+    @Test
     fun imageDecoderAppliesExifRotation() {
         val image = createJpeg(width = 40, height = 20)
         ExifInterface(image).apply {
@@ -105,6 +126,29 @@ class WallpaperUtilInstrumentedTest {
             assertEquals("Unexpected width for $scaling", 120, result?.width)
             assertEquals("Unexpected height for $scaling", 200, result?.height)
             result?.recycle()
+        }
+    }
+
+    @Test
+    fun fallbackBitmapsUseTheRequestedScalingAndCenterCrop() {
+        ScalingType.entries.forEach { scaling ->
+            val source = mutableBitmap(80, 40, Color.RED)
+            for (y in 0 until 40) {
+                for (x in 20 until 60) source.setPixel(x, y, Color.GREEN)
+            }
+            val result = finalizeToCanvas(source, 40, 80, scaling)
+            try {
+                assertTrue(source.isRecycled)
+                assertEquals(40, result.width)
+                assertEquals(80, result.height)
+                assertEquals("Center for $scaling", Color.GREEN, result.getPixel(20, 40))
+                val top = if (scaling == ScalingType.FIT || scaling == ScalingType.NONE) Color.BLACK else Color.GREEN
+                assertEquals("Top for $scaling", top, result.getPixel(20, 0))
+                val side = if (scaling == ScalingType.FIT || scaling == ScalingType.STRETCH) Color.RED else Color.GREEN
+                assertEquals("Side for $scaling", side, result.getPixel(2, 40))
+            } finally {
+                result.recycle()
+            }
         }
     }
 

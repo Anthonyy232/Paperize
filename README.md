@@ -51,19 +51,31 @@ Help translate Paperize into your language! Currently, most translations are pro
 | **Dependency Injection** | [Dagger Hilt](https://dagger.dev/hilt/) |
 | **Database** | [Room](https://developer.android.com/training/data-storage/room) |
 | **Image Loading** | [Coil](https://coil-kt.github.io/coil/) |
-| **Animations** | [Lottie](https://github.com/airbnb/lottie) |
 
 <details>
 <summary><b>View all dependencies</b></summary>
 
 - [Zoomable](https://github.com/usuiat/Zoomable) — Zoomable and pannable views
-- [DocumentFileCompat](https://github.com/ItzNotABug/DocumentFileCompat) — Efficient DocumentFile wrapper
-- [LazyColumnScrollbar](https://github.com/nanihadesuka/LazyColumnScrollbar) — Compose scrollbar library
-- [compose-collapsing-toolbar](https://github.com/onebone/compose-collapsing-toolbar) — Collapsing toolbar for Compose
 
 </details>
 
 ---
+
+## Architecture
+
+- `AlbumRepository` owns library mutations. Imports, reordering, removal, covers,
+  and queue invalidation use Room transactions; provider scans run outside them.
+- `DocumentSource` isolates Android permissions and document-provider queries.
+  Import and refresh use cases consume metadata without accessing Android providers.
+- `WallpaperRepository` owns rotation queues and current-wallpaper records.
+  Queue creation checks and writes in one transaction, including synchronized screens.
+- `WallpaperController` shares static wallpaper application between the service
+  and worker. Callers hold `WallpaperChangeLock` through application and schedule
+  updates. `WallpaperRenderer` owns image processing; the controller recycles applied bitmaps.
+- Operation `Result` values contain success or failure. Progress belongs to UI state,
+  and coroutine cancellation propagates instead of becoming a failure result.
+- Room migrations preserve versions 1–3 when upgrading to version 4. New schema
+  changes must include a migration; destructive fallback is disabled.
 
 ## Building from Source
 

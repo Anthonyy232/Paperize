@@ -5,9 +5,6 @@ import androidx.room.Relation
 import com.anthonyla.paperize.data.database.entities.FolderEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
 
-/**
- * Room relation combining Folder with its Wallpapers
- */
 data class FolderWithWallpapers(
     @Embedded
     val folder: FolderEntity,

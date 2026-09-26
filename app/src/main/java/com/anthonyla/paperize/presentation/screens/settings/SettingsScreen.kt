@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.settings
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,10 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,9 +31,6 @@ import com.anthonyla.paperize.presentation.theme.AppSpacing
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.isIgnoringBatteryOptimizations
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.requestIgnoreBatteryOptimizations
 
-/**
- * Settings screen with Material 3 Expressive design
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -43,9 +40,10 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val appSettings by viewModel.appSettings.collectAsStateWithLifecycle()
+    val isResetting by viewModel.isResetting.collectAsStateWithLifecycle()
+    val resetFailed by viewModel.resetFailed.collectAsStateWithLifecycle()
     val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
     var showResetDialog by remember { mutableStateOf(false) }
-    var showModeChangeDialog by remember { mutableStateOf(false) }
     var pendingMode by remember { mutableStateOf<com.anthonyla.paperize.core.WallpaperMode?>(null) }
     val context = LocalContext.current
 
@@ -53,18 +51,8 @@ fun SettingsScreen(
         mutableStateOf(isIgnoringBatteryOptimizations(context))
     }
 
-    // Refresh battery optimization status when returning to the screen
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations(context)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations(context)
     }
 
     Scaffold(
@@ -89,9 +77,10 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.large)
         ) {
+            if (resetFailed) Text(stringResource(R.string.reset_failed), color = MaterialTheme.colorScheme.error)
+            if (isResetting) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(AppSpacing.large))
 
-            // Wallpaper Mode Section
             SectionHeader(
                 icon = Icons.Filled.Wallpaper,
                 title = stringResource(R.string.wallpaper_mode_setting)
@@ -134,12 +123,12 @@ fun SettingsScreen(
                         }
 
                         FilledTonalButton(
+                            enabled = !isResetting,
                             onClick = {
                                 pendingMode = when (wallpaperMode) {
                                     com.anthonyla.paperize.core.WallpaperMode.STATIC -> com.anthonyla.paperize.core.WallpaperMode.LIVE
                                     com.anthonyla.paperize.core.WallpaperMode.LIVE -> com.anthonyla.paperize.core.WallpaperMode.STATIC
                                 }
-                                showModeChangeDialog = true
                             }
                         ) {
                             Text(stringResource(R.string.switch_button))
@@ -158,7 +147,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
-            // Appearance Section
             SectionHeader(
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.appearance)
@@ -169,7 +157,7 @@ fun SettingsScreen(
             SettingSwitchItem(
                 title = stringResource(R.string.dark_mode),
                 description = stringResource(R.string.easier_on_the_eyes),
-                checked = appSettings?.darkMode ?: false,
+                checked = appSettings?.darkMode ?: isSystemInDarkTheme(),
                 onCheckedChange = { viewModel.updateDarkMode(it) }
             )
 
@@ -193,7 +181,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
-            // Reliability Section
             SectionHeader(
                 icon = Icons.Default.Build,
                 title = stringResource(R.string.reliability)
@@ -271,7 +258,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
 
-            // About Section
             SectionHeader(
                 icon = Icons.Filled.Info,
                 title = stringResource(R.string.about)
@@ -279,7 +265,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.medium))
 
-            // Privacy Policy Card with enhanced styling
             Card(
                 onClick = onNavigateToPrivacy,
                 modifier = Modifier.fillMaxWidth(),
@@ -312,8 +297,8 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.large))
 
-            // Reset Data Button with enhanced styling
             FilledTonalButton(
+                enabled = !isResetting,
                 onClick = { showResetDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.filledTonalButtonColors(
@@ -353,10 +338,10 @@ fun SettingsScreen(
             )
         }
 
-        if (showModeChangeDialog && pendingMode != null) {
+        if (pendingMode != null) {
             AlertDialog(
                 onDismissRequest = {
-                    showModeChangeDialog = false
+
                     pendingMode = null
                 },
                 title = { 
@@ -373,7 +358,7 @@ fun SettingsScreen(
                     TextButton(
                         onClick = {
                             pendingMode?.let { viewModel.switchWallpaperMode(it) }
-                            showModeChangeDialog = false
+
                             pendingMode = null
                         },
                         colors = ButtonDefaults.textButtonColors(
@@ -385,7 +370,7 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = {
-                        showModeChangeDialog = false
+
                         pendingMode = null
                     }) {
                         Text(stringResource(R.string.cancel))
@@ -396,9 +381,6 @@ fun SettingsScreen(
     }
 }
 
-/**
- * Section header with icon and title for better visual hierarchy
- */
 @Composable
 private fun SectionHeader(
     icon: androidx.compose.ui.graphics.vector.ImageVector,

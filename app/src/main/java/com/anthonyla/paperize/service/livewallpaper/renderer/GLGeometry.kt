@@ -7,10 +7,6 @@ import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Geometry utilities for OpenGL rendering including vertex positions,
- * texture coordinates, and adaptive parallax calculations.
- */
 object GLGeometry {
 
     data class WallpaperTransform(
@@ -38,9 +34,6 @@ object GLGeometry {
         return CrossfadeAlphas(current = 1f, next = nextAlpha)
     }
 
-    /**
-     * Calculate live-wallpaper scale and launcher-scroll offset without OpenGL dependencies.
-     */
     fun calculateWallpaperTransform(
         viewWidth: Float,
         viewHeight: Float,
@@ -116,15 +109,6 @@ object GLGeometry {
         1.0f, 0.0f   // Top-right
     )
 
-
-
-    /**
-     * Create a native-order FloatBuffer from a float array.
-     * Required for passing vertex data to OpenGL.
-     *
-     * @param data Float array to convert
-     * @return FloatBuffer ready for use with OpenGL
-     */
     fun createFloatBuffer(data: FloatArray): FloatBuffer {
         return ByteBuffer.allocateDirect(data.size * 4)
             .order(ByteOrder.nativeOrder())
@@ -133,18 +117,5 @@ object GLGeometry {
                 put(data)
                 position(0)
             }
-    }
-
-    /**
-     * Update an existing FloatBuffer with new data.
-     * More efficient than creating a new buffer.
-     *
-     * @param buffer Buffer to update
-     * @param data New data to put in buffer
-     */
-    fun updateFloatBuffer(buffer: FloatBuffer, data: FloatArray) {
-        buffer.clear()
-        buffer.put(data)
-        buffer.position(0)
     }
 }
