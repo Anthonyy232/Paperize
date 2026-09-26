@@ -1,3 +1,19 @@
+## Unreleased
+
+- Made imports cancellable, moved file-provider queries off the UI thread, and
+  added visible errors for inaccessible selections and incomplete folder scans.
+- Prevented duplicate imports and fixed folder wallpaper source metadata.
+- Preserved albums during temporary storage-provider failures and scoped missing
+  wallpaper cleanup to the album being refreshed.
+- Made album deletion wait for completion and clear saved album selections;
+  added confirmation and failure feedback when removing selected items.
+- Added import actions to empty albums, enabled folder sorting, and made the
+  active sort order visible and accessible. Wallpaper thumbnails now expose file names and selection state to screen readers.
+- Added manual folder refresh with progress and error feedback, sharing batch
+  imports and duplicate detection with the daily background refresh.
+- Updated folder covers atomically during imports and consistently selected
+  covers by display order.
+
 ## v4.1.1
 
 - Fixed manual changes triggering an immediate extra automatic change by deferring

@@ -2,10 +2,11 @@ package com.anthonyla.paperize.data.repository
 
 import android.content.Context
 import android.net.Uri
-import androidx.documentfile.provider.DocumentFile
+import android.provider.DocumentsContract
 import androidx.room.withTransaction
 import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.util.generateId
+import com.anthonyla.paperize.core.util.isDocumentMissing
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.dao.AlbumDao
 import com.anthonyla.paperize.data.database.dao.FolderDao
@@ -23,16 +24,14 @@ import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of AlbumRepository
- *
- * Handles data operations for albums using Room database
- */
 @Singleton
 class AlbumRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -44,8 +43,7 @@ class AlbumRepositoryImpl @Inject constructor(
 ) : AlbumRepository {
 
     companion object {
-        /** Number of wallpapers written per insert/progress step during an import. */
-        private const val WALLPAPER_INSERT_CHUNK_SIZE = 500
+        private const val WALLPAPER_BATCH_SIZE = 500
     }
 
     override fun getAlbumSummaries(): Flow<List<AlbumSummary>> =
@@ -74,6 +72,8 @@ class AlbumRepositoryImpl @Inject constructor(
             )
             albumDao.insertAlbum(album.toEntity())
             Result.Success(album)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -83,6 +83,8 @@ class AlbumRepositoryImpl @Inject constructor(
         return try {
             albumDao.updateAlbum(album.toEntity())
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -95,6 +97,8 @@ class AlbumRepositoryImpl @Inject constructor(
                 wallpaperRepository.get().clearQueuesForAlbum(albumId)
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -104,6 +108,8 @@ class AlbumRepositoryImpl @Inject constructor(
         return try {
             albumDao.updateAlbumName(albumId, name, System.currentTimeMillis())
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -113,6 +119,8 @@ class AlbumRepositoryImpl @Inject constructor(
         return try {
             albumDao.updateAlbumCover(albumId, coverUri, System.currentTimeMillis())
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -124,15 +132,19 @@ class AlbumRepositoryImpl @Inject constructor(
         onProgress: (saved: Int, total: Int) -> Unit
     ): Result<Unit> {
         return try {
-            // Atomic transaction - insert wallpapers, update timestamp, and update cover
             database.withTransaction {
                 insertWallpapersChunked(wallpapers, onProgress)
+                wallpapers.mapNotNull { it.folderId }.toSet().forEach { folderId ->
+                    folderDao.updateFolderCover(folderId, wallpaperDao.getFolderCoverUri(folderId))
+                }
+                database.wallpaperQueueDao().clearAllQueues(albumId)
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
 
-                // Update album cover if it doesn't have one
                 updateAlbumCoverIfNeeded(albumId)
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -144,17 +156,17 @@ class AlbumRepositoryImpl @Inject constructor(
         onProgress: (saved: Int, total: Int) -> Unit
     ): Result<Unit> {
         return try {
-            // Atomic transaction - folder, wallpapers, timestamp, and cover all succeed or all fail
             database.withTransaction {
                 folderDao.insertFolder(folder.toEntity())
-                // Insert folder wallpapers
                 insertWallpapersChunked(folder.wallpapers, onProgress)
+                database.wallpaperQueueDao().clearAllQueues(albumId)
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
 
-                // Update album cover if it doesn't have one
                 updateAlbumCoverIfNeeded(albumId)
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -171,7 +183,7 @@ class AlbumRepositoryImpl @Inject constructor(
     ) {
         val total = wallpapers.size
         var saved = 0
-        wallpapers.chunked(WALLPAPER_INSERT_CHUNK_SIZE).forEach { chunk ->
+        wallpapers.chunked(WALLPAPER_BATCH_SIZE).forEach { chunk ->
             wallpaperDao.insertWallpapers(chunk.toEntities())
             saved += chunk.size
             onProgress(saved, total)
@@ -182,29 +194,8 @@ class AlbumRepositoryImpl @Inject constructor(
         return try {
             folderDao.updateFolder(folder.toEntity())
             Result.Success(Unit)
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    override suspend fun removeWallpaperFromAlbum(
-        albumId: String,
-        wallpaperId: String
-    ): Result<Unit> {
-        return try {
-            // Atomic transaction - delete wallpaper, update timestamp, and refresh cover
-            database.withTransaction {
-                val wallpaper = wallpaperDao.getWallpaperById(wallpaperId)
-                wallpaperDao.deleteWallpaperById(wallpaperId)
-                albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
-
-                // Refresh cover if deleted wallpaper was the cover
-                val album = albumDao.getAlbumById(albumId)
-                if (album?.coverUri == wallpaper?.uri) {
-                    updateAlbumCoverIfNeeded(albumId)
-                }
-            }
-            Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -219,25 +210,22 @@ class AlbumRepositoryImpl @Inject constructor(
                 return Result.Success(Unit)
             }
 
-            // Atomic transaction - delete wallpapers, update timestamp, and refresh cover
             database.withTransaction {
                 val album = albumDao.getAlbumById(albumId)
                 val currentCoverUri = album?.coverUri
 
-                // Batch delete wallpapers
-                wallpaperDao.deleteWallpapersByIds(wallpaperIds)
+                wallpaperIds.chunked(WALLPAPER_BATCH_SIZE).forEach {
+                    wallpaperDao.deleteWallpapersByIds(it)
+                }
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
 
-                // Refresh cover if any deleted wallpaper was the cover
-                // (we check by querying the album cover to see if it still exists)
-                if (currentCoverUri != null) {
-                    val coverStillExists = wallpaperDao.getWallpaperByUri(currentCoverUri) != null
-                    if (!coverStillExists) {
-                        updateAlbumCoverIfNeeded(albumId)
-                    }
+                if (currentCoverUri != null && !wallpaperDao.containsUri(albumId, currentCoverUri)) {
+                    updateAlbumCoverIfNeeded(albumId)
                 }
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -245,7 +233,6 @@ class AlbumRepositoryImpl @Inject constructor(
 
     override suspend fun removeFolderFromAlbum(albumId: String, folderId: String): Result<Unit> {
         return try {
-            // Atomic transaction - delete folder, update timestamp, and refresh cover
             database.withTransaction {
                 folderDao.deleteFolderById(folderId)
                 albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
@@ -254,6 +241,8 @@ class AlbumRepositoryImpl @Inject constructor(
                 updateAlbumCoverIfNeeded(albumId)
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -268,6 +257,8 @@ class AlbumRepositoryImpl @Inject constructor(
                 wallpaperRepository.get().clearAllQueues()
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -278,23 +269,28 @@ class AlbumRepositoryImpl @Inject constructor(
             val album = albumDao.getAlbumWithDetails(albumId).first() ?: return Result.Success(0)
             val folders = album.folders.map { it.toDomainModel() }
 
-            val invalidFolderIds = folders.filter { folder ->
-                // Check if folder URI is still valid
-                val uri = Uri.parse(folder.uri)
-                val documentFile = DocumentFile.fromTreeUri(context, uri)
-                documentFile == null || !documentFile.exists() || !documentFile.canRead()
-            }.map { it.id }
+            val invalidFolderIds = withContext(Dispatchers.IO) {
+                folders.filter { folder ->
+                    val treeUri = Uri.parse(folder.uri)
+                    val documentUri = DocumentsContract.buildDocumentUriUsingTree(
+                        treeUri, DocumentsContract.getTreeDocumentId(treeUri)
+                    )
+                    documentUri.isDocumentMissing(context.contentResolver)
+                }.map { it.id }
+            }
 
             if (invalidFolderIds.isNotEmpty()) {
-                // Atomic transaction - delete all invalid folders or none
                 database.withTransaction {
                     invalidFolderIds.forEach { folderId ->
                         folderDao.deleteFolderById(folderId)
                     }
+                    updateAlbumCoverIfNeeded(albumId)
                 }
             }
 
             Result.Success(invalidFolderIds.size)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -306,6 +302,8 @@ class AlbumRepositoryImpl @Inject constructor(
                 updateAlbumCoverIfNeeded(albumId)
             }
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -313,48 +311,20 @@ class AlbumRepositoryImpl @Inject constructor(
 
     override suspend fun refreshFolderCovers(albumId: String): Result<Unit> {
         return try {
-            // Get all folders in the album with their wallpapers
-            val folders = folderDao.getFoldersWithWallpapersByAlbum(albumId).first()
-
-            // Update each folder's cover to its first wallpaper
-            folders.forEach { folderWithWallpapers ->
-                val folder = folderWithWallpapers.folder
-                val wallpapers = folderWithWallpapers.wallpapers
-                val newCoverUri = wallpapers.firstOrNull()?.uri
-
-                // Only update if cover changed
-                if (folder.coverUri != newCoverUri) {
-                    folderDao.updateFolderCover(folder.id, newCoverUri)
-                }
-            }
+            folderDao.refreshFolderCovers(albumId)
             Result.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
-    /**
-     * Update album cover art based on available wallpapers
-     * Priority: 1) First direct wallpaper, 2) First wallpaper from first folder
-     * NOTE: This must be called within a transaction
-     */
+    /** Call within a transaction; direct wallpapers take priority over folder images. */
     private suspend fun updateAlbumCoverIfNeeded(albumId: String) {
         val album = albumDao.getAlbumById(albumId) ?: return
+        val newCoverUri = wallpaperDao.getAlbumCoverUri(albumId)
 
-        // Try to get first direct wallpaper (uploaded directly, not from folder)
-        val directWallpapers = wallpaperDao.getDirectWallpapersByAlbumSync(albumId)
-        val newCoverUri = when {
-            // Priority 1: First direct wallpaper
-            directWallpapers.isNotEmpty() -> directWallpapers.first().uri
-
-            // Priority 2: First wallpaper from any folder
-            else -> {
-                val allWallpapers = wallpaperDao.getWallpapersByAlbumSync(albumId)
-                allWallpapers.firstOrNull()?.uri
-            }
-        }
-
-        // Only update if cover changed
         if (album.coverUri != newCoverUri) {
             albumDao.updateAlbumCover(albumId, newCoverUri, System.currentTimeMillis())
         }

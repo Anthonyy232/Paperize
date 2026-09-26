@@ -216,4 +216,18 @@
   <string name="individual_wallpaper_static_only">请切换到静态模式以设置单张壁纸。</string>
   <string name="change_next_wallpaper_shortcut">切换到下一张已配置的壁纸</string>
 
+  <string name="import_failed">无法完成导入。请确认文件或文件夹可用后重试。</string>
+  <string name="import_permission_error">无法保留访问权限。请从可访问的位置重新选择文件或文件夹。</string>
+  <string name="import_already_added">所选内容已在相册中。</string>
+  <string name="delete_album_failed">无法删除相册，请重试。</string>
+  <string name="deleting_album">正在删除…</string>
+  <string name="delete_items_failed">部分项目无法移除，仍处于选中状态，请重试。</string>
+  <string name="album_empty_hint">添加图片或文件夹，开始创建你的壁纸收藏。</string>
+  <string name="folder_empty_title">暂无壁纸</string>
+  <string name="folder_empty_hint">将图片添加到此文件夹后，点击刷新即可查找新壁纸。</string>
+  <string name="remove_selected_title">移除所选项目（%1$d）？</string>
+  <string name="remove_selected_hint">这些项目将从相册中移除。原始文件将保留在设备上。</string>
+  <string name="refresh_folder">刷新文件夹</string>
+  <string name="folder_refreshed">已检查文件夹中的新壁纸。</string>
+  <string name="folder_refresh_failed">无法刷新此文件夹。请确认文件夹可访问后重试。</string>
 </resources>

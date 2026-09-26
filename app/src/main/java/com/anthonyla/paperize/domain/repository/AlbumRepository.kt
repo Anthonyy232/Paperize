@@ -93,11 +93,6 @@ interface AlbumRepository {
     suspend fun updateFolder(folder: Folder): Result<Unit>
 
     /**
-     * Remove wallpaper from album
-     */
-    suspend fun removeWallpaperFromAlbum(albumId: String, wallpaperId: String): Result<Unit>
-
-    /**
      * Remove multiple wallpapers from album (batch operation)
      * Updates album modified time and refreshes cover art
      */

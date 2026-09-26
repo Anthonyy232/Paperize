@@ -219,4 +219,18 @@
   <string name="individual_wallpaper_static_only">Switch to static mode to set an individual wallpaper.</string>
   <string name="change_next_wallpaper_shortcut">Change to the next configured wallpaper</string>
 
+  <string name="import_failed">Could not finish importing. Check that the files or folder are available, then try again.</string>
+  <string name="import_permission_error">Could not keep access to this selection. Select the files or folder again from an accessible location.</string>
+  <string name="import_already_added">This selection is already in the album.</string>
+  <string name="delete_album_failed">Could not delete the album. Please try again.</string>
+  <string name="deleting_album">Deleting…</string>
+  <string name="delete_items_failed">Some items could not be removed. They are still selected so you can try again.</string>
+  <string name="album_empty_hint">Add images or a folder to start building your wallpaper collection.</string>
+  <string name="folder_empty_title">No wallpapers yet</string>
+  <string name="folder_empty_hint">Add images to this folder, then tap Refresh to find new wallpapers.</string>
+  <string name="remove_selected_title">Remove selected items (%1$d)?</string>
+  <string name="remove_selected_hint">These items will be removed from this album. Your original files will stay on your device.</string>
+  <string name="refresh_folder">Refresh folder</string>
+  <string name="folder_refreshed">Folder checked for new wallpapers.</string>
+  <string name="folder_refresh_failed">Could not refresh this folder. Check that it is accessible, then try again.</string>
 </resources>

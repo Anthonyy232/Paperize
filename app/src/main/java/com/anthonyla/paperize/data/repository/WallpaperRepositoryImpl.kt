@@ -8,7 +8,7 @@ import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperSourceType
 import com.anthonyla.paperize.core.util.generateId
-import com.anthonyla.paperize.core.util.isValid
+import com.anthonyla.paperize.core.util.isDocumentMissing
 import com.anthonyla.paperize.core.util.scanFolderImages
 import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
 import com.anthonyla.paperize.data.database.dao.WallpaperDao
@@ -21,6 +21,9 @@ import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -126,23 +129,25 @@ class WallpaperRepositoryImpl @Inject constructor(
                 val wallpapers = wallpaperDao.getWallpapersByAlbumPaged(albumId, batchSize, offset)
                 if (wallpapers.isEmpty()) break
 
-                val invalidUris = wallpapers
-                    .filter { !it.uri.toUri().isValid(contentResolver) }
-                    .map { it.uri }
-                    .toSet()
+                val missingIds = withContext(Dispatchers.IO) {
+                    wallpapers.filter { it.uri.toUri().isDocumentMissing(contentResolver) }
+                        .map { it.id }
+                }
 
-                if (invalidUris.isNotEmpty()) {
-                    wallpaperDao.deleteWallpapersByUris(invalidUris.toList())
-                    totalRemoved += invalidUris.size
+                if (missingIds.isNotEmpty()) {
+                    wallpaperDao.deleteWallpapersByIds(missingIds)
+                    totalRemoved += missingIds.size
                     // Advance offset only by the number of valid items in this batch,
                     // so valid items already checked are not re-fetched next iteration
-                    offset += wallpapers.size - invalidUris.size
+                    offset += wallpapers.size - missingIds.size
                 } else {
                     offset += batchSize
                 }
             }
 
             Result.Success(totalRemoved)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -279,7 +284,7 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun scanFolderForWallpapers(folderUri: Uri): Result<List<Wallpaper>> {
         return try {
-            val wallpapers = folderUri.scanFolderImages(context).map { image ->
+            val wallpapers = withContext(Dispatchers.IO) { folderUri.scanFolderImages(context) }.map { image ->
                 Wallpaper(
                     id = generateId(),
                     albumId = "",
@@ -291,14 +296,11 @@ class WallpaperRepositoryImpl @Inject constructor(
                 )
             }
             Result.Success(wallpapers)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
-    override suspend fun isWallpaperInAlbum(albumId: String, uri: String): Boolean =
-        wallpaperDao.getWallpaperByUri(uri)?.let { it.albumId == albumId } ?: false
-
-    override suspend fun getExistingWallpaperUris(albumId: String, folderId: String): Set<String> =
-        wallpaperDao.getWallpaperUrisByAlbumAndFolder(albumId, folderId).toHashSet()
 }

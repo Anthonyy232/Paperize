@@ -72,8 +72,9 @@ Help translate Paperize into your language! Currently, most translations are pro
 | Requirement | Version |
 |-------------|---------|
 | Java | 17 |
-| Android Gradle Plugin | 9.1.0 |
-| Gradle | 9.4.1 |
+| Android Gradle Plugin | 9.3.2 |
+| Gradle | 9.7.1 |
+| Compile SDK | 37 (Android 17) |
 | Minimum SDK | 31 (Android 12) |
 | Target SDK | 36 |
 
@@ -94,6 +95,20 @@ Help translate Paperize into your language! Currently, most translations are pro
    - Select `Build > Generate Signed Bundle / APK` to create a signed release
 
 ---
+
+### Verification
+
+Set `ANDROID_HOME` to your Android SDK directory, or configure `sdk.dir` in
+`local.properties`. Use the checked-in Gradle wrapper:
+
+```bash
+./gradlew testDebugUnitTest lintDebug assembleDebug
+./gradlew connectedDebugAndroidTest
+```
+
+On Windows, use `gradlew.bat`. Device tests require a running Android emulator or
+connected device (API 31 or newer). They cover rendering, scheduling, document
+provider failures, import rollback, album cleanup, and library controls.
 
 ## Contributing
 

@@ -3,21 +3,23 @@ package com.anthonyla.paperize.core.util
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.CancellationSignal
 import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.anthonyla.paperize.core.constants.Constants
+import android.database.Cursor
+import java.io.IOException
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resumeWithException
 
-/**
- * URI extensions
- */
 fun Uri.isValid(contentResolver: ContentResolver): Boolean {
-    // Basic scheme check - we only handle content URIs
     if (scheme != "content") return false
     
     return try {
-        // Optimization: Use query to check existence/accessibility without opening the file
-        // This is significantly faster and less likely to hang on slow cloud providers
         contentResolver.query(this, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
             cursor.moveToFirst()
         } ?: false
@@ -35,6 +37,31 @@ fun Uri.getFileName(context: Context): String? {
     return DocumentFile.fromSingleUri(context, this)?.name
 }
 
+/** Only a successful, complete query with no rows proves that a document was removed. */
+fun Uri.isDocumentMissing(contentResolver: ContentResolver): Boolean {
+    if (scheme != ContentResolver.SCHEME_CONTENT) return false
+    return try {
+        contentResolver.query(this, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor ->
+                cursor.requireComplete()
+                !cursor.moveToFirst()
+            } ?: false
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        // Offline providers, revoked permissions and query failures do not prove deletion.
+        false
+    }
+}
+
+private fun Cursor.requireComplete() {
+    val metadata = extras
+    if (metadata.getBoolean(DocumentsContract.EXTRA_LOADING, false) ||
+        metadata.getString(DocumentsContract.EXTRA_ERROR) != null) {
+        throw IOException("Document provider has not returned a complete result")
+    }
+}
+
 /**
  * One image file discovered while scanning a folder tree.
  *
@@ -48,26 +75,12 @@ data class ScannedImage(
 )
 
 /**
- * Recursively scan a tree [Uri] for image files.
- *
- * Uses a single [DocumentsContract] cursor query per directory instead of
- * [DocumentFile.listFiles], which issues a separate IPC round-trip for every file and
- * for every attribute access (name, isDirectory, lastModified). For folders with tens of
- * thousands of files that difference is the dominant cost. Directories are traversed
- * iteratively to avoid deep-recursion stack overflow on heavily nested trees.
- *
- * Returned URIs are built from the same tree document id used by [DocumentFile], so they
- * are byte-for-byte identical to the previous implementation and remain stable across the app.
- *
- * [onProgress] is invoked with the running number of images found, throttled to roughly once
- * per [PROGRESS_REPORT_INTERVAL] discoveries so callers can show a live count without flooding.
+ * Traverses directories iteratively, querying metadata once per directory.
+ * Rejects incomplete provider results and cancels in-flight queries with the caller.
+ * [onProgress] reports every [PROGRESS_REPORT_INTERVAL] discoveries and on completion.
  */
-fun Uri.scanFolderImages(context: Context, onProgress: ((found: Int) -> Unit)? = null): List<ScannedImage> {
-    val rootDocumentId = try {
-        DocumentsContract.getTreeDocumentId(this)
-    } catch (_: IllegalArgumentException) {
-        return emptyList() // Not a tree URI
-    }
+suspend fun Uri.scanFolderImages(context: Context, onProgress: ((found: Int) -> Unit)? = null): List<ScannedImage> {
+    val rootDocumentId = DocumentsContract.getTreeDocumentId(this)
 
     val projection = arrayOf(
         DocumentsContract.Document.COLUMN_DOCUMENT_ID,
@@ -79,53 +92,61 @@ fun Uri.scanFolderImages(context: Context, onProgress: ((found: Int) -> Unit)? =
     val results = mutableListOf<ScannedImage>()
     var lastReported = 0
     val pendingDirs = ArrayDeque<String>()
+    val visitedDocuments = mutableSetOf(rootDocumentId)
     pendingDirs.addLast(rootDocumentId)
 
     while (pendingDirs.isNotEmpty()) {
+        currentCoroutineContext().ensureActive()
         val parentDocumentId = pendingDirs.removeLast()
         val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(this, parentDocumentId)
-        try {
-            context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
-                val idColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                val nameColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                val mimeColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
-                val modifiedColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+        val cursor = suspendCancellableCoroutine<Cursor> { continuation ->
+            val signal = CancellationSignal()
+            continuation.invokeOnCancellation { signal.cancel() }
+            try {
+                val result = context.contentResolver.query(childrenUri, projection, null, null, null, signal)
+                    ?: throw IOException("Document provider could not read the folder")
+                continuation.resume(result) { _, value, _ -> value.close() }
+            } catch (e: Exception) {
+                continuation.resumeWithException(e)
+            }
+        }
+        cursor.use {
+            cursor.requireComplete()
+            val idColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+            val nameColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            val mimeColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+            val modifiedColumn = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
 
-                while (cursor.moveToNext()) {
-                    val documentId = cursor.getString(idColumn) ?: continue
-                    if (cursor.getString(mimeColumn) == DocumentsContract.Document.MIME_TYPE_DIR) {
-                        pendingDirs.addLast(documentId)
-                    } else {
-                        val name = cursor.getString(nameColumn) ?: continue
-                        val extension = name.substringAfterLast('.', "").lowercase()
-                        if (extension in Constants.SUPPORTED_IMAGE_EXTENSIONS) {
-                            results.add(
-                                ScannedImage(
-                                    uri = DocumentsContract.buildDocumentUriUsingTree(this, documentId),
-                                    name = name,
-                                    lastModified = if (cursor.isNull(modifiedColumn)) 0L else cursor.getLong(modifiedColumn)
-                                )
+            while (cursor.moveToNext()) {
+                currentCoroutineContext().ensureActive()
+                val documentId = cursor.getString(idColumn) ?: continue
+                if (!visitedDocuments.add(documentId)) continue
+                if (cursor.getString(mimeColumn) == DocumentsContract.Document.MIME_TYPE_DIR) {
+                    pendingDirs.addLast(documentId)
+                } else {
+                    val name = cursor.getString(nameColumn) ?: continue
+                    val extension = name.substringAfterLast('.', "").lowercase()
+                    if (extension in Constants.SUPPORTED_IMAGE_EXTENSIONS) {
+                        results.add(
+                            ScannedImage(
+                                uri = DocumentsContract.buildDocumentUriUsingTree(this, documentId),
+                                name = name,
+                                lastModified = if (cursor.isNull(modifiedColumn)) 0L else cursor.getLong(modifiedColumn)
                             )
-                            if (onProgress != null && results.size - lastReported >= PROGRESS_REPORT_INTERVAL) {
-                                lastReported = results.size
-                                onProgress(results.size)
-                            }
+                        )
+                        if (onProgress != null && results.size - lastReported >= PROGRESS_REPORT_INTERVAL) {
+                            lastReported = results.size
+                            onProgress(results.size)
                         }
                     }
                 }
             }
-        } catch (_: Exception) {
-            // Skip directories that can't be read and continue with the rest of the tree.
         }
     }
     onProgress?.invoke(results.size)
     return results
 }
 
-/** Report scan progress at most once per this many discovered images. */
 private const val PROGRESS_REPORT_INTERVAL = 512
 
-/**
- * UUID generation
- */
 fun generateId(): String = UUID.randomUUID().toString()
