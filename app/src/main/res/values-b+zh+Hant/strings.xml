@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="album_create_failed">無法建立相簿，請再試一次。</string>
+  <string name="app_name">Paperize</string>
+  <string name="import_adding_folder">正在新增資料夾…</string>
+  <string name="import_adding_wallpapers">正在加入桌布…</string>
+  <string name="import_scanning">正在掃描… 已找到 %1$d 張</string>
+  <string name="import_saving">正在儲存 %1$d / %2$d</string>
+  <string name="home">主畫面</string>
+  <string name="settings_screen">設定</string>
+  <string name="wallpaper">桌布</string>
+  <string name="library">圖庫</string>
+  <string name="back">返回</string>
+  <string name="add_folder">新增資料夾</string>
+  <string name="add_album">新增相簿</string>
+  <string name="enter_the_name_of_the_album">輸入相簿名稱</string>
+  <string name="album_name">相簿名稱</string>
+  <string name="cancel">取消</string>
+  <string name="save">儲存</string>
+  <string name="delete_album">刪除</string>
+  <string name="no_album_selected">尚未選擇相簿</string>
+  <string name="currently_selected_album">目前選取的相簿</string>
+  <string name="agree">同意</string>
+  <string name="welcome">歡迎</string>
+  <string name="continue_button">開始使用</string>
+  <string name="allow">允許</string>
+  <string name="privacy_policy">隱私權政策</string>
+  <string name="reset_to_default">重設為預設值</string>
+  <string name="reset_all_data">重設所有資料</string>
+  <string name="are_you_sure_you_want_to_reset_all_settings_and_data_to_default">確定要將所有設定和資料重設為預設值嗎？</string>
+  <string name="confirm">確定</string>
+  <string name="selected_count">已選取 %1$s 項</string>
+  <string name="please_read_and_agree_to_the_following_privacy_notice_to_use_the_app">請閱讀並同意以下隱私權聲明後，再使用本應用程式。</string>
+  <string name="privacy_notice">隱私權聲明</string>
+  <string name="are_you_sure_you_want_to_delete_this">確定要刪除嗎？</string>
+  <string name="delete_album_question">要刪除這個相簿嗎？</string>
+  <string name="animation">動畫</string>
+  <string name="increase_visual_appeal">讓介面更生動</string>
+  <string name="dark_mode">深色模式</string>
+  <string name="easier_on_the_eyes">比較護眼</string>
+  <string name="material_you">Material You</string>
+  <string name="dynamic_theming">動態色彩</string>
+  <string name="click_here_to_view_our_privacy_policy">點這裡查看我們的隱私權政策</string>
+  <string name="appearance">外觀</string>
+  <string name="about">關於</string>
+  <plurals name="wallpaper_count">
+    <item quantity="other">%d 張桌布</item>
+  </plurals>
+  <string name="privacy_intro_title">簡介</string>
+  <string name="privacy_intro_content">歡迎使用 %1$s！本隱私權聲明說明我們在你使用本應用程式時，如何蒐集、使用及保護你的個人資料。使用 %1$s 即表示你同意本聲明所述條款。</string>
+  <string name="privacy_data_collection_title">資料蒐集</string>
+  <string name="privacy_data_collection_content">通知：%1$s 會申請通知權限，用來顯示桌布更換、背景作業及錯誤通知。它不會讀取其他應用程式的通知，也不會根據這些通知推薦桌布。\n\n本機檔案：%1$s 會存取你選取的圖片和資料夾，以便設為桌布。我們不會將這些檔案上傳或傳送到任何外部伺服器。</string>
+  <string name="privacy_information_usage_title">資料使用</string>
+  <string name="privacy_information_usage_content">個人資料：我們不會蒐集或儲存任何個人資料，例如姓名、電子郵件地址或電話號碼。\n\n使用分析：%1$s 不會追蹤你的使用行為，也不會蒐集分析資料。</string>
+  <string name="privacy_data_security_title">資料安全</string>
+  <string name="privacy_data_security_content">裝置本機儲存：%1$s 使用的所有資料都保留在你的裝置上。我們不會將任何資料傳送到外部，也不會在外部儲存。</string>
+  <string name="no_albums_found">找不到相簿</string>
+  <string name="empty_album">空的相簿</string>
+  <string name="empty_album_message">這個相簿還沒有桌布。請先加入桌布，再選擇它。</string>
+  <string name="ok">確定</string>
+  <string name="fill">填滿</string>
+  <string name="fit">完整顯示</string>
+  <string name="stretch">延展</string>
+  <string name="change_brightness">亮度效果</string>
+  <string name="home_screen_btn">主畫面</string>
+  <string name="lock_screen_btn">鎖定畫面</string>
+  <string name="individual_scheduling">個別排程</string>
+  <string name="show_interval_sliders">分別設定主畫面與鎖定畫面的間隔</string>
+  <string name="interval_text">時間間隔</string>
+  <string name="change_blur">模糊效果</string>
+  <string name="lock">鎖定畫面</string>
+  <string name="change_vignette">暗角效果</string>
+  <string name="none">原始</string>
+  <string name="gray_filter">灰階濾鏡</string>
+  <string name="folders">資料夾</string>
+  <string name="wallpapers_sort">桌布</string>
+  <string name="close">關閉</string>
+  <string name="shuffle">隨機輪播</string>
+  <string name="days_txt">天</string>
+  <string name="hours_txt">小時</string>
+  <string name="change_the_image_brightness">調整圖片亮度</string>
+  <string name="add_blur_to_the_image">為圖片加上模糊</string>
+  <string name="darken_the_edges_of_the_image">壓暗圖片邊緣</string>
+  <string name="make_the_colors_grayscale">將色彩轉為灰階</string>
+  <string name="double_tap_to_change">點兩下更換</string>
+  <string name="double_tap_wallpaper_to_change_it">點兩下桌布即可更換</string>
+  <string name="change_on_screen_off">關閉螢幕時更換</string>
+  <string name="change_wallpaper_when_screen_turns_off">螢幕關閉時更換桌布</string>
+  <string name="parallax_effect">視差效果</string>
+  <string name="wallpaper_moves_with_screen_scroll">在主畫面頁面間滑動時，桌布會跟著移動（需桌面支援）</string>
+  <string name="live_wallpaper_name">Paperize 動態桌布</string>
+  <string name="live_wallpaper_description">具特效與互動功能的動態桌布</string>
+  <string name="adaptive_brightness">自動調整亮度</string>
+  <string name="adjust_brightness_based_on_mode">依深色／淺色模式調整亮度</string>
+  <string name="randomly_shuffle_the_wallpapers">隨機打亂桌布順序</string>
+  <string name="changing_wallpaper">正在更換桌布…</string>
+  <string name="add_wallpapers">加入桌布</string>
+  <string name="select_album">選擇相簿</string>
+  <string name="sort">排序</string>
+  <string name="notification_permission_title">開啟通知</string>
+  <string name="notification_permission_description">允許 Paperize 發送桌布更換通知，以及在背景執行時顯示通知。你可以隨時在設定中更改。</string>
+  <string name="skip">略過</string>
+  <string name="permission_granted">已授予權限</string>
+
+  <!-- Content Descriptions for Accessibility -->
+  <string name="content_desc_clear_selection">清除選取</string>
+  <string name="content_desc_select_all">全選</string>
+  <string name="content_desc_delete_selected">刪除選取項目</string>
+  <string name="content_desc_expand">展開</string>
+  <string name="content_desc_collapse">收合</string>
+  <string name="content_desc_sort_items">排序項目</string>
+  <string name="content_desc_save">儲存</string>
+  <string name="content_desc_current_lock_wallpaper">目前的鎖定畫面桌布</string>
+  <string name="content_desc_current_home_wallpaper">目前的主畫面桌布</string>
+
+  <!-- UI Labels and Status -->
+  <string name="enabled">已開啟</string>
+  <string name="wallpaper_changer">定時更換</string>
+  <string name="wallpaper_changer_description">暫停或繼續定時更換，不會清除你的相簿。</string>
+  <string name="horizontal_wallpaper_scrolling">水平捲動</string>
+  <string name="horizontal_wallpaper_scrolling_description">讓採用「填滿」的寬幅桌布可隨主畫面頁面移動。鎖定畫面的桌布會保持置中。</string>
+  <string name="disabled">已關閉</string>
+  <string name="lock_album_label">鎖定畫面相簿</string>
+  <string name="home_album_label">主畫面相簿</string>
+  <string name="scaling">縮放</string>
+  <string name="wallpaper_effects_title">桌布效果</string>
+  <string name="visual_effects">視覺效果</string>
+  <string name="interactive_effects">互動效果</string>
+  <string name="current_wallpapers">目前桌布</string>
+
+  <!-- Sort Options -->
+  <string name="sort_name_asc">名稱（A 到 Z）</string>
+  <string name="sort_name_desc">名稱（Z 到 A）</string>
+  <string name="sort_date_added_asc">加入日期（由舊到新）</string>
+  <string name="sort_date_added_desc">加入日期（由新到舊）</string>
+  <string name="sort_date_modified_asc">修改日期（由舊到新）</string>
+  <string name="sort_date_modified_desc">修改日期（由新到舊）</string>
+  <string name="sort_a_z">依 A 到 Z 排序</string>
+  <string name="sort_z_a">依 Z 到 A 排序</string>
+  <string name="sort_by_newest">由新到舊</string>
+  <string name="sort_by_oldest">由舊到新</string>
+
+  <!-- Time Interval Picker -->
+  <string name="mins">分鐘</string>
+  <string name="total_interval">總計：</string>
+  <string name="time_unit_min">分</string>
+  <string name="live_short_interval_note">短於 15 分鐘的間隔，只在 Paperize 作為目前顯示的動態桌布時才會執行。</string>
+
+  <!-- Notification Service -->
+  <string name="notification_channel_description">桌布更換通知</string>
+  <string name="no_wallpapers_in_album">相簿中沒有桌布</string>
+  <string name="wallpaper_changer_disabled_empty_album">相簿是空的，已停用定時更換。</string>
+
+  <!-- Error Messages -->
+  <string name="error_no_valid_wallpaper_after_retries">多次重試後仍找不到可用的桌布</string>
+  <string name="wallpaper_not_found">這張桌布已無法使用。</string>
+  <string name="static_mode_required">請先切換到靜態桌布模式，再套用單張桌布。</string>
+
+  <!-- OEM Compatibility Warnings -->
+  <string name="parallax_may_not_work">視差效果可能無法在你的系統或桌面上運作。</string>
+
+  <!-- Plurals -->
+  <plurals name="time_unit_hours">
+    <item quantity="other">小時</item>
+  </plurals>
+  <plurals name="time_unit_days">
+    <item quantity="other">天</item>
+  </plurals>
+
+  <!-- Material 3 Expressive UI Strings -->
+  <string name="create_first_album_hint">輕觸 + 來建立第一本相簿</string>
+
+  <!-- Wallpaper Mode Selection -->
+  <string name="choose_wallpaper_mode">選擇桌布模式</string>
+  <string name="change_later_in_settings">之後可以在設定中更改</string>
+  <string name="static_mode">靜態模式</string>
+  <string name="static_mode_description">透過系統桌布功能更換，簡單省電，僅支援圖片。</string>
+  <string name="live_wallpaper_mode">動態桌布模式</string>
+  <string name="live_wallpaper_mode_description">進階動態桌布，具硬體加速特效與互動功能（點兩下、視差）。</string>
+
+  <!-- Live Wallpaper Selection Dialog -->
+  <string name="select_live_wallpaper">選擇動態桌布</string>
+  <string name="select_live_wallpaper_instruction">若要以動態桌布模式使用 Paperize，請在系統設定中將它設為動態桌布。</string>
+  <string name="open_wallpaper_picker">開啟桌布選擇器</string>
+  <string name="later">稍後</string>
+
+  <!-- Settings Mode Switcher -->
+  <string name="wallpaper_mode_setting">桌布模式</string>
+  <string name="current_mode">目前模式</string>
+  <string name="mode_static">靜態</string>
+  <string name="mode_live_wallpaper">動態桌布</string>
+  <string name="switch_button">切換</string>
+  <string name="mode_switch_warning">切換模式會重設所有相簿、桌布和設定，而且無法復原。</string>
+  <string name="switch_mode_dialog_title">要切換到%1$s模式嗎？</string>
+  <string name="switch_mode_dialog_description">這會重設所有相簿、桌布和排程設定，而且無法復原。\n\n你需要重新加入相簿，並再次設定桌布。</string>
+  <string name="switch_mode_button">切換模式</string>
+  <string name="open_wallpaper_picker_instruction_newline">\n輕觸下方的「開啟桌布選擇器」，在可用的動態桌布清單中選取 Paperize。</string>
+  <string name="loading_placeholder">…</string>
+  <string name="album_name_exists_error">已有相同名稱的相簿</string>
+  <string name="battery_optimization">電池效能最佳化</string>
+  <string name="battery_optimization_description">關閉電池效能最佳化，才能在背景穩定更換桌布。</string>
+  <string name="check_status">檢查狀態</string>
+  <string name="ignoring">未最佳化（建議）</string>
+  <string name="optimizing">已最佳化（可能延遲更換）</string>
+  <string name="reliability">穩定性</string>
+  <string name="change_wallpaper_now">立即更換桌布</string>
+  <string name="set_wallpaper">設為桌布</string>
+  <string name="home_and_lock_screens">主畫面和鎖定畫面</string>
+  <string name="individual_wallpaper_static_only">請切換到靜態模式以設定單張桌布。</string>
+  <string name="change_next_wallpaper_shortcut">更換為下一張已設定的桌布</string>
+
+  <string name="import_failed">無法完成匯入。請確認檔案或資料夾仍可使用，然後再試一次。</string>
+  <string name="import_permission_error">無法保留這次選取的存取權限。請從可存取的位置重新選取檔案或資料夾。</string>
+  <string name="import_already_added">選取的內容已在此相簿中。</string>
+  <string name="delete_album_failed">無法刪除相簿，請再試一次。</string>
+  <string name="deleting_album">正在刪除…</string>
+  <string name="delete_items_failed">部分項目無法移除，仍保持選取狀態，請再試一次。</string>
+  <string name="album_empty_hint">加入圖片或資料夾，開始建立你的桌布收藏。</string>
+  <string name="folder_empty_title">還沒有桌布</string>
+  <string name="folder_empty_hint">將圖片加入此資料夾，然後輕觸「重新整理」以尋找新桌布。</string>
+  <string name="remove_selected_title">要移除選取的項目（%1$d）嗎？</string>
+  <string name="remove_selected_hint">這些項目會從此相簿移除。原始檔案仍會留在裝置上。</string>
+  <string name="refresh_folder">重新整理資料夾</string>
+  <string name="folder_refreshed">已檢查資料夾是否有新桌布。</string>
+  <string name="folder_refresh_failed">無法重新整理此資料夾。請確認它仍可存取，然後再試一次。</string>
+  <string name="sort_load_failed">無法載入相簿。請返回後再試一次。</string>
+  <string name="sort_save_failed">無法儲存排序。請再試一次。</string>
+  <string name="reset_failed">無法完成資料重設，請再試一次。</string>
+</resources>
