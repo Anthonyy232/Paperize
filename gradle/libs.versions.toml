@@ -50,7 +50,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version = "1.14.11" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.11.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.11.0" }
-zoomable = { module = "net.engawapg.lib:zoomable", version = "2.13.0" }
+zoomable = { module = "net.engawapg.lib:zoomable", version = "2.14.0" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "3.1.0" }
 
 [plugins]
