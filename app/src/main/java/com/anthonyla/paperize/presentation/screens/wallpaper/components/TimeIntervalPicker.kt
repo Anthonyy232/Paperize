@@ -1,12 +1,16 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,7 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlinx.coroutines.delay
 
 @Composable
@@ -57,9 +61,9 @@ fun TimeIntervalPicker(
         }
     }
 
-    androidx.compose.material3.Card(
+    Card(
         shape = MaterialTheme.shapes.medium,
-        colors = androidx.compose.material3.CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         modifier = modifier
@@ -83,50 +87,18 @@ fun TimeIntervalPicker(
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.small),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = dayInput,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= Constants.MAX_DAYS_INPUT_LENGTH) {
-                            dayInput = newValue
-                            edited = true
-                        }
-                    },
-                    label = { Text(stringResource(R.string.days_txt)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodyLarge
-                )
-
-                OutlinedTextField(
-                    value = hourInput,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= Constants.MAX_HOURS_MINUTES_INPUT_LENGTH) {
-                            hourInput = newValue
-                            edited = true
-                        }
-                    },
-                    label = { Text(stringResource(R.string.hours_txt)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodyLarge
-                )
-
-                OutlinedTextField(
-                    value = minuteInput,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= Constants.MAX_HOURS_MINUTES_INPUT_LENGTH) {
-                            minuteInput = newValue
-                            edited = true
-                        }
-                    },
-                    label = { Text(stringResource(R.string.mins)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodyLarge
-                )
+                NumberField(dayInput, Constants.MAX_DAYS_INPUT_LENGTH, R.string.days_txt) {
+                    dayInput = it
+                    edited = true
+                }
+                NumberField(hourInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.hours_txt) {
+                    hourInput = it
+                    edited = true
+                }
+                NumberField(minuteInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.mins) {
+                    minuteInput = it
+                    edited = true
+                }
             }
 
             Text(
@@ -169,4 +141,17 @@ private fun formatIntervalComposable(minutes: Int): String {
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.NumberField(value: String, maxLength: Int, @StringRes label: Int, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { if (it.all(Char::isDigit) && it.length <= maxLength) onValueChange(it) },
+        label = { Text(stringResource(label)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        modifier = Modifier.weight(1f),
+        textStyle = MaterialTheme.typography.bodyLarge
+    )
 }

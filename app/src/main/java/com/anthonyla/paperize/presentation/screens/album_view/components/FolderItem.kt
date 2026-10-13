@@ -21,13 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.domain.model.Folder
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

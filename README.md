@@ -65,15 +65,21 @@ Help translate Paperize into your language! Currently, most translations are pro
 
 - `AlbumRepository` owns library mutations. Imports, reordering, removal, covers,
   and queue invalidation use Room transactions; provider scans run outside them.
-- `DocumentSource` isolates Android permissions and document-provider queries.
-  Import and refresh use cases consume metadata without accessing Android providers.
+- `DocumentSource` and `WallpaperRenderer` (domain interfaces, Android implementations in
+  `data/source`) keep use cases free of document-provider and bitmap-decoding details.
 - `WallpaperRepository` owns rotation queues and current-wallpaper records.
   Queue creation checks and writes in one transaction, including synchronized screens.
+  Static changes and the live wallpaper engine both dequeue through
+  `ChangeWallpaperUseCase.dequeueNext`.
 - `WallpaperController` shares static wallpaper application between the service
   and worker. Callers hold `WallpaperChangeLock` through application and schedule
-  updates. `WallpaperRenderer` owns image processing; the controller recycles applied bitmaps.
-- Operation `Result` values contain success or failure. Progress belongs to UI state,
-  and coroutine cancellation propagates instead of becoming a failure result.
+  updates. The controller recycles applied bitmaps.
+- `SettingsCoordinator` persists wallpaper settings edits and applies their side effects
+  (schedules, queues, immediate changes) one at a time; ViewModels only hold UI state.
+  `WallpaperChangeService` helpers are the single way to start a manual change.
+- Repositories and use cases throw on failure. ViewModels, services, and workers
+  catch at the edge, using `runCatchingCancellable` where they need a `Result`, so
+  coroutine cancellation always propagates. Progress belongs to UI state.
 - Room migrations preserve versions 1–3 when upgrading to version 4. New schema
   changes must include a migration; destructive fallback is disabled.
 

@@ -4,8 +4,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.anthonyla.paperize.core.WallpaperMediaType
-import com.anthonyla.paperize.core.WallpaperSourceType
 
 @Entity(
     tableName = "wallpapers",
@@ -41,8 +39,10 @@ data class WallpaperEntity(
     val fileName: String,
     val dateModified: Long,
     val displayOrder: Int = 0,
-    val sourceType: WallpaperSourceType = WallpaperSourceType.DIRECT,
+    // Legacy: always derived from [folderId] ("DIRECT" or "FOLDER").
+    val sourceType: String = "DIRECT",
     val addedAt: Long = System.currentTimeMillis(),
 
-    val mediaType: WallpaperMediaType = WallpaperMediaType.IMAGE,
+    // Legacy: Paperize only stores images.
+    val mediaType: String = "IMAGE",
 )

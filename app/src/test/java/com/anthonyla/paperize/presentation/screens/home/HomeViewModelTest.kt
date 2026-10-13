@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.home
 
-import android.content.Context
 import androidx.lifecycle.ViewModelStore
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
@@ -10,6 +9,7 @@ import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
+import com.anthonyla.paperize.service.SettingsCoordinator
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
@@ -44,13 +44,14 @@ class HomeViewModelTest {
         coEvery { settings.getWallpaperMode() } returns WallpaperMode.STATIC
         coEvery { settings.getScheduleSettings() } answers { stored.value }
         coEvery { settings.updateEnableChanger(any()) } answers { stored.value = stored.value.copy(enableChanger = firstArg()) }
-        coEvery { settings.updateHomeAlbumId(any()) } answers { stored.value = stored.value.copy(homeAlbumId = firstArg()) }
+        coEvery { settings.updateAlbumId(ScreenType.HOME, any()) } answers { stored.value = stored.value.copy(homeAlbumId = secondArg()) }
         coEvery { settings.updateScheduleSettings(any<(ScheduleSettings) -> ScheduleSettings>()) } answers {
             stored.value = firstArg<(ScheduleSettings) -> ScheduleSettings>()(stored.value)
             stored.value
         }
         every { wallpapers.getCurrentWallpaperFlow(any(), any()) } returns flowOf(null)
-        viewModel = HomeViewModel(mockk<Context>(), albums, mockk(), settings, scheduler, wallpapers)
+        val coordinator = SettingsCoordinator(mockk(relaxed = true), settings, wallpapers, albums, scheduler)
+        viewModel = HomeViewModel(albums, settings, wallpapers, mockk(), coordinator)
         store.put("home", viewModel)
     }
 
@@ -64,9 +65,9 @@ class HomeViewModelTest {
         stored.value = stored.value.copy(enableChanger = true)
         val draft = stored.value.copy(homeEffects = stored.value.homeEffects.copy(blurPercentage = 60))
         viewModel.updateScheduleSettingsDebounced(draft)
-        viewModel.toggleWallpaperChanger(false)
+        viewModel.setChangerEnabled(false)
         runCurrent()
-        viewModel.selectHomeAlbum(AlbumSummary.empty("new"))
+        viewModel.selectAlbum(ScreenType.HOME, AlbumSummary.empty("new"))
         advanceUntilIdle()
 
         assertFalse(stored.value.enableChanger)
@@ -92,7 +93,7 @@ class HomeViewModelTest {
         }
         viewModel.updateScheduleSettings(stored.value.copy(homeIntervalMinutes = 45))
         runCurrent()
-        viewModel.toggleWallpaperChanger(true, onlyIfNotScheduled = true)
+        viewModel.setChangerEnabled(true)
         runCurrent()
         assertFalse(stored.value.enableChanger)
         firstSchedule.complete(Unit)

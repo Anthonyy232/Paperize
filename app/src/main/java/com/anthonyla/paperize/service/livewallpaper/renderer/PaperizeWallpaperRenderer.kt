@@ -27,6 +27,7 @@ import android.opengl.Matrix
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
+/** Settings setters may be called from any thread; GL work runs on the engine's GL thread. */
 class PaperizeWallpaperRenderer(
     private val context: Context,
     private val callbacks: Callbacks
@@ -219,7 +220,6 @@ class PaperizeWallpaperRenderer(
     private fun drawWithBlur(picture: GLPicture, alpha: Float, blurRadius: Float) {
         if (blurFbo1 == 0) createBlurFramebuffers(surfaceWidth, surfaceHeight)
 
-        // Pass 1: Horizontal blur (source → FBO1)
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo1)
         GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -232,7 +232,6 @@ class PaperizeWallpaperRenderer(
 
         picture.draw(blurProgram, blurPositionHandle, blurTexCoordHandle, mvpMatrix, blurMvpMatrixHandle)
 
-        // Pass 2: Vertical blur (FBO1 → FBO2)
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo2)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
@@ -242,7 +241,6 @@ class PaperizeWallpaperRenderer(
         GLES20.glUniform2f(blurDirectionHandle, 0f, 1f)
         drawQuad(blurPositionHandle, blurTexCoordHandle, blurMvpMatrixHandle, identityMatrix)
 
-        // Pass 3: Color effects (FBO2 → Screen)
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
         GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight)
 
@@ -510,10 +508,6 @@ class PaperizeWallpaperRenderer(
         }
     }
 
-    /**
-     * Update effects settings.
-     * Can be called from any thread.
-     */
     fun updateEffects(effects: WallpaperEffects) {
         this.currentEffects = effects
         Log.d(TAG, "Effects updated: blur=${effects.enableBlur}/${effects.blurPercentage}, " +
@@ -524,12 +518,7 @@ class PaperizeWallpaperRenderer(
         callbacks.requestRender()
     }
 
-    /**
-     * Set parallax scroll offset.
-     * Can be called from any thread.
-     *
-     * @param offset Normalized offset (0.0 = left, 1.0 = right)
-     */
+    /** @param offset Normalized offset (0.0 = left, 1.0 = right) */
     fun setNormalOffsetX(offset: Float) {
         val clampedOffset = offset.coerceIn(0f, 1f)
         if (normalOffsetX != clampedOffset) {
@@ -538,10 +527,6 @@ class PaperizeWallpaperRenderer(
         }
     }
 
-    /**
-     * Update adaptive brightness setting.
-     * Can be called from any thread.
-     */
     fun updateAdaptiveBrightness(enabled: Boolean) {
         if (adaptiveBrightnessEnabled != enabled) {
             adaptiveBrightnessEnabled = enabled
@@ -560,10 +545,6 @@ class PaperizeWallpaperRenderer(
             1f
         }
 
-    /**
-     * Update scaling type.
-     * Can be called from any thread.
-     */
     fun updateScalingType(scalingType: ScalingType) {
         if (currentScalingType != scalingType) {
             currentScalingType = scalingType
@@ -572,10 +553,6 @@ class PaperizeWallpaperRenderer(
         }
     }
 
-    /**
-     * Cleanup resources.
-     * Must be called on GL thread.
-     */
     @Synchronized
     fun cancelLoading() {
         loadGeneration.incrementAndGet()
@@ -583,6 +560,7 @@ class PaperizeWallpaperRenderer(
         requestedImageLoader = null
     }
 
+    /** Must be called on the GL thread. */
     fun destroy() {
         cancelLoading()
 

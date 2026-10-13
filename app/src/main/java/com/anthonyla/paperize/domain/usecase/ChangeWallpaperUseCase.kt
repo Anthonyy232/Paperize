@@ -1,18 +1,15 @@
 package com.anthonyla.paperize.domain.usecase
 
-import android.content.Context
 import android.util.Log
-import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.NoValidWallpaperException
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.core.util.WallpaperRenderer
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.anthonyla.paperize.domain.source.WallpaperRenderer
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
@@ -28,24 +25,19 @@ import kotlinx.coroutines.withContext
  * the item back at the front of the queue.
  */
 class ChangeWallpaperUseCase @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val wallpaperRepository: WallpaperRepository,
     private val settingsRepository: SettingsRepository,
     private val renderer: WallpaperRenderer
 ) {
-    suspend operator fun invoke(albumId: String, screenType: ScreenType): Result<PreparedWallpaper> = Result.runCatching {
+    suspend operator fun invoke(albumId: String, screenType: ScreenType): PreparedWallpaper {
         val settings = settingsRepository.getScheduleSettings()
         repeat(Constants.MAX_WALLPAPER_LOAD_RETRIES) {
             currentCoroutineContext().ensureActive()
-            val candidate = wallpaperRepository.getAndDequeueWallpaper(albumId, screenType) ?: run {
-                wallpaperRepository.ensureWallpaperQueue(albumId, screenType, settings.shuffleEnabled).getOrThrow()
-                wallpaperRepository.getAndDequeueWallpaper(albumId, screenType)
-                    ?: throw EmptyAlbumException(context.getString(R.string.no_wallpapers_in_album))
-            }
+            val candidate = dequeueNext(albumId, screenType, settings.shuffleEnabled)
             try {
                 val bitmap = renderer.render(candidate, screenType, settings)
                 if (bitmap != null) {
-                    return@runCatching PreparedWallpaper(bitmap, albumId, screenType, candidate.id, settings.shuffleEnabled)
+                    return PreparedWallpaper(bitmap, albumId, screenType, candidate.id, settings.shuffleEnabled)
                 }
             } catch (e: CancellationException) {
                 // Cancelling preparation must not consume the selected queue item.
@@ -61,8 +53,16 @@ class ChangeWallpaperUseCase @Inject constructor(
                 // Unreadable images are skipped for this cycle; refresh owns permanent pruning.
             }
         }
-        throw NoValidWallpaperException(context.getString(R.string.error_no_valid_wallpaper_after_retries))
+        throw NoValidWallpaperException()
     }
+
+    /** Dequeue the next item, rebuilding an empty queue once. Throws [EmptyAlbumException] if none remain. */
+    suspend fun dequeueNext(albumId: String, screenType: ScreenType, shuffle: Boolean): Wallpaper =
+        wallpaperRepository.getAndDequeueWallpaper(albumId, screenType) ?: run {
+            wallpaperRepository.ensureWallpaperQueue(albumId, screenType, shuffle)
+            wallpaperRepository.getAndDequeueWallpaper(albumId, screenType)
+                ?: throw EmptyAlbumException()
+        }
 
     /**
      * Record a successfully applied wallpaper and keep the target screen queue in sync.
@@ -101,7 +101,7 @@ class ChangeWallpaperUseCase @Inject constructor(
         }
 
         try {
-            wallpaperRepository.ensureWallpaperQueue(albumId, screenType, shuffle).getOrThrow()
+            wallpaperRepository.ensureWallpaperQueue(albumId, screenType, shuffle)
             // Build first when this is the first synchronized use of a screen queue, then remove
             // the exact applied item. This prevents the just-applied wallpaper from being
             // reintroduced at the head of a freshly built queue.

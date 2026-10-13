@@ -35,13 +35,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,12 +53,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Size
-import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.sort.components.SortViewTopBar
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.theme.AppShapes
-import com.anthonyla.paperize.presentation.theme.AppSpacing
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -119,10 +118,10 @@ fun SortViewScreen(
                 enabled = !state.isLoading && !state.isSaving,
                 onBackClick = onTopBarBackClick,
                 onSaveClick = sortViewModel::saveChanges,
-                onSortAlphabetically = { sortViewModel.onEvent(SortEvent.SortAlphabetically) },
-                onSortAlphabeticallyReverse = { sortViewModel.onEvent(SortEvent.SortAlphabeticallyReverse) },
-                onSortByLastModified = { sortViewModel.onEvent(SortEvent.SortByLastModified) },
-                onSortByLastModifiedReverse = { sortViewModel.onEvent(SortEvent.SortByLastModifiedReverse) },
+                onSortAlphabetically = { sortViewModel.onEvent(SortEvent.Sort(byDate = false, ascending = true)) },
+                onSortAlphabeticallyReverse = { sortViewModel.onEvent(SortEvent.Sort(byDate = false, ascending = false)) },
+                onSortByLastModified = { sortViewModel.onEvent(SortEvent.Sort(byDate = true, ascending = true)) },
+                onSortByLastModifiedReverse = { sortViewModel.onEvent(SortEvent.Sort(byDate = true, ascending = false)) },
             )
         }
     ) { paddingValues ->
@@ -241,7 +240,7 @@ fun SortViewScreen(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(AppIconSizes.large)
-                                            .clip(AppShapes.imageShape)
+                                            .clip(MaterialTheme.shapes.small)
                                     )
                                 },
                                 content = {

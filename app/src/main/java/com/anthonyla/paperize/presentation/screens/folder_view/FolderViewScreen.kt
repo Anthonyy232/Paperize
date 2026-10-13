@@ -1,10 +1,9 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
 
-import com.anthonyla.paperize.core.constants.Constants
-
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,14 +13,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,15 +26,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.common.components.EmptyCollection
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.components.EmptyCollection
+import com.anthonyla.paperize.presentation.common.theme.AppGrid
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
 import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
 import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
 import com.anthonyla.paperize.presentation.screens.folder_view.components.FolderViewTopBar
-import com.anthonyla.paperize.presentation.theme.AppGrid
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+
 
 @Composable
 fun FolderViewScreen(

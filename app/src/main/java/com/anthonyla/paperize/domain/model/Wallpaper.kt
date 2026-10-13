@@ -1,8 +1,6 @@
 package com.anthonyla.paperize.domain.model
 
 import android.net.Uri
-import com.anthonyla.paperize.core.WallpaperMediaType
-import com.anthonyla.paperize.core.WallpaperSourceType
 
 data class Wallpaper(
     val id: String,
@@ -12,9 +10,7 @@ data class Wallpaper(
     val fileName: String,
     val dateModified: Long,
     val displayOrder: Int = 0,
-    val sourceType: WallpaperSourceType = WallpaperSourceType.DIRECT,
-    val addedAt: Long = System.currentTimeMillis(),
-    val mediaType: WallpaperMediaType = WallpaperMediaType.IMAGE
+    val addedAt: Long = System.currentTimeMillis()
 ) {
     val displayFileName: String
         get() = Uri.decode(fileName).let { decoded ->

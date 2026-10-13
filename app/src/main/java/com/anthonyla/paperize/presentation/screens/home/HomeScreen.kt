@@ -105,15 +105,11 @@ fun HomeScreen(
                                     persistedScheduleSettings = scheduleSettings,
                                     appSettings = appSettings,
                                     wallpaperMode = wallpaperMode!!,
-                                    onToggleChanger = { viewModel.toggleWallpaperChanger(it, onlyIfNotScheduled = true) },
-                                    onSelectHomeAlbum = { album -> viewModel.selectHomeAlbum(album) },
-                                    onSelectLockAlbum = { album -> viewModel.selectLockAlbum(album) },
-                                    onSelectLiveAlbum = { album -> viewModel.selectLiveAlbum(album) },
-                                    onUpdateScheduleSettings = { viewModel.updateScheduleSettings(it) },
-                                    onUpdateScheduleSettingsDebounced = { viewModel.updateScheduleSettingsDebounced(it) },
-                                    onChangeWallpaperNow = {
-                                        viewModel.changeWallpaperNowForActiveScreens()
-                                    },
+                                    onToggleChanger = viewModel::setChangerEnabled,
+                                    onSelectAlbum = viewModel::selectAlbum,
+                                    onUpdateScheduleSettings = viewModel::updateScheduleSettings,
+                                    onUpdateScheduleSettingsDebounced = viewModel::updateScheduleSettingsDebounced,
+                                    onChangeWallpaperNow = viewModel::changeWallpaperNow,
                                     homeWallpaperUri = currentHomeWallpaperUri,
                                     lockWallpaperUri = currentLockWallpaperUri
                                 )

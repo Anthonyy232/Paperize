@@ -1,8 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
-import com.anthonyla.paperize.presentation.theme.AppMaxWidths
-import com.anthonyla.paperize.presentation.theme.AppBorderWidths
-import com.anthonyla.paperize.core.constants.Constants
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,21 +18,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.theme.AppShapes
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlin.math.max
 import kotlin.math.min
+
 
 /** Shows the last applied source URIs; WallpaperManager readback is restricted on modern Android.
  * Cropping and effects applied to the actual wallpaper are not included in this preview.
@@ -60,9 +59,9 @@ fun CurrentWallpaperPreview(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .widthIn(max = AppMaxWidths.contentMaxWidth)
+            .widthIn(max = 600.dp)
             .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
-        shape = AppShapes.cardShape,
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -119,11 +118,11 @@ private fun WallpaperPreviewBox(
         modifier = modifier
             .aspectRatio(aspectRatio)
             .border(
-                width = AppBorderWidths.thick,
+                width = 3.dp,
                 color = Color.Black,
-                shape = AppShapes.imageShape
+                shape = MaterialTheme.shapes.small
             )
-            .clip(AppShapes.imageShape)
+            .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         AsyncImage(

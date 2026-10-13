@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.core.util
 import com.anthonyla.paperize.core.constants.Constants
 
-import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -105,43 +104,41 @@ fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
     return 1
 }
 
-object ScreenMetricsCompat {
-    fun getScreenSize(context: Context): Size {
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val metrics: WindowMetrics = windowManager.currentWindowMetrics
-        val currentWindow = metrics.bounds.width() to metrics.bounds.height()
+fun getDeviceScreenSize(context: Context): Size {
+    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    val metrics: WindowMetrics = windowManager.currentWindowMetrics
+    val currentWindow = metrics.bounds.width() to metrics.bounds.height()
 
-        // Display.Mode dimensions are reported in the panel's natural orientation. Prefer them
-        // over currentWindowMetrics so a scheduled change while a landscape game is foregrounded
-        // cannot permanently rotate and over-crop the wallpaper bitmap.
-        val displayManager = context.getSystemService(DisplayManager::class.java)
-        val builtInDisplays = displayManager
-            ?.getDisplays(BUILT_IN_DISPLAY_CATEGORY)
-            .orEmpty()
-        val candidateDisplays = if (builtInDisplays.isNotEmpty()) {
-            // Android 17+ returns all built-in panels, including currently inactive panels.
-            builtInDisplays.asSequence()
-        } else {
-            // Compatibility fallback for releases where the built-in category is unknown.
-            // Exclude presentation and app-owned virtual displays.
-            displayManager?.displays
-                ?.asSequence()
-                ?.filter { display ->
-                    display.flags and Display.FLAG_PRESENTATION == 0 &&
-                        display.flags and Display.FLAG_PRIVATE == 0
-                }
-                .orEmpty()
-        }
-        val supportedModes = candidateDisplays
-            .flatMap { display ->
-                display.supportedModes.asSequence().map { mode ->
-                    mode.physicalWidth to mode.physicalHeight
-                }
+    // Display.Mode dimensions are reported in the panel's natural orientation. Prefer them
+    // over currentWindowMetrics so a scheduled change while a landscape game is foregrounded
+    // cannot permanently rotate and over-crop the wallpaper bitmap.
+    val displayManager = context.getSystemService(DisplayManager::class.java)
+    val builtInDisplays = displayManager
+        ?.getDisplays(BUILT_IN_DISPLAY_CATEGORY)
+        .orEmpty()
+    val candidateDisplays = if (builtInDisplays.isNotEmpty()) {
+        // Android 17+ returns all built-in panels, including currently inactive panels.
+        builtInDisplays.asSequence()
+    } else {
+        // Compatibility fallback for releases where the built-in category is unknown.
+        // Exclude presentation and app-owned virtual displays.
+        displayManager?.displays
+            ?.asSequence()
+            ?.filter { display ->
+                display.flags and Display.FLAG_PRESENTATION == 0 &&
+                    display.flags and Display.FLAG_PRIVATE == 0
             }
-            .toList()
-        val selected = selectWallpaperDisplayDimensions(currentWindow, supportedModes)
-        return Size(selected.first, selected.second)
+            .orEmpty()
     }
+    val supportedModes = candidateDisplays
+        .flatMap { display ->
+            display.supportedModes.asSequence().map { mode ->
+                mode.physicalWidth to mode.physicalHeight
+            }
+        }
+        .toList()
+    val selected = selectWallpaperDisplayDimensions(currentWindow, supportedModes)
+    return Size(selected.first, selected.second)
 }
 
 internal fun selectWallpaperDisplayDimensions(
@@ -162,8 +159,6 @@ internal fun selectLargestDisplayDimensions(
             { (width, height) -> minOf(width, height) }
         )
     )
-
-fun getDeviceScreenSize(context: Context): Size = ScreenMetricsCompat.getScreenSize(context)
 
 /**
  * Whether a static wallpaper should retain source overflow for launcher-managed scrolling.
@@ -318,30 +313,6 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
     }
 }
 
-/**
- * Darken the bitmap by a certain percentage
- * @param darkenPercent 0-100 (0 is original brightness, 100 is completely dark/black)
- */
-fun darkenBitmap(source: Bitmap, darkenPercent: Int): Bitmap =
-    adjustBitmapBrightness(source, (100 - darkenPercent.coerceIn(0, 100)) / 100f)
-
-/**
- * Blur the bitmap using GPU acceleration
- * @param percent 0-100
- */
-fun blurBitmap(source: Bitmap, percent: Int): Bitmap {
-    if (percent <= 0) return source
-    return try {
-        processBitmapGpu(source, false, 0, true, percent, false, 0, false, 0)
-    } catch (e: Exception) {
-        Log.e(TAG, "Error blurring bitmap", e)
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM blurring bitmap", e)
-        source
-    }
-}
-
 private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) {
     val centerX = width / 2f
     val centerY = height / 2f
@@ -360,56 +331,6 @@ private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) 
         )
     }
     canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
-}
-
-/**
- * Apply a vignette effect to the bitmap
- * @param percent 0-100
- */
-fun vignetteBitmap(source: Bitmap, percent: Int): Bitmap {
-    if (percent <= 0) return source
-    if (!source.isMutable) {
-        Log.w(TAG, "vignetteBitmap received an immutable bitmap. Creating a mutable copy.")
-        val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        // Do not recycle source here — caller owns the lifecycle and handles recycling
-        return vignetteBitmap(mutableCopy, percent)
-    }
-
-    return try {
-        drawVignette(Canvas(source), source.width, source.height, percent)
-        source
-    } catch (e: Exception) {
-        Log.e(TAG, "Error applying vignette: $e")
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM applying vignette: $e")
-        source
-    }
-}
-
-/**
- * Apply a grayscale filter to the bitmap
- * @param percent 0-100 (0 is original, 100 is full grayscale)
- */
-fun grayscaleBitmap(source: Bitmap, percent: Int): Bitmap {
-    if (percent <= 0) return source
-    if (!source.isMutable) {
-        Log.w(TAG, "grayscaleBitmap received an immutable bitmap. Creating a mutable copy.")
-        val mutableCopy = source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
-        // Do not recycle source here — caller owns the lifecycle and handles recycling
-        return grayscaleBitmap(mutableCopy, percent)
-    }
-
-    val factor = percent.coerceIn(0, 100) / 100f
-
-    val colorMatrix = ColorMatrix().apply { setSaturation(1 - factor) }
-    val paint = Paint().apply {
-        colorFilter = ColorMatrixColorFilter(colorMatrix)
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
-    }
-
-    Canvas(source).drawBitmap(source, 0f, 0f, paint)
-    return source
 }
 
 /**
@@ -438,24 +359,12 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
 fun getAdaptiveBrightnessMultiplier(context: Context, brightness: Float): Float {
     val isDarkMode = (context.resources.configuration.uiMode and
         Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-    
     return BrightnessCalculator.getAdaptiveMultiplier(isDarkMode, brightness)
 }
 
 fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {
-    val isDarkMode = (context.resources.configuration.uiMode and
-        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
-    val currentBrightness = BrightnessCalculator.calculateBitmapBrightness(source)
-    val adjustmentFactor = BrightnessCalculator.getAdaptiveMultiplier(isDarkMode, currentBrightness)
-
-    return if (adjustmentFactor != 1.0f) {
-        Log.d(TAG, "Adaptive brightness adjustment factor: $adjustmentFactor (brightness: $currentBrightness, dark mode: $isDarkMode)")
-        adjustBitmapBrightness(source, adjustmentFactor)
-    } else {
-        Log.d(TAG, "No adaptive brightness adjustment needed (brightness: $currentBrightness, dark mode: $isDarkMode)")
-        source
-    }
+    val brightness = BrightnessCalculator.calculateBitmapBrightness(source)
+    return adjustBitmapBrightness(source, getAdaptiveBrightnessMultiplier(context, brightness))
 }
 
 fun processBitmap(
@@ -492,7 +401,6 @@ fun processBitmap(
     return processBitmapCpu(
         source,
         hasDarken, darkenPercent,
-        hasBlur, blurPercent,
         hasVignette, vignettePercent,
         hasGrayscale, grayscalePercent
     )
@@ -590,72 +498,32 @@ private fun processBitmapGpu(
     }
 }
 
+/**
+ * Fallback when the GPU pipeline fails. Darken, grayscale and vignette are plain canvas
+ * operations; blur requires [RenderEffect], so it is skipped here.
+ */
 private fun processBitmapCpu(
     source: Bitmap,
     hasDarken: Boolean, darkenPercent: Int,
-    hasBlur: Boolean, blurPercent: Int,
     hasVignette: Boolean, vignettePercent: Int,
     hasGrayscale: Boolean, grayscalePercent: Int
 ): Bitmap {
-    var result = source
-
-    if (hasDarken) {
-        result = darkenBitmap(result, darkenPercent)
-    }
-
-    if (hasBlur) {
-        val previous = result
-        result = blurBitmap(result, blurPercent)
-        if (result !== previous && previous !== source) {
-            previous.recycle()
+    // The caller owns and recycles [source] if a copy is returned.
+    val result = if (source.isMutable) source else source.copy(source.config ?: Bitmap.Config.ARGB_8888, true)
+    val canvas = Canvas(result)
+    if (hasDarken || hasGrayscale) {
+        val colorMatrix = ColorMatrix()
+        if (hasGrayscale) colorMatrix.setSaturation(1 - grayscalePercent.coerceIn(0, 100) / 100f)
+        if (hasDarken) {
+            val factor = (100 - darkenPercent.coerceIn(0, 100)) / 100f
+            colorMatrix.postConcat(ColorMatrix().apply { setScale(factor, factor, factor, 1f) })
         }
-    }
-
-    if (hasVignette) {
-        val previous = result
-        result = vignetteBitmap(result, vignettePercent)
-        if (result !== previous && previous !== source) {
-            previous.recycle()
+        val paint = Paint().apply {
+            colorFilter = ColorMatrixColorFilter(colorMatrix)
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
         }
+        canvas.drawBitmap(result, 0f, 0f, paint)
     }
-
-    if (hasGrayscale) {
-        val previous = result
-        result = grayscaleBitmap(result, grayscalePercent)
-        if (result !== previous && previous !== source) {
-            previous.recycle()
-        }
-    }
-
+    if (hasVignette) drawVignette(canvas, result.width, result.height, vignettePercent)
     return result
-}
-
-fun isPaperizeLiveWallpaperActive(context: Context): Boolean {
-    return try {
-        // If we are checking from within the service itself (e.g. preview mode), we are active
-        if (context is com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService) {
-            Log.d(TAG, "isPaperizeLiveWallpaperActive: called from service context, returning true")
-            return true
-        }
-
-        val wallpaperManager = WallpaperManager.getInstance(context)
-        val wallpaperInfo = wallpaperManager.wallpaperInfo
-
-        if (wallpaperInfo == null) {
-            Log.d(TAG, "isPaperizeLiveWallpaperActive: wallpaperInfo is null (static wallpaper), returning false")
-            return false
-        }
-
-        val expectedComponent = android.content.ComponentName(
-            context.packageName,
-            "com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService"
-        )
-        val isPaperize = wallpaperInfo.component == expectedComponent
-
-        Log.d(TAG, "isPaperizeLiveWallpaperActive: current=${wallpaperInfo.component}, expected=$expectedComponent, match=$isPaperize")
-        isPaperize
-    } catch (e: Exception) {
-        Log.e(TAG, "Error checking live wallpaper status", e)
-        false
-    }
 }

@@ -79,7 +79,7 @@ object GLShaders {
  
             color.rgb *= (1.0 - u_darkenFactor);
  
-            // 2. Apply vignette — matches CPU vignetteBitmap gradient stops:
+            // 2. Apply vignette — matches drawVignette gradient stops in WallpaperUtil:
             //    [0% dark at center] → [10% dark at 70% of radius] → [80% dark at edge]
             //    radius is normalized to 0.5 UV (image edge along shorter axis)
             vec2 vignetteCenter = v_imageCoord - 0.5;

@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @Composable
 fun SettingSwitchItem(

@@ -35,11 +35,7 @@ import coil3.request.ImageRequest
 import coil3.size.Size
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.InteractiveCard
-import com.anthonyla.paperize.presentation.theme.AppBorderWidths
-import com.anthonyla.paperize.presentation.theme.AppElevation
-import com.anthonyla.paperize.presentation.theme.AppRadii
-import com.anthonyla.paperize.presentation.theme.AppShapes
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @Composable
 fun AlbumItem(
@@ -57,9 +53,9 @@ fun AlbumItem(
     InteractiveCard(
         onClick = onAlbumViewClick,
         modifier = modifier.fillMaxSize(),
-        defaultRadius = AppRadii.large,
-        pressedRadius = AppRadii.huge,
-        elevation = AppElevation.level1
+        defaultRadius = 20.dp,
+        pressedRadius = 36.dp,
+        elevation = 1.dp
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.medium),
@@ -70,10 +66,10 @@ fun AlbumItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .clip(AppShapes.smallCardShape)
+                    .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                     .border(
-                        width = AppBorderWidths.medium,
+                        width = 2.dp,
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(12.dp)
                     ),

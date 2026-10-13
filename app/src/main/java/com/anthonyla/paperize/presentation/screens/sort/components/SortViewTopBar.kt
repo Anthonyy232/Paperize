@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

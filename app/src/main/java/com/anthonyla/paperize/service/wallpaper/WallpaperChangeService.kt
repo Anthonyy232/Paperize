@@ -4,13 +4,15 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
@@ -29,6 +31,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 
+/** Runs manual wallpaper actions in the foreground, serialized with scheduled changes. */
 @AndroidEntryPoint
 class WallpaperChangeService : Service() {
 
@@ -39,155 +42,70 @@ class WallpaperChangeService : Service() {
     @Inject lateinit var wallpaperRepository: WallpaperRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private lateinit var notificationManager: NotificationManager
-
-    override fun onCreate() {
-        super.onCreate()
-        notificationManager = getSystemService(NotificationManager::class.java)
-            ?: error("NotificationManager not available")
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(
-                Constants.NOTIFICATION_ID,
-                createNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )
-        } else {
-            startForeground(Constants.NOTIFICATION_ID, createNotification())
-        }
-
-        val screenType = intent?.getStringExtra(EXTRA_SCREEN_TYPE)
-            ?.let(ScreenType::fromString)
-            ?: ScreenType.BOTH
-        when (intent?.action) {
-            ACTION_CHANGE_WALLPAPER -> handleChangeWallpaper(screenType, startId)
-            ACTION_CHANGE_WALLPAPER_AUTO ->
-                handleChangeWallpaper(screenType, startId, respectWallpaperMode = true)
-            ACTION_APPLY_SPECIFIC_WALLPAPER -> handleApplySpecificWallpaper(
-                wallpaperId = intent.getStringExtra(EXTRA_WALLPAPER_ID),
-                screenType = screenType,
-                startId = startId
-            )
-            ACTION_REAPPLY_EFFECTS -> handleReapplyEffects(screenType, startId)
-            else -> {
-                Log.w(TAG, "Unknown action: ${intent?.action}")
-                stopSelf(startId)
+        ServiceCompat.startForeground(
+            this, Constants.NOTIFICATION_ID, createNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
+        val action = intent?.action
+        val screen = intent?.getStringExtra(EXTRA_SCREEN_TYPE)?.let(ScreenType::fromString)
+        val wallpaperId = intent?.getStringExtra(EXTRA_WALLPAPER_ID)
+        serviceScope.launch {
+            wallpaperChangeLock.mutex.withLock {
+                try {
+                    when (action) {
+                        ACTION_CHANGE_WALLPAPER -> changeWallpaper(screen)
+                        ACTION_APPLY_SPECIFIC_WALLPAPER -> applySpecificWallpaper(wallpaperId, screen ?: ScreenType.BOTH)
+                        ACTION_REAPPLY_EFFECTS -> reapplyEffects()
+                        else -> Log.w(TAG, "Unknown action: $action")
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Wallpaper action $action failed", e)
+                    showErrorNotification(getString(R.string.app_name), errorMessage(e))
+                } finally {
+                    stopSelf(startId)
+                }
             }
         }
         return START_NOT_STICKY
     }
 
-    private fun handleChangeWallpaper(
-        screenType: ScreenType,
-        startId: Int,
-        respectWallpaperMode: Boolean = false
-    ) {
-        serviceScope.launch {
-            wallpaperChangeLock.mutex.withLock {
-                try {
-                    val wallpaperMode = settingsRepository.getWallpaperMode()
-                    val effectiveScreenType =
-                        if (
-                            respectWallpaperMode &&
-                            wallpaperMode == WallpaperMode.LIVE
-                        ) {
-                            ScreenType.LIVE
-                        } else {
-                            screenType
-                        }
-                    val settings = settingsRepository.getScheduleSettings()
-                    val outcome = wallpaperController.change(effectiveScreenType, settings)
-                    if (outcome.emptyAlbum) showEmptyAlbumNotification()
-                    if (outcome.changed) {
-                        wallpaperScheduler.resetAfterManualChange(
-                            effectiveScreenType,
-                            settings,
-                            wallpaperMode
-                        )
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error changing wallpaper", e)
-                    showErrorNotification(
-                        getString(R.string.app_name),
-                        e.localizedMessage
-                            ?: getString(R.string.error_no_valid_wallpaper_after_retries)
-                    )
-                } finally {
-                    stopSelf(startId)
-                }
-            }
+    /** Without a [screen], changes every screen the current settings rotate. */
+    private suspend fun changeWallpaper(screen: ScreenType?) {
+        val mode = settingsRepository.getWallpaperMode()
+        val targets = screen?.let(::setOf) ?: settingsRepository.getScheduleSettings().activeScreens(mode)
+        for (target in targets) {
+            val settings = settingsRepository.getScheduleSettings()
+            val outcome = wallpaperController.change(target, settings)
+            if (outcome.emptyAlbum) showEmptyAlbumNotification()
+            if (outcome.changed) wallpaperScheduler.resetAfterManualChange(target, settings, mode)
         }
     }
 
-    private fun handleApplySpecificWallpaper(
-        wallpaperId: String?,
-        screenType: ScreenType,
-        startId: Int
-    ) {
-        serviceScope.launch {
-            wallpaperChangeLock.mutex.withLock {
-                try {
-                    require(!wallpaperId.isNullOrBlank()) { getString(R.string.wallpaper_not_found) }
-                    require(screenType != ScreenType.LIVE) { getString(R.string.static_mode_required) }
-                    val wallpaperMode = settingsRepository.getWallpaperMode()
-                    require(wallpaperMode == WallpaperMode.STATIC) {
-                        getString(R.string.static_mode_required)
-                    }
-                    val wallpaper = wallpaperRepository.getWallpaperById(wallpaperId)
-                        ?: error(getString(R.string.wallpaper_not_found))
-                    val settings = settingsRepository.getScheduleSettings()
+    private suspend fun applySpecificWallpaper(wallpaperId: String?, screen: ScreenType) {
+        require(!wallpaperId.isNullOrBlank()) { getString(R.string.wallpaper_not_found) }
+        val mode = settingsRepository.getWallpaperMode()
+        require(screen != ScreenType.LIVE && mode == WallpaperMode.STATIC) { getString(R.string.static_mode_required) }
+        val wallpaper = wallpaperRepository.getWallpaperById(wallpaperId)
+            ?: error(getString(R.string.wallpaper_not_found))
+        val settings = settingsRepository.getScheduleSettings()
+        wallpaperController.applySpecific(wallpaper.albumId, wallpaper.id, screen, settings)
+        wallpaperScheduler.resetAfterManualChange(screen, settings, mode)
+    }
 
-                    wallpaperController.applySpecific(
-                        albumId = wallpaper.albumId,
-                        wallpaperId = wallpaper.id,
-                        screen = screenType,
-                        settings = settings
-                    )
-                    wallpaperScheduler.resetAfterManualChange(
-                        screenType = screenType,
-                        settings = settings,
-                        wallpaperMode = wallpaperMode
-                    )
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error applying selected wallpaper", e)
-                    showErrorNotification(
-                        getString(R.string.app_name),
-                        e.localizedMessage ?: getString(R.string.error_no_valid_wallpaper_after_retries)
-                    )
-                } finally {
-                    stopSelf(startId)
-                }
-            }
+    private suspend fun reapplyEffects() {
+        val mode = settingsRepository.getWallpaperMode()
+        val settings = settingsRepository.getScheduleSettings()
+        for (target in settings.activeScreens(mode)) {
+            if (wallpaperController.reapply(target, settings).emptyAlbum) showEmptyAlbumNotification()
         }
     }
 
-    private fun handleReapplyEffects(screenType: ScreenType, startId: Int) {
-        serviceScope.launch {
-            wallpaperChangeLock.mutex.withLock {
-                try {
-                    val settings = settingsRepository.getScheduleSettings()
-                    val outcome = wallpaperController.reapply(screenType, settings)
-                    if (outcome.emptyAlbum) showEmptyAlbumNotification()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error reapplying effects", e)
-                    showErrorNotification(
-                        getString(R.string.app_name),
-                        e.localizedMessage
-                            ?: getString(R.string.error_no_valid_wallpaper_after_retries)
-                    )
-                } finally {
-                    stopSelf(startId)
-                }
-            }
-        }
+    private fun errorMessage(e: Exception): String = when (e) {
+        is NoValidWallpaperException -> getString(R.string.error_no_valid_wallpaper_after_retries)
+        else -> e.localizedMessage ?: getString(R.string.error_no_valid_wallpaper_after_retries)
     }
 
     private fun showEmptyAlbumNotification() {
@@ -197,38 +115,29 @@ class WallpaperChangeService : Service() {
         )
     }
 
-    private fun createNotification(): Notification {
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent().setClassName(packageName, MainActivity::class.java.name),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        return NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
+    private fun openAppIntent(): PendingIntent = PendingIntent.getActivity(
+        this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE
+    )
+
+    private fun createNotification(): Notification =
+        NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.changing_wallpaper))
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(openAppIntent())
             .setOngoing(true)
             .build()
-    }
 
     private fun showErrorNotification(title: String, message: String) {
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent().setClassName(packageName, MainActivity::class.java.name),
-            PendingIntent.FLAG_IMMUTABLE
-        )
         val notification = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(openAppIntent())
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-        notificationManager.notify(ERROR_NOTIFICATION_ID, notification)
+        getSystemService(NotificationManager::class.java).notify(ERROR_NOTIFICATION_ID, notification)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -240,13 +149,30 @@ class WallpaperChangeService : Service() {
 
     companion object {
         private const val TAG = "WallpaperChangeService"
-        const val ACTION_CHANGE_WALLPAPER = Constants.ACTION_CHANGE_WALLPAPER
-        const val ACTION_CHANGE_WALLPAPER_AUTO =
-            "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER_AUTO"
-        const val ACTION_APPLY_SPECIFIC_WALLPAPER = Constants.ACTION_APPLY_SPECIFIC_WALLPAPER
-        const val ACTION_REAPPLY_EFFECTS = Constants.ACTION_REAPPLY_EFFECTS
-        const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
-        const val EXTRA_WALLPAPER_ID = Constants.EXTRA_WALLPAPER_ID
+        private const val ACTION_CHANGE_WALLPAPER = "com.anthonyla.paperize.ACTION_CHANGE_WALLPAPER"
+        private const val ACTION_APPLY_SPECIFIC_WALLPAPER = "com.anthonyla.paperize.ACTION_APPLY_SPECIFIC_WALLPAPER"
+        private const val ACTION_REAPPLY_EFFECTS = "com.anthonyla.paperize.ACTION_REAPPLY_EFFECTS"
+        private const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
+        private const val EXTRA_WALLPAPER_ID = "wallpaper_id"
         private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
+
+        /** Without a [screen], changes every screen the current settings rotate (or the live wallpaper). */
+        fun changeWallpaper(context: Context, screen: ScreenType? = null) =
+            start(context, ACTION_CHANGE_WALLPAPER) { screen?.let { putExtra(EXTRA_SCREEN_TYPE, it.name) } }
+
+        fun applyWallpaper(context: Context, wallpaperId: String, screen: ScreenType) =
+            start(context, ACTION_APPLY_SPECIFIC_WALLPAPER) {
+                putExtra(EXTRA_WALLPAPER_ID, wallpaperId)
+                putExtra(EXTRA_SCREEN_TYPE, screen.name)
+            }
+
+        /** Re-render the current static wallpapers after display settings change. */
+        fun reapplyEffects(context: Context) = start(context, ACTION_REAPPLY_EFFECTS)
+
+        private fun start(context: Context, action: String, extras: Intent.() -> Unit = {}) {
+            context.startForegroundService(
+                Intent(context, WallpaperChangeService::class.java).setAction(action).apply(extras)
+            )
+        }
     }
 }

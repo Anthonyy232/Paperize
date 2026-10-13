@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class ScreenMetricsCompatTest {
+class DisplaySizeTest {
 
     @Test
     fun `largest internal display wins even when current window is folded`() {

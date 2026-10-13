@@ -1,6 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.album_view.components
-import com.anthonyla.paperize.core.constants.Constants
-
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,16 +20,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Size
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

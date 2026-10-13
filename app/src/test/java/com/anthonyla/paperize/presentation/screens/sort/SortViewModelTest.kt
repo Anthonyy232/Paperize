@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.navigation.toRoute
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.presentation.common.navigation.SortRoute
@@ -50,14 +49,14 @@ class SortViewModelTest {
         coVerify(exactly = 0) { albums.reorderAlbum(any(), any(), any()) }
         albumReady.complete(Album.empty("album"))
         runCurrent()
-        val completion = CompletableDeferred<Result<Unit>>()
+        val completion = CompletableDeferred<Unit>()
         coEvery { albums.reorderAlbum(any(), any(), any()) } coAnswers { completion.await() }
         viewModel.saveChanges()
         runCurrent()
         assertTrue(viewModel.state.value.isSaving)
         assertFalse(viewModel.state.value.saved)
         viewModel.saveChanges()
-        completion.complete(Result.Success(Unit))
+        completion.complete(Unit)
         advanceUntilIdle()
         assertTrue(viewModel.state.value.saved)
         assertFalse(viewModel.state.value.isSaving)
@@ -67,13 +66,13 @@ class SortViewModelTest {
     @Test fun `failed save keeps screen open and permits retry`() = runTest {
         albumReady.complete(Album.empty("album"))
         runCurrent()
-        coEvery { albums.reorderAlbum(any(), any(), any()) } returns Result.Error(IllegalStateException())
+        coEvery { albums.reorderAlbum(any(), any(), any()) } throws IllegalStateException()
         viewModel.saveChanges()
         advanceUntilIdle()
         assertFalse(viewModel.state.value.saved)
         assertFalse(viewModel.state.value.isSaving)
         assertNotNull(viewModel.state.value.error)
-        coEvery { albums.reorderAlbum(any(), any(), any()) } returns Result.Success(Unit)
+        coEvery { albums.reorderAlbum(any(), any(), any()) } just Runs
         viewModel.saveChanges()
         advanceUntilIdle()
         assertTrue(viewModel.state.value.saved)

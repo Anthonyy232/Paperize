@@ -168,7 +168,7 @@ class WallpaperUtilInstrumentedTest {
                 }
             }
         )
-        val actual = ScreenMetricsCompat.getScreenSize(context)
+        val actual = getDeviceScreenSize(context)
 
         assertNotNull(expected)
         assertEquals(expected?.first, actual.width)
@@ -181,7 +181,7 @@ class WallpaperUtilInstrumentedTest {
             orientation = Configuration.ORIENTATION_LANDSCAPE
         }
         val landscapeContext = context.createConfigurationContext(landscapeConfiguration)
-        val naturalPanel = ScreenMetricsCompat.getScreenSize(context)
+        val naturalPanel = getDeviceScreenSize(context)
         val renderSize = getDeviceScreenSize(landscapeContext)
 
         assertEquals(naturalPanel.width, renderSize.width)

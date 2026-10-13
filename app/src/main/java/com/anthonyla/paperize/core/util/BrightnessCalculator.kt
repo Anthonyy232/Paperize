@@ -6,7 +6,7 @@ import com.anthonyla.paperize.core.constants.Constants
 object BrightnessCalculator {
 
     /** Estimates luminance with BT.709 coefficients; channels remain in their encoded color space. */
-    fun calculateLuminance(pixel: Int): Double {
+    private fun calculateLuminance(pixel: Int): Double {
         val r = ((pixel shr 16) and 0xFF) / 255.0
         val g = ((pixel shr 8) and 0xFF) / 255.0
         val b = (pixel and 0xFF) / 255.0

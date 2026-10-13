@@ -1,7 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.components.OnboardingLayout
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -15,12 +12,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.anthonyla.paperize.presentation.screens.settings.SettingsViewModel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
+import com.anthonyla.paperize.presentation.screens.settings.SettingsViewModel
+
 
 @Composable
 fun WallpaperModeSelectionScreen(

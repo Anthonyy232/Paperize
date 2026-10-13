@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.data.repository
 
 import androidx.room.withTransaction
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.util.QueueBuilder
 import com.anthonyla.paperize.data.database.PaperizeDatabase
@@ -26,9 +25,6 @@ class WallpaperRepositoryImpl @Inject constructor(
     override suspend fun getWallpaperById(wallpaperId: String): Wallpaper? =
         wallpaperDao.getWallpaperById(wallpaperId)?.toDomainModel()
 
-    override suspend fun getNextWallpaperInQueue(albumId: String, screenType: ScreenType): Wallpaper? =
-        wallpaperQueueDao.getNextWallpaperInQueue(albumId, screenType)?.toDomainModel()
-
     override suspend fun getAndDequeueWallpaper(albumId: String, screenType: ScreenType): Wallpaper? =
         wallpaperQueueDao.getAndDequeueWallpaper(albumId, screenType)?.toDomainModel()
 
@@ -52,7 +48,7 @@ class WallpaperRepositoryImpl @Inject constructor(
         albumId: String,
         screenType: ScreenType,
         shuffle: Boolean
-    ): Result<Unit> = Result.runCatching {
+    ) {
         database.withTransaction {
             // Recheck inside the transaction: another caller may already have filled it.
             if (wallpaperQueueDao.getNextWallpaperInQueue(albumId, screenType) != null) return@withTransaction
@@ -76,7 +72,7 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun clearAllQueues(): Result<Unit> = Result.runCatching {
+    override suspend fun clearAllQueues() {
         wallpaperQueueDao.deleteAllQueueItems()
     }
 

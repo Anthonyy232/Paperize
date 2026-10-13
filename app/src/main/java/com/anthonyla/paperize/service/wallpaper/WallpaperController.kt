@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.setBitmapChecked
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
@@ -60,7 +61,7 @@ class WallpaperController @Inject constructor(
             applyPrepared(prepared, ScreenType.BOTH)
         } else {
             applyPrepared(prepared, ScreenType.HOME)
-            val lockBitmap = render(albumId, ScreenType.LOCK, prepared.wallpaperId).getOrThrow()
+            val lockBitmap = render(albumId, ScreenType.LOCK, prepared.wallpaperId)
             applyBitmap(lockBitmap, ScreenType.LOCK) { prepare.complete(prepared, ScreenType.LOCK) }
         }
         return WallpaperChangeOutcome(changed = true)
@@ -68,7 +69,7 @@ class WallpaperController @Inject constructor(
 
     private suspend fun prepareOrDisable(albumId: String, screen: ScreenType): PreparedWallpaper? {
         try {
-            return prepare(albumId, if (screen == ScreenType.BOTH) ScreenType.HOME else screen).getOrThrow()
+            return prepare(albumId, if (screen == ScreenType.BOTH) ScreenType.HOME else screen)
         } catch (_: EmptyAlbumException) {
             settingsRepository.clearEmptyAlbumSelection(albumId, screen)
             return null
@@ -99,7 +100,7 @@ class WallpaperController @Inject constructor(
         } else listOf(screen)
         for (target in targets) {
             val renderScreen = if (target == ScreenType.BOTH) ScreenType.HOME else target
-            val bitmap = render(albumId, renderScreen, wallpaperId).getOrThrow()
+            val bitmap = render(albumId, renderScreen, wallpaperId)
             applyBitmap(bitmap, target) {
                 target.staticScreens().forEach {
                     prepare.completeSpecific(albumId, it, wallpaperId, settings.shuffleEnabled)
@@ -114,7 +115,7 @@ class WallpaperController @Inject constructor(
         for (target in screen.staticScreens()) {
             val albumId = if (target == ScreenType.HOME) settings.homeAlbumId else settings.lockAlbumId
             if (albumId == null) continue
-            val bitmap = render(albumId, target).getOrNull()
+            val bitmap = runCatchingCancellable { render(albumId, target) }.getOrNull()
             val result = if (bitmap == null) changeSelected(albumId, target) else {
                 applyBitmap(bitmap, target)
                 WallpaperChangeOutcome(changed = true)

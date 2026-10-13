@@ -2,16 +2,20 @@ package com.anthonyla.paperize.service.worker
 
 import android.content.Context
 import android.util.Log
-import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Calendar
+import java.time.Duration
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,73 +26,39 @@ import kotlinx.coroutines.sync.withLock
 class WallpaperScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
-    private val workManager = WorkManager.getInstance(context)
+    // Lazy: the Application injects this before WorkManager can read its Hilt worker factory.
+    private val workManager by lazy { WorkManager.getInstance(context) }
     private val mutex = Mutex()
 
-    companion object {
-        private const val TAG = "WallpaperScheduler"
-    }
-
-    /**
-     * Schedule periodic wallpaper change
-     *
-     * @param screenType HOME, LOCK, or BOTH (for synchronized schedules)
-     * @param intervalMinutes Interval between changes (minimum 15 minutes for WorkManager)
-     */
+    /** [intervalMinutes] is raised to WorkManager's 15-minute minimum. */
     fun scheduleWallpaperChange(
         screenType: ScreenType,
         intervalMinutes: Int,
         resetInterval: Boolean = false,
         onlyIfNotScheduled: Boolean = false
     ) {
-
-        val adjustedInterval = intervalMinutes.toLong().coerceAtLeast(Constants.MIN_INTERVAL_MINUTES.toLong())
-        val workName = getWorkName(screenType)
-
-        val inputData = Data.Builder()
-            .putString(Constants.EXTRA_SCREEN_TYPE, screenType.name)
-            .build()
-
-        val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
-            adjustedInterval,
-            TimeUnit.MINUTES
-        )
-            .setInputData(inputData)
-            .addTag(getWorkTag(screenType))
+        val interval = intervalMinutes.toLong().coerceAtLeast(Constants.MIN_INTERVAL_MINUTES.toLong())
+        val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(interval, TimeUnit.MINUTES)
+            .setInputData(workDataOf(Constants.EXTRA_SCREEN_TYPE to screenType.name))
             .apply {
                 // New periodic work otherwise runs immediately. Unlike an initial delay, this
                 // one-run deadline also survives unrelated UPDATE requests from settings edits.
                 if (resetInterval) {
-                    setNextScheduleTimeOverride(
-                        System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(adjustedInterval)
-                    )
+                    setNextScheduleTimeOverride(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(interval))
                 }
             }
             .build()
 
         // Preserve the existing work and explicitly move only the next run after a manual change.
         // Replacing periodic work starts a new first period, which can otherwise run immediately.
-        workManager.enqueueUniquePeriodicWork(
-            workName,
-            if (onlyIfNotScheduled) ExistingPeriodicWorkPolicy.KEEP else ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
-
-        Log.d(TAG, "Scheduled $screenType wallpaper change every $adjustedInterval minutes")
+        workManager.enqueueUniquePeriodicWork(workName(screenType), policy(onlyIfNotScheduled), workRequest)
+        Log.d(TAG, "Scheduled $screenType wallpaper change every $interval minutes")
     }
 
     /** Reset only the automatic schedules affected by a successful manual change. */
-    fun resetAfterManualChange(
-        screenType: ScreenType,
-        settings: ScheduleSettings,
-        wallpaperMode: WallpaperMode
-    ) {
+    fun resetAfterManualChange(screenType: ScreenType, settings: ScheduleSettings, wallpaperMode: WallpaperMode) {
         scheduledScreensToReset(screenType, settings, wallpaperMode).forEach { scheduledScreen ->
-            scheduleWallpaperChange(
-                screenType = scheduledScreen,
-                intervalMinutes = settings.intervalMinutes(scheduledScreen),
-                resetInterval = true
-            )
+            scheduleWallpaperChange(scheduledScreen, settings.intervalMinutes(scheduledScreen), resetInterval = true)
         }
     }
 
@@ -102,86 +72,55 @@ class WallpaperScheduler @Inject constructor(
         val targets = if (enabled) settings.activeScreens(mode) else emptySet()
         for (screen in ScreenType.entries) {
             val interval = settings.intervalMinutes(screen)
-            val handledByEngine = screen == ScreenType.LIVE && interval < Constants.MIN_INTERVAL_MINUTES
+            val handledByEngine = screen == ScreenType.LIVE && usesVisibleLiveTimer(interval)
             if (screen in targets && interval > 0 && !handledByEngine) {
                 scheduleWallpaperChange(screen, interval, onlyIfNotScheduled = onlyIfNotScheduled)
             } else {
-                cancelWallpaperChange(screen)
+                workManager.cancelUniqueWork(workName(screen))
             }
         }
-        if (enabled) scheduleAlbumRefresh(onlyIfNotScheduled) else cancelAlbumRefresh()
-    }
-
-    fun cancelWallpaperChange(screenType: ScreenType) {
-        val workName = getWorkName(screenType)
-        workManager.cancelUniqueWork(workName)
-        Log.d(TAG, "Cancelled $screenType wallpaper change schedule")
+        if (enabled) scheduleDailyAlbumRefresh(onlyIfNotScheduled) else workManager.cancelUniqueWork(Constants.WORK_NAME_REFRESH)
     }
 
     fun cancelAllWallpaperChanges() {
-        workManager.cancelUniqueWork(Constants.WORK_NAME_HOME)
-        workManager.cancelUniqueWork(Constants.WORK_NAME_LOCK)
-        workManager.cancelUniqueWork(Constants.WORK_NAME_BOTH)
-        workManager.cancelUniqueWork(Constants.WORK_NAME_LIVE)
-        cancelAlbumRefresh()
-        Log.d(TAG, "Cancelled all wallpaper change schedules")
-    }
-
-    /** Refresh daily, with the first run targeting 3 AM. */
-    fun scheduleAlbumRefresh(onlyIfNotScheduled: Boolean = false) {
-        val calendar = Calendar.getInstance()
-        val nowMillis = calendar.timeInMillis
-        
-        if (calendar.get(Calendar.HOUR_OF_DAY) >= 3) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-        calendar.set(Calendar.HOUR_OF_DAY, 3)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        
-        val initialDelay = calendar.timeInMillis - nowMillis
-
-        val workRequest = PeriodicWorkRequestBuilder<AlbumRefreshWorker>(
-            1,
-            TimeUnit.DAYS
-        )
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-            .addTag(Constants.WORK_TAG_REFRESH)
-            .build()
-
-        workManager.enqueueUniquePeriodicWork(
-            Constants.WORK_NAME_REFRESH,
-            if (onlyIfNotScheduled) ExistingPeriodicWorkPolicy.KEEP else ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
-
-        Log.d(TAG, "Scheduled daily album refresh")
-    }
-
-    fun cancelAlbumRefresh() {
+        ScreenType.entries.forEach { workManager.cancelUniqueWork(workName(it)) }
         workManager.cancelUniqueWork(Constants.WORK_NAME_REFRESH)
-        Log.d(TAG, "Cancelled daily album refresh")
     }
 
-    private fun getWorkName(screenType: ScreenType): String {
-        return when (screenType) {
-            ScreenType.HOME -> Constants.WORK_NAME_HOME
-            ScreenType.LOCK -> Constants.WORK_NAME_LOCK
-            ScreenType.BOTH -> Constants.WORK_NAME_BOTH
-            ScreenType.LIVE -> Constants.WORK_NAME_LIVE
-        }
+    /** Rescan folders now; KEEP coalesces rapid foreground transitions into one scan. */
+    fun refreshAlbumsNow() {
+        workManager.enqueueUniqueWork(
+            FOREGROUND_REFRESH_WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            OneTimeWorkRequestBuilder<AlbumRefreshWorker>().build()
+        )
     }
 
-    private fun getWorkTag(screenType: ScreenType): String {
-        return when (screenType) {
-            ScreenType.HOME -> Constants.WORK_TAG_HOME
-            ScreenType.LOCK -> Constants.WORK_TAG_LOCK
-            ScreenType.BOTH -> Constants.WORK_TAG_BOTH
-            ScreenType.LIVE -> Constants.WORK_TAG_LIVE
-        }
+    /** Refresh daily, with the first run at the next 3 AM. */
+    private fun scheduleDailyAlbumRefresh(onlyIfNotScheduled: Boolean) {
+        val now = ZonedDateTime.now()
+        val today3am = now.toLocalDate().atTime(3, 0).atZone(now.zone)
+        val next3am = if (today3am.isAfter(now)) today3am else today3am.plusDays(1)
+        val workRequest = PeriodicWorkRequestBuilder<AlbumRefreshWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(Duration.between(now, next3am))
+            .build()
+        workManager.enqueueUniquePeriodicWork(Constants.WORK_NAME_REFRESH, policy(onlyIfNotScheduled), workRequest)
     }
 
+    private fun policy(onlyIfNotScheduled: Boolean) =
+        if (onlyIfNotScheduled) ExistingPeriodicWorkPolicy.KEEP else ExistingPeriodicWorkPolicy.UPDATE
+
+    private fun workName(screenType: ScreenType): String = when (screenType) {
+        ScreenType.HOME -> Constants.WORK_NAME_HOME
+        ScreenType.LOCK -> Constants.WORK_NAME_LOCK
+        ScreenType.BOTH -> Constants.WORK_NAME_BOTH
+        ScreenType.LIVE -> Constants.WORK_NAME_LIVE
+    }
+
+    private companion object {
+        const val TAG = "WallpaperScheduler"
+        const val FOREGROUND_REFRESH_WORK_NAME = "album_refresh_on_foreground"
+    }
 }
 
 internal fun scheduledScreensToReset(

@@ -1,21 +1,37 @@
 package com.anthonyla.paperize.service.livewallpaper
 
+import android.app.WallpaperManager
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.SurfaceHolder
-import com.anthonyla.paperize.core.ScreenType
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
 import com.anthonyla.paperize.domain.repository.SettingsRepository
-import com.anthonyla.paperize.domain.repository.WallpaperRepository
+import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.service.livewallpaper.gl.GLWallpaperService
 import com.anthonyla.paperize.service.livewallpaper.renderer.ContentUriImageLoader
 import com.anthonyla.paperize.service.livewallpaper.renderer.EmptyImageLoader
-import com.anthonyla.paperize.service.livewallpaper.renderer.PaperizeWallpaperRenderer
+import com.anthonyla.paperize.service.livewallpaper.renderer.ImageLoader
 import com.anthonyla.paperize.service.livewallpaper.renderer.PaperizeRenderController
+import com.anthonyla.paperize.service.livewallpaper.renderer.PaperizeWallpaperRenderer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -24,32 +40,39 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
-import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.core.util.isValid
-import com.anthonyla.paperize.domain.model.Wallpaper
-import com.anthonyla.paperize.service.livewallpaper.gl.GLCompatibility
-import android.widget.Toast
-import com.anthonyla.paperize.R
 
 @AndroidEntryPoint
 class PaperizeLiveWallpaperService : GLWallpaperService() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
-    @Inject lateinit var wallpaperRepository: WallpaperRepository
+    @Inject lateinit var changeWallpaperUseCase: ChangeWallpaperUseCase
 
     companion object {
         private const val TAG = "PaperizeLiveWallpaper"
+
+        // Their stock launchers often do not report wallpaper scroll offsets.
+        private val PARALLAX_ISSUE_MANUFACTURERS =
+            setOf("SAMSUNG", "XIAOMI", "HUAWEI", "OPPO", "VIVO", "REALME", "ONEPLUS")
+
+        private fun launcherMayIgnoreParallax(): Boolean =
+            Build.MANUFACTURER.uppercase().let { maker -> PARALLAX_ISSUE_MANUFACTURERS.any(maker::contains) }
+
+        fun isActive(context: Context): Boolean {
+            // Checking from within the service itself (e.g. preview mode) means it is active.
+            if (context is PaperizeLiveWallpaperService) return true
+            return try {
+                WallpaperManager.getInstance(context).wallpaperInfo?.component ==
+                    ComponentName(context, PaperizeLiveWallpaperService::class.java)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking live wallpaper status", e)
+                false
+            }
+        }
     }
 
     override fun onCreateEngine(): Engine {
@@ -109,72 +132,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
             renderer = PaperizeWallpaperRenderer(applicationContext, this)
             renderController = PaperizeRenderController(renderer::queueWallpaper, engineScope) {
-                withContext(Dispatchers.IO) {
-                    val mode = settingsRepository.getWallpaperMode()
-                    val settings = settingsRepository.getScheduleSettings()
-                    
-                    // Live Wallpaper only operates in LIVE mode
-                    // In STATIC mode, the static wallpaper worker handles HOME/LOCK screens separately
-                    if (mode != com.anthonyla.paperize.core.WallpaperMode.LIVE) {
-                        Log.d(TAG, "App is in STATIC mode, Live Wallpaper not active")
-                        return@withContext EmptyImageLoader
-                    }
-                    
-                    val albumId = settings.liveAlbumId
-
-                    if (albumId == null) {
-                        Log.w(TAG, "No live album ID set")
-                        return@withContext EmptyImageLoader
-                    }
-
-                    val queueCheck = wallpaperRepository.getNextWallpaperInQueue(albumId, ScreenType.LIVE)
-                    if (queueCheck == null) {
-                        wallpaperRepository.ensureWallpaperQueue(albumId, ScreenType.LIVE, settings.shuffleEnabled)
-                    }
-                    
-                    var wallpaper: Wallpaper? = null
-                    var maxRetries = Constants.MAX_WALLPAPER_LOAD_RETRIES // Prevent infinite loop
-                    var queueRebuildAttempts = 0
-
-                    while (wallpaper == null && maxRetries > 0) {
-                        val candidate = wallpaperRepository.getAndDequeueWallpaper(albumId, ScreenType.LIVE)
-
-                        if (candidate == null) {
-                            queueRebuildAttempts++
-                            if (queueRebuildAttempts > Constants.MAX_QUEUE_REBUILD_ATTEMPTS) {
-                                Log.w(TAG, "No wallpapers in album $albumId after retries")
-                                return@withContext EmptyImageLoader
-                            }
-
-                            wallpaperRepository.ensureWallpaperQueue(albumId, ScreenType.LIVE, settings.shuffleEnabled)
-                            continue
-                        }
-
-                        val uri = candidate.uri.toUri()
-                        if (uri.isValid(contentResolver)) {
-                            wallpaper = candidate
-                        } else {
-                            // Skip this cycle — do not permanently delete.
-                            // A transient permission or storage issue should not remove it from the album.
-                            // AlbumRefreshWorker handles pruning of truly invalid URIs on its daily scan.
-                            maxRetries--
-                        }
-                    }
-
-                    if (wallpaper == null) {
-                        Log.w(TAG, "No valid wallpaper found after retries")
-                        return@withContext EmptyImageLoader
-                    }
-
-                    currentWallpaper = wallpaper
-
-                    val nextInQueue = wallpaperRepository.getNextWallpaperInQueue(albumId, ScreenType.LIVE)
-                    if (nextInQueue == null) {
-                        wallpaperRepository.ensureWallpaperQueue(albumId, ScreenType.LIVE, settings.shuffleEnabled)
-                    }
-
-                    ContentUriImageLoader(contentResolver, wallpaper.uri.toUri(), settings.liveScalingType)
-                }
+                withContext(Dispatchers.IO) { openNextWallpaper() }
             }
 
             setRenderer(renderer)
@@ -201,6 +159,31 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             )
         }
 
+        /** Dequeue the next readable live wallpaper. Queue and database errors reach the controller. */
+        private suspend fun openNextWallpaper(): ImageLoader {
+            // In STATIC mode the static wallpaper worker owns HOME/LOCK; the engine stays empty.
+            if (settingsRepository.getWallpaperMode() != WallpaperMode.LIVE) return EmptyImageLoader
+            val settings = settingsRepository.getScheduleSettings()
+            val albumId = settings.liveAlbumId ?: return EmptyImageLoader
+
+            repeat(Constants.MAX_WALLPAPER_LOAD_RETRIES) {
+                val candidate = try {
+                    changeWallpaperUseCase.dequeueNext(albumId, ScreenType.LIVE, settings.shuffleEnabled)
+                } catch (_: EmptyAlbumException) {
+                    Log.w(TAG, "No wallpapers in album $albumId")
+                    return EmptyImageLoader
+                }
+                // Skip unreadable items without deleting them: a permission or storage issue may be
+                // transient. AlbumRefreshWorker prunes documents that are actually gone.
+                if (candidate.uri.toUri().isValid(contentResolver)) {
+                    currentWallpaper = candidate
+                    return ContentUriImageLoader(contentResolver, candidate.uri.toUri(), settings.liveScalingType)
+                }
+            }
+            Log.w(TAG, "No valid wallpaper found after retries")
+            return EmptyImageLoader
+        }
+
         private fun observeSettings() {
             engineScope.launch {
                 combine(
@@ -220,7 +203,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                     latestWallpaperMode = mode
                     if (timerConfigurationChanged) restartLiveIntervalTimer()
 
-                    if (mode != com.anthonyla.paperize.core.WallpaperMode.LIVE) {
+                    if (mode != WallpaperMode.LIVE) {
                         return@collect
                     }
                     
@@ -254,7 +237,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                         }
                     }
                     
-                    if (effects.enableParallax && !hasShownParallaxWarning && GLCompatibility.shouldWarnAboutParallax()) {
+                    if (effects.enableParallax && !hasShownParallaxWarning && launcherMayIgnoreParallax()) {
                         hasShownParallaxWarning = true
                         Toast.makeText(
                             applicationContext,
@@ -348,7 +331,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                 val settings = settingsRepository.getScheduleSettings()
                 if (settings.liveEffects.enableChangeOnScreenOff) {
                     Log.d(TAG, "Screen off - changing wallpaper")
-                    // Use forceReload to bypass visibility check and load while screen is off
                     renderController.forceReloadCurrentArtwork()
                 }
             }

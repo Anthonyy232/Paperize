@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.util.WallpaperSorter
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.presentation.common.navigation.SortRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -65,7 +64,6 @@ class SortViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 albumRepository.reorderAlbum(albumId, snapshot.folders, snapshot.wallpapers)
-                    .getOrThrow()
                 _state.value = _state.value.copy(saved = true)
             } catch (e: CancellationException) {
                 throw e
@@ -115,52 +113,13 @@ class SortViewModel @Inject constructor(
                 _state.value = _state.value.copy(wallpapers = updatedWallpapers)
             }
 
-            is SortEvent.SortAlphabetically -> {
-                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllAlphabetically(
-                    folders = state.value.folders,
-                    wallpapers = state.value.wallpapers,
-                    ascending = true
-                )
-                _state.value = _state.value.copy(
-                    folders = sortedFolders,
-                    wallpapers = sortedWallpapers
-                )
-            }
-
-            is SortEvent.SortAlphabeticallyReverse -> {
-                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllAlphabetically(
-                    folders = state.value.folders,
-                    wallpapers = state.value.wallpapers,
-                    ascending = false
-                )
-                _state.value = _state.value.copy(
-                    folders = sortedFolders,
-                    wallpapers = sortedWallpapers
-                )
-            }
-
-            is SortEvent.SortByLastModified -> {
-                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllByDateModified(
-                    folders = state.value.folders,
-                    wallpapers = state.value.wallpapers,
-                    ascending = true
-                )
-                _state.value = _state.value.copy(
-                    folders = sortedFolders,
-                    wallpapers = sortedWallpapers
-                )
-            }
-
-            is SortEvent.SortByLastModifiedReverse -> {
-                val (sortedFolders, sortedWallpapers) = WallpaperSorter.sortAllByDateModified(
-                    folders = state.value.folders,
-                    wallpapers = state.value.wallpapers,
-                    ascending = false
-                )
-                _state.value = _state.value.copy(
-                    folders = sortedFolders,
-                    wallpapers = sortedWallpapers
-                )
+            is SortEvent.Sort -> {
+                val (folders, wallpapers) = if (event.byDate) {
+                    WallpaperSorter.sortAllByDateModified(state.value.folders, state.value.wallpapers, event.ascending)
+                } else {
+                    WallpaperSorter.sortAllAlphabetically(state.value.folders, state.value.wallpapers, event.ascending)
+                }
+                _state.value = _state.value.copy(folders = folders, wallpapers = wallpapers)
             }
         }
     }

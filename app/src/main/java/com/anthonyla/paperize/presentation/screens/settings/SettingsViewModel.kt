@@ -1,80 +1,58 @@
 package com.anthonyla.paperize.presentation.screens.settings
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AppSettings
-import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
-import com.anthonyla.paperize.service.worker.WallpaperScheduler
+import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
+import com.anthonyla.paperize.service.SettingsCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val albumRepository: AlbumRepository,
-    private val wallpaperScheduler: WallpaperScheduler
+    private val coordinator: SettingsCoordinator
 ) : ViewModel() {
 
-    companion object {
-        private const val TAG = "SettingsViewModel"
-    }
+    // Eager so the first frame already knows whether to show onboarding.
+    val appSettings: StateFlow<AppSettings?> =
+        settingsRepository.getAppSettingsFlow().stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val appSettings: StateFlow<AppSettings?> = settingsRepository.getAppSettingsFlow()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,  // Start loading immediately to prevent onboarding flicker
-            initialValue = null
-        )
-
-    val wallpaperMode: StateFlow<WallpaperMode> = settingsRepository.getWallpaperModeFlow()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
-            initialValue = WallpaperMode.STATIC
-        )
-
-    fun updateDarkMode(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateDarkMode(enabled)
-        }
-    }
-
-    fun updateDynamicTheming(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateDynamicTheming(enabled)
-        }
-    }
-
-    fun updateAnimate(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateAnimate(enabled)
-        }
-    }
-
-    fun updateFirstLaunch(isFirstLaunch: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateFirstLaunch(isFirstLaunch)
-        }
-    }
+    val wallpaperMode: StateFlow<WallpaperMode> =
+        settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, WallpaperMode.STATIC)
 
     private val _isResetting = MutableStateFlow(false)
     val isResetting = _isResetting.asStateFlow()
     private val _resetFailed = MutableStateFlow(false)
     val resetFailed = _resetFailed.asStateFlow()
 
-    fun switchWallpaperMode(newMode: WallpaperMode, onSuccess: () -> Unit = {}) =
-        resetData(newMode, onSuccess)
+    fun updateDarkMode(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.updateDarkMode(enabled) }
+    }
+
+    fun updateDynamicTheming(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.updateDynamicTheming(enabled) }
+    }
+
+    fun updateAnimate(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.updateAnimate(enabled) }
+    }
+
+    fun updateFirstLaunch(isFirstLaunch: Boolean) {
+        viewModelScope.launch { settingsRepository.updateFirstLaunch(isFirstLaunch) }
+    }
+
+    fun switchWallpaperMode(newMode: WallpaperMode, onSuccess: () -> Unit = {}) = resetData(newMode, onSuccess)
 
     fun resetAllData() = resetData(mode = null)
 
@@ -84,16 +62,7 @@ class SettingsViewModel @Inject constructor(
         _resetFailed.value = false
         viewModelScope.launch {
             try {
-                // Stop both the visible live timer and background jobs before deleting their source.
-                settingsRepository.updateEnableChanger(false)
-                wallpaperScheduler.cancelAllWallpaperChanges()
-                albumRepository.deleteAllAlbums().getOrThrow()
-                if (mode == null) {
-                    settingsRepository.clearAllSettings()
-                } else {
-                    settingsRepository.clearScheduleSettings()
-                    settingsRepository.updateWallpaperMode(mode)
-                }
+                coordinator.resetData(mode)
                 onSuccess()
             } catch (e: CancellationException) {
                 throw e
@@ -104,5 +73,9 @@ class SettingsViewModel @Inject constructor(
                 _isResetting.value = false
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "SettingsViewModel"
     }
 }

@@ -1,6 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.library
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,14 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.AddAlbumDialog
+import com.anthonyla.paperize.presentation.common.theme.AppGrid
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.library.components.AlbumItem
-import com.anthonyla.paperize.presentation.theme.AppGrid
-import com.anthonyla.paperize.presentation.theme.AppSpacing
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun LibraryScreen(
@@ -139,10 +138,9 @@ fun LibraryScreen(
                     albumNameError = null
                     scope.launch {
                         try {
-                            when (onCreateAlbum(name)) {
-                                is Result.Success -> showAddAlbumDialog = false
-                                is Result.Error -> albumNameError = R.string.album_create_failed
-                            }
+                            onCreateAlbum(name)
+                                .onSuccess { showAddAlbumDialog = false }
+                                .onFailure { albumNameError = R.string.album_create_failed }
                         } finally {
                             isSaving = false
                         }

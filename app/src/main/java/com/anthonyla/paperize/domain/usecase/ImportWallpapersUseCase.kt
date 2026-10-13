@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.domain.usecase
 
-import com.anthonyla.paperize.core.WallpaperSourceType
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
@@ -19,8 +18,7 @@ class ImportWallpapersUseCase @Inject constructor(
             documents.retainReadPermission(uri)
             documents.readImage(uri).toWallpaper(albumId)
         }
-        return albumRepository.addWallpapersToAlbum(albumId, images, onSaving)
-            .getOrThrow() > 0
+        return albumRepository.addWallpapersToAlbum(albumId, images, onSaving) > 0
     }
 
     suspend fun addFolder(
@@ -39,12 +37,11 @@ class ImportWallpapersUseCase @Inject constructor(
             coverUri = null, dateModified = System.currentTimeMillis(),
             wallpapers = source.images.sortedBy { it.uri }.map { it.toWallpaper(albumId, folderId) }
         )
-        return albumRepository.addFolderToAlbum(albumId, folder, onSaving).getOrThrow()
+        return albumRepository.addFolderToAlbum(albumId, folder, onSaving)
     }
 }
 
 internal fun SourceImage.toWallpaper(albumId: String, folderId: String? = null) = Wallpaper(
     id = generateId(), albumId = albumId, folderId = folderId, uri = uri,
-    fileName = name, dateModified = modifiedAt,
-    sourceType = if (folderId == null) WallpaperSourceType.DIRECT else WallpaperSourceType.FOLDER
+    fileName = name, dateModified = modifiedAt
 )

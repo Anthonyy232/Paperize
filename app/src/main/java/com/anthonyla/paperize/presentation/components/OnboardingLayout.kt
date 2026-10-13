@@ -5,10 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.navigation.util.NavConstants
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @Composable
 fun OnboardingLayout(
@@ -47,9 +46,8 @@ fun OnboardingLayout(
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        // Delay to allow navigation transition to complete (approx 300ms)
-        // preventing "double dip" of animations
-        kotlinx.coroutines.delay(300)
+        // Let the navigation transition finish so the two animations don't overlap.
+        kotlinx.coroutines.delay(NavConstants.NAVIGATION_TIME.toLong())
         visible = true
     }
 

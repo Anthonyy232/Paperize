@@ -2,11 +2,11 @@ package com.anthonyla.paperize.presentation.screens.settings
 
 import android.util.Log
 import androidx.lifecycle.ViewModelStore
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
+import com.anthonyla.paperize.service.SettingsCoordinator
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import io.mockk.*
 import kotlinx.coroutines.CompletableDeferred
@@ -33,7 +33,7 @@ class SettingsViewModelTest {
         every { Log.e(any(), any(), any()) } returns 0
         every { settings.getAppSettingsFlow() } returns flowOf(AppSettings())
         every { settings.getWallpaperModeFlow() } returns flowOf(WallpaperMode.STATIC)
-        viewModel = SettingsViewModel(settings, albums, scheduler)
+        viewModel = SettingsViewModel(settings, SettingsCoordinator(mockk(), settings, mockk(), albums, scheduler))
         store.put("settings", viewModel)
     }
 
@@ -44,7 +44,7 @@ class SettingsViewModelTest {
     }
 
     @Test fun `mode switch waits for deletion and persistence before navigating`() = runTest {
-        val deletion = CompletableDeferred<Result<Unit>>()
+        val deletion = CompletableDeferred<Unit>()
         coEvery { albums.deleteAllAlbums() } coAnswers { deletion.await() }
         var completed = false
         viewModel.switchWallpaperMode(WallpaperMode.LIVE) { completed = true }
@@ -52,7 +52,7 @@ class SettingsViewModelTest {
         assertTrue(viewModel.isResetting.value)
         assertFalse(completed)
         viewModel.switchWallpaperMode(WallpaperMode.STATIC)
-        deletion.complete(Result.Success(Unit))
+        deletion.complete(Unit)
         advanceUntilIdle()
         coVerifyOrder {
             settings.updateEnableChanger(false)
@@ -67,7 +67,7 @@ class SettingsViewModelTest {
     }
 
     @Test fun `failed deletion preserves settings and allows retry`() = runTest {
-        coEvery { albums.deleteAllAlbums() } returns Result.Error(IllegalStateException("Database unavailable"))
+        coEvery { albums.deleteAllAlbums() } throws IllegalStateException("Database unavailable")
         var completed = false
         viewModel.switchWallpaperMode(WallpaperMode.LIVE) { completed = true }
         advanceUntilIdle()
@@ -75,7 +75,7 @@ class SettingsViewModelTest {
         assertFalse(completed)
         coVerify(exactly = 0) { settings.clearScheduleSettings(); settings.updateWallpaperMode(any()) }
 
-        coEvery { albums.deleteAllAlbums() } returns Result.Success(Unit)
+        coEvery { albums.deleteAllAlbums() } just Runs
         viewModel.resetAllData()
         advanceUntilIdle()
         assertFalse(viewModel.resetFailed.value)

@@ -1,28 +1,26 @@
 package com.anthonyla.paperize.presentation.screens.album_view
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.util.Log
-import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.Result
-import com.anthonyla.paperize.domain.usecase.ImportWallpapersUseCase
-import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.repository.AlbumRepository
+import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
+import com.anthonyla.paperize.domain.usecase.ImportWallpapersUseCase
 import com.anthonyla.paperize.presentation.common.navigation.AlbumRoute
+import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class AlbumViewViewModel @Inject constructor(
@@ -39,11 +37,7 @@ class AlbumViewViewModel @Inject constructor(
     private val albumId = savedStateHandle.toRoute<AlbumRoute>().albumId
 
     val album: StateFlow<Album?> = albumRepository.getAlbumById(albumId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(Constants.FLOW_SUBSCRIPTION_TIMEOUT_MS),
-            initialValue = null
-        )
+        .stateWhileSubscribed(viewModelScope, null)
 
     private val _selectedWallpapers = MutableStateFlow<Set<String>>(emptySet())
     val selectedWallpapers: StateFlow<Set<String>> = _selectedWallpapers.asStateFlow()
@@ -113,7 +107,6 @@ class AlbumViewViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteAlbumUseCase(albumId)
-                    .getOrThrow()
                 _albumDeleted.value = true
             } catch (e: CancellationException) {
                 throw e
@@ -166,16 +159,14 @@ class AlbumViewViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 if (wallpaperIds.isNotEmpty()) {
-                    when (albumRepository.removeWallpapersFromAlbum(albumId, wallpaperIds)) {
-                        is Result.Success -> _selectedWallpapers.value -= wallpaperIds.toSet()
-                        else -> _message.value = R.string.delete_items_failed
-                    }
+                    runCatchingCancellable { albumRepository.removeWallpapersFromAlbum(albumId, wallpaperIds) }
+                        .onSuccess { _selectedWallpapers.value -= wallpaperIds.toSet() }
+                        .onFailure { _message.value = R.string.delete_items_failed }
                 }
                 folderIds.forEach { folderId ->
-                    when (albumRepository.removeFolderFromAlbum(albumId, folderId)) {
-                        is Result.Success -> _selectedFolders.value -= folderId
-                        else -> _message.value = R.string.delete_items_failed
-                    }
+                    runCatchingCancellable { albumRepository.removeFolderFromAlbum(albumId, folderId) }
+                        .onSuccess { _selectedFolders.value -= folderId }
+                        .onFailure { _message.value = R.string.delete_items_failed }
                 }
             } catch (e: CancellationException) {
                 throw e

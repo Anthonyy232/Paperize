@@ -1,5 +1,5 @@
 package com.anthonyla.paperize.core
 
-class EmptyAlbumException(message: String) : Exception(message)
+class EmptyAlbumException : Exception("Album has no wallpapers")
 
-class NoValidWallpaperException(message: String) : Exception(message)
+class NoValidWallpaperException : Exception("No readable wallpaper found")

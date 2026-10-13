@@ -10,7 +10,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.DataResetManager
-import com.anthonyla.paperize.service.worker.AlbumRefreshScheduler
+import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -20,10 +20,12 @@ class PaperizeApplication : Application(), Configuration.Provider, DefaultLifecy
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var wallpaperScheduler: WallpaperScheduler
+
     override fun onCreate() {
         super<Application>.onCreate()
 
-        // Perform one-time data reset for major version upgrades (e.g., v3 -> v4)
         // Must run before any other initialization that accesses DB/preferences
         DataResetManager.performResetIfNeeded(this)
 
@@ -54,6 +56,6 @@ class PaperizeApplication : Application(), Configuration.Provider, DefaultLifecy
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        AlbumRefreshScheduler.enqueue(this)
+        wallpaperScheduler.refreshAlbumsNow()
     }
 }

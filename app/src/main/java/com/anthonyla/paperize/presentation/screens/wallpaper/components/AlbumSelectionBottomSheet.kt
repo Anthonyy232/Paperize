@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
@@ -46,10 +47,8 @@ import coil3.size.Size
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
-import com.anthonyla.paperize.presentation.theme.AppBorderWidths
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.theme.AppShapes
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,11 +134,11 @@ private fun AlbumSelectionItem(
                 .size(AppIconSizes.extraLarge)
                 .aspectRatio(1f)
                 .border(
-                    width = AppBorderWidths.thin,
+                    width = 1.dp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
-                    shape = AppShapes.imageShape
+                    shape = MaterialTheme.shapes.small
                 )
-                .clip(AppShapes.imageShape),
+                .clip(MaterialTheme.shapes.small),
             contentAlignment = Alignment.Center
         ) {
             if (coverState is AsyncImagePainter.State.Success) {

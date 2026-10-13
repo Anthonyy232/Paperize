@@ -1,43 +1,16 @@
-package com.anthonyla.paperize.core.util
+package com.anthonyla.paperize.presentation.screens.sort
 
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
 
 object WallpaperSorter {
 
-    fun shiftWallpaper(
-        wallpapers: List<Wallpaper>,
-        fromUri: String,
-        toUri: String
-    ): List<Wallpaper> {
-        val mutableList = wallpapers.toMutableList()
-        val fromIndex = mutableList.indexOfFirst { it.uri == fromUri }
-        val toIndex = mutableList.indexOfFirst { it.uri == toUri }
-        
-        if (fromIndex == -1 || toIndex == -1) return wallpapers
-        
-        val movedItem = mutableList.removeAt(fromIndex)
-        mutableList.add(toIndex, movedItem)
-        
-        return applyDisplayOrder(mutableList)
-    }
+    fun shiftWallpaper(wallpapers: List<Wallpaper>, fromUri: String, toUri: String): List<Wallpaper> =
+        applyDisplayOrder(wallpapers.moved(fromUri, toUri) { it.uri } ?: return wallpapers)
 
-    fun shiftFolder(
-        folders: List<Folder>,
-        fromUri: String,
-        toUri: String
-    ): List<Folder> {
-        val mutableList = folders.toMutableList()
-        val fromIndex = mutableList.indexOfFirst { it.uri == fromUri }
-        val toIndex = mutableList.indexOfFirst { it.uri == toUri }
-        
-        if (fromIndex == -1 || toIndex == -1) return folders
-        
-        val movedItem = mutableList.removeAt(fromIndex)
-        mutableList.add(toIndex, movedItem)
-        
-        return applyFolderDisplayOrder(mutableList)
-    }
+    fun shiftFolder(folders: List<Folder>, fromUri: String, toUri: String): List<Folder> =
+        (folders.moved(fromUri, toUri) { it.uri } ?: return folders)
+            .mapIndexed { index, folder -> folder.copy(displayOrder = index) }
 
     fun shiftWallpaperInFolder(
         folders: List<Folder>,
@@ -92,15 +65,14 @@ object WallpaperSorter {
         return sortedFolders to applyDisplayOrder(wallpapers.sortedWith(wallpaperOrder))
     }
 
-    private fun applyDisplayOrder(wallpapers: List<Wallpaper>): List<Wallpaper> {
-        return wallpapers.mapIndexed { index, wallpaper ->
-            wallpaper.copy(displayOrder = index)
-        }
-    }
+    private fun applyDisplayOrder(wallpapers: List<Wallpaper>): List<Wallpaper> =
+        wallpapers.mapIndexed { index, wallpaper -> wallpaper.copy(displayOrder = index) }
 
-    private fun applyFolderDisplayOrder(folders: List<Folder>): List<Folder> {
-        return folders.mapIndexed { index, folder ->
-            folder.copy(displayOrder = index)
-        }
+    /** Moves the item keyed [from] to the position of [to]; null if either key is missing. */
+    private fun <T> List<T>.moved(from: String, to: String, key: (T) -> String): List<T>? {
+        val fromIndex = indexOfFirst { key(it) == from }
+        val toIndex = indexOfFirst { key(it) == to }
+        if (fromIndex == -1 || toIndex == -1) return null
+        return toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
     }
 }

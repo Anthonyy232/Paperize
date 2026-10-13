@@ -20,9 +20,9 @@ class GLPicture(
     val sourceBrightness: Float
 ) {
 
-    companion object {
-        private const val TAG = "GLPicture"
-
+    private companion object {
+        const val TAG = "GLPicture"
+        const val MAX_TILE_SIZE = 4096
     }
 
     val width = bitmap.width
@@ -34,7 +34,8 @@ class GLPicture(
 
     init {
         require(!bitmap.isRecycled) { "Cannot create GLPicture from recycled bitmap" }
-        val tileSize = GLCompatibility.getSafeMaxTextureSize(GLUtil.getMaxTextureSize())
+        // Some drivers misreport GL_MAX_TEXTURE_SIZE; 4096 is safe on every device.
+        val tileSize = minOf(GLUtil.getMaxTextureSize(), MAX_TILE_SIZE)
 
         cols = ceil(width.toFloat() / tileSize).toInt()
         rows = ceil(height.toFloat() / tileSize).toInt()

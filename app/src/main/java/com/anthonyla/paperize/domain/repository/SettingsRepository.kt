@@ -31,11 +31,8 @@ interface SettingsRepository {
 
     suspend fun clearScheduleSettings()
 
-    suspend fun updateHomeAlbumId(albumId: String?)
-
-    suspend fun updateLockAlbumId(albumId: String?)
-
-    suspend fun updateLiveAlbumId(albumId: String?)
+    /** BOTH updates the home and lock selections together. */
+    suspend fun updateAlbumId(screen: ScreenType, albumId: String?)
 
     /** Clears matching selections atomically; returns whether any selection changed. */
     suspend fun clearAlbumSelectionsIfMatches(albumId: String): Boolean

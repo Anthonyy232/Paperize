@@ -15,7 +15,6 @@ import android.provider.OpenableColumns
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
@@ -144,7 +143,7 @@ class DocumentAccessInstrumentedTest {
             }
             val repository = com.anthonyla.paperize.data.repository.AlbumRepositoryImpl(
                 com.anthonyla.paperize.data.source.AndroidDocumentSource(context), db)
-            assertEquals(Result.Success(505), repository.pruneMissingEntries("one"))
+            assertEquals(505, repository.pruneMissingEntries("one"))
             assertEquals(0, db.wallpaperDao().getWallpaperCountByAlbum("one"))
             assertNull(db.albumDao().getAlbumById("one")?.coverUri)
             assertNotNull(db.wallpaperDao().getWallpaperById("other-album"))

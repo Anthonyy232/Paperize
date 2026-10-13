@@ -1,14 +1,12 @@
 package com.anthonyla.paperize.presentation.screens.album_view.components
 
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.semantics.Role
-import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.SortByAlpha
@@ -18,16 +16,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 enum class SortOption(val labelRes: Int) {
     NAME_ASC(R.string.sort_name_asc),

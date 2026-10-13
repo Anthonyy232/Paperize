@@ -1,18 +1,26 @@
-package com.anthonyla.paperize.core.util
+package com.anthonyla.paperize.data.source
 
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.core.net.toUri
 import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.util.adaptiveBrightnessAdjustment
+import com.anthonyla.paperize.core.util.getDeviceScreenSize
+import com.anthonyla.paperize.core.util.processBitmap
+import com.anthonyla.paperize.core.util.retrieveBitmap
+import com.anthonyla.paperize.core.util.usesLauncherManagedScrolling
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.domain.source.WallpaperRenderer
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import javax.inject.Inject
 
-class WallpaperRenderer @Inject constructor(@param:ApplicationContext private val context: Context) {
-    suspend fun render(wallpaper: Wallpaper, screen: ScreenType, settings: ScheduleSettings): Bitmap? {
+class AndroidWallpaperRenderer @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) : WallpaperRenderer {
+    override suspend fun render(wallpaper: Wallpaper, screen: ScreenType, settings: ScheduleSettings): Bitmap? {
         currentCoroutineContext().ensureActive()
         val effects = when (screen) {
             ScreenType.HOME, ScreenType.BOTH -> settings.homeEffects

@@ -1,3 +1,9 @@
+## Unreleased
+
+- Log live wallpaper queue failures instead of silently ignoring them.
+- The combined home and lock interval saves as soon as typing pauses, like the separate intervals.
+- Simplify error handling, settings storage, scheduling, and duplicated wallpaper queue, effect, and UI code.
+
 ## v4.2.0
 
 ### Library and albums

@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.data.repository
 
 import androidx.room.withTransaction
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.mapper.toDomainModel
@@ -42,14 +41,14 @@ class AlbumRepositoryImpl @Inject constructor(
     override fun getFolderById(folderId: String): Flow<Folder?> =
         folderDao.getFolderWithWallpapers(folderId).map { it?.toDomainModel() }
 
-    override suspend fun createAlbum(name: String, coverUri: String?): Result<Album> = Result.runCatching {
+    override suspend fun createAlbum(name: String, coverUri: String?): Album {
         val now = System.currentTimeMillis()
         val album = Album(id = generateId(), name = name, coverUri = coverUri, createdAt = now, modifiedAt = now)
         albumDao.insertAlbum(album.toEntity())
-        album
+        return album
     }
 
-    override suspend fun deleteAlbum(albumId: String): Result<Unit> = Result.runCatching {
+    override suspend fun deleteAlbum(albumId: String) {
         albumDao.deleteAlbumById(albumId)
     }
 
@@ -57,28 +56,24 @@ class AlbumRepositoryImpl @Inject constructor(
         albumId: String,
         wallpapers: List<Wallpaper>,
         onProgress: (saved: Int, total: Int) -> Unit
-    ): Result<Int> = Result.runCatching {
-        database.withTransaction {
-            checkNotNull(albumDao.getAlbumById(albumId))
-            insertNewWallpapers(albumId, wallpapers, onProgress)
-        }
+    ): Int = database.withTransaction {
+        checkNotNull(albumDao.getAlbumById(albumId))
+        insertNewWallpapers(albumId, wallpapers, onProgress)
     }
 
     override suspend fun addFolderToAlbum(
         albumId: String,
         folder: Folder,
         onProgress: (saved: Int, total: Int) -> Unit
-    ): Result<Boolean> = Result.runCatching {
-        database.withTransaction {
-            checkNotNull(albumDao.getAlbumById(albumId))
-            if (folderDao.containsUri(albumId, folder.uri)) return@withTransaction false
-            folderDao.insertFolder(folder.toEntity().copy(
-                albumId = albumId, displayOrder = folderDao.getMaxOrder(albumId) + 1, coverUri = null
-            ))
-            insertNewWallpapers(albumId, folder.wallpapers.map { it.copy(folderId = folder.id) }, onProgress)
-            albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
-            true
-        }
+    ): Boolean = database.withTransaction {
+        checkNotNull(albumDao.getAlbumById(albumId))
+        if (folderDao.containsUri(albumId, folder.uri)) return@withTransaction false
+        folderDao.insertFolder(folder.toEntity().copy(
+            albumId = albumId, displayOrder = folderDao.getMaxOrder(albumId) + 1, coverUri = null
+        ))
+        insertNewWallpapers(albumId, folder.wallpapers.map { it.copy(folderId = folder.id) }, onProgress)
+        albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
+        true
     }
 
     private suspend fun insertNewWallpapers(
@@ -127,7 +122,7 @@ class AlbumRepositoryImpl @Inject constructor(
         albumId: String,
         folders: List<Folder>,
         wallpapers: List<Wallpaper>
-    ): Result<Unit> = Result.runCatching {
+    ) {
         database.withTransaction {
             folders.forEachIndexed { index, folder ->
                 folderDao.updateFolderOrder(albumId, folder.id, index)
@@ -147,8 +142,8 @@ class AlbumRepositoryImpl @Inject constructor(
     override suspend fun removeWallpapersFromAlbum(
         albumId: String,
         wallpaperIds: List<String>
-    ): Result<Unit> = Result.runCatching {
-        if (wallpaperIds.isEmpty()) return@runCatching
+    ) {
+        if (wallpaperIds.isEmpty()) return
         database.withTransaction {
             wallpaperIds.chunked(WALLPAPER_BATCH_SIZE).forEach {
                 wallpaperDao.deleteAlbumWallpapers(albumId, it)
@@ -159,7 +154,7 @@ class AlbumRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeFolderFromAlbum(albumId: String, folderId: String): Result<Unit> = Result.runCatching {
+    override suspend fun removeFolderFromAlbum(albumId: String, folderId: String) {
         database.withTransaction {
             folderDao.deleteAlbumFolder(albumId, folderId)
             albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
@@ -167,11 +162,11 @@ class AlbumRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteAllAlbums(): Result<Unit> = Result.runCatching {
+    override suspend fun deleteAllAlbums() {
         albumDao.deleteAllAlbums()
     }
 
-    override suspend fun pruneMissingEntries(albumId: String): Result<Int> = Result.runCatching {
+    override suspend fun pruneMissingEntries(albumId: String): Int {
         val missingFolders = folderDao.getFoldersByAlbum(albumId)
             .filter { documents.isMissing(it.uri, isTree = true) }.map { it.id }.toSet()
         val missingImages = mutableListOf<String>()
@@ -183,7 +178,7 @@ class AlbumRepositoryImpl @Inject constructor(
                 .mapTo(missingImages) { it.id }
             afterId = batch.last().id
         }
-        database.withTransaction {
+        return database.withTransaction {
             var removed = missingFolders.sumOf { folderDao.deleteAlbumFolder(albumId, it) }
             missingImages.chunked(WALLPAPER_BATCH_SIZE).forEach {
                 removed += wallpaperDao.deleteAlbumWallpapers(albumId, it)

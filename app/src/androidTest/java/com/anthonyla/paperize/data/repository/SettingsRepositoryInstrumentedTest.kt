@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.data.datastore
+package com.anthonyla.paperize.data.repository
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -13,9 +13,9 @@ import kotlinx.coroutines.launch
 import org.junit.Assert.*
 import org.junit.Test
 
-class PreferencesManagerInstrumentedTest {
+class SettingsRepositoryInstrumentedTest {
     @Test fun concurrentScheduleEditsReadTheLatestValueWithoutLosingSelections() = runBlocking {
-        val preferences = PreferencesManager(ApplicationProvider.getApplicationContext<Context>())
+        val preferences = SettingsRepositoryImpl(ApplicationProvider.getApplicationContext<Context>())
         val previousSettings = preferences.getScheduleSettings()
         try {
             val initial = ScheduleSettings(homeAlbumId = "home", homeIntervalMinutes = 30)
@@ -28,7 +28,7 @@ class PreferencesManagerInstrumentedTest {
                         }
                     }
                 }
-                launch { preferences.updateHomeAlbumId("new-home") }
+                launch { preferences.updateAlbumId(ScreenType.HOME, "new-home") }
             }
             assertEquals(initial.copy(homeAlbumId = "new-home", homeIntervalMinutes = 50), preferences.getScheduleSettings())
         } finally {
@@ -37,7 +37,7 @@ class PreferencesManagerInstrumentedTest {
     }
 
     @Test fun resettingSchedulesPreservesAppearanceAndWallpaperMode() = runBlocking {
-        val preferences = PreferencesManager(ApplicationProvider.getApplicationContext<Context>())
+        val preferences = SettingsRepositoryImpl(ApplicationProvider.getApplicationContext<Context>())
         val previousSettings = preferences.getScheduleSettings()
         val previousMode = preferences.getWallpaperMode()
         val appearance = preferences.getAppSettings()
@@ -67,7 +67,7 @@ class PreferencesManagerInstrumentedTest {
     }
 
     @Test fun clearingAnEmptyAlbumPreservesNewSelectionsAndOtherSettings() = runBlocking {
-        val preferences = PreferencesManager(ApplicationProvider.getApplicationContext<Context>())
+        val preferences = SettingsRepositoryImpl(ApplicationProvider.getApplicationContext<Context>())
         val previousSettings = preferences.getScheduleSettings()
         val previousMode = preferences.getWallpaperMode()
         try {

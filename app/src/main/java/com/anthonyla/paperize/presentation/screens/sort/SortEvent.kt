@@ -19,8 +19,5 @@ sealed class SortEvent {
         val to: LazyListItemInfo
     ) : SortEvent()
 
-    data object SortAlphabetically : SortEvent()
-    data object SortAlphabeticallyReverse : SortEvent()
-    data object SortByLastModified : SortEvent()
-    data object SortByLastModifiedReverse : SortEvent()
+    data class Sort(val byDate: Boolean, val ascending: Boolean) : SortEvent()
 }

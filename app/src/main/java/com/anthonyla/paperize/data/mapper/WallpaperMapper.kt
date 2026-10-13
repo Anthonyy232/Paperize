@@ -11,9 +11,7 @@ fun WallpaperEntity.toDomainModel(): Wallpaper = Wallpaper(
     fileName = fileName,
     dateModified = dateModified,
     displayOrder = displayOrder,
-    sourceType = sourceType,
-    addedAt = addedAt,
-    mediaType = mediaType
+    addedAt = addedAt
 )
 
 fun Wallpaper.toEntity(): WallpaperEntity = WallpaperEntity(
@@ -24,7 +22,6 @@ fun Wallpaper.toEntity(): WallpaperEntity = WallpaperEntity(
     fileName = fileName,
     dateModified = dateModified,
     displayOrder = displayOrder,
-    sourceType = sourceType,
-    addedAt = addedAt,
-    mediaType = mediaType
+    sourceType = if (folderId == null) "DIRECT" else "FOLDER",
+    addedAt = addedAt
 )

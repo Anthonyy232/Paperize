@@ -4,7 +4,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.EmptyAlbumException
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
 import com.anthonyla.paperize.domain.model.ScheduleSettings
@@ -30,7 +29,7 @@ class WallpaperControllerTest {
     private val prepared = PreparedWallpaper(bitmap, "album", ScreenType.HOME, "image", false)
 
     @Test fun `matching screens use one write and commit both only after acceptance`() = runTest {
-        coEvery { prepare("album", ScreenType.HOME) } returns Result.Success(prepared)
+        coEvery { prepare("album", ScreenType.HOME) } returns prepared
         every { manager.setBitmap(bitmap, null, true, 3) } returns 1
         assertEquals(WallpaperChangeOutcome(changed = true), controller.change(ScreenType.BOTH, settings))
         coVerifyOrder {
@@ -43,7 +42,7 @@ class WallpaperControllerTest {
     }
 
     @Test fun `platform rejection restores prepared item and releases bitmap`() = runTest {
-        coEvery { prepare("album", ScreenType.HOME) } returns Result.Success(prepared)
+        coEvery { prepare("album", ScreenType.HOME) } returns prepared
         every { manager.setBitmap(bitmap, null, true, 1) } returns 0
         try { controller.change(ScreenType.HOME, settings); fail("Expected rejection") } catch (_: IOException) { }
         coVerify(exactly = 1) { prepare.restore(prepared) }
@@ -53,8 +52,8 @@ class WallpaperControllerTest {
 
     @Test fun `failed lock write preserves successful home commit`() = runTest {
         val lockBitmap = mockk<Bitmap>(relaxed = true)
-        coEvery { prepare("album", ScreenType.HOME) } returns Result.Success(prepared)
-        coEvery { render("album", ScreenType.LOCK, "image") } returns Result.Success(lockBitmap)
+        coEvery { prepare("album", ScreenType.HOME) } returns prepared
+        coEvery { render("album", ScreenType.LOCK, "image") } returns lockBitmap
         every { manager.setBitmap(bitmap, null, true, 1) } returns 1
         every { manager.setBitmap(lockBitmap, null, true, 2) } throws IOException("Rejected")
         try {
@@ -68,7 +67,7 @@ class WallpaperControllerTest {
     }
 
     @Test fun `cancellation after platform acceptance still records the applied wallpaper`() = runTest {
-        coEvery { prepare("album", ScreenType.HOME) } returns Result.Success(prepared)
+        coEvery { prepare("album", ScreenType.HOME) } returns prepared
         lateinit var change: Job
         every { manager.setBitmap(bitmap, null, true, 1) } answers { change.cancel(); 1 }
         change = launch { controller.change(ScreenType.HOME, settings) }
@@ -81,15 +80,15 @@ class WallpaperControllerTest {
 
     @Test fun `empty home album does not disable a valid lock album`() = runTest {
         val active = settings.copy(lockAlbumId = "lock", enableChanger = true, homeEnabled = true, lockEnabled = true)
-        coEvery { prepare("album", ScreenType.HOME) } returns Result.Error(EmptyAlbumException("Empty"))
+        coEvery { prepare("album", ScreenType.HOME) } throws EmptyAlbumException()
         val lock = prepared.copy(albumId = "lock", screenType = ScreenType.LOCK)
-        coEvery { prepare("lock", ScreenType.LOCK) } returns Result.Success(lock)
+        coEvery { prepare("lock", ScreenType.LOCK) } returns lock
         every { manager.setBitmap(bitmap, null, true, 2) } returns 1
         assertEquals(WallpaperChangeOutcome(changed = true, emptyAlbum = true), controller.change(ScreenType.BOTH, active))
         coVerify { settingsRepository.clearEmptyAlbumSelection("album", ScreenType.HOME) }
     }
     @Test fun `specific selection commits both screens without advancing a queue`() = runTest {
-        coEvery { render("album", ScreenType.HOME, "selected") } returns Result.Success(bitmap)
+        coEvery { render("album", ScreenType.HOME, "selected") } returns bitmap
         every { manager.setBitmap(bitmap, null, true, 3) } returns 1
         controller.applySpecific("album", "selected", ScreenType.BOTH, settings)
         coVerify(exactly = 0) { prepare(any(), any()) }
@@ -99,7 +98,7 @@ class WallpaperControllerTest {
     }
 
     @Test fun `reapplying a readable current image does not consume the next item`() = runTest {
-        coEvery { render("album", ScreenType.HOME, null) } returns Result.Success(bitmap)
+        coEvery { render("album", ScreenType.HOME, null) } returns bitmap
         every { manager.setBitmap(bitmap, null, true, 1) } returns 1
         assertTrue(controller.reapply(ScreenType.HOME, settings).changed)
         coVerify(exactly = 0) { prepare(any(), any()) }

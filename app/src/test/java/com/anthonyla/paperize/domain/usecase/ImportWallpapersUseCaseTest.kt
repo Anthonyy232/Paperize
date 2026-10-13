@@ -1,7 +1,5 @@
 package com.anthonyla.paperize.domain.usecase
 
-import com.anthonyla.paperize.core.Result
-import com.anthonyla.paperize.core.WallpaperSourceType
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.repository.AlbumRepository
@@ -23,7 +21,7 @@ class ImportWallpapersUseCaseTest {
     @Test fun `image imports retain permission once and preserve metadata`() = runTest {
         coEvery { documents.retainReadPermission("image") } just Runs
         coEvery { documents.readImage("image") } returns SourceImage("image", "photo.jpg", 42L)
-        coEvery { repository.addWallpapersToAlbum(any(), any(), any()) } returns Result.Success(1)
+        coEvery { repository.addWallpapersToAlbum(any(), any(), any()) } returns 1
         assertTrue(useCase.addImages("album", listOf("image", "image")) { _, _ -> })
         coVerify(exactly = 1) { documents.retainReadPermission("image") }
         coVerify { repository.addWallpapersToAlbum("album", match {
@@ -44,11 +42,11 @@ class ImportWallpapersUseCaseTest {
         coEvery { documents.retainReadPermission("tree") } just Runs
         every { repository.getAlbumById("album") } returns flowOf(Album.empty("album"))
         coEvery { documents.readFolder("tree", any()) } returns SourceFolder("Photos", listOf(SourceImage("image", "photo.png", 42L)))
-        coEvery { repository.addFolderToAlbum(any(), any(), any()) } returns Result.Success(true)
+        coEvery { repository.addFolderToAlbum(any(), any(), any()) } returns true
         assertTrue(useCase.addFolder("album", "tree", {}, { _, _ -> }))
         coVerify { repository.addFolderToAlbum("album", match { folder ->
             folder.name == "Photos" && folder.wallpapers.single().let {
-                it.folderId == folder.id && it.albumId == "album" && it.sourceType == WallpaperSourceType.FOLDER &&
+                it.folderId == folder.id && it.albumId == "album" &&
                     it.dateModified == 42L && it.fileName == "photo.png"
             }
         }, any()) }

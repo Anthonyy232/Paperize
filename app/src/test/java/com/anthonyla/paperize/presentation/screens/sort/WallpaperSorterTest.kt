@@ -1,4 +1,4 @@
-package com.anthonyla.paperize.core.util
+package com.anthonyla.paperize.presentation.screens.sort
 
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper

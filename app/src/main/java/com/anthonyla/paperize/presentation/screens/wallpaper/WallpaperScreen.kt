@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,24 +38,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
-import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.AlbumSelectionBottomSheet
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.CurrentWallpaperPreview
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.SettingSwitchWithSlider
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.TimeIntervalPicker
-import com.anthonyla.paperize.presentation.theme.AppSpacing
-
-private enum class AlbumSelectionContext {
-    HOME, LOCK, LIVE
-}
 
 @Composable
 fun WallpaperScreen(
@@ -63,9 +61,7 @@ fun WallpaperScreen(
     appSettings: AppSettings,
     wallpaperMode: WallpaperMode,
     onToggleChanger: (Boolean) -> Unit,
-    onSelectHomeAlbum: (AlbumSummary?) -> Unit,
-    onSelectLockAlbum: (AlbumSummary?) -> Unit,
-    onSelectLiveAlbum: (AlbumSummary?) -> Unit,
+    onSelectAlbum: (ScreenType, AlbumSummary?) -> Unit,
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onUpdateScheduleSettingsDebounced: (ScheduleSettings) -> Unit,
     onChangeWallpaperNow: () -> Unit,
@@ -73,7 +69,7 @@ fun WallpaperScreen(
     lockWallpaperUri: String?,
     modifier: Modifier = Modifier
 ) {
-    var albumSelectionContext by rememberSaveable { mutableStateOf<AlbumSelectionContext?>(null) }
+    var albumPickerScreen by rememberSaveable { mutableStateOf<ScreenType?>(null) }
     var showEmptyAlbumWarning by rememberSaveable { mutableStateOf(false) }
     var scheduleSettings by remember { mutableStateOf(persistedScheduleSettings) }
 
@@ -153,18 +149,18 @@ fun WallpaperScreen(
             if (lockEnabled) AlbumSelector(
                 albumId = scheduleSettings.lockAlbumId, albums = albums,
                 label = stringResource(R.string.lock_album_label),
-                onClick = { albumSelectionContext = AlbumSelectionContext.LOCK }
+                onClick = { albumPickerScreen = ScreenType.LOCK }
             )
             if (homeEnabled) AlbumSelector(
                 albumId = scheduleSettings.homeAlbumId, albums = albums,
                 label = stringResource(R.string.home_album_label),
-                onClick = { albumSelectionContext = AlbumSelectionContext.HOME }
+                onClick = { albumPickerScreen = ScreenType.HOME }
             )
         } else {
             AlbumSelector(
                 albumId = scheduleSettings.liveAlbumId, albums = albums,
                 label = stringResource(R.string.currently_selected_album),
-                onClick = { albumSelectionContext = AlbumSelectionContext.LIVE }
+                onClick = { albumPickerScreen = ScreenType.LIVE }
             )
         }
         if (wallpaperMode == WallpaperMode.STATIC && scheduleSettings.enableChanger && homeEnabled && lockEnabled) {
@@ -196,11 +192,8 @@ fun WallpaperScreen(
                         title = stringResource(R.string.interval_text),
                         minutes = scheduleSettings.homeIntervalMinutes,
                         onMinutesChange = { minutes ->
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    homeIntervalMinutes = minutes,
-                                    lockIntervalMinutes = minutes
-                                )
+                            updateSettingsImmediate(
+                                scheduleSettings.copy(homeIntervalMinutes = minutes, lockIntervalMinutes = minutes)
                             )
                         }
                     )
@@ -372,89 +365,28 @@ fun WallpaperScreen(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                SettingSwitchWithSlider(
-                    title = R.string.change_brightness,
-                    description = R.string.change_the_image_brightness,
-                    checked = primaryEffects.enableDarken,
-                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableDarken = enabled) }) },
-                    homeChecked = scheduleSettings.homeEffects.enableDarken,
-                    lockChecked = scheduleSettings.lockEffects.enableDarken,
-                    onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableDarken = enabled)))
-                    },
-                    onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableDarken = enabled)))
-                    },
-                    bothEnabled = bothEnabled,
-                    homePercentage = primaryEffects.darkenPercentage,
-                    lockPercentage = scheduleSettings.lockEffects.darkenPercentage,
-                    onPercentageChange = { home, lock ->
-                        updateEffects({ it.copy(darkenPercentage = home) }, { it.copy(darkenPercentage = lock) }, debounced = true)
-                    }
-                )
-
-                SettingSwitchWithSlider(
-                    title = R.string.change_blur,
-                    description = R.string.add_blur_to_the_image,
-                    checked = primaryEffects.enableBlur,
-                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableBlur = enabled) }) },
-                    homeChecked = scheduleSettings.homeEffects.enableBlur,
-                    lockChecked = scheduleSettings.lockEffects.enableBlur,
-                    onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableBlur = enabled)))
-                    },
-                    onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableBlur = enabled)))
-                    },
-                    bothEnabled = bothEnabled,
-                    homePercentage = primaryEffects.blurPercentage,
-                    lockPercentage = scheduleSettings.lockEffects.blurPercentage,
-                    onPercentageChange = { home, lock ->
-                        updateEffects({ it.copy(blurPercentage = home) }, { it.copy(blurPercentage = lock) }, debounced = true)
-                    }
-                )
-
-                SettingSwitchWithSlider(
-                    title = R.string.change_vignette,
-                    description = R.string.darken_the_edges_of_the_image,
-                    checked = primaryEffects.enableVignette,
-                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableVignette = enabled) }) },
-                    homeChecked = scheduleSettings.homeEffects.enableVignette,
-                    lockChecked = scheduleSettings.lockEffects.enableVignette,
-                    onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableVignette = enabled)))
-                    },
-                    onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableVignette = enabled)))
-                    },
-                    bothEnabled = bothEnabled,
-                    homePercentage = primaryEffects.vignettePercentage,
-                    lockPercentage = scheduleSettings.lockEffects.vignettePercentage,
-                    onPercentageChange = { home, lock ->
-                        updateEffects({ it.copy(vignettePercentage = home) }, { it.copy(vignettePercentage = lock) }, debounced = true)
-                    }
-                )
-
-                SettingSwitchWithSlider(
-                    title = R.string.gray_filter,
-                    description = R.string.make_the_colors_grayscale,
-                    checked = primaryEffects.enableGrayscale,
-                    onCheckedChange = { enabled -> updateEffects({ it.copy(enableGrayscale = enabled) }) },
-                    homeChecked = scheduleSettings.homeEffects.enableGrayscale,
-                    lockChecked = scheduleSettings.lockEffects.enableGrayscale,
-                    onHomeCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = scheduleSettings.homeEffects.copy(enableGrayscale = enabled)))
-                    },
-                    onLockCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = scheduleSettings.lockEffects.copy(enableGrayscale = enabled)))
-                    },
-                    bothEnabled = bothEnabled,
-                    homePercentage = primaryEffects.grayscalePercentage,
-                    lockPercentage = scheduleSettings.lockEffects.grayscalePercentage,
-                    onPercentageChange = { home, lock ->
-                        updateEffects({ it.copy(grayscalePercentage = home) }, { it.copy(grayscalePercentage = lock) }, debounced = true)
-                    }
-                )
+                imageEffects.forEach { effect ->
+                    SettingSwitchWithSlider(
+                        title = effect.title,
+                        description = effect.description,
+                        checked = effect.enabled(primaryEffects),
+                        onCheckedChange = { enabled -> updateEffects({ effect.withEnabled(it, enabled) }) },
+                        homeChecked = effect.enabled(scheduleSettings.homeEffects),
+                        lockChecked = effect.enabled(scheduleSettings.lockEffects),
+                        onHomeCheckedChange = { enabled ->
+                            updateSettingsImmediate(scheduleSettings.copy(homeEffects = effect.withEnabled(scheduleSettings.homeEffects, enabled)))
+                        },
+                        onLockCheckedChange = { enabled ->
+                            updateSettingsImmediate(scheduleSettings.copy(lockEffects = effect.withEnabled(scheduleSettings.lockEffects, enabled)))
+                        },
+                        bothEnabled = bothEnabled,
+                        homePercentage = effect.percentage(primaryEffects),
+                        lockPercentage = effect.percentage(scheduleSettings.lockEffects),
+                        onPercentageChange = { home, lock ->
+                            updateEffects({ effect.withPercentage(it, home) }, { effect.withPercentage(it, lock) }, debounced = true)
+                        }
+                    )
+                }
                 SettingSwitchItem(
                     title = stringResource(R.string.adaptive_brightness),
                     description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else stringResource(R.string.adjust_brightness_based_on_mode),
@@ -538,28 +470,23 @@ fun WallpaperScreen(
         }
     }
 
-    albumSelectionContext?.let { selection ->
+    albumPickerScreen?.let { selection ->
         val selectedId = when (selection) {
-            AlbumSelectionContext.HOME -> scheduleSettings.homeAlbumId
-            AlbumSelectionContext.LOCK -> scheduleSettings.lockAlbumId
-            AlbumSelectionContext.LIVE -> scheduleSettings.liveAlbumId
-        }
-        val selectAlbum = when (selection) {
-            AlbumSelectionContext.HOME -> onSelectHomeAlbum
-            AlbumSelectionContext.LOCK -> onSelectLockAlbum
-            AlbumSelectionContext.LIVE -> onSelectLiveAlbum
+            ScreenType.LOCK -> scheduleSettings.lockAlbumId
+            ScreenType.LIVE -> scheduleSettings.liveAlbumId
+            else -> scheduleSettings.homeAlbumId
         }
         AlbumSelectionBottomSheet(
             albums = albums,
             selectedAlbumId = selectedId,
             onAlbumSelect = { album ->
                 when {
-                    album.id == selectedId -> selectAlbum(null)
+                    album.id == selectedId -> onSelectAlbum(selection, null)
                     album.wallpaperCount == 0 -> showEmptyAlbumWarning = true
-                    else -> selectAlbum(album)
+                    else -> onSelectAlbum(selection, album)
                 }
             },
-            onDismiss = { albumSelectionContext = null }
+            onDismiss = { albumPickerScreen = null }
         )
     }
 
@@ -643,3 +570,36 @@ private fun AlbumSelector(albumId: String?, albums: List<AlbumSummary>, label: S
         }
     }
 }
+
+/** One adjustable image effect: a toggle plus a percentage within [WallpaperEffects]. */
+private class ImageEffect(
+    @StringRes val title: Int,
+    @StringRes val description: Int,
+    val enabled: (WallpaperEffects) -> Boolean,
+    val percentage: (WallpaperEffects) -> Int,
+    val withEnabled: (WallpaperEffects, Boolean) -> WallpaperEffects,
+    val withPercentage: (WallpaperEffects, Int) -> WallpaperEffects
+)
+
+private val imageEffects = listOf(
+    ImageEffect(
+        R.string.change_brightness, R.string.change_the_image_brightness,
+        { it.enableDarken }, { it.darkenPercentage },
+        { e, v -> e.copy(enableDarken = v) }, { e, v -> e.copy(darkenPercentage = v) }
+    ),
+    ImageEffect(
+        R.string.change_blur, R.string.add_blur_to_the_image,
+        { it.enableBlur }, { it.blurPercentage },
+        { e, v -> e.copy(enableBlur = v) }, { e, v -> e.copy(blurPercentage = v) }
+    ),
+    ImageEffect(
+        R.string.change_vignette, R.string.darken_the_edges_of_the_image,
+        { it.enableVignette }, { it.vignettePercentage },
+        { e, v -> e.copy(enableVignette = v) }, { e, v -> e.copy(vignettePercentage = v) }
+    ),
+    ImageEffect(
+        R.string.gray_filter, R.string.make_the_colors_grayscale,
+        { it.enableGrayscale }, { it.grayscalePercentage },
+        { e, v -> e.copy(enableGrayscale = v) }, { e, v -> e.copy(grayscalePercentage = v) }
+    )
+)

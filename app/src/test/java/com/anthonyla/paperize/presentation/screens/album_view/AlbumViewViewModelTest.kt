@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.navigation.toRoute
 import com.anthonyla.paperize.presentation.common.navigation.AlbumRoute
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.Result
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
@@ -79,14 +78,14 @@ class AlbumViewViewModelTest {
     }
 
     @Test fun `navigation waits for successful album deletion and cleanup`() = runTest {
-        val completion = CompletableDeferred<Result<Unit>>()
+        val completion = CompletableDeferred<Unit>()
         coEvery { delete("album") } coAnswers { completion.await() }
         viewModel.deleteAlbum()
         runCurrent()
         assertTrue(viewModel.isDeleting.value)
         assertFalse(viewModel.albumDeleted.value)
         viewModel.deleteAlbum()
-        completion.complete(Result.Success(Unit))
+        completion.complete(Unit)
         advanceUntilIdle()
         assertTrue(viewModel.albumDeleted.value)
         assertFalse(viewModel.isDeleting.value)
@@ -95,7 +94,7 @@ class AlbumViewViewModelTest {
     }
 
     @Test fun `failed deletion keeps the album open`() = runTest {
-        coEvery { delete("album") } returns Result.Error(IllegalStateException())
+        coEvery { delete("album") } throws IllegalStateException()
         viewModel.deleteAlbum()
         advanceUntilIdle()
         assertFalse(viewModel.albumDeleted.value)
@@ -106,8 +105,8 @@ class AlbumViewViewModelTest {
     @Test fun `partial removal keeps failed items selected`() = runTest {
         viewModel.toggleWallpaperSelection("wallpaper")
         viewModel.toggleFolderSelection("folder")
-        coEvery { albums.removeWallpapersFromAlbum("album", listOf("wallpaper")) } returns Result.Success(Unit)
-        coEvery { albums.removeFolderFromAlbum("album", "folder") } returns Result.Error(IllegalStateException())
+        coEvery { albums.removeWallpapersFromAlbum("album", listOf("wallpaper")) } just Runs
+        coEvery { albums.removeFolderFromAlbum("album", "folder") } throws IllegalStateException()
         viewModel.deleteSelected()
         advanceUntilIdle()
         assertTrue(viewModel.selectedWallpapers.value.isEmpty())

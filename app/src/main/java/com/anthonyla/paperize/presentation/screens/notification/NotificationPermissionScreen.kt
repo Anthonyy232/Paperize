@@ -1,8 +1,4 @@
 package com.anthonyla.paperize.presentation.screens.notification
-import com.anthonyla.paperize.presentation.theme.AppIconSizes
-import com.anthonyla.paperize.presentation.components.OnboardingLayout
-import com.anthonyla.paperize.core.util.PermissionUtil
-
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,7 +15,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.core.util.PermissionUtil
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
+
 
 @Composable
 fun NotificationPermissionScreen(

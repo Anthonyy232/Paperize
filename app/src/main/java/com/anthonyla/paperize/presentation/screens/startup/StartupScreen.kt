@@ -1,13 +1,11 @@
 package com.anthonyla.paperize.presentation.screens.startup
 
-import androidx.core.graphics.drawable.toBitmap
 import androidx.appcompat.content.res.AppCompatResources
-import com.anthonyla.paperize.presentation.components.OnboardingLayout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,8 +29,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.presentation.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+import com.anthonyla.paperize.presentation.components.OnboardingLayout
 
 @Composable
 fun StartupScreen(
