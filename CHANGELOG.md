@@ -1,7 +1,8 @@
-## Unreleased
+## v4.2.1
 
 - Log live wallpaper queue failures instead of silently ignoring them.
 - The combined home and lock interval saves as soon as typing pauses, like the separate intervals.
+- Remove debug logging from release builds, including a log written on every home-screen swipe with the live wallpaper.
 - Simplify error handling, settings storage, scheduling, and duplicated wallpaper queue, effect, and UI code.
 
 ## v4.2.0
