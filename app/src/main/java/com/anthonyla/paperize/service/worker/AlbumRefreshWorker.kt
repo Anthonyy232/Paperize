@@ -10,7 +10,6 @@ import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.RefreshFolderUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 
 @HiltWorker
@@ -21,57 +20,22 @@ class AlbumRefreshWorker @AssistedInject constructor(
     private val refreshFolderUseCase: RefreshFolderUseCase
 ) : CoroutineWorker(appContext, workerParams) {
 
+    /** Prune missing items and pick up new folder files. One failing album or folder does not stop the rest. */
     override suspend fun doWork(): Result {
-        return try {
-            Log.d(TAG, "Starting daily album refresh")
+        albumRepository.getAlbumSummaries().first().forEach { album ->
+            runCatchingCancellable { albumRepository.pruneMissingEntries(album.id) }
+                .onFailure { Log.e(TAG, "Error validating album '${album.name}'", it) }
 
-            val albums = albumRepository.getAlbumSummaries().first()
-
-            if (albums.isEmpty()) {
-                Log.d(TAG, "No albums to refresh")
-                return Result.success()
+            // Reload after validation, which may have removed folders from the snapshot.
+            albumRepository.getAlbumById(album.id).first()?.folders.orEmpty().forEach { folder ->
+                runCatchingCancellable { refreshFolderUseCase(folder.id) }
+                    .onFailure { Log.e(TAG, "Error refreshing folder '${folder.name}'", it) }
             }
-
-            var totalRemoved = 0
-            var totalAdded = 0
-            var failedCount = 0
-
-            albums.forEach { album ->
-                runCatchingCancellable { albumRepository.pruneMissingEntries(album.id) }
-                    .onSuccess { removedCount ->
-                        totalRemoved += removedCount
-                        if (removedCount > 0) {
-                            Log.d(TAG, "Album '${album.name}': removed $removedCount invalid items")
-                        }
-                    }
-                    .onFailure {
-                        Log.e(TAG, "Error validating album '${album.name}'", it)
-                        failedCount++
-                    }
-
-                // Reload after validation, which may have removed folders from the snapshot.
-                val currentAlbum = albumRepository.getAlbumById(album.id).first()
-                currentAlbum?.folders.orEmpty().forEach { folder ->
-                    runCatchingCancellable { refreshFolderUseCase(folder.id) }
-                        .onSuccess { totalAdded += it }
-                        .onFailure {
-                            Log.e(TAG, "Error refreshing folder '${folder.name}'", it)
-                            failedCount++
-                        }
-                }
-            }
-            Log.d(TAG, "Daily album refresh completed: removed $totalRemoved items, added $totalAdded new wallpapers across ${albums.size} albums ($failedCount failures)")
-
-            Result.success()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.e(TAG, "Error during album refresh", e)
-            Result.failure()
         }
+        return Result.success()
     }
 
-    companion object {
-        private const val TAG = "AlbumRefreshWorker"
+    private companion object {
+        const val TAG = "AlbumRefreshWorker"
     }
 }

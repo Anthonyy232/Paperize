@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.library
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,6 @@ import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.library.components.AlbumItem
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun LibraryScreen(

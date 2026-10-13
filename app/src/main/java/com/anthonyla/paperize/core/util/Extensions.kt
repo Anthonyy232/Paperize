@@ -2,14 +2,14 @@ package com.anthonyla.paperize.core.util
 
 import android.content.ContentResolver
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.os.CancellationSignal
 import android.provider.DocumentsContract
 import com.anthonyla.paperize.core.constants.Constants
-import android.database.Cursor
+import com.anthonyla.paperize.core.runCatchingCancellable
 import java.io.IOException
 import java.util.UUID
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -35,18 +35,14 @@ fun Uri.isValid(contentResolver: ContentResolver): Boolean {
 /** Only a successful, complete query with no rows proves that a document was removed. */
 fun Uri.isDocumentMissing(contentResolver: ContentResolver): Boolean {
     if (scheme != ContentResolver.SCHEME_CONTENT) return false
-    return try {
+    // Offline providers, revoked permissions and query failures do not prove deletion.
+    return runCatchingCancellable {
         contentResolver.query(this, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
             ?.use { cursor ->
                 cursor.requireComplete()
                 !cursor.moveToFirst()
             } ?: false
-    } catch (e: CancellationException) {
-        throw e
-    } catch (_: Exception) {
-        // Offline providers, revoked permissions and query failures do not prove deletion.
-        false
-    }
+    }.getOrDefault(false)
 }
 
 private fun Cursor.requireComplete() {

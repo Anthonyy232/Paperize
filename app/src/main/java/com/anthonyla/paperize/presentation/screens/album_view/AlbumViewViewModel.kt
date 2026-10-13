@@ -168,11 +168,6 @@ class AlbumViewViewModel @Inject constructor(
                         .onSuccess { _selectedFolders.value -= folderId }
                         .onFailure { _message.value = R.string.delete_items_failed }
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e(TAG, "Error removing selected items", e)
-                _message.value = R.string.delete_items_failed
             } finally {
                 _isDeleting.value = false
             }

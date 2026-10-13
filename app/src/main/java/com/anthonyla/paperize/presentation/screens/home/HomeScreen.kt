@@ -97,14 +97,15 @@ fun HomeScreen(
                 ) { index ->
                     when (index) {
                         0 -> {
-                            if (wallpaperMode == null) {
+                            val mode = wallpaperMode
+                            if (mode == null) {
                                 Box(modifier = Modifier.fillMaxSize())
                             } else {
                                 WallpaperScreen(
                                     albums = albums,
                                     persistedScheduleSettings = scheduleSettings,
                                     appSettings = appSettings,
-                                    wallpaperMode = wallpaperMode!!,
+                                    wallpaperMode = mode,
                                     onToggleChanger = viewModel::setChangerEnabled,
                                     onSelectAlbum = viewModel::selectAlbum,
                                     onUpdateScheduleSettings = viewModel::updateScheduleSettings,

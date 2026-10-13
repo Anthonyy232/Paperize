@@ -5,6 +5,7 @@ import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -87,49 +88,26 @@ class ChangeWallpaperUseCase @Inject constructor(
         wallpaperId: String,
         shuffle: Boolean
     ) {
-        try {
-            wallpaperRepository.setCurrentWallpaper(
-                albumId,
-                screenType,
-                wallpaperId
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.e(TAG, "Applied wallpaper could not be recorded as current", e)
-            return
-        }
+        runCatchingCancellable { wallpaperRepository.setCurrentWallpaper(albumId, screenType, wallpaperId) }
+            .onFailure {
+                Log.e(TAG, "Applied wallpaper could not be recorded as current", it)
+                return
+            }
 
-        try {
+        runCatchingCancellable {
             wallpaperRepository.ensureWallpaperQueue(albumId, screenType, shuffle)
             // Build first when this is the first synchronized use of a screen queue, then remove
             // the exact applied item. This prevents the just-applied wallpaper from being
             // reintroduced at the head of a freshly built queue.
-            wallpaperRepository.removeWallpaperFromQueue(
-                albumId,
-                screenType,
-                wallpaperId
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.w(TAG, "Queue sync failed; it will rebuild on the next change", e)
-        }
+            wallpaperRepository.removeWallpaperFromQueue(albumId, screenType, wallpaperId)
+        }.onFailure { Log.w(TAG, "Queue sync failed; it will rebuild on the next change", it) }
     }
 
     /** Restore a prepared item after WallpaperManager rejected it. */
     suspend fun restore(prepared: PreparedWallpaper) {
-        try {
-            wallpaperRepository.restoreWallpaperToQueueFront(
-                prepared.albumId,
-                prepared.screenType,
-                prepared.wallpaperId
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to restore rejected wallpaper to its queue", e)
-        }
+        runCatchingCancellable {
+            wallpaperRepository.restoreWallpaperToQueueFront(prepared.albumId, prepared.screenType, prepared.wallpaperId)
+        }.onFailure { Log.e(TAG, "Failed to restore rejected wallpaper to its queue", it) }
     }
 
     private companion object {
