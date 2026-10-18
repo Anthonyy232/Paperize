@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -13,6 +14,8 @@ import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
+import com.anthonyla.paperize.service.alarm.StaticWallpaperAlarmScheduler
+import com.anthonyla.paperize.service.alarm.usesStaticAlarm
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -24,20 +27,38 @@ import kotlinx.coroutines.sync.withLock
 
 @Singleton
 class WallpaperScheduler @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val alarmScheduler: StaticWallpaperAlarmScheduler
 ) {
     // Lazy: the Application injects this before WorkManager can read its Hilt worker factory.
     private val workManager by lazy { WorkManager.getInstance(context) }
     private val mutex = Mutex()
 
-    /** [intervalMinutes] is raised to WorkManager's 15-minute minimum. */
+    /**
+     * Static intervals below [Constants.MIN_WORKMANAGER_INTERVAL_MINUTES] are driven by an alarm,
+     * because WorkManager rejects shorter periodic work outright. Everything else stays on
+     * WorkManager so it keeps the framework's reboot and retry handling.
+     */
     fun scheduleWallpaperChange(
         screenType: ScreenType,
         intervalMinutes: Int,
         resetInterval: Boolean = false,
         onlyIfNotScheduled: Boolean = false
     ) {
-        val interval = intervalMinutes.toLong().coerceAtLeast(Constants.MIN_INTERVAL_MINUTES.toLong())
+        if (screenType != ScreenType.LIVE && usesStaticAlarm(intervalMinutes)) {
+            // The alarm path owns this screen, so any leftover periodic work must go: two active
+            // schedules would change the wallpaper at double the requested rate.
+            workManager.cancelUniqueWork(workName(screenType))
+            if (!onlyIfNotScheduled || !alarmScheduler.isScheduled(screenType)) {
+                alarmScheduler.schedule(screenType, intervalMinutes)
+            }
+            Log.d(TAG, "Scheduled $screenType alarm every $intervalMinutes minutes")
+            return
+        }
+
+        alarmScheduler.cancel(screenType)
+        val interval = intervalMinutes.toLong()
+            .coerceAtLeast(Constants.MIN_WORKMANAGER_INTERVAL_MINUTES.toLong())
         val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(interval, TimeUnit.MINUTES)
             .setInputData(workDataOf(Constants.EXTRA_SCREEN_TYPE to screenType.name))
             .apply {
@@ -77,6 +98,7 @@ class WallpaperScheduler @Inject constructor(
                 scheduleWallpaperChange(screen, interval, onlyIfNotScheduled = onlyIfNotScheduled)
             } else {
                 workManager.cancelUniqueWork(workName(screen))
+                alarmScheduler.cancel(screen)
             }
         }
         if (enabled) scheduleDailyAlbumRefresh(onlyIfNotScheduled) else workManager.cancelUniqueWork(Constants.WORK_NAME_REFRESH)
@@ -84,7 +106,38 @@ class WallpaperScheduler @Inject constructor(
 
     fun cancelAllWallpaperChanges() {
         ScreenType.entries.forEach { workManager.cancelUniqueWork(workName(it)) }
+        alarmScheduler.cancelAll()
         workManager.cancelUniqueWork(Constants.WORK_NAME_REFRESH)
+    }
+
+    /**
+     * Run one rotation now, as expedited one-time work.
+     *
+     * The short-interval alarm fires while the app is in the background, where starting
+     * [com.anthonyla.paperize.service.wallpaper.WallpaperChangeService] is rejected on Android 12+
+     * and a broadcast receiver has only seconds of lifetime. Expedited work is the supported
+     * background path: it runs immediately, gets minutes instead of seconds, and reuses the
+     * worker's retry handling plus the change lock that serializes it against every other
+     * rotation.
+     */
+    fun changeNow(screenType: ScreenType) {
+        workManager.enqueueUniqueWork(
+            alarmChangeWorkName(screenType),
+            ExistingWorkPolicy.KEEP,
+            OneTimeWorkRequestBuilder<WallpaperChangeWorker>()
+                .setInputData(workDataOf(Constants.EXTRA_SCREEN_TYPE to screenType.name))
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
+        )
+        Log.d(TAG, "Enqueued expedited $screenType wallpaper change")
+    }
+
+    /** True when [screenType] should currently be driven by the short-interval alarm path. */
+    fun isStaticAlarmScheduled(settings: ScheduleSettings, screenType: ScreenType): Boolean {
+        if (!settings.enableChanger) return false
+        if (screenType == ScreenType.LIVE) return false
+        val interval = settings.intervalMinutes(screenType)
+        return interval > 0 && usesStaticAlarm(interval)
     }
 
     /** Rescan folders now; KEEP coalesces rapid foreground transitions into one scan. */
@@ -117,6 +170,8 @@ class WallpaperScheduler @Inject constructor(
         ScreenType.LIVE -> Constants.WORK_NAME_LIVE
     }
 
+    private fun alarmChangeWorkName(screenType: ScreenType): String = "alarm_change_${screenType.name.lowercase()}"
+
     private companion object {
         const val TAG = "WallpaperScheduler"
         const val FOREGROUND_REFRESH_WORK_NAME = "album_refresh_on_foreground"
@@ -131,8 +186,10 @@ internal fun scheduledScreensToReset(
     if (!settings.enableChanger || !settings.hasRequiredAlbums(wallpaperMode)) return emptySet()
     return settings.activeScreens(wallpaperMode).filterTo(mutableSetOf()) { screen ->
         when (screen) {
+            // Below the WorkManager floor the visible engine owns the cadence, so there is no
+            // scheduled job to defer; the engine restarts its own timer instead.
             ScreenType.LIVE -> manualScreen == ScreenType.LIVE &&
-                settings.liveIntervalMinutes >= Constants.MIN_INTERVAL_MINUTES
+                settings.liveIntervalMinutes >= Constants.MIN_WORKMANAGER_INTERVAL_MINUTES
             ScreenType.BOTH -> manualScreen != ScreenType.LIVE
             else -> manualScreen == screen || manualScreen == ScreenType.BOTH
         }

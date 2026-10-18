@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.service.livewallpaper
 
+import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -7,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -93,6 +96,16 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         private var latestSettings = ScheduleSettings()
         private var latestWallpaperMode = WallpaperMode.STATIC
         private var liveIntervalJob: Job? = null
+
+        /**
+         * Palette of the picture currently on screen. A live wallpaper returns null from
+         * [onComputeColors] unless it overrides it, which is why Monet used to keep a stale or
+         * default palette instead of following Paperize's artwork.
+         */
+        @Volatile private var currentColors: WallpaperColors? = null
+
+        /** Engine callbacks are main-thread only; the renderer reports colors from its GL thread. */
+        private val colorsHandler = Handler(Looper.getMainLooper())
 
         private val gestureDetector = GestureDetector(
             this@PaperizeLiveWallpaperService,
@@ -311,6 +324,25 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
 
         override fun queueEventOnGlThread(event: () -> Unit): Boolean = queueEvent(event)
+
+        /**
+         * Called by the platform whenever it needs the palette of the visible wallpaper. Returning
+         * the colors of the displayed artwork lets the system derive Monet colors from it.
+         */
+        override fun onComputeColors(): WallpaperColors? = currentColors
+
+        override fun onWallpaperColorsAvailable(colors: WallpaperColors) {
+            currentColors = colors
+            // Called from the GL thread; engine callbacks and notifyColorsChanged belong to the
+            // main thread, so hand the notification over instead of racing the platform.
+            colorsHandler.post {
+                try {
+                    notifyColorsChanged()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not publish wallpaper colors", e)
+                }
+            }
+        }
 
         private fun handleDoubleTap() {
             engineScope.launch {

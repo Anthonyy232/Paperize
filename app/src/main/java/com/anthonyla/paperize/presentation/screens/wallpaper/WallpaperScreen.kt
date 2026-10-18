@@ -217,6 +217,16 @@ fun WallpaperScreen(
                         }
                     )
                 }
+                if (scheduleSettings.homeIntervalMinutes < Constants.MIN_WORKMANAGER_INTERVAL_MINUTES ||
+                    scheduleSettings.lockIntervalMinutes < Constants.MIN_WORKMANAGER_INTERVAL_MINUTES
+                ) {
+                    Text(
+                        text = stringResource(R.string.static_short_interval_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = AppSpacing.large)
+                    )
+                }
             } else {
                 TimeIntervalPicker(
                     title = stringResource(R.string.interval_text),

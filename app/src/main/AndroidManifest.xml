@@ -84,6 +84,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Static rotation below WorkManager's 15-minute floor -->
+        <receiver
+            android:name=".service.alarm.StaticWallpaperAlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.anthonyla.paperize.ACTION_STATIC_ALARM" />
+            </intent-filter>
+        </receiver>
+
         <!-- Quick Settings Tile -->
         <service
             android:name=".service.tile.WallpaperTileService"

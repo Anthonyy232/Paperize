@@ -175,7 +175,7 @@ class AlbumUiInstrumentedTest {
         compose.mainClock.advanceTimeBy(100)
         compose.onNodeWithText(context.getString(R.string.mins)).performTextReplacement("1")
         compose.mainClock.advanceTimeBy(Constants.DEBOUNCE_DELAY_MS + 50)
-        compose.runOnIdle { assertEquals(listOf(Constants.MIN_INTERVAL_MINUTES), changes) }
+        compose.runOnIdle { assertEquals(listOf(Constants.MIN_STATIC_INTERVAL_MINUTES), changes) }
 
         compose.onNodeWithText(context.getString(R.string.mins)).performTextReplacement("30")
         compose.runOnIdle { minutes.intValue = 120 }

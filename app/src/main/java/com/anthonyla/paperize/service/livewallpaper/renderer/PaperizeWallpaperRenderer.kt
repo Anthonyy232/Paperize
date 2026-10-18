@@ -2,11 +2,13 @@ package com.anthonyla.paperize.service.livewallpaper.renderer
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.ScalingType
 
+import android.app.WallpaperColors
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.util.Log
+import androidx.core.graphics.scale
 import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.service.livewallpaper.gl.GLPicture
 import com.anthonyla.paperize.service.livewallpaper.gl.GLUtil
@@ -36,11 +38,21 @@ class PaperizeWallpaperRenderer(
     companion object {
         private const val TAG = "PaperizeRenderer"
         private const val CROSSFADE_DURATION_MS = Constants.CROSSFADE_DURATION_MS
+
+        /** Side length of the downscaled copy handed to [WallpaperColors.fromBitmap]. */
+        private const val COLOR_SAMPLE_SIZE = 128
     }
 
     interface Callbacks {
         fun queueEventOnGlThread(event: () -> Unit): Boolean
         fun requestRender()
+
+        /**
+         * Colors of the picture that is about to be displayed. A live wallpaper reports nothing by
+         * default, so the system would keep a stale or default Monet palette; the engine turns
+         * this into [android.app.WallpaperColors] results for the platform.
+         */
+        fun onWallpaperColorsAvailable(colors: WallpaperColors)
     }
 
     private val surfaceSize = MutableStateFlow<Pair<Int, Int>?>(null)
@@ -456,9 +468,14 @@ class PaperizeWallpaperRenderer(
                     val sourceBrightness =
                         com.anthonyla.paperize.core.util.BrightnessCalculator.calculateBitmapBrightness(bitmap)
 
+                    // Extract the palette while the bitmap is already in memory and still valid:
+                    // the GL upload recycles it, and a live wallpaper must report colors itself
+                    // for Monet to follow the displayed image.
+                    val colors = extractWallpaperColors(bitmap)
+
                     val queued = callbacks.queueEventOnGlThread {
                         if (loadGeneration.get() == generation) {
-                            uploadBitmap(bitmap, sourceBrightness, skipCrossfade)
+                            uploadBitmap(bitmap, sourceBrightness, colors, skipCrossfade)
                         } else {
                             bitmap.recycle()
                         }
@@ -479,6 +496,7 @@ class PaperizeWallpaperRenderer(
     private fun uploadBitmap(
         bitmap: Bitmap,
         sourceBrightness: Float,
+        colors: WallpaperColors?,
         skipCrossfade: Boolean = false
     ) {
         try {
@@ -500,12 +518,35 @@ class PaperizeWallpaperRenderer(
                 Log.d(TAG, "Wallpaper uploaded to GPU with crossfade: $picture")
             }
 
+            colors?.let(callbacks::onWallpaperColorsAvailable)
+
             callbacks.requestRender()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to upload bitmap to GPU", e)
         } finally {
             bitmap.recycle()
         }
+    }
+
+    /**
+     * Palette of the source image, or null when the platform refuses to extract one.
+     *
+     * Downscaling first keeps this cheap: [WallpaperColors.fromBitmap] samples the whole image,
+     * and a full-resolution phone wallpaper would cost milliseconds per rotation for no gain.
+     */
+    private fun extractWallpaperColors(bitmap: Bitmap): WallpaperColors? = try {
+        val sample = if (bitmap.width > COLOR_SAMPLE_SIZE || bitmap.height > COLOR_SAMPLE_SIZE) {
+            bitmap.scale(COLOR_SAMPLE_SIZE, COLOR_SAMPLE_SIZE)
+        } else {
+            null
+        }
+        val source = sample ?: bitmap
+        val colors = WallpaperColors.fromBitmap(source)
+        sample?.recycle()
+        colors
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not extract wallpaper colors", e)
+        null
     }
 
     fun updateEffects(effects: WallpaperEffects) {

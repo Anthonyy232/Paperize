@@ -12,6 +12,7 @@ import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.service.alarm.StaticWallpaperAlarmScheduler
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -28,9 +29,11 @@ import kotlinx.coroutines.test.runTest
 class WallpaperSchedulerTest {
     private val context = mockk<Context>()
     private val workManager = mockk<WorkManager>()
+    private val alarmScheduler = mockk<StaticWallpaperAlarmScheduler>(relaxed = true)
     private val operation = mockk<Operation>()
     private val enqueued = mutableListOf<Triple<String, ExistingPeriodicWorkPolicy, PeriodicWorkRequest>>()
     private val cancelled = mutableListOf<String>()
+    private val alarms = mutableListOf<Pair<ScreenType, Int>>()
     private lateinit var scheduler: WallpaperScheduler
 
     @Before
@@ -47,7 +50,10 @@ class WallpaperSchedulerTest {
             cancelled += firstArg<String>()
             operation
         }
-        scheduler = WallpaperScheduler(context)
+        every { alarmScheduler.schedule(any(), any()) } answers {
+            alarms += firstArg<ScreenType>() to secondArg()
+        }
+        scheduler = WallpaperScheduler(context, alarmScheduler)
     }
 
     @After
@@ -104,13 +110,39 @@ class WallpaperSchedulerTest {
     @Test
     fun `manual reset delay uses the same minimum as the periodic interval`() {
         val before = System.currentTimeMillis()
-        scheduler.scheduleWallpaperChange(ScreenType.HOME, 1, resetInterval = true)
+        scheduler.scheduleWallpaperChange(ScreenType.HOME, 15, resetInterval = true)
 
         val request = enqueued.single().third
         val minimumMillis = TimeUnit.MINUTES.toMillis(15)
         assertEquals(minimumMillis, request.workSpec.intervalDuration)
         assertTrue(request.workSpec.calculateNextRunTime() >= before + minimumMillis)
         assertTrue(request.workSpec.calculateNextRunTime() <= System.currentTimeMillis() + minimumMillis)
+    }
+
+    @Test
+    fun `static interval below the workmanager floor is handed to the alarm scheduler`() {
+        scheduler.scheduleWallpaperChange(ScreenType.HOME, 5)
+
+        assertTrue(enqueued.isEmpty())
+        assertEquals(listOf(ScreenType.HOME to 5), alarms)
+        assertEquals(listOf(Constants.WORK_NAME_HOME), cancelled)
+    }
+
+    @Test
+    fun `alarm driven screens do not keep periodic work`() {
+        scheduler.scheduleWallpaperChange(ScreenType.LOCK, 1, resetInterval = true)
+
+        assertTrue(enqueued.isEmpty())
+        assertEquals(listOf(ScreenType.LOCK to 1), alarms)
+    }
+
+    @Test
+    fun `returning to the workmanager range cancels the alarm`() {
+        scheduler.scheduleWallpaperChange(ScreenType.HOME, 60)
+
+        assertTrue(alarms.isEmpty())
+        io.mockk.verify { alarmScheduler.cancel(ScreenType.HOME) }
+        assertEquals(TimeUnit.MINUTES.toMillis(60), enqueued.single().third.workSpec.intervalDuration)
     }
 
     @Test

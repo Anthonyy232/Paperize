@@ -146,6 +146,7 @@
   <string name="total_interval">Total: </string>
   <string name="time_unit_min">min</string>
   <string name="live_short_interval_note">Intervals under 15 minutes run only while Paperize is the visible live wallpaper.</string>
+  <string name="static_short_interval_note">Intervals under 15 minutes are driven by an alarm. Android may delay a change while the device is in deep doze; the exact cadence resumes once it wakes.</string>
 
   <!-- Notification Service -->
   <string name="notification_channel_description">Wallpaper change notifications</string>

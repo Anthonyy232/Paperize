@@ -53,8 +53,8 @@ data class ScheduleSettings(
     }
 
     fun validate(): ScheduleSettings = copy(
-        homeIntervalMinutes = homeIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
-        lockIntervalMinutes = lockIntervalMinutes.coerceAtLeast(Constants.MIN_INTERVAL_MINUTES),
+        homeIntervalMinutes = homeIntervalMinutes.coerceAtLeast(Constants.MIN_STATIC_INTERVAL_MINUTES),
+        lockIntervalMinutes = lockIntervalMinutes.coerceAtLeast(Constants.MIN_STATIC_INTERVAL_MINUTES),
         liveIntervalMinutes = liveIntervalMinutes.coerceAtLeast(Constants.MIN_LIVE_INTERVAL_MINUTES),
         homeEffects = homeEffects.validate(),
         lockEffects = lockEffects.validate(),
@@ -90,7 +90,9 @@ data class ScheduleSettings(
 
 /**
  * WorkManager cannot run periodic jobs more often than every 15 minutes. Short live-wallpaper
- * intervals are therefore driven by the visible wallpaper engine and stop when it is hidden.
+ * intervals are therefore driven by the visible wallpaper engine and stop when it is hidden;
+ * short static intervals are driven by an inexact alarm instead (see
+ * [com.anthonyla.paperize.service.alarm.StaticWallpaperAlarmScheduler]).
  */
 fun usesVisibleLiveTimer(intervalMinutes: Int): Boolean =
-    intervalMinutes in Constants.MIN_LIVE_INTERVAL_MINUTES until Constants.MIN_INTERVAL_MINUTES
+    intervalMinutes in Constants.MIN_LIVE_INTERVAL_MINUTES until Constants.MIN_WORKMANAGER_INTERVAL_MINUTES
