@@ -121,7 +121,9 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == Constants.ACTION_RELOAD_WALLPAPER) {
                     Log.d(TAG, "Received reload broadcast")
-                    renderController.reloadCurrentArtwork(immediate = true)
+                    // The change is requested while Paperize covers the launcher, so the engine is
+                    // hidden; forcing it advances the queue now instead of when the user goes home.
+                    renderController.reloadCurrentArtwork(immediate = true, force = true)
                     restartLiveIntervalTimer()
                 }
             }
