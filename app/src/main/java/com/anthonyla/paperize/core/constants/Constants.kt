@@ -25,6 +25,10 @@ object Constants {
 
     // Intents
     const val EXTRA_SCREEN_TYPE = "screen_type"
+    const val EXTRA_INTERVAL_MINUTES = "interval_minutes"
+
+    // Alarms (static rotation below WorkManager's 15-minute floor)
+    const val ACTION_STATIC_ALARM = "com.anthonyla.paperize.ACTION_STATIC_ALARM"
 
     // Wallpaper
     const val DEFAULT_BLUR_PERCENTAGE = 0
@@ -39,7 +43,13 @@ object Constants {
 
     // Scheduling
     const val MIN_LIVE_INTERVAL_MINUTES = 1
-    const val MIN_INTERVAL_MINUTES = 15
+
+    /** Static rotation is driven by AlarmManager, so it is not bound by the WorkManager floor. */
+    const val MIN_STATIC_INTERVAL_MINUTES = 1
+
+    /** WorkManager rejects periodic work shorter than this; shorter static intervals use alarms. */
+    const val MIN_WORKMANAGER_INTERVAL_MINUTES = 15
+
     const val MAX_INTERVAL_MINUTES = 43200  // 30 days in minutes
     const val DEFAULT_INTERVAL_MINUTES = 60
 

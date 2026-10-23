@@ -109,6 +109,7 @@ class LiveWallpaperShaderInstrumentedTest {
         val renderer = PaperizeWallpaperRenderer(app, object : PaperizeWallpaperRenderer.Callbacks {
             override fun queueEventOnGlThread(event: () -> Unit): Boolean = uploads.offer(event)
             override fun requestRender() { renderRequests++ }
+            override fun onWallpaperColorsAvailable(colors: android.app.WallpaperColors) = Unit
         })
         val egl = javax.microedition.khronos.egl.EGLContext.getEGL() as javax.microedition.khronos.egl.EGL10
         val gl = egl.eglGetCurrentContext().gl as javax.microedition.khronos.opengles.GL10

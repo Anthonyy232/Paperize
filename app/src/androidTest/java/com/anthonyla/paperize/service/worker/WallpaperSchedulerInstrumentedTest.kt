@@ -12,6 +12,7 @@ import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.service.alarm.StaticWallpaperAlarmScheduler
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -28,7 +29,8 @@ import org.junit.runner.RunWith
 class WallpaperSchedulerInstrumentedTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val workManager = WorkManager.getInstance(context) as WorkManagerImpl
-    private val scheduler = WallpaperScheduler(context)
+    private val alarmScheduler = StaticWallpaperAlarmScheduler(context)
+    private val scheduler = WallpaperScheduler(context, alarmScheduler)
     private val targets = mapOf(
         ScreenType.HOME to Constants.WORK_NAME_HOME,
         ScreenType.LOCK to Constants.WORK_NAME_LOCK,

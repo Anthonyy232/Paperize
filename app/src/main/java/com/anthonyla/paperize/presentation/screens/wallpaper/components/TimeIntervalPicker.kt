@@ -39,7 +39,7 @@ fun TimeIntervalPicker(
     minutes: Int,
     onMinutesChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES
+    minimumMinutes: Int = Constants.MIN_STATIC_INTERVAL_MINUTES
 ) {
     val initialDays = minutes / Constants.MINUTES_PER_DAY
     val remainingAfterDays = minutes % Constants.MINUTES_PER_DAY

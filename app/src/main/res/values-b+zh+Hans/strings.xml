@@ -145,6 +145,7 @@
   <string name="total_interval">总计： </string>
   <string name="time_unit_min">分</string>
   <string name="live_short_interval_note">低于 15 分钟的间隔仅在 Paperize 作为可见的动态壁纸运行时生效。</string>
+  <string name="static_short_interval_note">低于 15 分钟的间隔由闹钟触发。设备进入深度休眠时 Android 可能推迟更换，唤醒后恢复原有时钟。</string>
 
   <!-- Notification Service -->
   <string name="notification_channel_description">壁纸更换通知</string>

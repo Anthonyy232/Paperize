@@ -11,7 +11,7 @@ class ScheduleSettingsTest {
     fun `validation applies distinct static and live minimums and validates all screens`() {
         val effects = WallpaperEffects(darkenPercentage = 150, blurPercentage = -10)
         val settings = ScheduleSettings(
-            homeIntervalMinutes = 5,
+            homeIntervalMinutes = 0,
             lockIntervalMinutes = 120,
             liveIntervalMinutes = 0,
             homeEffects = effects,
@@ -21,7 +21,7 @@ class ScheduleSettingsTest {
         val validEffects = effects.copy(darkenPercentage = 100, blurPercentage = 0)
         assertEquals(
             settings.copy(
-                homeIntervalMinutes = 15,
+                homeIntervalMinutes = 1,
                 liveIntervalMinutes = 1,
                 homeEffects = validEffects,
                 lockEffects = validEffects,
@@ -29,6 +29,13 @@ class ScheduleSettingsTest {
             ),
             settings.validate()
         )
+    }
+
+    @Test
+    fun `sub-workmanager static intervals are kept instead of clamped`() {
+        val settings = ScheduleSettings(homeIntervalMinutes = 5, lockIntervalMinutes = 5)
+        assertEquals(5, settings.validate().homeIntervalMinutes)
+        assertEquals(5, settings.validate().lockIntervalMinutes)
     }
 
     @Test

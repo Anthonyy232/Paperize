@@ -17,27 +17,35 @@ class PaperizeRenderController(
     var visible = false
         set(value) {
             field = value
-            if (value && hasPendingReload) reloadCurrentArtwork(immediate = true)
+            if (value && hasPendingReload) reloadCurrentArtwork(immediate = true, force = pendingForce)
         }
 
     private var isLoading = false
     private var hasPendingReload = false
+    private var pendingForce = false
     private var throttleJob: Job? = null
 
-    fun reloadCurrentArtwork(immediate: Boolean = false) {
-        if (!visible || isLoading) {
+    /**
+     * [force] runs the reload while the engine is hidden. A manual change requested from the app
+     * arrives while the launcher is covered, and deferring it until the engine becomes visible made
+     * the button look broken: the wallpaper only advanced once the user returned home.
+     */
+    fun reloadCurrentArtwork(immediate: Boolean = false, force: Boolean = false) {
+        if ((!visible && !force) || isLoading) {
             hasPendingReload = true
+            pendingForce = pendingForce || force
             return
         }
 
         hasPendingReload = false
+        pendingForce = false
         throttleJob?.cancel()
         if (immediate) {
             executeReload()
         } else {
             throttleJob = controllerScope.launch {
                 delay(Constants.RELOAD_THROTTLE_MS)
-                if (visible) executeReload() else hasPendingReload = true
+                if (visible || force) executeReload() else hasPendingReload = true
             }
         }
     }
@@ -46,6 +54,7 @@ class PaperizeRenderController(
     fun forceReloadCurrentArtwork() {
         if (isLoading) return
         hasPendingReload = false
+        pendingForce = false
         throttleJob?.cancel()
         executeReload(skipCrossfade = true)
     }
@@ -62,8 +71,8 @@ class PaperizeRenderController(
                 if (isActive) Log.e("PaperizeRenderController", "Error reloading wallpaper", e)
             } finally {
                 isLoading = false
-                if (isActive && hasPendingReload && visible) {
-                    reloadCurrentArtwork(immediate = true)
+                if (isActive && hasPendingReload && (visible || pendingForce)) {
+                    reloadCurrentArtwork(immediate = true, force = pendingForce)
                 }
             }
         }
