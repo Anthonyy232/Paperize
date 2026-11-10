@@ -9,6 +9,7 @@ import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.RefreshFolderUseCase
+import com.anthonyla.paperize.presentation.common.launchBusy
 import com.anthonyla.paperize.presentation.common.navigation.FolderRoute
 import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class FolderViewViewModel @Inject constructor(
@@ -40,16 +40,11 @@ class FolderViewViewModel @Inject constructor(
     fun refresh() {
         if (_isRefreshing.value) return
         _message.value = null
-        _isRefreshing.value = true
-        viewModelScope.launch {
-            try {
-                _message.value = if (runCatchingCancellable { refreshFolderUseCase(folderId) }.isSuccess) {
-                    R.string.folder_refreshed
-                } else {
-                    R.string.folder_refresh_failed
-                }
-            } finally {
-                _isRefreshing.value = false
+        launchBusy(_isRefreshing) {
+            _message.value = if (runCatchingCancellable { refreshFolderUseCase(folderId) }.isSuccess) {
+                R.string.folder_refreshed
+            } else {
+                R.string.folder_refresh_failed
             }
         }
     }

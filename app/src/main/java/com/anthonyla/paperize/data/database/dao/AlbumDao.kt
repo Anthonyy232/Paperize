@@ -33,9 +33,6 @@ interface AlbumDao {
     @Query("SELECT * FROM albums WHERE id = :albumId")
     suspend fun getAlbumById(albumId: String): AlbumEntity?
 
-    @Query("SELECT * FROM albums WHERE name = :name LIMIT 1")
-    suspend fun getAlbumByName(name: String): AlbumEntity?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlbum(album: AlbumEntity)
 

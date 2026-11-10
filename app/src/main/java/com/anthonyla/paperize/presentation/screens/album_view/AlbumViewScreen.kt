@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -27,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
+import com.anthonyla.paperize.presentation.common.components.ConfirmDialog
 import com.anthonyla.paperize.presentation.common.components.EmptyCollection
 import com.anthonyla.paperize.presentation.common.components.SnackbarMessageEffect
 import com.anthonyla.paperize.presentation.common.components.SortBottomSheet
@@ -201,42 +201,25 @@ fun AlbumViewScreen(
     ImportProgressDialog(progress = importProgress, onCancel = viewModel::cancelImport)
 
     if (showDeleteSelectedDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteSelectedDialog = false },
-            title = { Text(stringResource(R.string.remove_selected_title, selectedCount)) },
-            text = { Text(stringResource(R.string.remove_selected_hint)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDeleteSelectedDialog = false
-                    viewModel.deleteSelected()
-                }) { Text(stringResource(R.string.confirm)) }
+        ConfirmDialog(
+            title = stringResource(R.string.remove_selected_title, selectedCount),
+            text = stringResource(R.string.remove_selected_hint),
+            onConfirm = {
+                showDeleteSelectedDialog = false
+                viewModel.deleteSelected()
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteSelectedDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onDismiss = { showDeleteSelectedDialog = false }
         )
     }
 
     if (showDeleteAlbumDialog) {
-        AlertDialog(
-            onDismissRequest = { if (!isDeleting) showDeleteAlbumDialog = false },
-            title = { Text(stringResource(R.string.delete_album_question)) },
-            text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this)) },
-            confirmButton = {
-                TextButton(
-                    enabled = !isDeleting,
-                    onClick = {
-                        viewModel.deleteAlbum()
-                    }
-                ) { Text(stringResource(if (isDeleting) R.string.deleting_album else R.string.confirm)) }
-            },
-            dismissButton = {
-                TextButton(enabled = !isDeleting, onClick = { showDeleteAlbumDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+        ConfirmDialog(
+            title = stringResource(R.string.delete_album_question),
+            text = stringResource(R.string.are_you_sure_you_want_to_delete_this),
+            onConfirm = viewModel::deleteAlbum,
+            onDismiss = { showDeleteAlbumDialog = false },
+            confirmLabel = stringResource(if (isDeleting) R.string.deleting_album else R.string.confirm),
+            enabled = !isDeleting
         )
     }
 }

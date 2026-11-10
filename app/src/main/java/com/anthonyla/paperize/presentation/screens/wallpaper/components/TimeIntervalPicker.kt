@@ -28,6 +28,9 @@ import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.delay
 
 @Composable
@@ -37,10 +40,7 @@ fun TimeIntervalPicker(
     onMinutesChange: (Int) -> Unit,
     minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES
 ) {
-    val initialDays = minutes / Constants.MINUTES_PER_DAY
-    val remainingAfterDays = minutes % Constants.MINUTES_PER_DAY
-    val initialHours = remainingAfterDays / Constants.MINUTES_PER_HOUR
-    val initialMins = remainingAfterDays % Constants.MINUTES_PER_HOUR
+    val (initialDays, initialHours, initialMins) = splitInterval(minutes)
 
     var dayInput by remember(minutes) { mutableStateOf(initialDays.toString()) }
     var hourInput by remember(minutes) { mutableStateOf(initialHours.toString()) }
@@ -51,9 +51,9 @@ fun TimeIntervalPicker(
     LaunchedEffect(dayInput, hourInput, minuteInput, edited, minimumMinutes) {
         if (edited) {
             delay(Constants.DEBOUNCE_DELAY_MS)
-            val total = (dayInput.toIntOrNull() ?: 0) * Constants.MINUTES_PER_DAY +
-                (hourInput.toIntOrNull() ?: 0) * Constants.MINUTES_PER_HOUR + (minuteInput.toIntOrNull() ?: 0)
-            onChange(total.coerceIn(minimumMinutes, Constants.MAX_INTERVAL_MINUTES))
+            val total = (dayInput.toIntOrNull() ?: 0).days +
+                (hourInput.toIntOrNull() ?: 0).hours + (minuteInput.toIntOrNull() ?: 0).minutes
+            onChange(total.inWholeMinutes.toInt().coerceIn(minimumMinutes, Constants.MAX_INTERVAL_MINUTES))
         }
     }
 
@@ -100,34 +100,16 @@ fun TimeIntervalPicker(
 
 @Composable
 private fun formatIntervalComposable(minutes: Int): String {
-    val minUnit = stringResource(R.string.time_unit_min)
-
-    return when {
-        minutes < Constants.MINUTES_PER_HOUR -> "$minutes $minUnit"
-        minutes < Constants.MINUTES_PER_DAY -> {
-            val h = minutes / Constants.MINUTES_PER_HOUR
-            val remainingMins = minutes % Constants.MINUTES_PER_HOUR
-            val hUnit = pluralStringResource(R.plurals.time_unit_hours, h)
-            if (remainingMins == 0) "$h $hUnit"
-            else "$h $hUnit $remainingMins $minUnit"
-        }
-        else -> {
-            val d = minutes / Constants.MINUTES_PER_DAY
-            val remainingMinutes = minutes % Constants.MINUTES_PER_DAY
-            val remainingHours = remainingMinutes / Constants.MINUTES_PER_HOUR
-            val finalMins = remainingMinutes % Constants.MINUTES_PER_HOUR
-            val dUnit = pluralStringResource(R.plurals.time_unit_days, d)
-            buildString {
-                append("$d $dUnit")
-                if (remainingHours > 0) {
-                    val hUnit = pluralStringResource(R.plurals.time_unit_hours, remainingHours)
-                    append(" $remainingHours $hUnit")
-                }
-                if (finalMins > 0) append(" $finalMins $minUnit")
-            }
-        }
-    }
+    val (d, h, m) = splitInterval(minutes)
+    return listOfNotNull(
+        if (d > 0) "$d ${pluralStringResource(R.plurals.time_unit_days, d)}" else null,
+        if (h > 0) "$h ${pluralStringResource(R.plurals.time_unit_hours, h)}" else null,
+        if (m > 0 || d == 0 && h == 0)"$m ${stringResource(R.string.time_unit_min)}" else null
+    ).joinToString(" ")
 }
+
+private fun splitInterval(totalMinutes: Int): Triple<Int, Int, Int> =
+    totalMinutes.minutes.toComponents { days, hours, minutes, _, _ -> Triple(days.toInt(), hours, minutes) }
 
 @Composable
 private fun RowScope.NumberField(value: String, maxLength: Int, @StringRes label: Int, onValueChange: (String) -> Unit) {

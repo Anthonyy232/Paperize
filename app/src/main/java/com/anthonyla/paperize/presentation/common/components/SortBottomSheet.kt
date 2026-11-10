@@ -40,23 +40,19 @@ enum class SortOption(val labelRes: Int) {
     DATE_MODIFIED_DESC(R.string.sort_date_modified_desc);
 
     val wallpaperComparator: Comparator<Wallpaper>
-        get() = when (this) {
-            NAME_ASC -> compareBy { it.fileName.lowercase() }
-            NAME_DESC -> compareByDescending { it.fileName.lowercase() }
-            DATE_ADDED_ASC -> compareBy { it.addedAt }
-            DATE_ADDED_DESC -> compareByDescending { it.addedAt }
-            DATE_MODIFIED_ASC -> compareBy { it.dateModified }
-            DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
-        }
+        get() = comparator(Wallpaper::fileName, Wallpaper::addedAt, Wallpaper::dateModified)
 
     val folderComparator: Comparator<Folder>
-        get() = when (this) {
-            NAME_ASC -> compareBy { it.name.lowercase() }
-            NAME_DESC -> compareByDescending { it.name.lowercase() }
-            DATE_ADDED_ASC -> compareBy { it.addedAt }
-            DATE_ADDED_DESC -> compareByDescending { it.addedAt }
-            DATE_MODIFIED_ASC -> compareBy { it.dateModified }
-            DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
+        get() = comparator(Folder::name, Folder::addedAt, Folder::dateModified)
+
+    private fun <T> comparator(name: (T) -> String, addedAt: (T) -> Long, dateModified: (T) -> Long): Comparator<T> =
+        when (this) {
+            NAME_ASC -> compareBy { name(it).lowercase() }
+            NAME_DESC -> compareByDescending { name(it).lowercase() }
+            DATE_ADDED_ASC -> compareBy(addedAt)
+            DATE_ADDED_DESC -> compareByDescending(addedAt)
+            DATE_MODIFIED_ASC -> compareBy(dateModified)
+            DATE_MODIFIED_DESC -> compareByDescending(dateModified)
         }
 }
 

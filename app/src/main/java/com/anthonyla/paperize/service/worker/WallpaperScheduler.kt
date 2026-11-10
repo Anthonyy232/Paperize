@@ -68,7 +68,7 @@ class WallpaperScheduler @Inject constructor(
         mode: WallpaperMode,
         onlyIfNotScheduled: Boolean = false
     ) = mutex.withLock {
-        val enabled = settings.enableChanger && settings.hasRequiredAlbums(mode)
+        val enabled = settings.isRotating(mode)
         val targets = if (enabled) settings.activeScreens(mode) else emptySet()
         for (screen in ScreenType.entries) {
             val interval = settings.intervalMinutes(screen)
@@ -128,7 +128,7 @@ internal fun scheduledScreensToReset(
     settings: ScheduleSettings,
     wallpaperMode: WallpaperMode
 ): Set<ScreenType> {
-    if (!settings.enableChanger || !settings.hasRequiredAlbums(wallpaperMode)) return emptySet()
+    if (!settings.isRotating(wallpaperMode)) return emptySet()
     return settings.activeScreens(wallpaperMode).filterTo(mutableSetOf()) { screen ->
         when (screen) {
             ScreenType.LIVE -> manualScreen == ScreenType.LIVE &&

@@ -11,8 +11,6 @@ interface AlbumRepository {
 
     fun getAlbumById(albumId: String): Flow<Album?>
 
-    suspend fun getAlbumByName(name: String): Album?
-
     fun getFolderById(folderId: String): Flow<Folder?>
 
     suspend fun createAlbum(name: String, coverUri: String? = null): Album

@@ -156,13 +156,8 @@ class SettingsRepositoryImpl @Inject constructor(
             val targets = albumIdKeys(screen).filter { prefs[it] == albumId }
             if (targets.isEmpty()) return@edit
             targets.forEach { prefs.remove(it) }
-            val active = if (WallpaperMode.fromString(prefs[WALLPAPER_MODE]) == WallpaperMode.LIVE) {
-                prefs[LIVE_ALBUM_ID] != null
-            } else {
-                (prefs[HOME_ENABLED] == true && prefs[HOME_ALBUM_ID] != null) ||
-                    (prefs[LOCK_ENABLED] == true && prefs[LOCK_ALBUM_ID] != null)
-            }
-            if (!active) prefs[ENABLE_CHANGER] = false
+            val mode = WallpaperMode.fromString(prefs[WALLPAPER_MODE])
+            if (scheduleSettings(prefs).activeScreens(mode).isEmpty()) prefs[ENABLE_CHANGER] = false
         }
     }
 

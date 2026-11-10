@@ -7,6 +7,7 @@ import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
+import com.anthonyla.paperize.presentation.common.launchBusy
 import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import com.anthonyla.paperize.service.SettingsCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,19 +59,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun resetData(mode: WallpaperMode?, onSuccess: () -> Unit = {}) {
         if (_isResetting.value) return
-        _isResetting.value = true
         _resetFailed.value = false
-        viewModelScope.launch {
-            try {
-                runCatchingCancellable {
-                    coordinator.resetData(mode)
-                    onSuccess()
-                }.onFailure { e ->
-                    Log.e(TAG, "Could not reset app data", e)
-                    _resetFailed.value = true
-                }
-            } finally {
-                _isResetting.value = false
+        launchBusy(_isResetting) {
+            runCatchingCancellable {
+                coordinator.resetData(mode)
+                onSuccess()
+            }.onFailure { e ->
+                Log.e(TAG, "Could not reset app data", e)
+                _resetFailed.value = true
             }
         }
     }

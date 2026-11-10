@@ -11,6 +11,7 @@ import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
 import com.anthonyla.paperize.domain.usecase.ImportWallpapersUseCase
+import com.anthonyla.paperize.presentation.common.launchBusy
 import com.anthonyla.paperize.presentation.common.navigation.AlbumRoute
 import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -101,18 +102,13 @@ class AlbumViewViewModel @Inject constructor(
     fun deleteAlbum() {
         if (_isDeleting.value || importJob?.isCompleted == false) return
         _message.value = null
-        _isDeleting.value = true
-        viewModelScope.launch {
-            try {
-                runCatchingCancellable { deleteAlbumUseCase(albumId) }
-                    .onSuccess { _albumDeleted.value = true }
-                    .onFailure { e ->
-                        Log.e(TAG, "Error deleting album", e)
-                        _message.value = R.string.delete_album_failed
-                    }
-            } finally {
-                _isDeleting.value = false
-            }
+        launchBusy(_isDeleting) {
+            runCatchingCancellable { deleteAlbumUseCase(albumId) }
+                .onSuccess { _albumDeleted.value = true }
+                .onFailure { e ->
+                    Log.e(TAG, "Error deleting album", e)
+                    _message.value = R.string.delete_album_failed
+                }
         }
     }
 
@@ -143,21 +139,16 @@ class AlbumViewViewModel @Inject constructor(
         val wallpaperIds = _selectedWallpapers.value.toList()
         val folderIds = _selectedFolders.value.toList()
         if (wallpaperIds.isEmpty() && folderIds.isEmpty()) return
-        _isDeleting.value = true
-        viewModelScope.launch {
-            try {
-                if (wallpaperIds.isNotEmpty()) {
-                    runCatchingCancellable { albumRepository.removeWallpapersFromAlbum(albumId, wallpaperIds) }
-                        .onSuccess { _selectedWallpapers.value -= wallpaperIds.toSet() }
-                        .onFailure { _message.value = R.string.delete_items_failed }
-                }
-                folderIds.forEach { folderId ->
-                    runCatchingCancellable { albumRepository.removeFolderFromAlbum(albumId, folderId) }
-                        .onSuccess { _selectedFolders.value -= folderId }
-                        .onFailure { _message.value = R.string.delete_items_failed }
-                }
-            } finally {
-                _isDeleting.value = false
+        launchBusy(_isDeleting) {
+            if (wallpaperIds.isNotEmpty()) {
+                runCatchingCancellable { albumRepository.removeWallpapersFromAlbum(albumId, wallpaperIds) }
+                    .onSuccess { _selectedWallpapers.value -= wallpaperIds.toSet() }
+                    .onFailure { _message.value = R.string.delete_items_failed }
+            }
+            folderIds.forEach { folderId ->
+                runCatchingCancellable { albumRepository.removeFolderFromAlbum(albumId, folderId) }
+                    .onSuccess { _selectedFolders.value -= folderId }
+                    .onFailure { _message.value = R.string.delete_items_failed }
             }
         }
     }

@@ -31,6 +31,7 @@ import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.isIgnoringBatteryOptimizations
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.requestIgnoreBatteryOptimizations
 import com.anthonyla.paperize.presentation.common.components.BackTopAppBar
+import com.anthonyla.paperize.presentation.common.components.ConfirmDialog
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
 import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
@@ -274,55 +275,28 @@ fun SettingsScreen(
         }
 
         if (showResetDialog) {
-            AlertDialog(
-                onDismissRequest = { showResetDialog = false },
-                title = { Text(stringResource(R.string.reset_to_default)) },
-                text = { Text(stringResource(R.string.are_you_sure_you_want_to_reset_all_settings_and_data_to_default)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.resetAllData()
-                            showResetDialog = false
-                        }
-                    ) {
-                        Text(stringResource(R.string.confirm))
-                    }
+            ConfirmDialog(
+                title = stringResource(R.string.reset_to_default),
+                text = stringResource(R.string.are_you_sure_you_want_to_reset_all_settings_and_data_to_default),
+                onConfirm = {
+                    viewModel.resetAllData()
+                    showResetDialog = false
                 },
-                dismissButton = {
-                    TextButton(onClick = { showResetDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
+                onDismiss = { showResetDialog = false }
             )
         }
 
         pendingMode?.let { mode ->
-            AlertDialog(
-                onDismissRequest = { pendingMode = null },
-                title = {
-                    Text(stringResource(R.string.switch_mode_dialog_title, stringResource(mode.labelRes)))
+            ConfirmDialog(
+                title = stringResource(R.string.switch_mode_dialog_title, stringResource(mode.labelRes)),
+                text = stringResource(R.string.switch_mode_dialog_description),
+                onConfirm = {
+                    viewModel.switchWallpaperMode(mode)
+                    pendingMode = null
                 },
-                text = {
-                    Text(stringResource(R.string.switch_mode_dialog_description))
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.switchWallpaperMode(mode)
-                            pendingMode = null
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(stringResource(R.string.switch_mode_button))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { pendingMode = null }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
+                onDismiss = { pendingMode = null },
+                confirmLabel = stringResource(R.string.switch_mode_button),
+                confirmColor = MaterialTheme.colorScheme.error
             )
         }
     }

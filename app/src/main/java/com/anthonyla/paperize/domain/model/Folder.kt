@@ -14,8 +14,10 @@ data class Folder(
     val addedAt: Long = System.currentTimeMillis()
 ) {
     val displayName: String
-        get() = Uri.decode(name).let { decoded ->
-            decoded.substringAfterLast('/', decoded.substringAfterLast(':', decoded))
-        }
+        get() = decodedLastSegment(name)
+}
 
+/** Readable name of a document URI or encoded path: the part after the last '/', else after the last ':'. */
+internal fun decodedLastSegment(encoded: String): String = Uri.decode(encoded).let { decoded ->
+    decoded.substringAfterLast('/', decoded.substringAfterLast(':', decoded))
 }

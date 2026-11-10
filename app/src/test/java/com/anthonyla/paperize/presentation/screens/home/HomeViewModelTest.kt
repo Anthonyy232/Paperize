@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.home
 
-import com.anthonyla.paperize.testAlbum
 import com.anthonyla.paperize.testAlbumSummary
 import androidx.lifecycle.ViewModelStore
 import com.anthonyla.paperize.R
@@ -123,17 +122,14 @@ class HomeViewModelTest {
         verify(exactly = 1) { wallpapers.getCurrentWallpaperFlow("new", ScreenType.BOTH) }
     }
 
-    @Test fun `album creation rejects names that differ only by case and reports failed saves`() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.albums.collect() }
-        summaries.value = listOf(testAlbumSummary("nature", "Nature"))
-        runCurrent()
+    @Test fun `album creation reports taken names and failed saves`() = runTest {
+        coEvery { createAlbum("nature") } returns false
         assertEquals(R.string.album_name_exists_error, viewModel.createAlbum("nature"))
-        coVerify(exactly = 0) { createAlbum(any(), any()) }
 
-        coEvery { createAlbum("Trips", any()) } throws IllegalStateException("Storage unavailable")
+        coEvery { createAlbum("Trips") } throws IllegalStateException("Storage unavailable")
         assertEquals(R.string.album_create_failed, viewModel.createAlbum("Trips"))
 
-        coEvery { createAlbum("Trips", any()) } returns testAlbum("trips", "Trips")
+        coEvery { createAlbum("Trips") } returns true
         assertNull(viewModel.createAlbum("Trips"))
     }
 }

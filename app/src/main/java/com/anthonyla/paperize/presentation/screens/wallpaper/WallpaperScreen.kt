@@ -413,11 +413,7 @@ fun WallpaperScreen(
     }
 
     albumPickerScreen?.let { selection ->
-        val selectedId = when (selection) {
-            ScreenType.HOME, ScreenType.BOTH -> scheduleSettings.homeAlbumId
-            ScreenType.LOCK -> scheduleSettings.lockAlbumId
-            ScreenType.LIVE -> scheduleSettings.liveAlbumId
-        }
+        val selectedId = scheduleSettings.albumId(selection)
         AlbumSelectionBottomSheet(
             albums = albums,
             selectedAlbumId = selectedId,

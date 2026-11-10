@@ -46,6 +46,14 @@ data class ScheduleSettings(
         }
     }
 
+    fun isRotating(mode: WallpaperMode): Boolean = enableChanger && hasRequiredAlbums(mode)
+
+    fun albumId(screen: ScreenType): String? = when (screen) {
+        ScreenType.HOME, ScreenType.BOTH -> homeAlbumId
+        ScreenType.LOCK -> lockAlbumId
+        ScreenType.LIVE -> liveAlbumId
+    }
+
     fun intervalMinutes(screen: ScreenType): Int = when (screen) {
         ScreenType.HOME, ScreenType.BOTH -> homeIntervalMinutes
         ScreenType.LOCK -> effectiveLockIntervalMinutes

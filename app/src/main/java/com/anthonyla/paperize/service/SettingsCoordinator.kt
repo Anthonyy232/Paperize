@@ -41,7 +41,7 @@ class SettingsCoordinator @Inject constructor(
             settings = settings.copy(enableChanger = false)
         }
         scheduler.updateSchedules(settings, mode)
-        if (albumId != null && settings.enableChanger && settings.hasRequiredAlbums(mode) && mode == WallpaperMode.STATIC) {
+        if (albumId != null && settings.isRotating(mode) && mode == WallpaperMode.STATIC) {
             val active = settings.activeScreens(mode)
             WallpaperChangeService.changeWallpaper(context, if (ScreenType.BOTH in active) ScreenType.BOTH else screen)
         }
@@ -80,9 +80,7 @@ class SettingsCoordinator @Inject constructor(
         }
         val mode = settingsRepository.getWallpaperMode()
         if (updated.hasSchedulingChanges(previous)) scheduler.updateSchedules(updated, mode)
-        if (updated.hasDisplayChanges(previous) && updated.enableChanger &&
-            updated.hasRequiredAlbums(mode) && mode == WallpaperMode.STATIC
-        ) {
+        if (updated.hasDisplayChanges(previous) && updated.isRotating(mode) && mode == WallpaperMode.STATIC) {
             WallpaperChangeService.reapplyEffects(context)
         }
     }

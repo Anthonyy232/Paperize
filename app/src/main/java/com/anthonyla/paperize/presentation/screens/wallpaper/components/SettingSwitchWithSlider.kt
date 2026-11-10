@@ -20,11 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.components.SettingSwitchRow
 import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlin.math.roundToInt
@@ -95,40 +95,12 @@ fun SettingSwitchWithSlider(
                 }
             )
         } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics(mergeDescendants = true) {},
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
-                ) {
-                    Text(
-                        text = stringResource(title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (!checked) {
-                        Text(
-                            text = stringResource(description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
-            }
+            SettingSwitchRow(
+                title = stringResource(title),
+                description = if (checked) null else stringResource(description),
+                checked = checked,
+                onCheckedChange = onCheckedChange
+            )
 
             if (checked) {
                 PercentageSlider(

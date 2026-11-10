@@ -1,7 +1,5 @@
 package com.anthonyla.paperize.domain.model
 
-import android.net.Uri
-
 data class Wallpaper(
     val id: String,
     val albumId: String,
@@ -13,8 +11,5 @@ data class Wallpaper(
     val addedAt: Long = System.currentTimeMillis()
 ) {
     val displayFileName: String
-        get() = Uri.decode(fileName).let { decoded ->
-            decoded.substringAfterLast('/', decoded.substringAfterLast(':', decoded))
-        }
-
+        get() = decodedLastSegment(fileName)
 }

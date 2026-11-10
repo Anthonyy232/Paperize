@@ -42,40 +42,51 @@ fun SettingSwitchItem(
     description: String? = null
 ) {
     SettingsCard(modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)) {
-        Row(
+        SettingSwitchRow(title, description, checked, onCheckedChange)
+    }
+}
+
+@Composable
+fun SettingSwitchRow(
+    title: String,
+    description: String?,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .semantics(mergeDescendants = true) {},
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .weight(1f)
+                .padding(end = AppSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Text(
+                text = title,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (description != null) {
                 Text(
-                    text = title,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (description != null) {
-                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
-            Spacer(modifier = Modifier.width(AppSpacing.large))
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange
-            )
         }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }

@@ -76,11 +76,10 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Creates the album and returns null, or returns the string resource of the error to show. */
-    suspend fun createAlbum(name: String): Int? = when {
-        albums.value.any { it.name.equals(name, ignoreCase = true) } -> R.string.album_name_exists_error
-        runCatchingCancellable { createAlbumUseCase(name) }.isSuccess -> null
-        else -> R.string.album_create_failed
-    }
+    suspend fun createAlbum(name: String): Int? = runCatchingCancellable { createAlbumUseCase(name) }.fold(
+        onSuccess = { created -> if (created) null else R.string.album_name_exists_error },
+        onFailure = { R.string.album_create_failed }
+    )
 
     fun selectAlbum(screen: ScreenType, album: AlbumSummary?) {
         viewModelScope.launch { coordinator.selectAlbum(screen, album?.id) }

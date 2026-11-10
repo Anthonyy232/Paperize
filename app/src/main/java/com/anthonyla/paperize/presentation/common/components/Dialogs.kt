@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
@@ -49,6 +50,38 @@ fun AddAlbumDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isSaving) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+/** [enabled] false locks the dialog open while the confirmed action runs. */
+@Composable
+fun ConfirmDialog(
+    title: String,
+    text: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmLabel: String = stringResource(R.string.confirm),
+    confirmColor: Color = Color.Unspecified,
+    enabled: Boolean = true
+) {
+    AlertDialog(
+        onDismissRequest = { if (enabled) onDismiss() },
+        title = { Text(title) },
+        text = { Text(text) },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = enabled,
+                colors = ButtonDefaults.textButtonColors(contentColor = confirmColor)
+            ) {
+                Text(confirmLabel)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = enabled) {
                 Text(stringResource(R.string.cancel))
             }
         }
