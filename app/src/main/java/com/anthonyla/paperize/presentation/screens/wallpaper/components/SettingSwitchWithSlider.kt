@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -207,12 +208,10 @@ private fun PercentageSlider(
                 modifier = Modifier.padding(start = AppSpacing.medium)
             )
         }
-        Slider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = Constants.MIN_EFFECT_PERCENTAGE.toFloat()..
-                Constants.MAX_EFFECT_PERCENTAGE.toFloat(),
-            steps = Constants.SLIDER_EFFECT_STEPS
-        )
+        val state = remember {
+            SliderState(value, Constants.SLIDER_EFFECT_STEPS, Constants.MIN_EFFECT_PERCENTAGE.toFloat()..Constants.MAX_EFFECT_PERCENTAGE.toFloat())
+        }
+        state.value = value
+        Slider(state = state, onValueChange = onValueChange)
     }
 }
