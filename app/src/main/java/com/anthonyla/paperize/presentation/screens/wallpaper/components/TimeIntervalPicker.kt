@@ -2,15 +2,11 @@ package com.anthonyla.paperize.presentation.screens.wallpaper.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlinx.coroutines.delay
 
@@ -38,7 +35,6 @@ fun TimeIntervalPicker(
     title: String,
     minutes: Int,
     onMinutesChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
     minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES
 ) {
     val initialDays = minutes / Constants.MINUTES_PER_DAY
@@ -61,54 +57,44 @@ fun TimeIntervalPicker(
         }
     }
 
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+    SettingsCard(
+        modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
     ) {
-        Column(
-            modifier = Modifier.padding(AppSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.W500,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.small),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.W500,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.small),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NumberField(dayInput, Constants.MAX_DAYS_INPUT_LENGTH, R.string.days_txt) {
-                    dayInput = it
-                    edited = true
-                }
-                NumberField(hourInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.hours_txt) {
-                    hourInput = it
-                    edited = true
-                }
-                NumberField(minuteInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.mins) {
-                    minuteInput = it
-                    edited = true
-                }
+            NumberField(dayInput, Constants.MAX_DAYS_INPUT_LENGTH, R.string.days_txt) {
+                dayInput = it
+                edited = true
             }
-
-            Text(
-                text = "${stringResource(R.string.total_interval)} ${formatIntervalComposable(minutes)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            NumberField(hourInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.hours_txt) {
+                hourInput = it
+                edited = true
+            }
+            NumberField(minuteInput, Constants.MAX_HOURS_MINUTES_INPUT_LENGTH, R.string.mins) {
+                minuteInput = it
+                edited = true
+            }
         }
+
+        Text(
+            text = "${stringResource(R.string.total_interval)} ${formatIntervalComposable(minutes)}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

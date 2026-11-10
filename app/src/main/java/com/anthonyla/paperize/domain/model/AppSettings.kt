@@ -5,5 +5,4 @@ data class AppSettings(
     val dynamicTheming: Boolean = false,
     val animate: Boolean = true,
     val firstLaunch: Boolean = true
-) {
-}
+)

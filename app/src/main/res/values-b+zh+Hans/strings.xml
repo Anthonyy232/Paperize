@@ -72,9 +72,6 @@
   <string name="change_vignette">暗角效果</string>
   <string name="none">无</string>
   <string name="gray_filter">灰度滤镜</string>
-  <string name="folders">文件夹</string>
-  <string name="wallpapers_sort">壁纸</string>
-  <string name="close">关闭</string>
   <string name="shuffle">随机</string>
   <string name="days_txt">天</string>
   <string name="hours_txt">小时</string>
@@ -100,16 +97,12 @@
   <string name="notification_permission_title">开启通知</string>
   <string name="notification_permission_description">允许 Paperize 发送壁纸更换通知，以及在后台运行时显示通知。你可以随时在设置中更改。</string>
   <string name="skip">跳过</string>
-  <string name="permission_granted">已授予权限</string>
 
   <!-- Content Descriptions for Accessibility -->
   <string name="content_desc_clear_selection">清除选择</string>
   <string name="content_desc_select_all">全选</string>
   <string name="content_desc_delete_selected">删除所选</string>
-  <string name="content_desc_expand">展开</string>
   <string name="content_desc_collapse">收起</string>
-  <string name="content_desc_sort_items">排序项目</string>
-  <string name="content_desc_save">保存</string>
   <string name="content_desc_current_lock_wallpaper">当前锁屏壁纸</string>
   <string name="content_desc_current_home_wallpaper">当前主屏幕壁纸</string>
 
@@ -135,10 +128,6 @@
   <string name="sort_date_added_desc">添加日期（最新优先）</string>
   <string name="sort_date_modified_asc">修改日期（最早优先）</string>
   <string name="sort_date_modified_desc">修改日期（最新优先）</string>
-  <string name="sort_a_z">按 A-Z 排序</string>
-  <string name="sort_z_a">按 Z-A 排序</string>
-  <string name="sort_by_newest">按最新排序</string>
-  <string name="sort_by_oldest">按最早排序</string>
 
   <!-- Time Interval Picker -->
   <string name="mins">分钟</string>
@@ -223,7 +212,5 @@
   <string name="refresh_folder">刷新文件夹</string>
   <string name="folder_refreshed">已检查文件夹中的新壁纸。</string>
   <string name="folder_refresh_failed">无法刷新此文件夹。请确认文件夹可访问后重试。</string>
-  <string name="sort_load_failed">无法加载相册。请返回后重试。</string>
-  <string name="sort_save_failed">无法保存顺序。请重试。</string>
   <string name="reset_failed">无法完成数据重置，请重试。</string>
 </resources>

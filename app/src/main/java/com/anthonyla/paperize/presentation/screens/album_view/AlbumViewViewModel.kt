@@ -15,7 +15,6 @@ import com.anthonyla.paperize.presentation.common.navigation.AlbumRoute
 import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -82,17 +81,16 @@ class AlbumViewViewModel @Inject constructor(
         _message.value = null
         _importProgress.value = initialProgress
         importJob = viewModelScope.launch {
-            try {
-                if (!block()) _message.value = R.string.import_already_added
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Import permission failed", e)
-                _message.value = R.string.import_permission_error
-            } catch (e: Exception) {
-                Log.e(TAG, "Import failed", e)
-                _message.value = R.string.import_failed
-            }
+            runCatchingCancellable { block() }
+                .onSuccess { added -> if (!added) _message.value = R.string.import_already_added }
+                .onFailure { e ->
+                    Log.e(TAG, "Import failed", e)
+                    _message.value = if (e is SecurityException) {
+                        R.string.import_permission_error
+                    } else {
+                        R.string.import_failed
+                    }
+                }
         }.also { job ->
             job.invokeOnCompletion { _importProgress.value = ImportProgress.Idle }
         }
@@ -106,35 +104,25 @@ class AlbumViewViewModel @Inject constructor(
         _isDeleting.value = true
         viewModelScope.launch {
             try {
-                deleteAlbumUseCase(albumId)
-                _albumDeleted.value = true
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e(TAG, "Error deleting album", e)
-                _message.value = R.string.delete_album_failed
+                runCatchingCancellable { deleteAlbumUseCase(albumId) }
+                    .onSuccess { _albumDeleted.value = true }
+                    .onFailure { e ->
+                        Log.e(TAG, "Error deleting album", e)
+                        _message.value = R.string.delete_album_failed
+                    }
             } finally {
                 _isDeleting.value = false
             }
         }
     }
 
-    fun toggleWallpaperSelection(wallpaperId: String) {
-        if (_isDeleting.value) return
-        _selectedWallpapers.value = if (wallpaperId in _selectedWallpapers.value) {
-            _selectedWallpapers.value - wallpaperId
-        } else {
-            _selectedWallpapers.value + wallpaperId
-        }
-    }
+    fun toggleWallpaperSelection(wallpaperId: String) = toggle(_selectedWallpapers, wallpaperId)
 
-    fun toggleFolderSelection(folderId: String) {
+    fun toggleFolderSelection(folderId: String) = toggle(_selectedFolders, folderId)
+
+    private fun toggle(selection: MutableStateFlow<Set<String>>, id: String) {
         if (_isDeleting.value) return
-        _selectedFolders.value = if (folderId in _selectedFolders.value) {
-            _selectedFolders.value - folderId
-        } else {
-            _selectedFolders.value + folderId
-        }
+        selection.value = if (id in selection.value) selection.value - id else selection.value + id
     }
 
     fun selectAll() {

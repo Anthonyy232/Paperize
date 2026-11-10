@@ -29,16 +29,14 @@ class GLPicture(
     val height = bitmap.height
 
     private val tiles: Array<Tile>
-    private val cols: Int
-    private val rows: Int
 
     init {
         require(!bitmap.isRecycled) { "Cannot create GLPicture from recycled bitmap" }
         // Some drivers misreport GL_MAX_TEXTURE_SIZE; 4096 is safe on every device.
         val tileSize = minOf(GLUtil.getMaxTextureSize(), MAX_TILE_SIZE)
 
-        cols = ceil(width.toFloat() / tileSize).toInt()
-        rows = ceil(height.toFloat() / tileSize).toInt()
+        val cols = ceil(width.toFloat() / tileSize).toInt()
+        val rows = ceil(height.toFloat() / tileSize).toInt()
 
         Log.d(TAG, "Creating GLPicture: ${width}x${height}, tiling to ${cols}x${rows} (tile size: $tileSize)")
 
@@ -90,15 +88,13 @@ class GLPicture(
         tiles = partialTiles.toTypedArray()
     }
 
+    /** Draws with the currently bound program; the handles must belong to it. */
     fun draw(
-        program: Int,
         aPositionHandle: Int,
         aTexCoordHandle: Int,
         mvpMatrix: FloatArray,
         uMvpMatrixHandle: Int
     ) {
-        GLES20.glUseProgram(program)
-
         GLES20.glEnableVertexAttribArray(aPositionHandle)
         GLES20.glEnableVertexAttribArray(aTexCoordHandle)
 
@@ -123,10 +119,7 @@ class GLPicture(
         GLES20.glDisableVertexAttribArray(aTexCoordHandle)
     }
 
-    /**
-     * Recycle all tile textures and free GPU memory.
-     * Must be called on GL thread.
-     */
+    /** Must be called on the GL thread. */
     fun recycle() {
         for (tile in tiles) {
             GLUtil.deleteTexture(tile.textureId)
@@ -166,8 +159,4 @@ class GLPicture(
         val vertexBuffer: FloatBuffer,
         val texCoordBuffer: FloatBuffer
     )
-
-    override fun toString(): String {
-        return "GLPicture(size=${width}x${height}, tiles=${cols}x${rows})"
-    }
 }

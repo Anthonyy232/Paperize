@@ -36,17 +36,12 @@ object BrightnessCalculator {
     }
 
     fun getAdaptiveMultiplier(isDarkMode: Boolean, brightness: Float): Float {
-        val lightBrightnessMin = Constants.LIGHT_BRIGHTNESS_MIN
-        val darkBrightnessMax = Constants.DARK_BRIGHTNESS_MAX
-        val targetBrightnessDark = Constants.TARGET_BRIGHTNESS_DARK
-        val targetBrightnessLight = Constants.TARGET_BRIGHTNESS_LIGHT
-
         // Avoid issues with very dark items or division by zero
         if (brightness < 0.01f) return 1.0f
 
         return when {
-            isDarkMode && brightness > lightBrightnessMin -> targetBrightnessDark / brightness
-            !isDarkMode && brightness < darkBrightnessMax -> targetBrightnessLight / brightness
+            isDarkMode && brightness > Constants.LIGHT_BRIGHTNESS_MIN -> Constants.TARGET_BRIGHTNESS_DARK / brightness
+            !isDarkMode && brightness < Constants.DARK_BRIGHTNESS_MAX -> Constants.TARGET_BRIGHTNESS_LIGHT / brightness
             else -> 1.0f
         }
     }

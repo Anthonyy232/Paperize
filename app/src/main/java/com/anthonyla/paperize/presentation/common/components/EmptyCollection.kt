@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 @Composable
@@ -36,7 +37,7 @@ fun EmptyCollection(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
             Icon(Icons.Outlined.PhotoLibrary, contentDescription = null,
-                modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                modifier = Modifier.size(AppIconSizes.huge), tint = MaterialTheme.colorScheme.primary)
             Text(title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
             Text(hint, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)

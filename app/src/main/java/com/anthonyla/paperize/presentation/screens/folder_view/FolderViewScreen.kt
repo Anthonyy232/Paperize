@@ -1,24 +1,20 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,37 +25,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.presentation.common.components.BackTopAppBar
 import com.anthonyla.paperize.presentation.common.components.EmptyCollection
-import com.anthonyla.paperize.presentation.common.theme.AppGrid
-import com.anthonyla.paperize.presentation.common.theme.AppSpacing
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
-import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
-import com.anthonyla.paperize.presentation.screens.folder_view.components.FolderViewTopBar
-
+import com.anthonyla.paperize.presentation.common.components.SnackbarMessageEffect
+import com.anthonyla.paperize.presentation.common.components.SortBottomSheet
+import com.anthonyla.paperize.presentation.common.components.SortOption
+import com.anthonyla.paperize.presentation.common.components.WallpaperGrid
+import com.anthonyla.paperize.presentation.common.components.WallpaperItem
+import com.anthonyla.paperize.presentation.common.components.wallpaperGridItem
 
 @Composable
 fun FolderViewScreen(
     onBackClick: () -> Unit,
-    onNavigateToWallpaperView: (String, String, String) -> Unit,
+    onNavigateToWallpaperView: (Wallpaper) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FolderViewViewModel = hiltViewModel()
 ) {
-    val lazyListState = rememberLazyGridState()
-
     val folder by viewModel.folder.collectAsStateWithLifecycle()
     val wallpapers = folder?.wallpapers.orEmpty()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
-    val snackbarHost = remember { SnackbarHostState() }
-    val messageText = message?.let { stringResource(it) }
-    LaunchedEffect(messageText) {
-        messageText?.let {
-            snackbarHost.showSnackbar(it)
-            viewModel.dismissMessage()
-        }
-    }
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarMessageEffect(message, snackbarHostState, viewModel::dismissMessage)
 
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
@@ -69,15 +57,16 @@ fun FolderViewScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHost) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            FolderViewTopBar(
-                title = folder?.displayName ?: "",
-                onBackClick = onBackClick,
-                onSortClick = { showSortSheet = true },
-                isRefreshing = isRefreshing,
-                onRefreshClick = viewModel::refresh
-            )
+            BackTopAppBar(title = folder?.displayName ?: "", onBack = onBackClick) {
+                IconButton(onClick = viewModel::refresh, enabled = !isRefreshing) {
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh_folder))
+                }
+                IconButton(onClick = { showSortSheet = true }) {
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.sort))
+                }
+            }
         }
     ) { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
@@ -87,14 +76,7 @@ fun FolderViewScreen(
                     hint = stringResource(R.string.folder_empty_hint)
                 )
             } else {
-                LazyVerticalGrid(
-                    state = lazyListState,
-                    modifier = Modifier.fillMaxSize(),
-                    columns = GridCells.Adaptive(AppGrid.itemMinSize),
-                    contentPadding = PaddingValues(AppSpacing.gridPadding),
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing)
-                ) {
+                WallpaperGrid {
                     items(
                         items = sortedWallpapers,
                         key = { wallpaper -> wallpaper.id }
@@ -104,23 +86,9 @@ fun FolderViewScreen(
                             wallpaperName = wallpaper.displayFileName,
                             isSelected = false,
                             isSelectionMode = false,
-                            onClick = {
-                                onNavigateToWallpaperView(
-                                    wallpaper.id,
-                                    wallpaper.uri,
-                                    wallpaper.fileName
-                                )
-                            },
+                            onClick = { onNavigateToWallpaperView(wallpaper) },
                             onLongClick = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(Constants.WALLPAPER_ASPECT_RATIO)
-                                .animateItem(
-                                    placementSpec = tween(
-                                        durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                )
+                            modifier = Modifier.wallpaperGridItem(this)
                         )
                     }
                 }

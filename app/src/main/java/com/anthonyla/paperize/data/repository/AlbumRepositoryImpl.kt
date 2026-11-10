@@ -118,27 +118,6 @@ class AlbumRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun reorderAlbum(
-        albumId: String,
-        folders: List<Folder>,
-        wallpapers: List<Wallpaper>
-    ) {
-        database.withTransaction {
-            folders.forEachIndexed { index, folder ->
-                folderDao.updateFolderOrder(albumId, folder.id, index)
-            }
-            // Rotation follows direct images, then each folder in the saved order.
-            (wallpapers.asSequence() + folders.asSequence().flatMap { it.wallpapers })
-                .forEachIndexed { index, wallpaper ->
-                    wallpaperDao.updateAlbumWallpaperOrder(albumId, wallpaper.id, index)
-                }
-            folderDao.refreshFolderCovers(albumId)
-            updateAlbumCoverIfNeeded(albumId)
-            albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
-            database.wallpaperQueueDao().clearAllQueues(albumId)
-        }
-    }
-
     override suspend fun removeWallpapersFromAlbum(
         albumId: String,
         wallpaperIds: List<String>

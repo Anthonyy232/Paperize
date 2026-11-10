@@ -12,18 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WallpaperCurrentDao {
 
-    /**
-     * Return the wallpaper entity that was last applied for this album/screen,
-     * or null if none has been recorded yet (or if it was deleted via CASCADE).
-     */
-    @Query("""
-        SELECT w.* FROM wallpapers w
-        INNER JOIN wallpaper_current wc ON w.id = wc.wallpaperId
-        WHERE wc.albumId = :albumId AND wc.screenType = :screenType
-        LIMIT 1
-    """)
-    suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): WallpaperEntity?
-
+    /** Emits null until a wallpaper is applied, and again if that wallpaper or album is deleted. */
     @Query("""
         SELECT w.* FROM wallpapers w
         INNER JOIN wallpaper_current wc ON w.id = wc.wallpaperId

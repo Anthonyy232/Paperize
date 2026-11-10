@@ -30,15 +30,13 @@ import com.anthonyla.paperize.R
 fun AddAlbumAnimatedFab(
     isLoading: Boolean,
     onImageClick: () -> Unit,
-    onFolderClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onFolderClick: () -> Unit
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
 
     FloatingActionButtonMenu(
-        modifier = modifier,
         expanded = fabMenuExpanded,
         button = {
             ToggleFloatingActionButton(

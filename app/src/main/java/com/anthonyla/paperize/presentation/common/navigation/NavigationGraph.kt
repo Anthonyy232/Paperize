@@ -4,14 +4,13 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.anthonyla.paperize.core.util.PermissionUtil
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.presentation.common.navigation.util.enterTransitionBackward
 import com.anthonyla.paperize.presentation.common.navigation.util.enterTransitionForward
 import com.anthonyla.paperize.presentation.common.navigation.util.exitTransitionBackward
@@ -22,17 +21,15 @@ import com.anthonyla.paperize.presentation.screens.home.HomeScreen
 import com.anthonyla.paperize.presentation.screens.notification.NotificationPermissionScreen
 import com.anthonyla.paperize.presentation.screens.privacy.PrivacyScreen
 import com.anthonyla.paperize.presentation.screens.settings.SettingsScreen
-import com.anthonyla.paperize.presentation.screens.sort.SortViewScreen
 import com.anthonyla.paperize.presentation.screens.startup.StartupScreen
+import com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection.WallpaperModeSelectionScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper_view.WallpaperViewScreen
 
 @Composable
 fun NavigationGraph(
-    modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
-    startDestination: Any = StartupRoute,
-    animate: Boolean = true,
-    onFirstLaunchComplete: () -> Unit = {}
+    startDestination: Any,
+    animate: Boolean,
+    onFirstLaunchComplete: () -> Unit
 ) {
     val enterForward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
         if (animate) { { enterTransitionForward() } } else { { EnterTransition.None } }
@@ -42,12 +39,17 @@ fun NavigationGraph(
         if (animate) { { enterTransitionBackward() } } else { { EnterTransition.None } }
     val exitBackward: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
         if (animate) { { exitTransitionBackward() } } else { { ExitTransition.None } }
-    val context = androidx.compose.ui.platform.LocalContext.current
-    
+    val context = LocalContext.current
+    val navController = rememberNavController()
+    val viewWallpaper: (Wallpaper) -> Unit = { wallpaper ->
+        navController.navigate(
+            WallpaperViewRoute(wallpaper.id, wallpaper.uri, wallpaper.displayFileName)
+        )
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier,
         enterTransition = enterForward,
         exitTransition = exitForward,
         popEnterTransition = enterBackward,
@@ -67,7 +69,7 @@ fun NavigationGraph(
         }
 
         composable<WallpaperModeSelectionRoute> {
-            com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection.WallpaperModeSelectionScreen(
+            WallpaperModeSelectionScreen(
                 onModeSelected = {
                     if (!PermissionUtil.hasNotificationPermission(context)) {
                         navController.navigate(NotificationRoute) {
@@ -111,37 +113,19 @@ fun NavigationGraph(
                 onNavigateToFolder = { folderId ->
                     navController.navigate(FolderRoute(folderId))
                 },
-                onNavigateToWallpaperView = { wallpaperId, wallpaperUri, wallpaperName ->
-                    navController.navigate(
-                        WallpaperViewRoute(wallpaperId, wallpaperUri, wallpaperName)
-                    )
-                }
-            )
-        }
-
-        composable<SortRoute> {
-            SortViewScreen(
-                onSaveClick = { navController.popBackStack() },
-                onBackClick = { navController.popBackStack() }
+                onNavigateToWallpaperView = viewWallpaper
             )
         }
 
         composable<FolderRoute> {
             FolderViewScreen(
                 onBackClick = { navController.popBackStack() },
-                onNavigateToWallpaperView = { wallpaperId, wallpaperUri, wallpaperName ->
-                    navController.navigate(
-                        WallpaperViewRoute(wallpaperId, wallpaperUri, wallpaperName)
-                    )
-                }
+                onNavigateToWallpaperView = viewWallpaper
             )
         }
 
-        composable<WallpaperViewRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<WallpaperViewRoute>()
+        composable<WallpaperViewRoute> {
             WallpaperViewScreen(
-                wallpaperUri = route.wallpaperUri,
-                wallpaperName = route.wallpaperName,
                 onBackClick = { navController.popBackStack() }
             )
         }

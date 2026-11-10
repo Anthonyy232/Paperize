@@ -18,6 +18,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
+import com.anthonyla.paperize.data.source.isDocumentMissing
+import com.anthonyla.paperize.data.source.scanFolderImages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -92,7 +94,7 @@ class DocumentAccessInstrumentedTest {
         val found = treeUri.scanFolderImages(context)
         assertEquals(1, found.size)
         assertEquals("photo.PNG", found.single().name)
-        assertEquals(42L, found.single().lastModified)
+        assertEquals(42L, found.single().modifiedAt)
         assertEquals(2, provider.queries)
     }
 

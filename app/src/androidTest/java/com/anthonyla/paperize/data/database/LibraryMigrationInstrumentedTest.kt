@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import com.anthonyla.paperize.core.ScreenType
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -32,7 +33,7 @@ class LibraryMigrationInstrumentedTest {
                     assertEquals(42L, image.addedAt)
                     assertEquals("content://image", db.folderDao().getFolderById("folder")?.coverUri)
                     assertEquals(listOf("image"), db.wallpaperQueueDao().getQueueItems("album", ScreenType.HOME).map { it.wallpaperId })
-                    assertEquals(if (version >= 3) "image" else null, db.wallpaperCurrentDao().getCurrentWallpaper("album", ScreenType.HOME)?.id)
+                    assertEquals(if (version >= 3) "image" else null, db.wallpaperCurrentDao().getCurrentWallpaperFlow("album", ScreenType.HOME).first()?.id)
                     db.openHelper.readableDatabase.query("PRAGMA foreign_key_check").use { assertEquals(0, it.count) }
                     db.albumDao().deleteAlbumById("album")
                     assertNull(db.wallpaperDao().getWallpaperById("image"))

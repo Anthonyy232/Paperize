@@ -1,12 +1,16 @@
 package com.anthonyla.paperize.data.mapper
 
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
+import com.anthonyla.paperize.data.database.entities.AlbumSummaryEntity
 import com.anthonyla.paperize.data.database.relations.AlbumWithDetails
 import com.anthonyla.paperize.domain.model.Album
+import com.anthonyla.paperize.domain.model.AlbumSummary
+import com.anthonyla.paperize.domain.model.Folder
+import com.anthonyla.paperize.domain.model.Wallpaper
 
 fun AlbumEntity.toDomainModel(
-    wallpapers: List<com.anthonyla.paperize.domain.model.Wallpaper> = emptyList(),
-    folders: List<com.anthonyla.paperize.domain.model.Folder> = emptyList()
+    wallpapers: List<Wallpaper> = emptyList(),
+    folders: List<Folder> = emptyList()
 ): Album = Album(
     id = id,
     name = name,
@@ -41,13 +45,12 @@ fun AlbumWithDetails.toDomainModel(): Album {
     )
 }
 
-fun com.anthonyla.paperize.data.database.entities.AlbumSummaryEntity.toDomainModel(): com.anthonyla.paperize.domain.model.AlbumSummary =
-    com.anthonyla.paperize.domain.model.AlbumSummary(
-        id = id,
-        name = name,
-        coverUri = coverUri,
-        wallpaperCount = wallpaperCount,
-        folderCount = folderCount,
-        createdAt = createdAt,
-        modifiedAt = modifiedAt
-    )
+fun AlbumSummaryEntity.toDomainModel(): AlbumSummary = AlbumSummary(
+    id = id,
+    name = name,
+    coverUri = coverUri,
+    wallpaperCount = wallpaperCount,
+    folderCount = folderCount,
+    createdAt = createdAt,
+    modifiedAt = modifiedAt
+)

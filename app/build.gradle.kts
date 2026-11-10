@@ -110,7 +110,6 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.profileinstaller)
-    implementation(libs.reorderable)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

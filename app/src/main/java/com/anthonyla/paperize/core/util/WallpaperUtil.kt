@@ -1,5 +1,4 @@
 package com.anthonyla.paperize.core.util
-import com.anthonyla.paperize.core.constants.Constants
 
 import android.content.Context
 import android.content.res.Configuration
@@ -20,6 +19,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
 import android.hardware.display.DisplayManager
@@ -35,6 +35,9 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
+import com.anthonyla.paperize.core.ScreenType
+import com.anthonyla.paperize.core.constants.Constants
+import kotlin.math.hypot
 
 private const val TAG = "WallpaperUtil"
 private const val BUILT_IN_DISPLAY_CATEGORY =
@@ -166,13 +169,13 @@ internal fun selectLargestDisplayDimensions(
  * FIT/STRETCH/NONE use an exact launcher canvas so Android cannot rescale them into FILL.
  */
 internal fun usesLauncherManagedScrolling(
-    screenType: com.anthonyla.paperize.core.ScreenType,
+    screenType: ScreenType,
     scaling: ScalingType,
     scrollingEnabled: Boolean
 ): Boolean =
     scrollingEnabled &&
-        (screenType == com.anthonyla.paperize.core.ScreenType.HOME ||
-        screenType == com.anthonyla.paperize.core.ScreenType.BOTH) &&
+        (screenType == ScreenType.HOME ||
+        screenType == ScreenType.BOTH) &&
         scaling == ScalingType.FILL
 
 fun retrieveBitmap(
@@ -198,7 +201,7 @@ fun retrieveBitmap(
             ) {
                 val cropX = ((targetW - width) / 2).coerceAtLeast(0)
                 val cropY = ((targetH - height) / 2).coerceAtLeast(0)
-                decoder.setCrop(android.graphics.Rect(cropX, cropY, cropX + width, cropY + height))
+                decoder.setCrop(Rect(cropX, cropY, cropX + width, cropY + height))
             }
 
             decoder.isMutableRequired = true
@@ -301,7 +304,7 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
         val matrix = getExifTransformationMatrix(orientation, source.width, source.height)
         val rotated = Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
         if (rotated != source) {
-            source.recycle() // Recycle old bitmap to free memory
+            source.recycle()
         }
         rotated
     } catch (e: Exception) {
@@ -316,7 +319,7 @@ private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bi
 private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) {
     val centerX = width / 2f
     val centerY = height / 2f
-    val radius = (kotlin.math.hypot(centerX, centerY) *
+    val radius = (hypot(centerX, centerY) *
         (1 - percent.coerceIn(0, 100) / Constants.VIGNETTE_DIVISOR))
         .coerceAtLeast(Constants.VIGNETTE_MIN_RADIUS)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -333,10 +336,6 @@ private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) 
     canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 }
 
-/**
- * Adjust bitmap brightness by a multiplier
- * @param brightnessFactor Brightness multiplier (e.g., 0.7 to darken, 1.5 to brighten)
- */
 fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
     if (brightnessFactor == 1.0f) return source
     if (!source.isMutable) {

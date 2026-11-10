@@ -1,7 +1,9 @@
-package com.anthonyla.paperize.presentation.screens.album_view.components
+package com.anthonyla.paperize.presentation.common.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -24,8 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
@@ -46,6 +48,16 @@ enum class SortOption(val labelRes: Int) {
             DATE_MODIFIED_ASC -> compareBy { it.dateModified }
             DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
         }
+
+    val folderComparator: Comparator<Folder>
+        get() = when (this) {
+            NAME_ASC -> compareBy { it.name.lowercase() }
+            NAME_DESC -> compareByDescending { it.name.lowercase() }
+            DATE_ADDED_ASC -> compareBy { it.addedAt }
+            DATE_ADDED_DESC -> compareByDescending { it.addedAt }
+            DATE_MODIFIED_ASC -> compareBy { it.dateModified }
+            DATE_MODIFIED_DESC -> compareByDescending { it.dateModified }
+        }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,8 +65,7 @@ enum class SortOption(val labelRes: Int) {
 fun SortBottomSheet(
     selectedOption: SortOption,
     onSortSelected: (SortOption) -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    onDismiss: () -> Unit
 ) {
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -63,8 +74,7 @@ fun SortBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        modifier = modifier
+        sheetState = sheetState
     ) {
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).selectableGroup()) {
             Text(
@@ -99,7 +109,7 @@ fun SortBottomSheet(
                     )
                 )
             }
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(bottom = 16.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
         }
     }
 }

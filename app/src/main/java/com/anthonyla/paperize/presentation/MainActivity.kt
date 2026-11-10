@@ -38,13 +38,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (currentSettings != null) {
+                    currentSettings?.let { settings ->
                         NavigationGraph(
-                            startDestination = if (currentSettings?.firstLaunch != false) StartupRoute else HomeRoute,
-                            animate = currentSettings?.animate ?: true,
-                            onFirstLaunchComplete = {
-                                settingsViewModel.updateFirstLaunch(false)
-                            }
+                            startDestination = if (settings.firstLaunch) StartupRoute else HomeRoute,
+                            animate = settings.animate,
+                            onFirstLaunchComplete = settingsViewModel::completeFirstLaunch
                         )
                     }
                 }

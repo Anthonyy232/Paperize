@@ -59,10 +59,6 @@ object GLShaders {
         }
     """
 
-    /**
-     * Fragment shader for color effects (darken, vignette, grayscale).
-     * Applied after blur passes. Uses branchless math for optimal GPU performance.
-     */
     const val EFFECTS_FRAGMENT_SHADER = """
         precision mediump float;
         uniform sampler2D u_texture;
@@ -79,9 +75,10 @@ object GLShaders {
  
             color.rgb *= (1.0 - u_darkenFactor);
  
-            // 2. Apply vignette — matches drawVignette gradient stops in WallpaperUtil:
-            //    [0% dark at center] → [10% dark at 70% of radius] → [80% dark at edge]
-            //    radius is normalized to 0.5 UV (image edge along shorter axis)
+            // Vignette: darkening ramps to 10% at 70% of the radius and 80% at the edge,
+            // scaled by u_vignetteFactor over a fixed radius of 0.5 in image coordinates.
+            // The static path (drawVignette in WallpaperUtil) instead shrinks its radius
+            // with the percentage, so the two looks do not match.
             vec2 vignetteCenter = v_imageCoord - 0.5;
             float dist = length(vignetteCenter);
             float t = clamp(dist / 0.5, 0.0, 1.0);
@@ -90,7 +87,7 @@ object GLShaders {
             float darkAmount = innerDark + outerDark;
             color.rgb *= (1.0 - darkAmount * u_vignetteFactor);
  
-            // 3. Apply grayscale (branchless - mix handles factor 0 correctly)
+            // Grayscale (branchless - mix handles factor 0 correctly)
             // ITU-R BT.709 standard luminance calculation
             float gray = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
             color.rgb = mix(color.rgb, vec3(gray), u_grayscaleFactor);

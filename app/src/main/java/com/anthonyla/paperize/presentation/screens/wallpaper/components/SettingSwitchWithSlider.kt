@@ -4,12 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -27,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlin.math.roundToInt
 
@@ -43,7 +41,6 @@ fun SettingSwitchWithSlider(
     homePercentage: Int,
     lockPercentage: Int,
     onPercentageChange: (Int, Int) -> Unit,
-    modifier: Modifier = Modifier,
     homeChecked: Boolean = checked,
     lockChecked: Boolean = checked,
     onHomeCheckedChange: (Boolean) -> Unit = onCheckedChange,
@@ -56,102 +53,91 @@ fun SettingSwitchWithSlider(
         mutableFloatStateOf(lockPercentage.toFloat())
     }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        )
+    SettingsCard(
+        modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+        contentModifier = Modifier.animateContentSize(),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
     ) {
-        Column(
-            modifier = Modifier
-                .animateContentSize()
-                .padding(AppSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.large)
-        ) {
-            if (bothEnabled) {
-                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)) {
+        if (bothEnabled) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)) {
+                Text(
+                    text = stringResource(title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            ScreenEffectControl(
+                label = R.string.home,
+                checked = homeChecked,
+                onCheckedChange = onHomeCheckedChange,
+                value = homeValue,
+                onValueChange = {
+                    homeValue = it
+                    onPercentageChange(it.roundToInt(), lockValue.roundToInt())
+                }
+            )
+            ScreenEffectControl(
+                label = R.string.lock,
+                checked = lockChecked,
+                onCheckedChange = onLockCheckedChange,
+                value = lockValue,
+                onValueChange = {
+                    lockValue = it
+                    onPercentageChange(homeValue.roundToInt(), it.roundToInt())
+                }
+            )
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {},
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
+                ) {
                     Text(
                         text = stringResource(title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = stringResource(description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (!checked) {
+                        Text(
+                            text = stringResource(description),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
+                Switch(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            }
 
-                ScreenEffectControl(
-                    label = R.string.home,
-                    checked = homeChecked,
-                    onCheckedChange = onHomeCheckedChange,
+            if (checked) {
+                PercentageSlider(
+                    label = description,
                     value = homeValue,
                     onValueChange = {
                         homeValue = it
-                        onPercentageChange(it.roundToInt(), lockValue.roundToInt())
+                        onPercentageChange(it.roundToInt(), it.roundToInt())
                     }
                 )
-                ScreenEffectControl(
-                    label = R.string.lock,
-                    checked = lockChecked,
-                    onCheckedChange = onLockCheckedChange,
-                    value = lockValue,
-                    onValueChange = {
-                        lockValue = it
-                        onPercentageChange(homeValue.roundToInt(), it.roundToInt())
-                    }
-                )
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .semantics(mergeDescendants = true) {},
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(AppSpacing.extraSmall)
-                    ) {
-                        Text(
-                            text = stringResource(title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        if (!checked) {
-                            Text(
-                                text = stringResource(description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    Switch(
-                        checked = checked,
-                        onCheckedChange = onCheckedChange
-                    )
-                }
-
-                if (checked) {
-                    PercentageSlider(
-                        label = description,
-                        value = homeValue,
-                        onValueChange = {
-                            homeValue = it
-                            onPercentageChange(it.roundToInt(), it.roundToInt())
-                        }
-                    )
-                }
             }
         }
     }

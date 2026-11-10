@@ -11,75 +11,51 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 
-/** Slides in with a delayed fade so the outgoing screen fades first. */
-fun sharedXTransitionIn(
-    initial: (fullWidth: Int) -> Int,
-    durationMillis: Int = NavConstants.NAVIGATION_TIME,
-): EnterTransition {
-    val outgoingDuration = (durationMillis * NavConstants.OFFSET_LIMIT).toInt()
-    val incomingDuration = durationMillis - outgoingDuration
+private val FADE_OUT_MILLIS = (NavConstants.NAVIGATION_TIME * NavConstants.FADE_OUT_FRACTION).toInt()
 
-    return slideInHorizontally(
+/** Slides in with a delayed fade so the outgoing screen fades first. */
+private fun sharedXTransitionIn(initial: (fullWidth: Int) -> Int): EnterTransition =
+    slideInHorizontally(
         animationSpec = tween(
-            durationMillis = durationMillis,
+            durationMillis = NavConstants.NAVIGATION_TIME,
             easing = FastOutSlowInEasing
         ),
         initialOffsetX = initial
     ) + fadeIn(
         animationSpec = tween(
-            durationMillis = incomingDuration,
-            delayMillis = outgoingDuration,
+            durationMillis = NavConstants.NAVIGATION_TIME - FADE_OUT_MILLIS,
+            delayMillis = FADE_OUT_MILLIS,
             easing = LinearOutSlowInEasing
         )
     )
-}
 
 /** Slides out while fading immediately to make room for the incoming screen. */
-fun sharedXTransitionOut(
-    target: (fullWidth: Int) -> Int,
-    durationMillis: Int = NavConstants.NAVIGATION_TIME,
-): ExitTransition {
-    val outgoingDuration = (durationMillis * NavConstants.OFFSET_LIMIT).toInt()
-
-    return slideOutHorizontally(
+private fun sharedXTransitionOut(target: (fullWidth: Int) -> Int): ExitTransition =
+    slideOutHorizontally(
         animationSpec = tween(
-            durationMillis = durationMillis,
+            durationMillis = NavConstants.NAVIGATION_TIME,
             easing = FastOutSlowInEasing
         ),
         targetOffsetX = target
     ) + fadeOut(
         animationSpec = tween(
-            durationMillis = outgoingDuration,
-            delayMillis = 0,
+            durationMillis = FADE_OUT_MILLIS,
             easing = FastOutLinearInEasing
         )
     )
-}
 
-/**
- * Standard forward navigation enter transition (slide in from right)
- */
 fun enterTransitionForward(): EnterTransition = sharedXTransitionIn(
     initial = { fullWidth -> (fullWidth * NavConstants.INITIAL_OFFSET).toInt() }
 )
 
-/**
- * Standard forward navigation exit transition (slide out to left)
- */
 fun exitTransitionForward(): ExitTransition = sharedXTransitionOut(
     target = { fullWidth -> -(fullWidth * NavConstants.INITIAL_OFFSET).toInt() }
 )
 
-/**
- * Standard backward navigation enter transition (slide in from left)
- */
 fun enterTransitionBackward(): EnterTransition = sharedXTransitionIn(
     initial = { fullWidth -> -(fullWidth * NavConstants.INITIAL_OFFSET).toInt() }
 )
 
-/**
- * Standard backward navigation exit transition (slide out to right)
- */
 fun exitTransitionBackward(): ExitTransition = sharedXTransitionOut(
     target = { fullWidth -> (fullWidth * NavConstants.INITIAL_OFFSET).toInt() }
 )

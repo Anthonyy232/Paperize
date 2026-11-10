@@ -44,8 +44,7 @@ import kotlin.math.min
 fun CurrentWallpaperPreview(
     homeWallpaperUri: String?,
     lockWallpaperUri: String?,
-    modifier: Modifier = Modifier,
-    animate: Boolean = true
+    animate: Boolean
 ) {
     val configuration = LocalConfiguration.current
 
@@ -57,7 +56,7 @@ fun CurrentWallpaperPreview(
     }
 
     Card(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 600.dp)
             .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),

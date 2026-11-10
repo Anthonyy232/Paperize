@@ -13,7 +13,6 @@ import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.core.constants.PreferenceKeys
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.WallpaperEffects
@@ -29,27 +28,27 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = Constants.PREFERENCES_NAME
 )
 
-private val DARK_MODE = booleanPreferencesKey(PreferenceKeys.DARK_MODE)
-private val DYNAMIC_THEMING = booleanPreferencesKey(PreferenceKeys.DYNAMIC_THEMING)
-private val ANIMATE = booleanPreferencesKey(PreferenceKeys.ANIMATE)
-private val FIRST_LAUNCH = booleanPreferencesKey(PreferenceKeys.FIRST_LAUNCH)
-private val WALLPAPER_MODE = stringPreferencesKey(PreferenceKeys.WALLPAPER_MODE)
-private val ENABLE_CHANGER = booleanPreferencesKey(PreferenceKeys.ENABLE_CHANGER)
-private val SEPARATE_SCHEDULES = booleanPreferencesKey(PreferenceKeys.SEPARATE_SCHEDULES)
-private val SHUFFLE_ENABLED = booleanPreferencesKey(PreferenceKeys.SHUFFLE_ENABLED)
-private val HOME_ENABLED = booleanPreferencesKey(PreferenceKeys.HOME_ENABLED)
-private val LOCK_ENABLED = booleanPreferencesKey(PreferenceKeys.LOCK_ENABLED)
-private val HOME_ALBUM_ID = stringPreferencesKey(PreferenceKeys.HOME_ALBUM_ID)
-private val LOCK_ALBUM_ID = stringPreferencesKey(PreferenceKeys.LOCK_ALBUM_ID)
-private val LIVE_ALBUM_ID = stringPreferencesKey(PreferenceKeys.LIVE_ALBUM_ID)
-private val HOME_INTERVAL_MINUTES = intPreferencesKey(PreferenceKeys.HOME_INTERVAL_MINUTES)
-private val LOCK_INTERVAL_MINUTES = intPreferencesKey(PreferenceKeys.LOCK_INTERVAL_MINUTES)
-private val LIVE_INTERVAL_MINUTES = intPreferencesKey(PreferenceKeys.LIVE_INTERVAL_MINUTES)
-private val HOME_SCALING_TYPE = stringPreferencesKey(PreferenceKeys.HOME_SCALING_TYPE)
-private val LOCK_SCALING_TYPE = stringPreferencesKey(PreferenceKeys.LOCK_SCALING_TYPE)
-private val LIVE_SCALING_TYPE = stringPreferencesKey(PreferenceKeys.LIVE_SCALING_TYPE)
-private val HOME_SCROLLING_ENABLED = booleanPreferencesKey(PreferenceKeys.HOME_SCROLLING_ENABLED)
-private val ADAPTIVE_BRIGHTNESS = booleanPreferencesKey(PreferenceKeys.ADAPTIVE_BRIGHTNESS)
+private val DARK_MODE = booleanPreferencesKey("dark_mode")
+private val DYNAMIC_THEMING = booleanPreferencesKey("dynamic_theming")
+private val ANIMATE = booleanPreferencesKey("animate")
+private val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
+private val WALLPAPER_MODE = stringPreferencesKey("wallpaper_mode")
+private val ENABLE_CHANGER = booleanPreferencesKey("enable_changer")
+private val SEPARATE_SCHEDULES = booleanPreferencesKey("separate_schedules")
+private val SHUFFLE_ENABLED = booleanPreferencesKey("shuffle_enabled")
+private val HOME_ENABLED = booleanPreferencesKey("home_enabled")
+private val LOCK_ENABLED = booleanPreferencesKey("lock_enabled")
+private val HOME_ALBUM_ID = stringPreferencesKey("home_album_id")
+private val LOCK_ALBUM_ID = stringPreferencesKey("lock_album_id")
+private val LIVE_ALBUM_ID = stringPreferencesKey("live_album_id")
+private val HOME_INTERVAL_MINUTES = intPreferencesKey("home_interval_minutes")
+private val LOCK_INTERVAL_MINUTES = intPreferencesKey("lock_interval_minutes")
+private val LIVE_INTERVAL_MINUTES = intPreferencesKey("live_interval_minutes")
+private val HOME_SCALING_TYPE = stringPreferencesKey("home_scaling_type")
+private val LOCK_SCALING_TYPE = stringPreferencesKey("lock_scaling_type")
+private val LIVE_SCALING_TYPE = stringPreferencesKey("live_scaling_type")
+private val HOME_SCROLLING_ENABLED = booleanPreferencesKey("home_scrolling_enabled")
+private val ADAPTIVE_BRIGHTNESS = booleanPreferencesKey("adaptive_brightness")
 
 /** Effect keys are "<screen>_<field>", e.g. "home_enable_blur" or "live_parallax_intensity". */
 private class EffectKeys(screen: String) {
@@ -179,8 +178,8 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[ANIMATE] = enabled }
     }
 
-    override suspend fun updateFirstLaunch(isFirstLaunch: Boolean) {
-        dataStore.edit { it[FIRST_LAUNCH] = isFirstLaunch }
+    override suspend fun completeFirstLaunch() {
+        dataStore.edit { it[FIRST_LAUNCH] = false }
     }
 
     override suspend fun updateEnableChanger(enabled: Boolean) {

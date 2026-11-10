@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.album_view.components
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,7 @@ import com.anthonyla.paperize.presentation.screens.album_view.ImportProgress
 
 @Composable
 fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
-    if (progress is ImportProgress.Idle) return
+    val active = progress as? ImportProgress.Active ?: return
 
     Dialog(
         onDismissRequest = {},
@@ -44,17 +45,9 @@ fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val titleRes = when (progress) {
-                    is ImportProgress.Scanning -> R.string.import_adding_folder
-                    else -> R.string.import_adding_wallpapers
-                }
-                Text(
-                    text = stringResource(titleRes),
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                when (progress) {
+                when (active) {
                     is ImportProgress.Scanning -> {
+                        Title(R.string.import_adding_folder)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -62,19 +55,20 @@ fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
                         ) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                             Text(
-                                text = stringResource(R.string.import_scanning, progress.found),
+                                text = stringResource(R.string.import_scanning, active.found),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
 
                     is ImportProgress.Saving -> {
+                        Title(R.string.import_adding_wallpapers)
                         Text(
-                            text = stringResource(R.string.import_saving, progress.saved, progress.total),
+                            text = stringResource(R.string.import_saving, active.saved, active.total),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         val fraction by animateFloatAsState(
-                            targetValue = if (progress.total > 0) progress.saved.toFloat() / progress.total else 0f,
+                            targetValue = if (active.total > 0) active.saved.toFloat() / active.total else 0f,
                             label = "importProgress"
                         )
                         LinearProgressIndicator(
@@ -84,8 +78,6 @@ fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
                                 .height(6.dp)
                         )
                     }
-
-                    ImportProgress.Idle -> Unit
                 }
                 TextButton(onClick = onCancel, modifier = Modifier.align(Alignment.End)) {
                     Text(stringResource(R.string.cancel))
@@ -93,4 +85,12 @@ fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun Title(@StringRes text: Int) {
+    Text(
+        text = stringResource(text),
+        style = MaterialTheme.typography.titleMedium
+    )
 }

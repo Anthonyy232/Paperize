@@ -63,7 +63,7 @@ Help translate Paperize into your language! Currently, most translations are pro
 
 ## Architecture
 
-- `AlbumRepository` owns library mutations. Imports, reordering, removal, covers,
+- `AlbumRepository` owns library mutations. Imports, removal, covers,
   and queue invalidation use Room transactions; provider scans run outside them.
 - `DocumentSource` and `WallpaperRenderer` (domain interfaces, Android implementations in
   `data/source`) keep use cases free of document-provider and bitmap-decoding details.

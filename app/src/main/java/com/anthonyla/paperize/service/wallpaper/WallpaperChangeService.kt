@@ -16,6 +16,7 @@ import com.anthonyla.paperize.core.NoValidWallpaperException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import com.anthonyla.paperize.presentation.MainActivity
@@ -23,7 +24,6 @@ import com.anthonyla.paperize.service.WallpaperChangeLock
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -52,21 +52,18 @@ class WallpaperChangeService : Service() {
         val wallpaperId = intent?.getStringExtra(EXTRA_WALLPAPER_ID)
         serviceScope.launch {
             wallpaperChangeLock.mutex.withLock {
-                try {
+                runCatchingCancellable {
                     when (action) {
                         ACTION_CHANGE_WALLPAPER -> changeWallpaper(screen)
                         ACTION_APPLY_SPECIFIC_WALLPAPER -> applySpecificWallpaper(wallpaperId, screen ?: ScreenType.BOTH)
                         ACTION_REAPPLY_EFFECTS -> reapplyEffects()
                         else -> Log.w(TAG, "Unknown action: $action")
                     }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
+                }.onFailure { e ->
                     Log.e(TAG, "Wallpaper action $action failed", e)
                     showErrorNotification(getString(R.string.app_name), errorMessage(e))
-                } finally {
-                    stopSelf(startId)
                 }
+                stopSelf(startId)
             }
         }
         return START_NOT_STICKY
@@ -103,7 +100,7 @@ class WallpaperChangeService : Service() {
         }
     }
 
-    private fun errorMessage(e: Exception): String = when (e) {
+    private fun errorMessage(e: Throwable): String = when (e) {
         is NoValidWallpaperException -> getString(R.string.error_no_valid_wallpaper_after_retries)
         else -> e.localizedMessage ?: getString(R.string.error_no_valid_wallpaper_after_retries)
     }

@@ -15,25 +15,6 @@ object GLGeometry {
         val horizontalOffset: Float
     )
 
-    data class CrossfadeAlphas(
-        val current: Float,
-        val next: Float
-    )
-
-    /**
-     * Alpha values for source-over crossfading.
-     *
-     * The current layer must stay opaque while the next layer fades over it. Fading
-     * both layers produces a visible brightness dip at the midpoint.
-     */
-    fun calculateCrossfadeAlphas(
-        progress: Float,
-        hasNextPicture: Boolean
-    ): CrossfadeAlphas {
-        val nextAlpha = if (hasNextPicture) progress.coerceIn(0f, 1f) else 0f
-        return CrossfadeAlphas(current = 1f, next = nextAlpha)
-    }
-
     fun calculateWallpaperTransform(
         viewWidth: Float,
         viewHeight: Float,
@@ -85,28 +66,20 @@ object GLGeometry {
         )
     }
 
-    /**
-     * Full-screen quad vertices in normalized device coordinates (-1 to 1).
-     * Layout: x, y for each vertex (2 floats per vertex, 4 vertices).
-     * Order: bottom-left, bottom-right, top-left, top-right (triangle strip).
-     */
+    /** Triangle-strip order: bottom-left, bottom-right, top-left, top-right. */
     val VERTICES = floatArrayOf(
-        -1.0f, -1.0f,  // Bottom-left
-         1.0f, -1.0f,  // Bottom-right
-        -1.0f,  1.0f,  // Top-left
-         1.0f,  1.0f   // Top-right
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+        -1.0f,  1.0f,
+         1.0f,  1.0f
     )
 
-    /**
-     * Standard texture coordinates (0 to 1, Y-flipped for OpenGL convention).
-     * Layout: u, v for each vertex (2 floats per vertex, 4 vertices).
-     * Order: bottom-left, bottom-right, top-left, top-right.
-     */
+    /** Y-flipped; same vertex order as [VERTICES]. */
     val TEX_COORDS = floatArrayOf(
-        0.0f, 1.0f,  // Bottom-left
-        1.0f, 1.0f,  // Bottom-right
-        0.0f, 0.0f,  // Top-left
-        1.0f, 0.0f   // Top-right
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f
     )
 
     fun createFloatBuffer(data: FloatArray): FloatBuffer {

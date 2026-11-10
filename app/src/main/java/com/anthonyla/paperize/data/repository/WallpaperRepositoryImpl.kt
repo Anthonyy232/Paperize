@@ -11,6 +11,7 @@ import com.anthonyla.paperize.domain.repository.WallpaperRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @Singleton
@@ -77,7 +78,7 @@ class WallpaperRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCurrentWallpaper(albumId: String, screenType: ScreenType): Wallpaper? =
-        wallpaperCurrentDao.getCurrentWallpaper(albumId, screenType)?.toDomainModel()
+        getCurrentWallpaperFlow(albumId, screenType).first()
 
     override fun getCurrentWallpaperFlow(albumId: String, screenType: ScreenType): Flow<Wallpaper?> =
         wallpaperCurrentDao.getCurrentWallpaperFlow(albumId, screenType).map { it?.toDomainModel() }

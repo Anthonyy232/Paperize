@@ -13,9 +13,8 @@ import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 fun AddAlbumDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    errorMessage: String? = null,
-    isSaving: Boolean = false
+    errorMessage: String?,
+    isSaving: Boolean
 ) {
     var albumName by rememberSaveable { mutableStateOf("") }
 
@@ -52,7 +51,6 @@ fun AddAlbumDialog(
             TextButton(onClick = onDismiss, enabled = !isSaving) {
                 Text(stringResource(R.string.cancel))
             }
-        },
-        modifier = modifier
+        }
     )
 }

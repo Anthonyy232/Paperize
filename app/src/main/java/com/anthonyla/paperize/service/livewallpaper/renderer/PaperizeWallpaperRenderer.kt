@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.core.util.BrightnessCalculator
+import com.anthonyla.paperize.core.util.getAdaptiveBrightnessMultiplier
 import com.anthonyla.paperize.core.ScalingType
 
 import android.content.Context
@@ -35,7 +37,6 @@ class PaperizeWallpaperRenderer(
 
     companion object {
         private const val TAG = "PaperizeRenderer"
-        private const val CROSSFADE_DURATION_MS = Constants.CROSSFADE_DURATION_MS
     }
 
     interface Callbacks {
@@ -171,29 +172,25 @@ class PaperizeWallpaperRenderer(
 
         val crossfadeProgress = if (next != null) {
             val elapsedMs = (System.nanoTime() - crossfadeStartTimeNanos) / 1_000_000f
-            (elapsedMs / CROSSFADE_DURATION_MS).coerceIn(0f, 1f)
+            (elapsedMs / Constants.CROSSFADE_DURATION_MS).coerceIn(0f, 1f)
         } else {
             0f
         }
 
-        val crossfadeAlphas = GLGeometry.calculateCrossfadeAlphas(
-            progress = crossfadeProgress,
-            hasNextPicture = next != null
-        )
-
+        // The current layer stays opaque while the next fades over it; fading both
+        // produces a visible brightness dip at the midpoint.
         current?.let { picture ->
-            drawPictureWithEffects(picture, crossfadeAlphas.current, blurRadius)
+            drawPictureWithEffects(picture, 1f, blurRadius)
         }
 
         next?.let { picture ->
-            drawPictureWithEffects(picture, crossfadeAlphas.next, blurRadius)
+            drawPictureWithEffects(picture, crossfadeProgress, blurRadius)
 
             if (crossfadeProgress >= 1.0f) {
                 currentPicture?.recycle()
                 currentPicture = picture
                 nextPicture = null
 
-                crossfadeStartTimeNanos = 0L
                 Log.d(TAG, "Crossfade complete")
             } else {
                 callbacks.requestRender()
@@ -228,9 +225,9 @@ class PaperizeWallpaperRenderer(
         GLES20.glUniform2f(blurDirectionHandle, 1f, 0f)
         GLES20.glUniform2f(blurResolutionHandle, surfaceWidth.toFloat(), surfaceHeight.toFloat())
         GLES20.glUniform1f(blurRadiusHandle, blurRadius)
-        GLES20.glUniform1i(blurTextureHandle, 0)  // Bind texture unit 0
+        GLES20.glUniform1i(blurTextureHandle, 0)
 
-        picture.draw(blurProgram, blurPositionHandle, blurTexCoordHandle, mvpMatrix, blurMvpMatrixHandle)
+        picture.draw(blurPositionHandle, blurTexCoordHandle, mvpMatrix, blurMvpMatrixHandle)
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo2)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -239,7 +236,7 @@ class PaperizeWallpaperRenderer(
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, blurTexture1)
 
         GLES20.glUniform2f(blurDirectionHandle, 0f, 1f)
-        drawQuad(blurPositionHandle, blurTexCoordHandle, blurMvpMatrixHandle, identityMatrix)
+        drawQuad(blurPositionHandle, blurTexCoordHandle, blurMvpMatrixHandle)
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
         GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight)
@@ -250,12 +247,12 @@ class PaperizeWallpaperRenderer(
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, blurTexture2)
         GLES20.glUniform1i(uTextureHandle, 0)
 
-        drawQuad(aPositionHandle, aTexCoordHandle, uMvpMatrixHandle, identityMatrix)
+        drawQuad(aPositionHandle, aTexCoordHandle, uMvpMatrixHandle)
     }
 
     private fun drawWithColorEffects(picture: GLPicture, alpha: Float) {
         setEffectUniforms(picture, alpha)
-        picture.draw(effectsProgram, aPositionHandle, aTexCoordHandle, mvpMatrix, uMvpMatrixHandle)
+        picture.draw(aPositionHandle, aTexCoordHandle, mvpMatrix, uMvpMatrixHandle)
     }
 
     private fun setEffectUniforms(picture: GLPicture, alpha: Float) {
@@ -264,15 +261,15 @@ class PaperizeWallpaperRenderer(
         GLES20.glUniform1f(uAlphaHandle, alpha)
         GLES20.glUniform1f(
             uDarkenFactorHandle,
-            if (currentEffects.enableDarken) currentEffects.darkenPercentage / Constants.PERCENTAGE_DIVISOR else 0f
+            if (currentEffects.enableDarken) currentEffects.darkenPercentage / 100f else 0f
         )
         GLES20.glUniform1f(
             uVignetteFactorHandle,
-            if (currentEffects.enableVignette) currentEffects.vignettePercentage / Constants.PERCENTAGE_DIVISOR else 0f
+            if (currentEffects.enableVignette) currentEffects.vignettePercentage / 100f else 0f
         )
         GLES20.glUniform1f(
             uGrayscaleFactorHandle,
-            if (currentEffects.enableGrayscale) currentEffects.grayscalePercentage / Constants.PERCENTAGE_DIVISOR else 0f
+            if (currentEffects.enableGrayscale) currentEffects.grayscalePercentage / 100f else 0f
         )
         GLES20.glUniform1f(uAdaptiveBrightnessFactorHandle, adaptiveBrightnessFactor(picture))
 
@@ -307,11 +304,11 @@ class PaperizeWallpaperRenderer(
         )
     }
 
-    private fun drawQuad(aPositionHandle: Int, aTexCoordHandle: Int, uMvpMatrixHandle: Int, mvpMatrix: FloatArray) {
+    private fun drawQuad(aPositionHandle: Int, aTexCoordHandle: Int, uMvpMatrixHandle: Int) {
         GLES20.glEnableVertexAttribArray(aPositionHandle)
         GLES20.glEnableVertexAttribArray(aTexCoordHandle)
 
-        GLES20.glUniformMatrix4fv(uMvpMatrixHandle, 1, false, mvpMatrix, 0)
+        GLES20.glUniformMatrix4fv(uMvpMatrixHandle, 1, false, identityMatrix, 0)
 
         GLES20.glVertexAttribPointer(aPositionHandle, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer)
         GLES20.glVertexAttribPointer(aTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, texCoordBuffer)
@@ -352,8 +349,6 @@ class PaperizeWallpaperRenderer(
     }
 
     private fun createBlurFramebuffers(width: Int, height: Int) {
-        deleteBlurResources()
-
         try {
             val (fbo1, tex1) = createFboWithTexture(width, height)
             blurFbo1 = fbo1
@@ -370,10 +365,6 @@ class PaperizeWallpaperRenderer(
         Log.d(TAG, "Blur framebuffers created: ${width}x${height}")
     }
 
-    /**
-     * Create an FBO with attached texture at specified dimensions.
-     * @return Pair of (fboId, textureId)
-     */
     private fun createFboWithTexture(width: Int, height: Int): Pair<Int, Int> {
         val textureIds = IntArray(1)
         GLES20.glGenTextures(1, textureIds, 0)
@@ -416,10 +407,10 @@ class PaperizeWallpaperRenderer(
     }
 
     private fun deleteBlurResources() {
-        if (blurFbo1 != 0) GLUtil.deleteFramebuffer(blurFbo1)
-        if (blurFbo2 != 0) GLUtil.deleteFramebuffer(blurFbo2)
-        if (blurTexture1 != 0) GLUtil.deleteTexture(blurTexture1)
-        if (blurTexture2 != 0) GLUtil.deleteTexture(blurTexture2)
+        GLUtil.deleteFramebuffer(blurFbo1)
+        GLUtil.deleteFramebuffer(blurFbo2)
+        GLUtil.deleteTexture(blurTexture1)
+        GLUtil.deleteTexture(blurTexture2)
 
         blurFbo1 = 0
         blurFbo2 = 0
@@ -450,11 +441,8 @@ class PaperizeWallpaperRenderer(
                         return@launch
                     }
 
-                    // Always retain source luminance. Whether adaptive brightness is enabled
-                    // is evaluated at draw time so settings changes are immediate and do not
-                    // advance the wallpaper queue.
                     val sourceBrightness =
-                        com.anthonyla.paperize.core.util.BrightnessCalculator.calculateBitmapBrightness(bitmap)
+                        BrightnessCalculator.calculateBitmapBrightness(bitmap)
 
                     val queued = callbacks.queueEventOnGlThread {
                         if (loadGeneration.get() == generation) {
@@ -479,25 +467,24 @@ class PaperizeWallpaperRenderer(
     private fun uploadBitmap(
         bitmap: Bitmap,
         sourceBrightness: Float,
-        skipCrossfade: Boolean = false
+        skipCrossfade: Boolean
     ) {
         try {
             val picture = GLPicture(bitmap, sourceBrightness)
 
             if (skipCrossfade) {
                 currentPicture?.recycle()
-                nextPicture?.recycle() // Recycle any in-flight crossfade target
+                nextPicture?.recycle()
                 currentPicture = picture
                 nextPicture = null
 
-                crossfadeStartTimeNanos = 0L
-                Log.d(TAG, "Wallpaper instantly swapped (no crossfade): $picture")
+                Log.d(TAG, "Wallpaper instantly swapped (no crossfade): ${picture.width}x${picture.height}")
             } else {
-                nextPicture?.recycle() // Recycle interrupted crossfade target if any
+                nextPicture?.recycle()
                 nextPicture = picture
 
                 crossfadeStartTimeNanos = System.nanoTime()
-                Log.d(TAG, "Wallpaper uploaded to GPU with crossfade: $picture")
+                Log.d(TAG, "Wallpaper uploaded to GPU with crossfade: ${picture.width}x${picture.height}")
             }
 
             callbacks.requestRender()
@@ -518,7 +505,6 @@ class PaperizeWallpaperRenderer(
         callbacks.requestRender()
     }
 
-    /** @param offset Normalized offset (0.0 = left, 1.0 = right) */
     fun setNormalOffsetX(offset: Float) {
         val clampedOffset = offset.coerceIn(0f, 1f)
         if (normalOffsetX != clampedOffset) {
@@ -537,7 +523,7 @@ class PaperizeWallpaperRenderer(
 
     private fun adaptiveBrightnessFactor(picture: GLPicture): Float =
         if (adaptiveBrightnessEnabled) {
-            com.anthonyla.paperize.core.util.getAdaptiveBrightnessMultiplier(
+            getAdaptiveBrightnessMultiplier(
                 context,
                 picture.sourceBrightness
             )

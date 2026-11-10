@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.anthonyla.paperize.data.database.entities.WallpaperEntity
 
 @Dao
@@ -35,12 +34,6 @@ interface WallpaperDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWallpapers(wallpapers: List<WallpaperEntity>)
-
-    @Update
-    suspend fun updateWallpaper(wallpaper: WallpaperEntity)
-
-    @Query("UPDATE wallpapers SET displayOrder = :order WHERE id = :wallpaperId AND albumId = :albumId")
-    suspend fun updateAlbumWallpaperOrder(albumId: String, wallpaperId: String, order: Int)
 
     @Query("DELETE FROM wallpapers WHERE folderId = :folderId")
     suspend fun deleteWallpapersByFolder(folderId: String)

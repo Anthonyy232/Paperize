@@ -5,7 +5,6 @@ import android.opengl.GLSurfaceView
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.SurfaceHolder
-import com.anthonyla.paperize.core.constants.Constants
 import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
@@ -28,10 +27,7 @@ abstract class GLWallpaperService : WallpaperService() {
 
         @Volatile private var glThread: GLThread? = null
         private var renderer: GLSurfaceView.Renderer? = null
-        /**
-         * Set the renderer for this engine.
-         * Must be called before surface is created.
-         */
+        /** Must be called before the surface is created. */
         fun setRenderer(renderer: GLSurfaceView.Renderer) {
             this.renderer = renderer
         }
@@ -207,6 +203,11 @@ abstract class GLWallpaperService : WallpaperService() {
             } catch (e: Exception) {
                 Log.e(TAG, "GL thread error", e)
             } finally {
+                // After a renderer crash nothing drains the queue; make queueEvent refuse work.
+                synchronized(lock) {
+                    shouldExit = true
+                    eventQueue.clear()
+                }
                 cleanupGL()
             }
         }
@@ -227,7 +228,7 @@ abstract class GLWallpaperService : WallpaperService() {
             val eglConfig = WallpaperEglConfigChooser().chooseConfig(egl!!, eglDisplay!!)
 
             val attribList = intArrayOf(
-                EGL14.EGL_CONTEXT_CLIENT_VERSION, Constants.GL_ES_VERSION,
+                EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL10.EGL_NONE
             )
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -31,8 +30,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.presentation.common.components.OnboardingButton
+import com.anthonyla.paperize.presentation.common.components.OnboardingLayout
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
-import com.anthonyla.paperize.presentation.components.OnboardingLayout
 
 @Composable
 fun StartupScreen(
@@ -122,18 +122,7 @@ fun StartupScreen(
             }
         },
         actions = {
-            Button(
-                onClick = onAgree,
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large
-            ) {
-                Text(
-                    text = stringResource(R.string.agree),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(vertical = AppSpacing.small)
-                )
-            }
+            OnboardingButton(text = stringResource(R.string.agree), onClick = onAgree)
         }
     )
 }

@@ -3,16 +3,14 @@ package com.anthonyla.paperize.presentation.screens.privacy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.presentation.common.components.BackTopAppBar
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyScreen(
     onNavigateBack: () -> Unit,
@@ -20,17 +18,7 @@ fun PrivacyScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.privacy_policy)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-            )
+            BackTopAppBar(title = stringResource(R.string.privacy_policy), onBack = onNavigateBack)
         }
     ) { paddingValues ->
         Column(
@@ -72,10 +60,9 @@ fun PrivacyScreen(
 @Composable
 private fun PrivacySection(
     title: String,
-    content: String,
-    modifier: Modifier = Modifier
+    content: String
 ) {
-    Column(modifier = modifier) {
+    Column {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,

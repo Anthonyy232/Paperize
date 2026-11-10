@@ -91,21 +91,18 @@ object GLUtil {
     fun deleteProgram(program: Int) {
         if (program != 0) {
             GLES20.glDeleteProgram(program)
-            checkGLError("glDeleteProgram")
         }
     }
 
     fun deleteTexture(texture: Int) {
         if (texture != 0) {
             GLES20.glDeleteTextures(1, intArrayOf(texture), 0)
-            checkGLError("glDeleteTextures")
         }
     }
 
     fun deleteFramebuffer(framebuffer: Int) {
         if (framebuffer != 0) {
             GLES20.glDeleteFramebuffers(1, intArrayOf(framebuffer), 0)
-            checkGLError("glDeleteFramebuffers")
         }
     }
 }

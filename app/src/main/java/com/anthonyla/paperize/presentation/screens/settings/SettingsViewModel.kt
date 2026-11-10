@@ -4,13 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.presentation.common.stateWhileSubscribed
 import com.anthonyla.paperize.service.SettingsCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,8 +48,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.updateAnimate(enabled) }
     }
 
-    fun updateFirstLaunch(isFirstLaunch: Boolean) {
-        viewModelScope.launch { settingsRepository.updateFirstLaunch(isFirstLaunch) }
+    fun completeFirstLaunch() {
+        viewModelScope.launch { settingsRepository.completeFirstLaunch() }
     }
 
     fun switchWallpaperMode(newMode: WallpaperMode, onSuccess: () -> Unit = {}) = resetData(newMode, onSuccess)
@@ -62,13 +62,13 @@ class SettingsViewModel @Inject constructor(
         _resetFailed.value = false
         viewModelScope.launch {
             try {
-                coordinator.resetData(mode)
-                onSuccess()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e(TAG, "Could not reset app data", e)
-                _resetFailed.value = true
+                runCatchingCancellable {
+                    coordinator.resetData(mode)
+                    onSuccess()
+                }.onFailure { e ->
+                    Log.e(TAG, "Could not reset app data", e)
+                    _resetFailed.value = true
+                }
             } finally {
                 _isResetting.value = false
             }

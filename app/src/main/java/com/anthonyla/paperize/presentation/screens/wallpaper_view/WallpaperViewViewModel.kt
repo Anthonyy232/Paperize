@@ -23,10 +23,12 @@ class WallpaperViewViewModel @Inject constructor(
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<WallpaperViewRoute>()
 
+    val wallpaperUri = route.wallpaperUri
+    val wallpaperName = route.wallpaperName
+
     val wallpaperMode = settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, WallpaperMode.STATIC)
 
     fun applyTo(screenType: ScreenType) {
-        require(screenType != ScreenType.LIVE)
         WallpaperChangeService.applyWallpaper(context, route.wallpaperId, screenType)
     }
 }

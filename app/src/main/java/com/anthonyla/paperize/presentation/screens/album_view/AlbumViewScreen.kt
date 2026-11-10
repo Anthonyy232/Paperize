@@ -4,18 +4,8 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Scaffold
@@ -35,28 +25,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.presentation.common.components.AddAlbumAnimatedFab
 import com.anthonyla.paperize.presentation.common.components.EmptyCollection
-import com.anthonyla.paperize.presentation.common.theme.AppGrid
-import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+import com.anthonyla.paperize.presentation.common.components.SnackbarMessageEffect
+import com.anthonyla.paperize.presentation.common.components.SortBottomSheet
+import com.anthonyla.paperize.presentation.common.components.SortOption
+import com.anthonyla.paperize.presentation.common.components.WallpaperGrid
+import com.anthonyla.paperize.presentation.common.components.WallpaperItem
+import com.anthonyla.paperize.presentation.common.components.wallpaperGridItem
 import com.anthonyla.paperize.presentation.screens.album_view.components.AlbumViewTopBar
 import com.anthonyla.paperize.presentation.screens.album_view.components.FolderItem
 import com.anthonyla.paperize.presentation.screens.album_view.components.ImportProgressDialog
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
-import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
+import kotlinx.coroutines.flow.drop
 
 @Composable
 fun AlbumViewScreen(
     onBackClick: () -> Unit,
     onNavigateToFolder: (String) -> Unit,
-    onNavigateToWallpaperView: (String, String, String) -> Unit,
+    onNavigateToWallpaperView: (Wallpaper) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AlbumViewViewModel = hiltViewModel()
 ) {
-    val lazyListState = rememberLazyGridState()
-
     val album by viewModel.album.collectAsStateWithLifecycle()
     val folders = album?.folders.orEmpty()
     val wallpapers = album?.wallpapers.orEmpty()
@@ -70,13 +60,10 @@ fun AlbumViewScreen(
     val albumDeleted by viewModel.albumDeleted.collectAsStateWithLifecycle()
     var showDeleteAlbumDialog by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val messageText = message?.let { stringResource(it) }
-    LaunchedEffect(messageText) {
-        messageText?.let {
-            if (message == R.string.delete_album_failed) showDeleteAlbumDialog = false
-            snackbarHostState.showSnackbar(it)
-            viewModel.dismissMessage()
-        }
+    SnackbarMessageEffect(message, snackbarHostState, viewModel::dismissMessage)
+    LaunchedEffect(viewModel) {
+        // drop(1): the current value must not close a dialog restored after rotation.
+        viewModel.isDeleting.drop(1).collect { deleting -> if (!deleting) showDeleteAlbumDialog = false }
     }
     LaunchedEffect(albumDeleted) {
         if (albumDeleted) onBackClick()
@@ -95,24 +82,11 @@ fun AlbumViewScreen(
     }
 
     val sortedFolders = remember(folders, sortOption) {
-        when (sortOption) {
-            SortOption.NAME_ASC -> folders.sortedBy { it.name.lowercase() }
-            SortOption.NAME_DESC -> folders.sortedByDescending { it.name.lowercase() }
-            SortOption.DATE_ADDED_ASC -> folders.sortedBy { it.addedAt }
-            SortOption.DATE_ADDED_DESC -> folders.sortedByDescending { it.addedAt }
-            SortOption.DATE_MODIFIED_ASC -> folders.sortedBy { it.dateModified }
-            SortOption.DATE_MODIFIED_DESC -> folders.sortedByDescending { it.dateModified }
-        }
+        folders.sortedWith(sortOption.folderComparator)
     }
 
     val sortedWallpapers = remember(wallpapers, sortOption) {
         wallpapers.sortedWith(sortOption.wallpaperComparator)
-    }
-
-    val commonItemModifier = remember {
-        Modifier
-            .fillMaxWidth()
-            .aspectRatio(Constants.WALLPAPER_ASPECT_RATIO)
     }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -168,16 +142,7 @@ fun AlbumViewScreen(
             }
             return@Scaffold
         }
-        LazyVerticalGrid(
-            state = lazyListState,
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            columns = GridCells.Adaptive(AppGrid.itemMinSize),
-            contentPadding = PaddingValues(AppSpacing.gridPadding),
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.gridSpacing)
-        ) {
+        WallpaperGrid(modifier = modifier.padding(paddingValues)) {
             items(
                 items = sortedFolders,
                 key = { folder -> "folder-${folder.id}" }
@@ -196,13 +161,7 @@ fun AlbumViewScreen(
                     onLongClick = {
                         viewModel.toggleFolderSelection(folder.id)
                     },
-                    modifier = commonItemModifier
-                        .animateItem(
-                            placementSpec = tween(
-                                durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                easing = FastOutSlowInEasing
-                            )
-                        )
+                    modifier = Modifier.wallpaperGridItem(this)
                 )
             }
 
@@ -219,23 +178,13 @@ fun AlbumViewScreen(
                         if (isSelectionMode) {
                             viewModel.toggleWallpaperSelection(wallpaper.id)
                         } else {
-                            onNavigateToWallpaperView(
-                                wallpaper.id,
-                                wallpaper.uri,
-                                wallpaper.fileName
-                            )
+                            onNavigateToWallpaperView(wallpaper)
                         }
                     },
                     onLongClick = {
                         viewModel.toggleWallpaperSelection(wallpaper.id)
                     },
-                    modifier = commonItemModifier
-                        .animateItem(
-                            placementSpec = tween(
-                                durationMillis = Constants.ANIMATION_DURATION_LONG_MS,
-                                easing = FastOutSlowInEasing
-                            )
-                        )
+                    modifier = Modifier.wallpaperGridItem(this)
                 )
             }
         }

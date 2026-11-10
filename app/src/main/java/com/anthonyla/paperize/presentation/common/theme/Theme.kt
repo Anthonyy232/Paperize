@@ -109,11 +109,11 @@ fun PaperizeTheme(
     val motionScheme = MotionScheme.expressive()
 
     val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkMode
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDarkMode
+    SideEffect {
+        val window = (view.context as Activity).window
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightStatusBars = !isDarkMode
+            isAppearanceLightNavigationBars = !isDarkMode
         }
     }
 

@@ -48,8 +48,6 @@ import net.engawapg.lib.zoomable.zoomable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperViewScreen(
-    wallpaperUri: String,
-    wallpaperName: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WallpaperViewViewModel = hiltViewModel()
@@ -68,7 +66,7 @@ fun WallpaperViewScreen(
                 title = {
                     if (zoomState.scale <= 1.01f) {
                         Text(
-                            text = wallpaperName,
+                            text = viewModel.wallpaperName,
                             color = MaterialTheme.colorScheme.surfaceBright,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
@@ -131,8 +129,8 @@ fun WallpaperViewScreen(
                     .zoomable(zoomState)
             ) {
                 AsyncImage(
-                    model = wallpaperUri.toUri(),
-                    contentDescription = wallpaperName,
+                    model = viewModel.wallpaperUri.toUri(),
+                    contentDescription = viewModel.wallpaperName,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )

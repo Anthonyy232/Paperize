@@ -1,10 +1,8 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -29,24 +26,17 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.size.Size
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
+import com.anthonyla.paperize.presentation.common.components.AlbumCover
 import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
@@ -111,25 +101,21 @@ fun AlbumSelectionBottomSheet(
 private fun AlbumSelectionItem(
     album: AlbumSummary,
     isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val cover = rememberAsyncImagePainter(
-        ImageRequest.Builder(context).data(album.coverUri).size(Size(Constants.LIST_THUMBNAIL_SIZE, Constants.LIST_THUMBNAIL_SIZE)).build(),
-        contentScale = ContentScale.Crop
-    )
-    val coverState by cover.state.collectAsState()
-
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = AppSpacing.extraLarge, vertical = AppSpacing.medium),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        AlbumCover(
+            album = album,
+            thumbnailSize = Constants.LIST_THUMBNAIL_SIZE,
+            placeholderModifier = Modifier.size(AppIconSizes.medium),
+            placeholderTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
             modifier = Modifier
                 .size(AppIconSizes.extraLarge)
                 .aspectRatio(1f)
@@ -138,25 +124,8 @@ private fun AlbumSelectionItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
                     shape = MaterialTheme.shapes.small
                 )
-                .clip(MaterialTheme.shapes.small),
-            contentAlignment = Alignment.Center
-        ) {
-            if (coverState is AsyncImagePainter.State.Success) {
-                Image(
-                        painter = cover,
-                        contentDescription = album.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(AppIconSizes.extraLarge)
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.PhotoAlbum,
-                    contentDescription = album.name,
-                    modifier = Modifier.size(AppIconSizes.medium),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                )
-            }
-        }
+                .clip(MaterialTheme.shapes.small)
+        )
 
         Spacer(modifier = Modifier.width(AppSpacing.large))
 

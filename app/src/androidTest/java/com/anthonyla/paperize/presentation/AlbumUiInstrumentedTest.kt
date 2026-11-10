@@ -17,21 +17,19 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.presentation.common.theme.PaperizeTheme
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortBottomSheet
-import com.anthonyla.paperize.presentation.screens.album_view.components.SortOption
-import com.anthonyla.paperize.presentation.screens.album_view.components.WallpaperItem
+import com.anthonyla.paperize.presentation.common.components.SortBottomSheet
+import com.anthonyla.paperize.presentation.common.components.SortOption
+import com.anthonyla.paperize.presentation.common.components.WallpaperItem
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
-import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.presentation.screens.library.LibraryScreen
 import kotlinx.coroutines.CompletableDeferred
 import androidx.compose.ui.semantics.SemanticsActions
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.presentation.screens.wallpaper.WallpaperScreen
@@ -53,7 +51,7 @@ class AlbumUiInstrumentedTest {
             PaperizeTheme(false, false) {
                 WallpaperScreen(
                     albums = emptyList(), persistedScheduleSettings = settings.value,
-                    appSettings = AppSettings(), wallpaperMode = mode.value,
+                    animate = true, wallpaperMode = mode.value,
                     onToggleChanger = {}, onSelectAlbum = { _, _ -> },
                     onUpdateScheduleSettings = { latest = it },
                     onUpdateScheduleSettingsDebounced = { latest = it },
@@ -89,22 +87,21 @@ class AlbumUiInstrumentedTest {
     }
 
     @Test fun failedAlbumCreationKeepsNameAndAllowsRetryAfterPendingSave() {
-        val pending = CompletableDeferred<Result<Album>>()
+        val pending = CompletableDeferred<Int?>()
         var attempts = 0
         compose.setContent {
             PaperizeTheme(false, false) {
                 LibraryScreen(emptyList(), {}, { name ->
                     assertEquals("Mountains", name)
                     attempts++
-                    if (attempts == 1) pending.await()
-                    else Result.success(Album.empty(id = "album", name = name))
+                    if (attempts == 1) pending.await() else null
                 })
             }
         }
         compose.onNodeWithContentDescription(context.getString(R.string.add_album)).performClick()
         compose.onNodeWithText(context.getString(R.string.album_name)).performTextInput("Mountains")
         compose.onNodeWithText(context.getString(R.string.save)).performClick().assertIsNotEnabled()
-        compose.runOnIdle { pending.complete(Result.failure(IllegalStateException("Storage unavailable"))) }
+        compose.runOnIdle { pending.complete(R.string.album_create_failed) }
         compose.onNodeWithText(context.getString(R.string.album_create_failed)).assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.album_name)).assertTextContains("Mountains")
         compose.onNodeWithText(context.getString(R.string.save)).performClick()

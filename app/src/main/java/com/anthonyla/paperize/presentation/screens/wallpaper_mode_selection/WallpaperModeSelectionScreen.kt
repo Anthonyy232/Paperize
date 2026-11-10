@@ -1,4 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -16,11 +18,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.presentation.common.components.OnboardingButton
+import com.anthonyla.paperize.presentation.common.components.OnboardingLayout
 import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
-import com.anthonyla.paperize.presentation.components.OnboardingLayout
+import com.anthonyla.paperize.presentation.screens.settings.ResetStatus
 import com.anthonyla.paperize.presentation.screens.settings.SettingsViewModel
-
 
 @Composable
 fun WallpaperModeSelectionScreen(
@@ -75,25 +78,16 @@ fun WallpaperModeSelectionScreen(
             }
         },
         actions = {
-            if (resetFailed) Text(stringResource(R.string.reset_failed), color = MaterialTheme.colorScheme.error)
-            if (isResetting) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            Button(
+            ResetStatus(resetFailed = resetFailed, isResetting = isResetting)
+            OnboardingButton(
+                text = stringResource(R.string.continue_button),
                 onClick = {
                     selectedMode?.let { mode ->
                         viewModel.switchWallpaperMode(mode, onModeSelected)
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large,
                 enabled = selectedMode != null && !isResetting
-            ) {
-                Text(
-                    text = stringResource(R.string.continue_button),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(vertical = AppSpacing.small)
-                )
-            }
+            )
         }
     )
 }
@@ -102,14 +96,13 @@ fun WallpaperModeSelectionScreen(
 private fun ModeSelectionCard(
     title: String,
     description: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)

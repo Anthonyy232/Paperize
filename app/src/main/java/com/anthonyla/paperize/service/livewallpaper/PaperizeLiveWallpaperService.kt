@@ -89,7 +89,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         @Volatile private var currentWallpaper: Wallpaper? = null
         private var observedScalingType: ScalingType? = null
         private var hasShownParallaxWarning = false
-        private var engineVisible = false
         private var latestSettings = ScheduleSettings()
         private var latestWallpaperMode = WallpaperMode.STATIC
         private var liveIntervalJob: Job? = null
@@ -106,19 +105,15 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
         private val reloadReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == Constants.ACTION_RELOAD_WALLPAPER) {
-                    Log.d(TAG, "Received reload broadcast")
-                    renderController.reloadCurrentArtwork(immediate = true)
-                    restartLiveIntervalTimer()
-                }
+                Log.d(TAG, "Received reload broadcast")
+                renderController.reloadCurrentArtwork(immediate = true)
+                restartLiveIntervalTimer()
             }
         }
 
         private val screenOffReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == Intent.ACTION_SCREEN_OFF) {
-                    handleScreenOff()
-                }
+                handleScreenOff()
             }
         }
 
@@ -256,7 +251,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
-            engineVisible = visible
             renderController.visible = visible
             if (visible) {
                 // Re-evaluate draw-time effects such as adaptive brightness after
@@ -280,25 +274,13 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
 
         override fun onTouchEvent(event: MotionEvent) {
-            try {
-                gestureDetector.onTouchEvent(event)
-            } catch (e: Exception) {
-                Log.w(TAG, "Error processing touch event", e)
-            }
+            gestureDetector.onTouchEvent(event)
             super.onTouchEvent(event)
         }
 
         override fun onDestroy() {
-            try {
-                applicationContext.unregisterReceiver(reloadReceiver)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error unregistering reload receiver", e)
-            }
-            try {
-                applicationContext.unregisterReceiver(screenOffReceiver)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error unregistering screen-off receiver", e)
-            }
+            applicationContext.unregisterReceiver(reloadReceiver)
+            applicationContext.unregisterReceiver(screenOffReceiver)
 
             renderer.cancelLoading()
 
@@ -341,7 +323,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
             val intervalMinutes = latestSettings.liveIntervalMinutes
             val shouldRun =
-                engineVisible &&
+                renderController.visible &&
                     !isPreview &&
                     latestWallpaperMode == WallpaperMode.LIVE &&
                     latestSettings.enableChanger &&

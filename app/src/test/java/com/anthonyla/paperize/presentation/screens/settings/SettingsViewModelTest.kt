@@ -1,22 +1,22 @@
 package com.anthonyla.paperize.presentation.screens.settings
 
-import android.util.Log
 import androidx.lifecycle.ViewModelStore
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
+import com.anthonyla.paperize.presentation.ViewModelTestRule
 import com.anthonyla.paperize.service.SettingsCoordinator
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import io.mockk.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -27,10 +27,9 @@ class SettingsViewModelTest {
     private val store = ViewModelStore()
     private lateinit var viewModel: SettingsViewModel
 
+    @get:Rule val viewModelRule = ViewModelTestRule()
+
     @Before fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
-        mockkStatic(Log::class)
-        every { Log.e(any(), any(), any()) } returns 0
         every { settings.getAppSettingsFlow() } returns flowOf(AppSettings())
         every { settings.getWallpaperModeFlow() } returns flowOf(WallpaperMode.STATIC)
         viewModel = SettingsViewModel(settings, SettingsCoordinator(mockk(), settings, mockk(), albums, scheduler))
@@ -39,8 +38,6 @@ class SettingsViewModelTest {
 
     @After fun tearDown() {
         store.clear()
-        Dispatchers.resetMain()
-        unmockkAll()
     }
 
     @Test fun `mode switch waits for deletion and persistence before navigating`() = runTest {
@@ -66,7 +63,7 @@ class SettingsViewModelTest {
         assertFalse(viewModel.isResetting.value)
     }
 
-    @Test fun `failed deletion preserves settings and allows retry`() = runTest {
+    @Test fun `failed deletion keeps schedule settings and mode and allows retry`() = runTest {
         coEvery { albums.deleteAllAlbums() } throws IllegalStateException("Database unavailable")
         var completed = false
         viewModel.switchWallpaperMode(WallpaperMode.LIVE) { completed = true }

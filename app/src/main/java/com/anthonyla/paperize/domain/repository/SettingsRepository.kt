@@ -42,7 +42,7 @@ interface SettingsRepository {
     suspend fun updateDarkMode(enabled: Boolean)
     suspend fun updateDynamicTheming(enabled: Boolean)
     suspend fun updateAnimate(enabled: Boolean)
-    suspend fun updateFirstLaunch(isFirstLaunch: Boolean)
+    suspend fun completeFirstLaunch()
 
     suspend fun updateEnableChanger(enabled: Boolean)
 }

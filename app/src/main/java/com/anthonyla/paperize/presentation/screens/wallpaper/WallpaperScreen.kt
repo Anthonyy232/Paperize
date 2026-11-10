@@ -3,7 +3,6 @@ package com.anthonyla.paperize.presentation.screens.wallpaper
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,10 +44,10 @@ import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
-import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
+import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.AlbumSelectionBottomSheet
 import com.anthonyla.paperize.presentation.screens.wallpaper.components.CurrentWallpaperPreview
@@ -58,7 +58,7 @@ import com.anthonyla.paperize.presentation.screens.wallpaper.components.TimeInte
 fun WallpaperScreen(
     albums: List<AlbumSummary>,
     persistedScheduleSettings: ScheduleSettings,
-    appSettings: AppSettings,
+    animate: Boolean,
     wallpaperMode: WallpaperMode,
     onToggleChanger: (Boolean) -> Unit,
     onSelectAlbum: (ScreenType, AlbumSummary?) -> Unit,
@@ -163,7 +163,7 @@ fun WallpaperScreen(
                 onClick = { albumPickerScreen = ScreenType.LIVE }
             )
         }
-        if (wallpaperMode == WallpaperMode.STATIC && scheduleSettings.enableChanger && homeEnabled && lockEnabled) {
+        if (scheduleSettings.enableChanger && bothEnabled) {
             SettingSwitchItem(
                 title = stringResource(R.string.individual_scheduling),
                 description = stringResource(R.string.show_interval_sliders),
@@ -187,7 +187,7 @@ fun WallpaperScreen(
         }
         if (hasAlbumSelected) {
             if (wallpaperMode == WallpaperMode.STATIC) {
-                if (!scheduleSettings.separateSchedules || !homeEnabled || !lockEnabled) {
+                if (!(scheduleSettings.separateSchedules && bothEnabled)) {
                     TimeIntervalPicker(
                         title = stringResource(R.string.interval_text),
                         minutes = scheduleSettings.homeIntervalMinutes,
@@ -249,13 +249,10 @@ fun WallpaperScreen(
                     )
                 }
             )
-        }
-
-        if (wallpaperMode == WallpaperMode.STATIC) {
             CurrentWallpaperPreview(
                 homeWallpaperUri = homeWallpaperUri,
                 lockWallpaperUri = lockWallpaperUri,
-                animate = appSettings.animate
+                animate = animate
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = AppSpacing.small))
         }
@@ -267,53 +264,37 @@ fun WallpaperScreen(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+        SettingsCard(
+            modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
-            Column(
-                modifier = Modifier.padding(AppSpacing.large),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-            ) {
-                Text(
-                    text = stringResource(R.string.scaling),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    scalingOptions.forEachIndexed { index, (scalingType, label) ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = scalingOptions.size
-                            ),
-                            onClick = {
-                                updateSettingsImmediate(
-                                    if (wallpaperMode == WallpaperMode.LIVE) {
-                                        scheduleSettings.copy(liveScalingType = scalingType)
-                                    } else {
-                                        scheduleSettings.copy(
-                                            homeScalingType = scalingType,
-                                            lockScalingType = scalingType
-                                        )
-                                    }
-                                )
-                            },
-                            selected = scalingType == selectedScaling
-                        ) {
-                            Text(
-                                text = label,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+            CardTitle(stringResource(R.string.scaling))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                scalingOptions.forEachIndexed { index, (scalingType, label) ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = scalingOptions.size
+                        ),
+                        onClick = {
+                            updateSettingsImmediate(
+                                if (wallpaperMode == WallpaperMode.LIVE) {
+                                    scheduleSettings.copy(liveScalingType = scalingType)
+                                } else {
+                                    scheduleSettings.copy(
+                                        homeScalingType = scalingType,
+                                        lockScalingType = scalingType
+                                    )
+                                }
                             )
-                        }
+                        },
+                        selected = scalingType == selectedScaling
+                    ) {
+                        Text(
+                            text = label,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -324,12 +305,7 @@ fun WallpaperScreen(
                 onClick = onChangeWallpaperNow,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        PaddingValues(
-                            horizontal = AppSpacing.small,
-                            vertical = AppSpacing.extraSmall
-                        )
-                    )
+                    .padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)
             ) {
                 Text(text = stringResource(R.string.change_wallpaper_now))
             }
@@ -343,138 +319,104 @@ fun WallpaperScreen(
             }
         )
 
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+        SettingsCard(
+            modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            Column(
-                modifier = Modifier.padding(AppSpacing.large),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
-            ) {
-                Text(
-                    text = stringResource(R.string.visual_effects),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = AppSpacing.small),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            CardTitle(stringResource(R.string.visual_effects), Modifier.padding(bottom = AppSpacing.small))
 
-                imageEffects.forEach { effect ->
-                    SettingSwitchWithSlider(
-                        title = effect.title,
-                        description = effect.description,
-                        checked = effect.enabled(primaryEffects),
-                        onCheckedChange = { enabled -> updateEffects({ effect.withEnabled(it, enabled) }) },
-                        homeChecked = effect.enabled(scheduleSettings.homeEffects),
-                        lockChecked = effect.enabled(scheduleSettings.lockEffects),
-                        onHomeCheckedChange = { enabled ->
-                            updateSettingsImmediate(scheduleSettings.copy(homeEffects = effect.withEnabled(scheduleSettings.homeEffects, enabled)))
-                        },
-                        onLockCheckedChange = { enabled ->
-                            updateSettingsImmediate(scheduleSettings.copy(lockEffects = effect.withEnabled(scheduleSettings.lockEffects, enabled)))
-                        },
-                        bothEnabled = bothEnabled,
-                        homePercentage = effect.percentage(primaryEffects),
-                        lockPercentage = effect.percentage(scheduleSettings.lockEffects),
-                        onPercentageChange = { home, lock ->
-                            updateEffects({ effect.withPercentage(it, home) }, { effect.withPercentage(it, lock) }, debounced = true)
-                        }
-                    )
-                }
-                SettingSwitchItem(
-                    title = stringResource(R.string.adaptive_brightness),
-                    description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else stringResource(R.string.adjust_brightness_based_on_mode),
-                    checked = scheduleSettings.adaptiveBrightness,
-                    onCheckedChange = { enabled ->
-                        updateSettingsImmediate(scheduleSettings.copy(adaptiveBrightness = enabled))
+            imageEffects.forEach { effect ->
+                SettingSwitchWithSlider(
+                    title = effect.title,
+                    description = effect.description,
+                    checked = effect.enabled(primaryEffects),
+                    onCheckedChange = { enabled -> updateEffects({ effect.withEnabled(it, enabled) }) },
+                    homeChecked = effect.enabled(scheduleSettings.homeEffects),
+                    lockChecked = effect.enabled(scheduleSettings.lockEffects),
+                    onHomeCheckedChange = { enabled ->
+                        updateSettingsImmediate(scheduleSettings.copy(homeEffects = effect.withEnabled(scheduleSettings.homeEffects, enabled)))
+                    },
+                    onLockCheckedChange = { enabled ->
+                        updateSettingsImmediate(scheduleSettings.copy(lockEffects = effect.withEnabled(scheduleSettings.lockEffects, enabled)))
+                    },
+                    bothEnabled = bothEnabled,
+                    homePercentage = effect.percentage(primaryEffects),
+                    lockPercentage = effect.percentage(scheduleSettings.lockEffects),
+                    onPercentageChange = { home, lock ->
+                        updateEffects({ effect.withPercentage(it, home) }, { effect.withPercentage(it, lock) }, debounced = true)
                     }
                 )
             }
+            SettingSwitchItem(
+                title = stringResource(R.string.adaptive_brightness),
+                description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else stringResource(R.string.adjust_brightness_based_on_mode),
+                checked = scheduleSettings.adaptiveBrightness,
+                onCheckedChange = { enabled ->
+                    updateSettingsImmediate(scheduleSettings.copy(adaptiveBrightness = enabled))
+                }
+            )
         }
         if (wallpaperMode == WallpaperMode.LIVE) {
-            Card(
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingValues(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall))
+            SettingsCard(
+                modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
             ) {
-                Column(
-                    modifier = Modifier.padding(AppSpacing.large),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
-                ) {
-                    Text(
-                        text = stringResource(R.string.interactive_effects),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = AppSpacing.small),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    SettingSwitchItem(
-                        title = stringResource(R.string.double_tap_to_change),
-                        description = if (scheduleSettings.liveEffects.enableDoubleTap) null else stringResource(R.string.double_tap_wallpaper_to_change_it),
-                        checked = scheduleSettings.liveEffects.enableDoubleTap,
-                        onCheckedChange = { enabled ->
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableDoubleTap = enabled)
-                                )
+                CardTitle(stringResource(R.string.interactive_effects), Modifier.padding(bottom = AppSpacing.small))
+                SettingSwitchItem(
+                    title = stringResource(R.string.double_tap_to_change),
+                    description = if (scheduleSettings.liveEffects.enableDoubleTap) null else stringResource(R.string.double_tap_wallpaper_to_change_it),
+                    checked = scheduleSettings.liveEffects.enableDoubleTap,
+                    onCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                liveEffects = scheduleSettings.liveEffects.copy(enableDoubleTap = enabled)
                             )
-                        }
-                    )
-                    SettingSwitchItem(
-                        title = stringResource(R.string.change_on_screen_off),
-                        description = if (scheduleSettings.liveEffects.enableChangeOnScreenOff) null else stringResource(R.string.change_wallpaper_when_screen_turns_off),
-                        checked = scheduleSettings.liveEffects.enableChangeOnScreenOff,
-                        onCheckedChange = { enabled ->
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableChangeOnScreenOff = enabled)
-                                )
+                        )
+                    }
+                )
+                SettingSwitchItem(
+                    title = stringResource(R.string.change_on_screen_off),
+                    description = if (scheduleSettings.liveEffects.enableChangeOnScreenOff) null else stringResource(R.string.change_wallpaper_when_screen_turns_off),
+                    checked = scheduleSettings.liveEffects.enableChangeOnScreenOff,
+                    onCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                liveEffects = scheduleSettings.liveEffects.copy(enableChangeOnScreenOff = enabled)
                             )
-                        }
-                    )
-                    SettingSwitchWithSlider(
-                        title = R.string.parallax_effect,
-                        description = R.string.wallpaper_moves_with_screen_scroll,
-                        checked = scheduleSettings.liveEffects.enableParallax,
-                        onCheckedChange = { enabled ->
-                            updateSettingsImmediate(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(enableParallax = enabled)
-                                )
+                        )
+                    }
+                )
+                SettingSwitchWithSlider(
+                    title = R.string.parallax_effect,
+                    description = R.string.wallpaper_moves_with_screen_scroll,
+                    checked = scheduleSettings.liveEffects.enableParallax,
+                    onCheckedChange = { enabled ->
+                        updateSettingsImmediate(
+                            scheduleSettings.copy(
+                                liveEffects = scheduleSettings.liveEffects.copy(enableParallax = enabled)
                             )
-                        },
-                        bothEnabled = false, // Never separate in Live Mode
-                        homePercentage = scheduleSettings.liveEffects.parallaxIntensity,
-                        lockPercentage = 0,
-                        onPercentageChange = { homePercent, _ ->
-                            updateSettingsDebounced(
-                                scheduleSettings.copy(
-                                    liveEffects = scheduleSettings.liveEffects.copy(parallaxIntensity = homePercent)
-                                )
+                        )
+                    },
+                    bothEnabled = false, // Never separate in Live Mode
+                    homePercentage = scheduleSettings.liveEffects.parallaxIntensity,
+                    lockPercentage = 0,
+                    onPercentageChange = { homePercent, _ ->
+                        updateSettingsDebounced(
+                            scheduleSettings.copy(
+                                liveEffects = scheduleSettings.liveEffects.copy(parallaxIntensity = homePercent)
                             )
-                        }
-                    )
-                }
+                        )
+                    }
+                )
             }
         }
     }
 
     albumPickerScreen?.let { selection ->
         val selectedId = when (selection) {
+            ScreenType.HOME, ScreenType.BOTH -> scheduleSettings.homeAlbumId
             ScreenType.LOCK -> scheduleSettings.lockAlbumId
             ScreenType.LIVE -> scheduleSettings.liveAlbumId
-            else -> scheduleSettings.homeAlbumId
         }
         AlbumSelectionBottomSheet(
             albums = albums,
@@ -523,7 +465,7 @@ fun WallpaperScreen(
 @Composable
 private fun ScreenToggleCard(
     title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -552,13 +494,8 @@ private fun ScreenToggleCard(
 @Composable
 private fun AlbumSelector(albumId: String?, albums: List<AlbumSummary>, label: String, onClick: () -> Unit) {
     val album = albums.find { it.id == albumId }
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.small),
-        onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
-    ) {
-        Row(Modifier.fillMaxWidth().padding(AppSpacing.large), verticalAlignment = Alignment.CenterVertically) {
+    SettingsCard(modifier = Modifier.padding(horizontal = AppSpacing.small), onClick = onClick) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(album?.name ?: stringResource(if (albumId == null) R.string.no_album_selected else R.string.loading_placeholder),
                     style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
@@ -569,6 +506,18 @@ private fun AlbumSelector(albumId: String?, albums: List<AlbumSummary>, label: S
             Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
     }
+}
+
+@Composable
+private fun CardTitle(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        modifier = modifier,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 /** One adjustable image effect: a toggle plus a percentage within [WallpaperEffects]. */

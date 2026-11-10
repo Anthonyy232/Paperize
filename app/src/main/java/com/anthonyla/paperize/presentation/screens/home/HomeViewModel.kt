@@ -2,12 +2,12 @@ package com.anthonyla.paperize.presentation.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.AlbumSummary
-import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
@@ -46,8 +46,8 @@ class HomeViewModel @Inject constructor(
     val scheduleSettings: StateFlow<ScheduleSettings> =
         settingsRepository.getScheduleSettingsFlow().stateWhileSubscribed(viewModelScope, ScheduleSettings())
 
-    val appSettings: StateFlow<AppSettings> =
-        settingsRepository.getAppSettingsFlow().stateWhileSubscribed(viewModelScope, AppSettings())
+    val animate: StateFlow<Boolean> =
+        settingsRepository.getAppSettingsFlow().map { it.animate }.stateWhileSubscribed(viewModelScope, true)
 
     val wallpaperMode: StateFlow<WallpaperMode?> =
         settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, null)
@@ -75,7 +75,12 @@ class HomeViewModel @Inject constructor(
         _showLiveWallpaperPrompt.value = false
     }
 
-    suspend fun createAlbum(name: String) = runCatchingCancellable { createAlbumUseCase(name) }
+    /** Creates the album and returns null, or returns the string resource of the error to show. */
+    suspend fun createAlbum(name: String): Int? = when {
+        albums.value.any { it.name.equals(name, ignoreCase = true) } -> R.string.album_name_exists_error
+        runCatchingCancellable { createAlbumUseCase(name) }.isSuccess -> null
+        else -> R.string.album_create_failed
+    }
 
     fun selectAlbum(screen: ScreenType, album: AlbumSummary?) {
         viewModelScope.launch { coordinator.selectAlbum(screen, album?.id) }

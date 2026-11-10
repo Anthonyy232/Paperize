@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.album_view
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.navigation.toRoute
@@ -10,9 +9,9 @@ import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.DeleteAlbumUseCase
 import com.anthonyla.paperize.domain.usecase.ImportWallpapersUseCase
+import com.anthonyla.paperize.presentation.ViewModelTestRule
 import io.mockk.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.flowOf
@@ -20,6 +19,7 @@ import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -30,10 +30,9 @@ class AlbumViewViewModelTest {
     private val store = ViewModelStore()
     private lateinit var viewModel: AlbumViewViewModel
 
+    @get:Rule val viewModelRule = ViewModelTestRule()
+
     @Before fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
-        mockkStatic(Log::class)
-        every { Log.e(any(), any(), any()) } returns 0
         every { albums.getAlbumById("album") } returns flowOf(Album.empty("album"))
         val savedState = SavedStateHandle()
         mockkStatic("androidx.navigation.SavedStateHandleKt")
@@ -44,8 +43,6 @@ class AlbumViewViewModelTest {
 
     @After fun tearDown() {
         store.clear()
-        Dispatchers.resetMain()
-        unmockkAll()
     }
 
     @Test fun `failed import restores idle and shows a retry message`() = runTest {
@@ -56,7 +53,7 @@ class AlbumViewViewModelTest {
         assertEquals(R.string.import_failed, viewModel.message.value)
     }
 
-    @Test fun `cancellation restores idle without reporting an error`() = runTest {
+    @Test fun `a second import is ignored while one runs and cancellation restores idle silently`() = runTest {
         coEvery { imports.addImages(any(), any(), any()) } coAnswers { awaitCancellation() }
         viewModel.addWallpapers(listOf("image"))
         viewModel.addFolder("folder")
@@ -77,7 +74,7 @@ class AlbumViewViewModelTest {
         assertNull(viewModel.message.value)
     }
 
-    @Test fun `navigation waits for successful album deletion and cleanup`() = runTest {
+    @Test fun `navigation waits for deletion and ignores duplicate requests`() = runTest {
         val completion = CompletableDeferred<Unit>()
         coEvery { delete("album") } coAnswers { completion.await() }
         viewModel.deleteAlbum()
@@ -90,7 +87,6 @@ class AlbumViewViewModelTest {
         assertTrue(viewModel.albumDeleted.value)
         assertFalse(viewModel.isDeleting.value)
         coVerify(exactly = 1) { delete("album") }
-        coVerify(exactly = 0) { albums.deleteAlbum(any()) }
     }
 
     @Test fun `failed deletion keeps the album open`() = runTest {

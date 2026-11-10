@@ -1,11 +1,11 @@
 package com.anthonyla.paperize.presentation.screens.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Build
@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,12 +27,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.isIgnoringBatteryOptimizations
 import com.anthonyla.paperize.core.util.BatteryOptimizationUtil.requestIgnoreBatteryOptimizations
+import com.anthonyla.paperize.presentation.common.components.BackTopAppBar
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
+import com.anthonyla.paperize.presentation.common.components.SettingsCard
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
@@ -44,7 +47,7 @@ fun SettingsScreen(
     val resetFailed by viewModel.resetFailed.collectAsStateWithLifecycle()
     val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
     var showResetDialog by remember { mutableStateOf(false) }
-    var pendingMode by remember { mutableStateOf<com.anthonyla.paperize.core.WallpaperMode?>(null) }
+    var pendingMode by remember { mutableStateOf<WallpaperMode?>(null) }
     val context = LocalContext.current
 
     var isIgnoringBatteryOptimizations by remember {
@@ -57,17 +60,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.settings_screen)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-            )
+            BackTopAppBar(title = stringResource(R.string.settings_screen), onBack = onNavigateBack)
         }
     ) { paddingValues ->
         Column(
@@ -77,8 +70,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.large)
         ) {
-            if (resetFailed) Text(stringResource(R.string.reset_failed), color = MaterialTheme.colorScheme.error)
-            if (isResetting) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            ResetStatus(resetFailed = resetFailed, isResetting = isResetting)
             Spacer(modifier = Modifier.height(AppSpacing.large))
 
             SectionHeader(
@@ -88,61 +80,48 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.medium))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(AppSpacing.large)
+            SettingsCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.current_mode),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                            Text(
-                                text = when (wallpaperMode) {
-                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> stringResource(R.string.mode_static)
-                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> stringResource(R.string.mode_live_wallpaper)
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-
-                        FilledTonalButton(
-                            enabled = !isResetting,
-                            onClick = {
-                                pendingMode = when (wallpaperMode) {
-                                    com.anthonyla.paperize.core.WallpaperMode.STATIC -> com.anthonyla.paperize.core.WallpaperMode.LIVE
-                                    com.anthonyla.paperize.core.WallpaperMode.LIVE -> com.anthonyla.paperize.core.WallpaperMode.STATIC
-                                }
-                            }
-                        ) {
-                            Text(stringResource(R.string.switch_button))
-                        }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.current_mode),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                        Text(
+                            text = stringResource(wallpaperMode.labelRes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(AppSpacing.small))
-
-                    Text(
-                        text = stringResource(R.string.mode_switch_warning),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    FilledTonalButton(
+                        enabled = !isResetting,
+                        onClick = {
+                            pendingMode = when (wallpaperMode) {
+                                WallpaperMode.STATIC -> WallpaperMode.LIVE
+                                WallpaperMode.LIVE -> WallpaperMode.STATIC
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.switch_button))
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(AppSpacing.small))
+
+                Text(
+                    text = stringResource(R.string.mode_switch_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
@@ -188,72 +167,62 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.medium))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(AppSpacing.large)
+            SettingsCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.battery_optimization),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                            
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (isIgnoringBatteryOptimizations) 
-                                        Icons.Default.BatteryFull else Icons.Default.BatteryAlert,
-                                    contentDescription = null,
-                                    tint = if (isIgnoringBatteryOptimizations) 
-                                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = if (isIgnoringBatteryOptimizations)
-                                        stringResource(R.string.ignoring)
-                                    else
-                                        stringResource(R.string.optimizing),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (isIgnoringBatteryOptimizations)
-                                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.battery_optimization),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
 
-                        if (!isIgnoringBatteryOptimizations) {
-                            Button(
-                                onClick = {
-                                    requestIgnoreBatteryOptimizations(context)
-                                }
-                            ) {
-                                Text(stringResource(R.string.check_status))
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isIgnoringBatteryOptimizations)
+                                    Icons.Default.BatteryFull else Icons.Default.BatteryAlert,
+                                contentDescription = null,
+                                tint = if (isIgnoringBatteryOptimizations)
+                                    MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (isIgnoringBatteryOptimizations)
+                                    stringResource(R.string.ignoring)
+                                else
+                                    stringResource(R.string.optimizing),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isIgnoringBatteryOptimizations)
+                                    MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(AppSpacing.small))
-
-                    Text(
-                        text = stringResource(R.string.battery_optimization_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (!isIgnoringBatteryOptimizations) {
+                        Button(
+                            onClick = {
+                                requestIgnoreBatteryOptimizations(context)
+                            }
+                        ) {
+                            Text(stringResource(R.string.check_status))
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(AppSpacing.small))
+
+                Text(
+                    text = stringResource(R.string.battery_optimization_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
@@ -265,34 +234,23 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(AppSpacing.medium))
 
-            Card(
-                onClick = onNavigateToPrivacy,
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            SettingsCard(onClick = onNavigateToPrivacy) {
+                Text(
+                    text = stringResource(R.string.privacy_policy),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-            ) {
-                Column(
-                    modifier = Modifier.padding(AppSpacing.large)
-                ) {
-                    Text(
-                        text = stringResource(R.string.privacy_policy),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    Text(
-                        text = stringResource(R.string.click_here_to_view_our_privacy_policy),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                Text(
+                    text = stringResource(R.string.click_here_to_view_our_privacy_policy),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.large))
@@ -338,18 +296,11 @@ fun SettingsScreen(
             )
         }
 
-        if (pendingMode != null) {
+        pendingMode?.let { mode ->
             AlertDialog(
-                onDismissRequest = {
-
-                    pendingMode = null
-                },
-                title = { 
-                    val modeName = if (pendingMode == com.anthonyla.paperize.core.WallpaperMode.LIVE) 
-                        stringResource(R.string.mode_live_wallpaper) 
-                    else 
-                        stringResource(R.string.mode_static)
-                    Text(stringResource(R.string.switch_mode_dialog_title, modeName)) 
+                onDismissRequest = { pendingMode = null },
+                title = {
+                    Text(stringResource(R.string.switch_mode_dialog_title, stringResource(mode.labelRes)))
                 },
                 text = {
                     Text(stringResource(R.string.switch_mode_dialog_description))
@@ -357,8 +308,7 @@ fun SettingsScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            pendingMode?.let { viewModel.switchWallpaperMode(it) }
-
+                            viewModel.switchWallpaperMode(mode)
                             pendingMode = null
                         },
                         colors = ButtonDefaults.textButtonColors(
@@ -369,10 +319,7 @@ fun SettingsScreen(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-
-                        pendingMode = null
-                    }) {
+                    TextButton(onClick = { pendingMode = null }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -381,14 +328,27 @@ fun SettingsScreen(
     }
 }
 
+/** Reset progress and failure, shared with onboarding where the same reset picks the first mode. */
+@Composable
+fun ResetStatus(resetFailed: Boolean, isResetting: Boolean) {
+    if (resetFailed) Text(stringResource(R.string.reset_failed), color = MaterialTheme.colorScheme.error)
+    if (isResetting) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+}
+
+@get:StringRes
+private val WallpaperMode.labelRes: Int
+    get() = when (this) {
+        WallpaperMode.STATIC -> R.string.mode_static
+        WallpaperMode.LIVE -> R.string.mode_live_wallpaper
+    }
+
 @Composable
 private fun SectionHeader(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    modifier: Modifier = Modifier
+    icon: ImageVector,
+    title: String
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)

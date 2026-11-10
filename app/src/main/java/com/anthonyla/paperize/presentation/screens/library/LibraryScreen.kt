@@ -1,8 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.library
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,15 +8,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,28 +21,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
-import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.presentation.common.components.AddAlbumDialog
+import com.anthonyla.paperize.presentation.common.components.EmptyCollection
 import com.anthonyla.paperize.presentation.common.theme.AppGrid
 import com.anthonyla.paperize.presentation.common.theme.AppIconSizes
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import com.anthonyla.paperize.presentation.screens.library.components.AlbumItem
 import kotlinx.coroutines.launch
 
+/** [onCreateAlbum] returns the string resource of the error to show, or null once the album exists. */
 @Composable
 fun LibraryScreen(
     albums: List<AlbumSummary>,
     onViewAlbum: (String) -> Unit,
-    onCreateAlbum: suspend (String) -> Result<Album>,
+    onCreateAlbum: suspend (String) -> Int?,
     modifier: Modifier = Modifier
 ) {
-    val lazyListState = rememberLazyGridState()
     var showAddAlbumDialog by rememberSaveable { mutableStateOf(false) }
     var albumNameError by rememberSaveable { mutableStateOf<Int?>(null) }
     var isSaving by remember { mutableStateOf(false) }
@@ -71,41 +64,13 @@ fun LibraryScreen(
         }
     ) { paddingValues ->
         if (albums.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoLibrary,
-                        contentDescription = null,
-                        modifier = Modifier.size(AppIconSizes.huge),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                    )
-                    Text(
-                        text = stringResource(R.string.no_albums_found),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = stringResource(R.string.create_first_album_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+            EmptyCollection(
+                title = stringResource(R.string.no_albums_found),
+                hint = stringResource(R.string.create_first_album_hint),
+                modifier = Modifier.padding(paddingValues)
+            )
         } else {
             LazyVerticalGrid(
-                state = lazyListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
@@ -131,19 +96,14 @@ fun LibraryScreen(
                 albumNameError = null
             },
             onConfirm = { name ->
-                if (albums.any { it.name.equals(name, ignoreCase = true) }) {
-                    albumNameError = R.string.album_name_exists_error
-                } else {
-                    isSaving = true
-                    albumNameError = null
-                    scope.launch {
-                        try {
-                            onCreateAlbum(name)
-                                .onSuccess { showAddAlbumDialog = false }
-                                .onFailure { albumNameError = R.string.album_create_failed }
-                        } finally {
-                            isSaving = false
-                        }
+                isSaving = true
+                albumNameError = null
+                scope.launch {
+                    try {
+                        albumNameError = onCreateAlbum(name)
+                        if (albumNameError == null) showAddAlbumDialog = false
+                    } finally {
+                        isSaving = false
                     }
                 }
             },

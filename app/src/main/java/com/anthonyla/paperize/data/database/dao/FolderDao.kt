@@ -33,9 +33,6 @@ interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFolder(folder: FolderEntity)
 
-    @Query("UPDATE folders SET displayOrder = :order WHERE id = :folderId AND albumId = :albumId")
-    suspend fun updateFolderOrder(albumId: String, folderId: String, order: Int)
-
     @Query("UPDATE folders SET coverUri = :coverUri WHERE id = :folderId")
     suspend fun updateFolderCover(folderId: String, coverUri: String?)
 

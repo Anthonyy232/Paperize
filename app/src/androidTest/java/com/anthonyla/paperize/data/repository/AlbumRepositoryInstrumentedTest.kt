@@ -103,37 +103,6 @@ class AlbumRepositoryInstrumentedTest {
         assertEquals(0, albums.addWallpapersToAlbum("album", listOf(image.copy(id = "stale", folderId = "folder"))))
     }
 
-    @Test fun reorderPersistsNestedImagesWithoutOverwritingMetadata() = runBlocking {
-        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
-        val first = Wallpaper.empty("first", "album").copy(uri = "content://first", folderId = "folder")
-        val second = first.copy(id = "second", uri = "content://second")
-        val folder = Folder.empty("folder", "album").copy(wallpapers = listOf(first, second))
-        albums.addFolderToAlbum("album", folder)
-        wallpapers.ensureWallpaperQueue("album", ScreenType.HOME, false)
-        db.wallpaperDao().updateWallpaper(first.copy(fileName = "new-name.jpg").toEntity())
-
-        albums.reorderAlbum("album", listOf(folder.copy(wallpapers = listOf(second, first))), emptyList())
-        assertEquals(listOf("second", "first"), db.wallpaperDao().getOrderedWallpaperIdsByAlbum("album"))
-        assertEquals("new-name.jpg", db.wallpaperDao().getWallpaperById("first")?.fileName)
-        assertEquals("content://second", db.folderDao().getFolderById("folder")?.coverUri)
-        assertTrue(db.wallpaperQueueDao().getQueueItems("album", ScreenType.HOME).isEmpty())
-    }
-
-    @Test fun failedReorderRollsBackEarlierRowsAndPreservesQueue() = runBlocking {
-        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
-        val first = Wallpaper.empty("first", "album").copy(uri = "content://first")
-        val second = first.copy(id = "second", uri = "content://second")
-        albums.addWallpapersToAlbum("album", listOf(first, second))
-        wallpapers.ensureWallpaperQueue("album", ScreenType.HOME, false)
-        db.openHelper.writableDatabase.execSQL("""
-            CREATE TRIGGER reject_order BEFORE UPDATE OF displayOrder ON wallpapers
-            WHEN NEW.id = 'first' BEGIN SELECT RAISE(ABORT, 'test write failure'); END
-        """)
-        assertTrue(runCatching { albums.reorderAlbum("album", emptyList(), listOf(second, first)) }.isFailure)
-        assertEquals(listOf("first", "second"), db.wallpaperDao().getOrderedWallpaperIdsByAlbum("album"))
-        assertEquals(listOf("first", "second"), db.wallpaperQueueDao().getQueueItems("album", ScreenType.HOME).map { it.wallpaperId })
-    }
-
     @Test fun concurrentQueueCreationKeepsBothScreensInSyncAndDoesNotRefillConsumedItems() = runBlocking {
         db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
         albums.addWallpapersToAlbum("album", (1..8).map {

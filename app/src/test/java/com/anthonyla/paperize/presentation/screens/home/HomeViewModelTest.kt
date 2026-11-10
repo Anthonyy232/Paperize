@@ -1,18 +1,21 @@
 package com.anthonyla.paperize.presentation.screens.home
 
 import androidx.lifecycle.ViewModelStore
+import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
+import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
+import com.anthonyla.paperize.domain.usecase.CreateAlbumUseCase
+import com.anthonyla.paperize.presentation.ViewModelTestRule
 import com.anthonyla.paperize.service.SettingsCoordinator
 import com.anthonyla.paperize.service.worker.WallpaperScheduler
 import io.mockk.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +26,7 @@ import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -31,13 +35,16 @@ class HomeViewModelTest {
     private val albums = mockk<AlbumRepository>()
     private val wallpapers = mockk<WallpaperRepository>(relaxed = true)
     private val scheduler = mockk<WallpaperScheduler>(relaxed = true)
+    private val createAlbum = mockk<CreateAlbumUseCase>()
+    private val summaries = MutableStateFlow(emptyList<AlbumSummary>())
     private val stored = MutableStateFlow(ScheduleSettings(homeEnabled = true, homeAlbumId = "old"))
     private val store = ViewModelStore()
     private lateinit var viewModel: HomeViewModel
 
+    @get:Rule val viewModelRule = ViewModelTestRule()
+
     @Before fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
-        every { albums.getAlbumSummaries() } returns flowOf(emptyList())
+        every { albums.getAlbumSummaries() } returns summaries
         every { settings.getScheduleSettingsFlow() } returns stored
         every { settings.getAppSettingsFlow() } returns flowOf(AppSettings())
         every { settings.getWallpaperModeFlow() } returns flowOf(WallpaperMode.STATIC)
@@ -51,14 +58,12 @@ class HomeViewModelTest {
         }
         every { wallpapers.getCurrentWallpaperFlow(any(), any()) } returns flowOf(null)
         val coordinator = SettingsCoordinator(mockk(relaxed = true), settings, wallpapers, albums, scheduler)
-        viewModel = HomeViewModel(albums, settings, wallpapers, mockk(), coordinator)
+        viewModel = HomeViewModel(albums, settings, wallpapers, createAlbum, coordinator)
         store.put("home", viewModel)
     }
 
     @After fun tearDown() {
         store.clear()
-        Dispatchers.resetMain()
-        unmockkAll()
     }
 
     @Test fun `delayed effect edits preserve a newer pause and album selection`() = runTest {
@@ -114,5 +119,19 @@ class HomeViewModelTest {
         runCurrent()
         verify(exactly = 1) { wallpapers.getCurrentWallpaperFlow("new", ScreenType.HOME) }
         verify(exactly = 1) { wallpapers.getCurrentWallpaperFlow("new", ScreenType.BOTH) }
+    }
+
+    @Test fun `album creation rejects names that differ only by case and reports failed saves`() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.albums.collect() }
+        summaries.value = listOf(AlbumSummary.empty("nature", "Nature"))
+        runCurrent()
+        assertEquals(R.string.album_name_exists_error, viewModel.createAlbum("nature"))
+        coVerify(exactly = 0) { createAlbum(any(), any()) }
+
+        coEvery { createAlbum("Trips", any()) } throws IllegalStateException("Storage unavailable")
+        assertEquals(R.string.album_create_failed, viewModel.createAlbum("Trips"))
+
+        coEvery { createAlbum("Trips", any()) } returns Album.empty("trips", "Trips")
+        assertNull(viewModel.createAlbum("Trips"))
     }
 }

@@ -73,9 +73,6 @@
   <string name="change_vignette">Vignette Effect</string>
   <string name="none">None</string>
   <string name="gray_filter">Gray Filter</string>
-  <string name="folders">Folders</string>
-  <string name="wallpapers_sort">Wallpapers</string>
-  <string name="close">Close</string>
   <string name="shuffle">Shuffle</string>
   <string name="days_txt">Days</string>
   <string name="hours_txt">Hours</string>
@@ -101,16 +98,12 @@
   <string name="notification_permission_title">Enable Notifications</string>
   <string name="notification_permission_description">Allow Paperize to send notifications about wallpaper changes and when the app is running in the background. You can change this anytime in settings.</string>
   <string name="skip">Skip</string>
-  <string name="permission_granted">Permission Granted</string>
 
   <!-- Content Descriptions for Accessibility -->
   <string name="content_desc_clear_selection">Clear selection</string>
   <string name="content_desc_select_all">Select all</string>
   <string name="content_desc_delete_selected">Delete selected</string>
-  <string name="content_desc_expand">Expand</string>
   <string name="content_desc_collapse">Collapse</string>
-  <string name="content_desc_sort_items">Sort items</string>
-  <string name="content_desc_save">Save</string>
   <string name="content_desc_current_lock_wallpaper">Current lock screen wallpaper</string>
   <string name="content_desc_current_home_wallpaper">Current home screen wallpaper</string>
 
@@ -136,10 +129,6 @@
   <string name="sort_date_added_desc">Date Added (Newest First)</string>
   <string name="sort_date_modified_asc">Date Modified (Oldest First)</string>
   <string name="sort_date_modified_desc">Date Modified (Newest First)</string>
-  <string name="sort_a_z">Sort A-Z</string>
-  <string name="sort_z_a">Sort Z-A</string>
-  <string name="sort_by_newest">Sort by newest</string>
-  <string name="sort_by_oldest">Sort by oldest</string>
 
   <!-- Time Interval Picker -->
   <string name="mins">Mins</string>
@@ -226,7 +215,5 @@
   <string name="refresh_folder">Refresh folder</string>
   <string name="folder_refreshed">Folder checked for new wallpapers.</string>
   <string name="folder_refresh_failed">Could not refresh this folder. Check that it is accessible, then try again.</string>
-  <string name="sort_load_failed">Could not load the album. Go back and try again.</string>
-  <string name="sort_save_failed">Could not save the order. Please try again.</string>
   <string name="reset_failed">Could not finish resetting data. Please try again.</string>
 </resources>
