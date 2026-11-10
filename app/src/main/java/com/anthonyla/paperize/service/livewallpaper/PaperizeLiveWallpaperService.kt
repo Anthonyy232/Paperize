@@ -27,6 +27,7 @@ import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
+import com.anthonyla.paperize.service.LiveWallpaperReload
 import com.anthonyla.paperize.service.livewallpaper.gl.GLWallpaperService
 import com.anthonyla.paperize.service.livewallpaper.renderer.ContentUriImageLoader
 import com.anthonyla.paperize.service.livewallpaper.renderer.EmptyImageLoader
@@ -51,6 +52,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var changeWallpaperUseCase: ChangeWallpaperUseCase
+    @Inject lateinit var liveWallpaperReload: LiveWallpaperReload
 
     companion object {
         private const val TAG = "PaperizeLiveWallpaper"
@@ -111,14 +113,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             }
         )
 
-        private val reloadReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                Log.d(TAG, "Received reload broadcast")
-                renderController.reloadCurrentArtwork()
-                restartLiveIntervalTimer()
-            }
-        }
-
         private val screenOffReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 handleScreenOff()
@@ -144,13 +138,12 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
             observeSettings()
 
-            val filter = IntentFilter(Constants.ACTION_RELOAD_WALLPAPER)
-            ContextCompat.registerReceiver(
-                applicationContext,
-                reloadReceiver,
-                filter,
-                ContextCompat.RECEIVER_NOT_EXPORTED
-            )
+            engineScope.launch {
+                liveWallpaperReload.requests.collect {
+                    renderController.reloadCurrentArtwork()
+                    restartLiveIntervalTimer()
+                }
+            }
 
             val screenOffFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
             ContextCompat.registerReceiver(
@@ -285,7 +278,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
         override fun onDestroy() {
             engines -= this
-            applicationContext.unregisterReceiver(reloadReceiver)
             applicationContext.unregisterReceiver(screenOffReceiver)
 
             renderer.cancelLoading()

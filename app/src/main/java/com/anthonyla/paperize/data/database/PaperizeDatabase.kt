@@ -2,8 +2,6 @@ package com.anthonyla.paperize.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.anthonyla.paperize.data.database.converters.TypeConverters as PaperizeTypeConverters
 import com.anthonyla.paperize.data.database.dao.AlbumDao
 import com.anthonyla.paperize.data.database.dao.FolderDao
 import com.anthonyla.paperize.data.database.dao.WallpaperCurrentDao
@@ -27,7 +25,6 @@ import com.anthonyla.paperize.core.constants.Constants
     version = Constants.DATABASE_VERSION,
     exportSchema = true
 )
-@TypeConverters(PaperizeTypeConverters::class)
 abstract class PaperizeDatabase : RoomDatabase() {
     abstract fun albumDao(): AlbumDao
     abstract fun wallpaperDao(): WallpaperDao

@@ -1,20 +1,17 @@
 package com.anthonyla.paperize.service.wallpaper
 
 import android.app.WallpaperManager
-import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.runCatchingCancellable
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.setBitmapChecked
 import com.anthonyla.paperize.domain.model.PreparedWallpaper
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.anthonyla.paperize.service.LiveWallpaperReload
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -25,19 +22,18 @@ data class WallpaperChangeOutcome(val changed: Boolean = false, val emptyAlbum: 
 
 /** Call while holding WallpaperChangeLock so applying and resetting schedules stay ordered. */
 class WallpaperController @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val wallpaperManager: WallpaperManager,
     private val prepare: ChangeWallpaperUseCase,
     private val render: ReapplyEffectsUseCase,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val liveWallpaperReload: LiveWallpaperReload
 ) {
     suspend fun change(screen: ScreenType, settings: ScheduleSettings): WallpaperChangeOutcome = when (screen) {
         ScreenType.LIVE -> {
-            context.sendBroadcast(Intent(Constants.ACTION_RELOAD_WALLPAPER).setPackage(context.packageName))
+            liveWallpaperReload.request()
             WallpaperChangeOutcome(changed = true)
         }
-        ScreenType.HOME -> changeSelected(settings.homeAlbumId, screen)
-        ScreenType.LOCK -> changeSelected(settings.lockAlbumId, screen)
+        ScreenType.HOME, ScreenType.LOCK -> changeSelected(settings.albumId(screen), screen)
         ScreenType.BOTH -> {
             val home = settings.homeAlbumId
             if (home != null && home == settings.lockAlbumId && !settings.separateSchedules) {
@@ -113,8 +109,7 @@ class WallpaperController @Inject constructor(
         if (screen == ScreenType.LIVE) return WallpaperChangeOutcome()
         var outcome = WallpaperChangeOutcome()
         for (target in screen.staticScreens()) {
-            val albumId = if (target == ScreenType.HOME) settings.homeAlbumId else settings.lockAlbumId
-            if (albumId == null) continue
+            val albumId = settings.albumId(target) ?: continue
             val bitmap = runCatchingCancellable { render(albumId, target) }.getOrNull()
             val result = if (bitmap == null) changeSelected(albumId, target) else {
                 applyBitmap(bitmap, target)

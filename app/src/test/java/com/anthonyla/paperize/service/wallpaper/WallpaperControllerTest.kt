@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.service.wallpaper
 
 import android.app.WallpaperManager
-import android.content.Context
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScreenType
@@ -10,6 +9,7 @@ import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import com.anthonyla.paperize.domain.usecase.ReapplyEffectsUseCase
+import com.anthonyla.paperize.service.LiveWallpaperReload
 import io.mockk.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ class WallpaperControllerTest {
     private val prepare = mockk<ChangeWallpaperUseCase>(relaxed = true)
     private val render = mockk<ReapplyEffectsUseCase>()
     private val settingsRepository = mockk<SettingsRepository>(relaxed = true)
-    private val controller = WallpaperController(mockk<Context>(), manager, prepare, render, settingsRepository)
+    private val controller = WallpaperController(manager, prepare, render, settingsRepository, LiveWallpaperReload())
     private val settings = ScheduleSettings(homeAlbumId = "album", lockAlbumId = "album")
     private val bitmap = mockk<Bitmap>(relaxed = true)
     private val prepared = PreparedWallpaper(bitmap, "album", ScreenType.HOME, "image", false)

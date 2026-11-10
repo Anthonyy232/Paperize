@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.HardwareRenderer
 import android.graphics.ImageDecoder
-import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
@@ -33,7 +31,6 @@ import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.graphics.scale
-import androidx.exifinterface.media.ExifInterface
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.constants.Constants
@@ -42,70 +39,6 @@ import kotlin.math.hypot
 private const val TAG = "WallpaperUtil"
 private const val BUILT_IN_DISPLAY_CATEGORY =
     "android.hardware.display.category.BUILT_IN_DISPLAYS"
-
-fun Uri.getExifOrientation(context: Context): Int {
-    return try {
-        context.contentResolver.openInputStream(this)?.use { inputStream ->
-            val exif = ExifInterface(inputStream)
-            exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
-        } ?: ExifInterface.ORIENTATION_UNDEFINED
-    } catch (e: Exception) {
-        Log.w(TAG, "Error reading EXIF orientation: $e")
-        ExifInterface.ORIENTATION_UNDEFINED
-    }
-}
-
-fun getExifTransformationMatrix(orientation: Int, width: Int, height: Int): Matrix {
-    val matrix = Matrix()
-
-    when (orientation) {
-        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> {
-            matrix.setScale(-1f, 1f)
-            matrix.postTranslate(width.toFloat(), 0f)
-        }
-        ExifInterface.ORIENTATION_ROTATE_180 -> {
-            matrix.setRotate(180f)
-            matrix.postTranslate(width.toFloat(), height.toFloat())
-        }
-        ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
-            matrix.setScale(1f, -1f)
-            matrix.postTranslate(0f, height.toFloat())
-        }
-        ExifInterface.ORIENTATION_TRANSPOSE -> {
-            matrix.setRotate(90f)
-            matrix.postScale(-1f, 1f)
-        }
-        ExifInterface.ORIENTATION_ROTATE_90 -> {
-            matrix.setRotate(90f)
-            matrix.postTranslate(height.toFloat(), 0f)
-        }
-        ExifInterface.ORIENTATION_TRANSVERSE -> {
-            matrix.setRotate(-90f)
-            matrix.postScale(-1f, 1f)
-        }
-        ExifInterface.ORIENTATION_ROTATE_270 -> {
-            matrix.setRotate(-90f)
-            matrix.postTranslate(0f, width.toFloat())
-        }
-    }
-
-    return matrix
-}
-
-fun calculateInSampleSize(imageSize: Size, width: Int, height: Int): Int {
-    if (imageSize.width == 0 || imageSize.height == 0) return 1
-    if (width == 0 || height == 0) return 1
-
-    if (imageSize.width > width || imageSize.height > height) {
-        // Integer division (floor) ensures inSampleSize is never larger than needed,
-        // guaranteeing the decoded bitmap is at least as wide/tall as the target.
-        // fastRoundToInt() can round UP, producing a bitmap smaller than the target.
-        val heightRatio = imageSize.height / height
-        val widthRatio = imageSize.width / width
-        return minOf(heightRatio, widthRatio).coerceAtLeast(1)
-    }
-    return 1
-}
 
 fun getDeviceScreenSize(context: Context): Size {
     val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -186,11 +119,10 @@ fun retrieveBitmap(
     scaling: ScalingType = ScalingType.FIT,
     preserveSourceOverflow: Boolean = false
 ): Bitmap? {
-    // ImageDecoder reports dimensions after applying EXIF orientation.
-    var decodedWithImageDecoder = false
+    // ImageDecoder applies EXIF orientation and reports dimensions after it.
     val bitmap = try {
         val source = ImageDecoder.createSource(context.contentResolver, wallpaperUri)
-        val result = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+        ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
             val (targetW, targetH) = calculateDecodeSize(
                 info.size.width, info.size.height, width, height, scaling
             )
@@ -206,39 +138,18 @@ fun retrieveBitmap(
 
             decoder.isMutableRequired = true
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            decoder.setOnPartialImageListener { true }
         }
-        decodedWithImageDecoder = true
-        result
     } catch (e: Exception) {
-        Log.w(TAG, "ImageDecoder failed, falling back to BitmapFactory: $e")
-        try {
-            val sampleSize = context.contentResolver.openInputStream(wallpaperUri)?.use { stream ->
-                val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                BitmapFactory.decodeStream(stream, null, opts)
-                if (scaling == ScalingType.NONE || opts.outWidth <= 0 || opts.outHeight <= 0) 1
-                else calculateInSampleSize(Size(opts.outWidth, opts.outHeight), width, height)
-            } ?: 1
-            context.contentResolver.openInputStream(wallpaperUri)?.use { stream ->
-                BitmapFactory.decodeStream(stream, null, BitmapFactory.Options().apply {
-                    inSampleSize = sampleSize
-                    inMutable = true
-                    inPreferredConfig = Bitmap.Config.ARGB_8888
-                })
-            }
-        } catch (oom: OutOfMemoryError) {
-            Log.e(TAG, "OOM during BitmapFactory fallback for $wallpaperUri: $oom")
-            null
-        }
+        Log.w(TAG, "Could not decode $wallpaperUri: $e")
+        null
     } catch (e: OutOfMemoryError) {
         Log.e(TAG, "OOM during retrieveBitmap for $wallpaperUri: $e")
         null
     }
 
-    // Only apply EXIF orientation for the BitmapFactory path — ImageDecoder already handles it
-    val oriented = if (decodedWithImageDecoder) bitmap else bitmap?.let { applyExifOrientation(it, wallpaperUri, context) }
-
     // An exact canvas prevents the launcher from undoing the selected scaling mode.
-    return oriented?.let {
+    return bitmap?.let {
         if (preserveSourceOverflow && scaling == ScalingType.FILL) {
             scaleToFillPreservingOverflow(it, width, height)
         } else {
@@ -271,7 +182,7 @@ private fun scaleToFillPreservingOverflow(
     return scaled
 }
 
-/** Render either decoder's output onto the requested canvas; consumes [source]. */
+/** Render the decoded bitmap onto the requested canvas; consumes [source]. */
 internal fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scaling: ScalingType): Bitmap {
     if (source.width == canvasW && source.height == canvasH) return source
     val widthRatio = canvasW.toFloat() / source.width
@@ -292,28 +203,6 @@ internal fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scalin
     }
     source.recycle()
     return result
-}
-
-private fun applyExifOrientation(source: Bitmap, uri: Uri, context: Context): Bitmap {
-    val orientation = uri.getExifOrientation(context)
-    if (orientation == ExifInterface.ORIENTATION_UNDEFINED || orientation == ExifInterface.ORIENTATION_NORMAL) {
-        return source
-    }
-
-    return try {
-        val matrix = getExifTransformationMatrix(orientation, source.width, source.height)
-        val rotated = Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
-        if (rotated != source) {
-            source.recycle()
-        }
-        rotated
-    } catch (e: Exception) {
-        Log.e(TAG, "Error applying EXIF orientation: $e")
-        source
-    } catch (e: OutOfMemoryError) {
-        Log.e(TAG, "OOM applying EXIF orientation: $e")
-        source
-    }
 }
 
 private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) {

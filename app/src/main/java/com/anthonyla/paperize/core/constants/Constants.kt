@@ -9,8 +9,6 @@ object Constants {
     const val NOTIFICATION_CHANNEL_ID = "paperize_channel"
     const val NOTIFICATION_ID = 1
 
-    const val ACTION_RELOAD_WALLPAPER = "com.anthonyla.paperize.ACTION_RELOAD_WALLPAPER"
-
     const val WORK_NAME_HOME = "wallpaper_change_home"
     const val WORK_NAME_LOCK = "wallpaper_change_lock"
     const val WORK_NAME_BOTH = "wallpaper_change_both"
@@ -45,9 +43,6 @@ object Constants {
     const val PREVIEW_THUMBNAIL_WIDTH = 600
     const val PREVIEW_THUMBNAIL_HEIGHT = 1200
 
-    const val MINUTES_PER_HOUR = 60
-    const val MINUTES_PER_DAY = 1440
-
     const val MAX_BLUR_RADIUS = 25.0f
     const val BRIGHTNESS_SAMPLE_SIZE = 10
 
@@ -72,7 +67,7 @@ object Constants {
     const val MAX_HOURS_MINUTES_INPUT_LENGTH = 2
 
     val SUPPORTED_IMAGE_EXTENSIONS = setOf(
-        "jpg", "jpeg", "png", "webp", "avif", "heic", "heif", "bmp", "gif", "tiff", "tif", "svg"
+        "jpg", "jpeg", "png", "webp", "avif", "heic", "heif", "bmp", "gif", "tiff", "tif"
     )
 
     const val CROSSFADE_DURATION_MS = 750f

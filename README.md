@@ -17,7 +17,7 @@
 
 - **Dynamic Wallpaper Changer** — Set your wallpaper to change at specific time intervals
 - **Static & Live Wallpapers** — Choose between traditional static wallpapers or smooth live wallpaper transitions
-- **Multiple Image Formats** — Supports JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF, TIFF, and SVG
+- **Multiple Image Formats** — Supports JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF, and TIFF
 - **Folder Support** — Organize wallpapers into folders for auto-updating
 - **Dual Screen Support** — Choose the same or separate albums for home and lock screen
 - **Wallpaper Effects** — Apply various effects including brightness, blur, scaling, vignette, and more
