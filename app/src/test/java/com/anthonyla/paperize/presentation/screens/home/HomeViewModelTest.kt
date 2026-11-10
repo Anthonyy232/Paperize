@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.home
 
+import com.anthonyla.paperize.testAlbum
+import com.anthonyla.paperize.testAlbumSummary
 import androidx.lifecycle.ViewModelStore
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScreenType
@@ -72,7 +74,7 @@ class HomeViewModelTest {
         viewModel.updateScheduleSettingsDebounced(draft)
         viewModel.setChangerEnabled(false)
         runCurrent()
-        viewModel.selectAlbum(ScreenType.HOME, AlbumSummary.empty("new"))
+        viewModel.selectAlbum(ScreenType.HOME, testAlbumSummary("new"))
         advanceUntilIdle()
 
         assertFalse(stored.value.enableChanger)
@@ -123,7 +125,7 @@ class HomeViewModelTest {
 
     @Test fun `album creation rejects names that differ only by case and reports failed saves`() = runTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.albums.collect() }
-        summaries.value = listOf(AlbumSummary.empty("nature", "Nature"))
+        summaries.value = listOf(testAlbumSummary("nature", "Nature"))
         runCurrent()
         assertEquals(R.string.album_name_exists_error, viewModel.createAlbum("nature"))
         coVerify(exactly = 0) { createAlbum(any(), any()) }
@@ -131,7 +133,7 @@ class HomeViewModelTest {
         coEvery { createAlbum("Trips", any()) } throws IllegalStateException("Storage unavailable")
         assertEquals(R.string.album_create_failed, viewModel.createAlbum("Trips"))
 
-        coEvery { createAlbum("Trips", any()) } returns Album.empty("trips", "Trips")
+        coEvery { createAlbum("Trips", any()) } returns testAlbum("trips", "Trips")
         assertNull(viewModel.createAlbum("Trips"))
     }
 }

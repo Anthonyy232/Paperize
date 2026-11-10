@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.presentation
 
+import com.anthonyla.paperize.testAlbumSummary
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -141,7 +142,7 @@ class AlbumUiInstrumentedTest {
         try {
             compose.setContent {
                 PaperizeTheme(false, false) {
-                    AlbumItem(AlbumSummary.empty("album").copy(name = "Cover", coverUri = uri.value), {}, Modifier.size(180.dp))
+                    AlbumItem(testAlbumSummary("album").copy(name = "Cover", coverUri = uri.value), {}, Modifier.size(180.dp))
                 }
             }
             fun centerColor(): Int {

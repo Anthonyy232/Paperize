@@ -17,13 +17,4 @@ data class Wallpaper(
             decoded.substringAfterLast('/', decoded.substringAfterLast(':', decoded))
         }
 
-    companion object {
-        fun empty(id: String = "", albumId: String = "") = Wallpaper(
-            id = id,
-            albumId = albumId,
-            uri = "",
-            fileName = "",
-            dateModified = 0L
-        )
-    }
 }

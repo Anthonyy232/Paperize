@@ -135,7 +135,7 @@ class DocumentAccessInstrumentedTest {
             val uri = documentUri.toString()
             val missing = WallpaperEntity("first", "one", null, uri, "photo.png", 0L)
             db.wallpaperDao().insertWallpapers((0..504).map { missing.copy(id = "missing-$it") })
-            db.wallpaperDao().insertWallpaper(missing.copy(id = "other-album", albumId = "two"))
+            db.wallpaperDao().insertWallpapers(listOf(missing.copy(id = "other-album", albumId = "two")))
             provider.answer = {
                 if (provider.queries == 1) {
                     // Move an unread image before the first page while that page is being scanned.
@@ -146,7 +146,7 @@ class DocumentAccessInstrumentedTest {
             val repository = com.anthonyla.paperize.data.repository.AlbumRepositoryImpl(
                 com.anthonyla.paperize.data.source.AndroidDocumentSource(context), db)
             assertEquals(505, repository.pruneMissingEntries("one"))
-            assertEquals(0, db.wallpaperDao().getWallpaperCountByAlbum("one"))
+            assertEquals(0, db.wallpaperDao().getWallpaperIdsByAlbum("one").size)
             assertNull(db.albumDao().getAlbumById("one")?.coverUri)
             assertNotNull(db.wallpaperDao().getWallpaperById("other-album"))
         } finally { db.close() }
@@ -169,7 +169,7 @@ class DocumentAccessInstrumentedTest {
                 repository.pruneMissingEntries("album")
                 fail("Expected cancellation")
             } catch (_: kotlinx.coroutines.CancellationException) { }
-            assertEquals(2, db.wallpaperDao().getWallpaperCountByAlbum("album"))
+            assertEquals(2, db.wallpaperDao().getWallpaperIdsByAlbum("album").size)
             assertEquals("content://test/document/first", db.albumDao().getAlbumById("album")?.coverUri)
         } finally { db.close() }
     }

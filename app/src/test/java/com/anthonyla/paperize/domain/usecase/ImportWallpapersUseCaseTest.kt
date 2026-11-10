@@ -1,5 +1,7 @@
 package com.anthonyla.paperize.domain.usecase
 
+import com.anthonyla.paperize.testAlbum
+import com.anthonyla.paperize.testFolder
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.repository.AlbumRepository
@@ -41,7 +43,7 @@ class ImportWallpapersUseCaseTest {
 
     @Test fun `folder import keeps metadata and assigns membership`() = runTest {
         coEvery { documents.retainReadPermission("tree") } just Runs
-        every { repository.getAlbumById("album") } returns flowOf(Album.empty("album"))
+        every { repository.getAlbumById("album") } returns flowOf(testAlbum("album"))
         coEvery { documents.readFolder("tree", any()) } returns SourceFolder("Photos", listOf(SourceImage("image", "photo.png", 42L)))
         coEvery { repository.addFolderToAlbum(any(), any(), any()) } returns true
         assertTrue(useCase.addFolder("album", "tree", {}, { _, _ -> }))
@@ -55,8 +57,8 @@ class ImportWallpapersUseCaseTest {
 
     @Test fun `existing folder restores access without rescanning`() = runTest {
         coEvery { documents.retainReadPermission("tree") } just Runs
-        every { repository.getAlbumById("album") } returns flowOf(Album.empty("album").copy(
-            folders = listOf(Folder.empty().copy(uri = "tree"))
+        every { repository.getAlbumById("album") } returns flowOf(testAlbum("album").copy(
+            folders = listOf(testFolder().copy(uri = "tree"))
         ))
         assertFalse(useCase.addFolder("album", "tree", {}, { _, _ -> }))
         coVerify { documents.retainReadPermission("tree") }

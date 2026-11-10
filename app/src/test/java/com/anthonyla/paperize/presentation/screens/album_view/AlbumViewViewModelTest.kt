@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.presentation.screens.album_view
 
+import com.anthonyla.paperize.testAlbum
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.navigation.toRoute
@@ -33,7 +34,7 @@ class AlbumViewViewModelTest {
     @get:Rule val viewModelRule = ViewModelTestRule()
 
     @Before fun setUp() {
-        every { albums.getAlbumById("album") } returns flowOf(Album.empty("album"))
+        every { albums.getAlbumById("album") } returns flowOf(testAlbum("album"))
         val savedState = SavedStateHandle()
         mockkStatic("androidx.navigation.SavedStateHandleKt")
         every { savedState.toRoute<AlbumRoute>() } returns AlbumRoute("album")

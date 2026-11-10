@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.domain.usecase
 
+import com.anthonyla.paperize.testWallpaper
 import android.graphics.Bitmap
 import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.NoValidWallpaperException
@@ -51,7 +52,7 @@ class ChangeWallpaperUseCaseTest {
 
     @Test(expected = kotlinx.coroutines.CancellationException::class)
     fun `cancelled rendering restores the dequeued item without retrying`() = runTest {
-        val wallpaper = Wallpaper.empty("image", "album")
+        val wallpaper = testWallpaper("image", "album")
         coEvery { repository.getAndDequeueWallpaper("album", ScreenType.HOME) } returns wallpaper
         coEvery { renderer.render(wallpaper, ScreenType.HOME, any()) } throws kotlinx.coroutines.CancellationException()
         try {
@@ -64,7 +65,7 @@ class ChangeWallpaperUseCaseTest {
 
     @Test
     fun `unreadable single image album is not reported as empty`() = runTest {
-        val wallpaper = Wallpaper.empty("image", "album")
+        val wallpaper = testWallpaper("image", "album")
         var dequeues = 0
         coEvery { repository.getAndDequeueWallpaper("album", ScreenType.HOME) } answers {
             if (dequeues++ % 2 == 0) null else wallpaper

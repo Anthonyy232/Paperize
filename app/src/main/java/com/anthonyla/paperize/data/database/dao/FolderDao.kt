@@ -42,7 +42,4 @@ interface FolderDao {
         ) WHERE albumId = :albumId
     """)
     suspend fun refreshFolderCovers(albumId: String)
-
-    @Query("DELETE FROM folders WHERE id = :folderId")
-    suspend fun deleteFolderById(folderId: String)
 }

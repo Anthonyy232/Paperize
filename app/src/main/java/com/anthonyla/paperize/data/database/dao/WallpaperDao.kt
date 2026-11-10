@@ -30,16 +30,7 @@ interface WallpaperDao {
     suspend fun getWallpaperById(wallpaperId: String): WallpaperEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWallpaper(wallpaper: WallpaperEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWallpapers(wallpapers: List<WallpaperEntity>)
-
-    @Query("DELETE FROM wallpapers WHERE folderId = :folderId")
-    suspend fun deleteWallpapersByFolder(folderId: String)
-
-    @Query("SELECT COUNT(*) FROM wallpapers WHERE albumId = :albumId")
-    suspend fun getWallpaperCountByAlbum(albumId: String): Int
 
     @Query("SELECT id FROM wallpapers WHERE albumId = :albumId")
     suspend fun getWallpaperIdsByAlbum(albumId: String): List<String>

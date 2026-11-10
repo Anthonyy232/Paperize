@@ -1,5 +1,6 @@
 package com.anthonyla.paperize.domain.usecase
 
+import com.anthonyla.paperize.testFolder
 import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.source.DocumentSource
@@ -17,7 +18,7 @@ class RefreshFolderUseCaseTest {
     private val refresh = RefreshFolderUseCase(albums, documents)
 
     @Test fun `refresh assigns membership and reports actual inserted count`() = runTest {
-        every { albums.getFolderById("folder") } returns flowOf(Folder.empty("folder", "album").copy(uri = "tree"))
+        every { albums.getFolderById("folder") } returns flowOf(testFolder("folder", "album").copy(uri = "tree"))
         coEvery { documents.readFolder("tree", any()) } returns SourceFolder("Photos", listOf(
             SourceImage("existing", "old.png", 1L), SourceImage("new", "new.png", 2L)
         ))

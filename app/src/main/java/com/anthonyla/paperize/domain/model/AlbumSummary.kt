@@ -13,16 +13,4 @@ data class AlbumSummary(
     val folderCount: Int,
     val createdAt: Long,
     val modifiedAt: Long
-) {
-    companion object {
-        fun empty(id: String = "", name: String = "") = AlbumSummary(
-            id = id,
-            name = name,
-            coverUri = null,
-            wallpaperCount = 0,
-            folderCount = 0,
-            createdAt = System.currentTimeMillis(),
-            modifiedAt = System.currentTimeMillis()
-        )
-    }
-}
+)

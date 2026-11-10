@@ -29,6 +29,9 @@ android {
     }
 
     sourceSets.getByName("androidTest").assets.directories.add("$projectDir/schemas")
+    listOf("test", "androidTest").forEach {
+        sourceSets.getByName(it).kotlin.directories.add("$projectDir/src/sharedTest/java")
+    }
 
     defaultConfig {
         applicationId = "com.anthonyla.paperize"
