@@ -78,7 +78,7 @@ class WallpaperControllerTest {
         verify { bitmap.recycle() }
     }
 
-    @Test fun `empty home album does not disable a valid lock album`() = runTest {
+    @Test fun `empty home album still changes lock and clears only the home selection`() = runTest {
         val active = settings.copy(lockAlbumId = "lock", enableChanger = true, homeEnabled = true, lockEnabled = true)
         coEvery { prepare("album", ScreenType.HOME) } throws EmptyAlbumException()
         val lock = prepared.copy(albumId = "lock", screenType = ScreenType.LOCK)

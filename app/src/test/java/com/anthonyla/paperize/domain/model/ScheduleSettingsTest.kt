@@ -12,7 +12,7 @@ class ScheduleSettingsTest {
         val effects = WallpaperEffects(darkenPercentage = 150, blurPercentage = -10)
         val settings = ScheduleSettings(
             homeIntervalMinutes = 5,
-            lockIntervalMinutes = 120,
+            lockIntervalMinutes = 5,
             liveIntervalMinutes = 0,
             homeEffects = effects,
             lockEffects = effects,
@@ -22,6 +22,7 @@ class ScheduleSettingsTest {
         assertEquals(
             settings.copy(
                 homeIntervalMinutes = 15,
+                lockIntervalMinutes = 15,
                 liveIntervalMinutes = 1,
                 homeEffects = validEffects,
                 lockEffects = validEffects,

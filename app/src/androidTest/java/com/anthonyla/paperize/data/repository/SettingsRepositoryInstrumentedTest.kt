@@ -48,14 +48,25 @@ class SettingsRepositoryInstrumentedTest {
                 enableVignette = true, vignettePercentage = 40, enableGrayscale = true, grayscalePercentage = 50,
                 enableDoubleTap = true, enableChangeOnScreenOff = true, enableParallax = true, parallaxIntensity = 60
             )
-            preferences.updateScheduleSettings(ScheduleSettings(
+            // Each screen gets distinct effects so a cross-screen key swap cannot round-trip.
+            val lockEffects = effects.copy(
+                blurPercentage = 31, darkenPercentage = 21, vignettePercentage = 41, grayscalePercentage = 51,
+                enableVignette = false, enableDoubleTap = false, parallaxIntensity = 61
+            )
+            val liveEffects = effects.copy(
+                blurPercentage = 32, darkenPercentage = 22, vignettePercentage = 42, grayscalePercentage = 52,
+                enableGrayscale = false, enableChangeOnScreenOff = false, parallaxIntensity = 62
+            )
+            val full = ScheduleSettings(
                 enableChanger = true, separateSchedules = true, shuffleEnabled = true,
                 homeEnabled = true, lockEnabled = true, homeAlbumId = "home", lockAlbumId = "lock", liveAlbumId = "live",
                 homeIntervalMinutes = 25, lockIntervalMinutes = 35, liveIntervalMinutes = 45,
                 homeScalingType = ScalingType.FIT, lockScalingType = ScalingType.STRETCH, liveScalingType = ScalingType.NONE,
-                homeScrollingEnabled = true, homeEffects = effects, lockEffects = effects, liveEffects = effects,
+                homeScrollingEnabled = true, homeEffects = effects, lockEffects = lockEffects, liveEffects = liveEffects,
                 adaptiveBrightness = true
-            ))
+            )
+            preferences.updateScheduleSettings(full)
+            assertEquals(full, preferences.getScheduleSettings())
             preferences.clearScheduleSettings()
             assertEquals(ScheduleSettings(), preferences.getScheduleSettings())
             assertEquals(appearance, preferences.getAppSettings())

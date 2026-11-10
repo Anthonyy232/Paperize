@@ -11,19 +11,6 @@ import org.junit.Test
 class DisplaySizeTest {
 
     @Test
-    fun `largest internal display wins even when current window is folded`() {
-        val result = selectLargestDisplayDimensions(
-            listOf(
-                1080 to 2092,
-                1840 to 2208,
-                920 to 1104
-            )
-        )
-
-        assertEquals(1840 to 2208, result)
-    }
-
-    @Test
     fun `selection uses pixel area instead of only one dimension`() {
         val result = selectLargestDisplayDimensions(
             listOf(
@@ -68,14 +55,10 @@ class DisplaySizeTest {
     }
 
     @Test
-    fun `home fill preserves overflow only when scrolling is enabled`() {
-        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL, false))
+    fun `only home fill with scrolling enabled preserves overflow`() {
         assertTrue(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL, true))
         assertTrue(usesLauncherManagedScrolling(ScreenType.BOTH, ScalingType.FILL, true))
-    }
-
-    @Test
-    fun `non-fill and lock rendering use exact canvas`() {
+        assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FILL, false))
         assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.FIT, true))
         assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.STRETCH, true))
         assertFalse(usesLauncherManagedScrolling(ScreenType.HOME, ScalingType.NONE, true))

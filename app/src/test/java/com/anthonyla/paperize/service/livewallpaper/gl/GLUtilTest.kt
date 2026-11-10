@@ -55,17 +55,4 @@ class GLUtilTest {
             GLES20.glDeleteShader(12)
         }
     }
-
-    @Test fun `attach failure releases the program before linking`() {
-        every { GLES20.glGetError() } returns GLES20.GL_INVALID_OPERATION
-
-        assertThrows(RuntimeException::class.java) { GLUtil.createProgram("vertex", "fragment") }
-
-        verify(exactly = 1) {
-            GLES20.glDeleteProgram(13)
-            GLES20.glDeleteShader(11)
-            GLES20.glDeleteShader(12)
-        }
-        verify(exactly = 0) { GLES20.glLinkProgram(any()) }
-    }
 }

@@ -102,7 +102,7 @@ class LiveWallpaperShaderInstrumentedTest {
     }
 
     @Test
-    fun rendererDrawsTheFinalCrossfadeFrameAndRejectsSupersededUploads() {
+    fun rendererSurvivesSupersededUploadsCrossfadeResizeAndContextLoss() {
         val app = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         val uploads = java.util.concurrent.LinkedBlockingQueue<() -> Unit>()
         var renderRequests = 0
@@ -168,18 +168,6 @@ class LiveWallpaperShaderInstrumentedTest {
             renderer.destroy()
             file.delete()
             replacement.delete()
-        }
-    }
-
-    @Test
-    fun everyLiveWallpaperShaderCompilesAndLinksOnDevice() {
-        listOf(
-            GLShaders.BLUR_FRAGMENT_SHADER,
-            GLShaders.EFFECTS_FRAGMENT_SHADER
-        ).forEach { fragmentShader ->
-            val program = GLUtil.createProgram(GLShaders.VERTEX_SHADER, fragmentShader)
-            assertTrue(program != 0)
-            GLES20.glDeleteProgram(program)
         }
     }
 

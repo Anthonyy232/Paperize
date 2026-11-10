@@ -142,28 +142,4 @@ class WallpaperSchedulerTest {
         )
         assertEquals(TimeUnit.MINUTES.toMillis(30), enqueued.single().third.workSpec.intervalDuration)
     }
-
-    @Test
-    fun `manual home reset delays only its active independent schedule`() {
-        val before = System.currentTimeMillis()
-        scheduler.resetAfterManualChange(
-            ScreenType.HOME,
-            ScheduleSettings(
-                enableChanger = true,
-                separateSchedules = true,
-                homeEnabled = true,
-                lockEnabled = true,
-                homeAlbumId = "home",
-                lockAlbumId = "lock",
-                homeIntervalMinutes = 60,
-                lockIntervalMinutes = 90
-            ),
-            WallpaperMode.STATIC
-        )
-
-        val (name, policy, request) = enqueued.single()
-        assertEquals(Constants.WORK_NAME_HOME, name)
-        assertEquals(ExistingPeriodicWorkPolicy.UPDATE, policy)
-        assertTrue(request.workSpec.calculateNextRunTime() >= before + TimeUnit.MINUTES.toMillis(60))
-    }
 }

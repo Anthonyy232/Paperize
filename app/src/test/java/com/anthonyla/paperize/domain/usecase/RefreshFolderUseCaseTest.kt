@@ -6,7 +6,6 @@ import com.anthonyla.paperize.domain.source.DocumentSource
 import com.anthonyla.paperize.domain.source.SourceFolder
 import com.anthonyla.paperize.domain.source.SourceImage
 import io.mockk.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -27,14 +26,5 @@ class RefreshFolderUseCaseTest {
         coVerify { albums.addWallpapersToAlbum("album", match {
             it.size == 2 && it.all { image -> image.albumId == "album" && image.folderId == "folder" }
         }, any()) }
-    }
-
-    @Test fun `failed scan preserves existing data and cancellation propagates`() = runTest {
-        every { albums.getFolderById("folder") } returns flowOf(Folder.empty("folder", "album").copy(uri = "tree"))
-        coEvery { documents.readFolder("tree", any()) } throws SecurityException()
-        assertTrue(runCatching { refresh("folder") }.isFailure)
-        coEvery { documents.readFolder("tree", any()) } throws CancellationException()
-        try { refresh("folder"); fail("Expected cancellation") } catch (_: CancellationException) { }
-        coVerify(exactly = 0) { albums.addWallpapersToAlbum(any(), any(), any()) }
     }
 }

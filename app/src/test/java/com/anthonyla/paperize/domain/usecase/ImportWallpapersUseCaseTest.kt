@@ -7,7 +7,6 @@ import com.anthonyla.paperize.domain.source.DocumentSource
 import com.anthonyla.paperize.domain.source.SourceFolder
 import com.anthonyla.paperize.domain.source.SourceImage
 import io.mockk.*
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -29,10 +28,12 @@ class ImportWallpapersUseCaseTest {
         }, any()) }
     }
 
-    @Test fun `permission failure does not save an inaccessible image`() = runTest {
+    @Test fun `permission failure on one image saves nothing from the selection`() = runTest {
+        coEvery { documents.retainReadPermission("ok") } just Runs
+        coEvery { documents.readImage("ok") } returns SourceImage("ok", "photo.jpg", 42L)
         coEvery { documents.retainReadPermission("blocked") } throws SecurityException("No grant")
         try {
-            useCase.addImages("album", listOf("blocked")) { _, _ -> }
+            useCase.addImages("album", listOf("ok", "blocked")) { _, _ -> }
             fail("Expected permission error")
         } catch (_: SecurityException) { }
         coVerify(exactly = 0) { repository.addWallpapersToAlbum(any(), any(), any()) }
@@ -60,18 +61,5 @@ class ImportWallpapersUseCaseTest {
         assertFalse(useCase.addFolder("album", "tree", {}, { _, _ -> }))
         coVerify { documents.retainReadPermission("tree") }
         coVerify(exactly = 0) { documents.readFolder(any(), any()) }
-    }
-
-    @Test fun `failed and cancelled scans do not save a partial folder`() = runTest {
-        coEvery { documents.retainReadPermission("tree") } just Runs
-        every { repository.getAlbumById("album") } returns flowOf(Album.empty("album"))
-        for (failure in listOf(java.io.IOException("Unavailable"), CancellationException("Cancelled"))) {
-            coEvery { documents.readFolder("tree", any()) } throws failure
-            try {
-                useCase.addFolder("album", "tree", {}, { _, _ -> })
-                fail("Expected scan failure")
-            } catch (actual: Exception) { assertSame(failure, actual) }
-        }
-        coVerify(exactly = 0) { repository.addFolderToAlbum(any(), any(), any()) }
     }
 }

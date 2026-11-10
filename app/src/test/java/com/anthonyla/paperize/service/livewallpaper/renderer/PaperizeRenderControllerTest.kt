@@ -35,7 +35,11 @@ class PaperizeRenderControllerTest {
     @Test fun `hidden debounce waits until visible without selecting twice`() = runTest {
         val uploads = mutableListOf<Pair<ImageLoader, Boolean>>()
         val loader = mockk<ContentUriImageLoader>()
-        val controller = PaperizeRenderController({ loader, skip -> uploads.add(loader to skip) }, backgroundScope) { loader }
+        var selections = 0
+        val controller = PaperizeRenderController({ loader, skip -> uploads.add(loader to skip) }, backgroundScope) {
+            selections++
+            loader
+        }
         controller.visible = true
         controller.reloadCurrentArtwork()
         runCurrent()
@@ -47,5 +51,6 @@ class PaperizeRenderControllerTest {
         controller.visible = true
         runCurrent()
         assertEquals(listOf(loader to false), uploads)
+        assertEquals(1, selections)
     }
 }
