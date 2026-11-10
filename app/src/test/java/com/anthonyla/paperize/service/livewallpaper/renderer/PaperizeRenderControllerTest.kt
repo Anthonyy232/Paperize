@@ -1,12 +1,10 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 
-import com.anthonyla.paperize.core.constants.Constants
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -23,7 +21,7 @@ class PaperizeRenderControllerTest {
             if (selections++ == 0) first.await() else current
         }
         controller.visible = true
-        controller.reloadCurrentArtwork(immediate = true)
+        controller.reloadCurrentArtwork()
         runCurrent()
         controller.reloadCurrentArtwork()
         first.complete(stale)
@@ -32,7 +30,7 @@ class PaperizeRenderControllerTest {
         assertEquals(listOf(current to false), uploads)
     }
 
-    @Test fun `hidden debounce waits until visible without selecting twice`() = runTest {
+    @Test fun `reloads requested while hidden select once when visible`() = runTest {
         val uploads = mutableListOf<Pair<ImageLoader, Boolean>>()
         val loader = mockk<ContentUriImageLoader>()
         var selections = 0
@@ -40,11 +38,8 @@ class PaperizeRenderControllerTest {
             selections++
             loader
         }
-        controller.visible = true
         controller.reloadCurrentArtwork()
-        runCurrent()
-        controller.visible = false
-        advanceTimeBy(Constants.RELOAD_THROTTLE_MS)
+        controller.reloadCurrentArtwork()
         runCurrent()
         assertTrue(uploads.isEmpty())
 

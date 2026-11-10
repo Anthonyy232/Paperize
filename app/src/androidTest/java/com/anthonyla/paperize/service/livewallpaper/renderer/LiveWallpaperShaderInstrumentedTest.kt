@@ -165,7 +165,7 @@ class LiveWallpaperShaderInstrumentedTest {
             assertTrue(Color.green(readPixel(SIZE / 2, SIZE / 2)) <= 2)
             GLUtil.checkGLError("recreated wallpaper surface")
         } finally {
-            renderer.destroy()
+            renderer.cancelLoading()
             file.delete()
             replacement.delete()
         }

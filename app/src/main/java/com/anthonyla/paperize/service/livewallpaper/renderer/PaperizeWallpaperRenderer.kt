@@ -545,22 +545,4 @@ class PaperizeWallpaperRenderer(
         loadingScope.cancel()
         requestedImageLoader = null
     }
-
-    /** Must be called on the GL thread. */
-    fun destroy() {
-        cancelLoading()
-
-        currentPicture?.recycle()
-        currentPicture = null
-
-        nextPicture?.recycle()
-        nextPicture = null
-
-        GLUtil.deleteProgram(blurProgram)
-        GLUtil.deleteProgram(effectsProgram)
-
-        deleteBlurResources()
-
-        Log.d(TAG, "Renderer destroyed")
-    }
 }

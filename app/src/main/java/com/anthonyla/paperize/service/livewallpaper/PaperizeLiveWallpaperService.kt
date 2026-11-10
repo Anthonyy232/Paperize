@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
 import android.view.GestureDetector
@@ -40,7 +41,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -75,6 +75,14 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
     }
 
+    private val engines = mutableSetOf<PaperizeLiveWallpaperEngine>()
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Adaptive brightness reads dark mode at draw time, so a theme switch needs a new frame.
+        engines.forEach { it.requestRender() }
+    }
+
     override fun onCreateEngine(): Engine {
         return PaperizeLiveWallpaperEngine()
     }
@@ -106,7 +114,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         private val reloadReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 Log.d(TAG, "Received reload broadcast")
-                renderController.reloadCurrentArtwork(immediate = true)
+                renderController.reloadCurrentArtwork()
                 restartLiveIntervalTimer()
             }
         }
@@ -132,8 +140,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
             setRenderer(renderer)
             requestRender()
-
-            renderController.reloadCurrentArtwork(immediate = true)
+            engines += this
 
             observeSettings()
 
@@ -186,8 +193,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                     settingsRepository.getWallpaperModeFlow()
                 ) { settings, mode ->
                     Pair(settings, mode)
-                }.catch { e ->
-                    Log.e(TAG, "Error observing settings", e)
                 }.collect { (settings, mode) ->
                     val timerConfigurationChanged =
                         latestWallpaperMode != mode ||
@@ -279,14 +284,11 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
 
         override fun onDestroy() {
+            engines -= this
             applicationContext.unregisterReceiver(reloadReceiver)
             applicationContext.unregisterReceiver(screenOffReceiver)
 
             renderer.cancelLoading()
-
-            queueEvent {
-                renderer.destroy()
-            }
 
             engineScope.cancel()
             super.onDestroy()
@@ -301,7 +303,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                 val doubleTapEnabled = settings.liveEffects.enableDoubleTap
 
                 if (doubleTapEnabled) {
-                    renderController.reloadCurrentArtwork(immediate = true)
+                    renderController.reloadCurrentArtwork()
                     restartLiveIntervalTimer()
                 }
             }
@@ -336,9 +338,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                 while (isActive) {
                     delay(intervalMillis)
                     Log.d(TAG, "Visible live interval elapsed; changing wallpaper")
-                    renderController.reloadCurrentArtwork(
-                        immediate = true
-                    )
+                    renderController.reloadCurrentArtwork()
                 }
             }
         }

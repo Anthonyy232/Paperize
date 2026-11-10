@@ -76,7 +76,6 @@ object Constants {
     )
 
     const val CROSSFADE_DURATION_MS = 750f
-    const val RELOAD_THROTTLE_MS = 250L
     const val BLUR_MIN_THRESHOLD = 0.01f
 
     const val MAX_WALLPAPER_LOAD_RETRIES = 10

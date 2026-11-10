@@ -1,10 +1,7 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 
 import android.util.Log
-import com.anthonyla.paperize.core.constants.Constants
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -17,36 +14,26 @@ class PaperizeRenderController(
     var visible = false
         set(value) {
             field = value
-            if (value && hasPendingReload) reloadCurrentArtwork(immediate = true)
+            if (value && hasPendingReload) reloadCurrentArtwork()
         }
 
     private var isLoading = false
     private var hasPendingReload = false
-    private var throttleJob: Job? = null
 
-    fun reloadCurrentArtwork(immediate: Boolean = false) {
+    /** Deferred until the wallpaper is visible and any running selection has finished. */
+    fun reloadCurrentArtwork() {
         if (!visible || isLoading) {
             hasPendingReload = true
             return
         }
-
         hasPendingReload = false
-        throttleJob?.cancel()
-        if (immediate) {
-            executeReload()
-        } else {
-            throttleJob = controllerScope.launch {
-                delay(Constants.RELOAD_THROTTLE_MS)
-                if (visible) executeReload() else hasPendingReload = true
-            }
-        }
+        executeReload()
     }
 
     /** Prepare the next wallpaper while the screen is dark, without crossfading. */
     fun forceReloadCurrentArtwork() {
         if (isLoading) return
         hasPendingReload = false
-        throttleJob?.cancel()
         executeReload(skipCrossfade = true)
     }
 
@@ -63,7 +50,7 @@ class PaperizeRenderController(
             } finally {
                 isLoading = false
                 if (isActive && hasPendingReload && visible) {
-                    reloadCurrentArtwork(immediate = true)
+                    reloadCurrentArtwork()
                 }
             }
         }

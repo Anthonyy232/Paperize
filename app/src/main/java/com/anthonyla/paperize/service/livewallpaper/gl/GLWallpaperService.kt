@@ -66,12 +66,6 @@ abstract class GLWallpaperService : WallpaperService() {
                 glThread?.onPause()
             }
         }
-
-        override fun onDestroy() {
-            super.onDestroy()
-            glThread?.requestExitAndWait()
-            glThread = null
-        }
     }
 
     private class GLThread(
@@ -166,7 +160,7 @@ abstract class GLWallpaperService : WallpaperService() {
                                 break
                             }
 
-                            // Drain accepted events (including renderer cleanup) before releasing EGL.
+                            // Run accepted events before releasing EGL so their bitmaps are recycled.
                             if (shouldExit) return
 
                             if (!paused && width > 0 && height > 0 && requestRender) {

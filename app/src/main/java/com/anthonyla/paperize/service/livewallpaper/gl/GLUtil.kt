@@ -88,12 +88,6 @@ object GLUtil {
         return maxSize[0]
     }
 
-    fun deleteProgram(program: Int) {
-        if (program != 0) {
-            GLES20.glDeleteProgram(program)
-        }
-    }
-
     fun deleteTexture(texture: Int) {
         if (texture != 0) {
             GLES20.glDeleteTextures(1, intArrayOf(texture), 0)
