@@ -312,7 +312,7 @@ fun WallpaperScreen(
         }
         SettingSwitchItem(
             title = stringResource(R.string.shuffle),
-            description = if (scheduleSettings.shuffleEnabled && !scheduleSettings.separateSchedules) null else stringResource(R.string.randomly_shuffle_the_wallpapers),
+            description = if (scheduleSettings.shuffleEnabled) null else stringResource(R.string.randomly_shuffle_the_wallpapers),
             checked = scheduleSettings.shuffleEnabled,
             onCheckedChange = { enabled ->
                 updateSettingsImmediate(scheduleSettings.copy(shuffleEnabled = enabled))
@@ -349,7 +349,7 @@ fun WallpaperScreen(
             }
             SettingSwitchItem(
                 title = stringResource(R.string.adaptive_brightness),
-                description = if (scheduleSettings.adaptiveBrightness && !scheduleSettings.separateSchedules) null else stringResource(R.string.adjust_brightness_based_on_mode),
+                description = if (scheduleSettings.adaptiveBrightness) null else stringResource(R.string.adjust_brightness_based_on_mode),
                 checked = scheduleSettings.adaptiveBrightness,
                 onCheckedChange = { enabled ->
                     updateSettingsImmediate(scheduleSettings.copy(adaptiveBrightness = enabled))
