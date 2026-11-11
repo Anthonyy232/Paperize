@@ -1,3 +1,12 @@
+## v4.2.2
+
+- The live wallpaper loads one image when it starts instead of two, and redraws at once when dark mode changes with adaptive brightness on.
+- The Library tab no longer leaves double spacing around the system bars.
+- The shuffle and adaptive brightness descriptions hide whenever the setting is on, like the other settings.
+- SVG files are no longer imported; they could never be shown as a wallpaper.
+- Remove the unused boot and foreground-service permissions.
+- Update the build tools and dependencies, and remove dead, duplicated and hand-rolled code.
+
 ## v4.2.1
 
 - Log live wallpaper queue failures instead of silently ignoring them.
