@@ -2,6 +2,8 @@
 <resources>
   <string name="album_create_failed">Could not create the album. Please try again.</string>
   <string name="app_name">Paperize</string>
+  <string name="continue_rotation_from_here">Continue rotation from here</string>
+  <string name="continue_rotation_from_here_desc">Next changes follow album order after this wallpaper</string>
   <string name="import_adding_folder">Adding folder…</string>
   <string name="import_adding_wallpapers">Adding wallpapers…</string>
   <string name="import_scanning">Scanning… %1$d found</string>

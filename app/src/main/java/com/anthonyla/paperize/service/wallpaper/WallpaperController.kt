@@ -90,7 +90,13 @@ class WallpaperController @Inject constructor(
         }
     }
 
-    suspend fun applySpecific(albumId: String, wallpaperId: String, screen: ScreenType, settings: ScheduleSettings) {
+    suspend fun applySpecific(
+        albumId: String,
+        wallpaperId: String,
+        screen: ScreenType,
+        settings: ScheduleSettings,
+        startSequenceHere: Boolean = false
+    ) {
         val targets = if (screen == ScreenType.BOTH && !settings.sameStaticPresentation()) {
             listOf(ScreenType.HOME, ScreenType.LOCK)
         } else listOf(screen)
@@ -99,7 +105,7 @@ class WallpaperController @Inject constructor(
             val bitmap = render(albumId, renderScreen, wallpaperId)
             applyBitmap(bitmap, target) {
                 target.staticScreens().forEach {
-                    prepare.completeSpecific(albumId, it, wallpaperId, settings.shuffleEnabled)
+                    prepare.completeSpecific(albumId, it, wallpaperId, settings.shuffleEnabled, startSequenceHere)
                 }
             }
         }

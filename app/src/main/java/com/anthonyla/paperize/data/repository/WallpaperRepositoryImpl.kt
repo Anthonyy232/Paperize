@@ -73,6 +73,17 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun startSequenceAfter(
+        albumId: String,
+        screenType: ScreenType,
+        wallpaperId: String
+    ) {
+        database.withTransaction {
+            val ordered = wallpaperDao.getOrderedWallpaperIdsByAlbum(albumId)
+            wallpaperQueueDao.rebuildQueue(albumId, screenType, QueueBuilder.idsAfter(ordered, wallpaperId))
+        }
+    }
+
     override suspend fun clearAllQueues() {
         wallpaperQueueDao.deleteAllQueueItems()
     }

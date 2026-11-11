@@ -92,9 +92,17 @@ class WallpaperControllerTest {
         every { manager.setBitmap(bitmap, null, true, 3) } returns 1
         controller.applySpecific("album", "selected", ScreenType.BOTH, settings)
         coVerify(exactly = 0) { prepare(any(), any()) }
-        coVerify { prepare.completeSpecific("album", ScreenType.HOME, "selected", false) }
-        coVerify { prepare.completeSpecific("album", ScreenType.LOCK, "selected", false) }
+        coVerify { prepare.completeSpecific("album", ScreenType.HOME, "selected", false, false) }
+        coVerify { prepare.completeSpecific("album", ScreenType.LOCK, "selected", false, false) }
         verify { bitmap.recycle() }
+    }
+
+    @Test fun `specific selection can continue the sequence on both screens`() = runTest {
+        coEvery { render("album", ScreenType.HOME, "selected") } returns bitmap
+        every { manager.setBitmap(bitmap, null, true, 3) } returns 1
+        controller.applySpecific("album", "selected", ScreenType.BOTH, settings, startSequenceHere = true)
+        coVerify { prepare.completeSpecific("album", ScreenType.HOME, "selected", false, true) }
+        coVerify { prepare.completeSpecific("album", ScreenType.LOCK, "selected", false, true) }
     }
 
     @Test fun `reapplying a readable current image does not consume the next item`() = runTest {
