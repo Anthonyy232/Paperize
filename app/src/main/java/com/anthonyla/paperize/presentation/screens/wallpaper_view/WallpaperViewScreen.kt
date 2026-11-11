@@ -2,6 +2,8 @@ package com.anthonyla.paperize.presentation.screens.wallpaper_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,7 +58,9 @@ fun WallpaperViewScreen(
 ) {
     val zoomState = rememberZoomState()
     val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
+    val shuffleEnabled by viewModel.shuffleEnabled.collectAsStateWithLifecycle()
     var showApplyDialog by rememberSaveable { mutableStateOf(false) }
+    var continueFromHere by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -144,6 +150,32 @@ fun WallpaperViewScreen(
             title = { Text(stringResource(R.string.set_wallpaper)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
+                    if (!shuffleEnabled) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = continueFromHere,
+                                    role = Role.Checkbox,
+                                    onValueChange = { continueFromHere = it }
+                                )
+                                .padding(bottom = AppSpacing.small)
+                        ) {
+                            Checkbox(checked = continueFromHere, onCheckedChange = null)
+                            Column(modifier = Modifier.padding(start = AppSpacing.small)) {
+                                Text(
+                                    text = stringResource(R.string.continue_rotation_from_here),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = stringResource(R.string.continue_rotation_from_here_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
                     listOf(
                         ScreenType.HOME to R.string.home_screen_btn,
                         ScreenType.LOCK to R.string.lock_screen_btn,
@@ -152,7 +184,7 @@ fun WallpaperViewScreen(
                         TextButton(
                             onClick = {
                                 showApplyDialog = false
-                                viewModel.applyTo(screenType)
+                                viewModel.applyTo(screenType, startSequenceHere = !shuffleEnabled && continueFromHere)
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {

@@ -81,18 +81,30 @@ class ChangeWallpaperUseCase @Inject constructor(
         shuffle = prepared.shuffle
     )
 
-    /** Record a user-selected wallpaper and remove that exact item from the next-change queue. */
+    /**
+     * Record a user-selected wallpaper and remove that exact item from the next-change queue.
+     *
+     * With [startSequenceHere] and shuffle off, the queue is instead rebuilt to continue in album
+     * order from the wallpaper after [wallpaperId].
+     */
     suspend fun completeSpecific(
         albumId: String,
         screenType: ScreenType,
         wallpaperId: String,
-        shuffle: Boolean
+        shuffle: Boolean,
+        startSequenceHere: Boolean = false
     ) {
         runCatchingCancellable { wallpaperRepository.setCurrentWallpaper(albumId, screenType, wallpaperId) }
             .onFailure {
                 Log.e(TAG, "Applied wallpaper could not be recorded as current", it)
                 return
             }
+
+        if (startSequenceHere && !shuffle) {
+            runCatchingCancellable { wallpaperRepository.startSequenceAfter(albumId, screenType, wallpaperId) }
+                .onFailure { Log.w(TAG, "Could not continue the sequence from the picked wallpaper", it) }
+            return
+        }
 
         runCatchingCancellable {
             wallpaperRepository.ensureWallpaperQueue(albumId, screenType, shuffle)

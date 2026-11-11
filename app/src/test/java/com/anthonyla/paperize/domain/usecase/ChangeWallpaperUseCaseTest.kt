@@ -50,6 +50,25 @@ class ChangeWallpaperUseCaseTest {
         }
     }
 
+    @Test
+    fun `start sequence here rebuilds the ordered queue after the picked wallpaper`() = runTest {
+        useCase.completeSpecific("album", ScreenType.HOME, "picked", shuffle = false, startSequenceHere = true)
+
+        coVerifyOrder {
+            repository.setCurrentWallpaper("album", ScreenType.HOME, "picked")
+            repository.startSequenceAfter("album", ScreenType.HOME, "picked")
+        }
+        coVerify(exactly = 0) { repository.removeWallpaperFromQueue(any(), any(), any()) }
+    }
+
+    @Test
+    fun `start sequence here is ignored while shuffling`() = runTest {
+        useCase.completeSpecific("album", ScreenType.HOME, "picked", shuffle = true, startSequenceHere = true)
+
+        coVerify(exactly = 0) { repository.startSequenceAfter(any(), any(), any()) }
+        coVerify { repository.removeWallpaperFromQueue("album", ScreenType.HOME, "picked") }
+    }
+
     @Test(expected = kotlinx.coroutines.CancellationException::class)
     fun `cancelled rendering restores the dequeued item without retrying`() = runTest {
         val wallpaper = testWallpaper("image", "album")
