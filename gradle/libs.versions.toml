@@ -1,6 +1,6 @@
 [versions]
-androidGradlePlugin = "9.3.2"
-kotlin = "2.4.10"
+androidGradlePlugin = "9.5.1"
+kotlin = "2.4.21"
 hilt = "2.60.1"
 ksp = "2.3.12"
 material = "1.14.0"
@@ -9,10 +9,10 @@ coil = "3.6.3"
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-animation = { module = "androidx.compose.animation:animation" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.08.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.09.00" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.1" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.1" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.3.0" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
 androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.2" }
@@ -26,8 +26,8 @@ androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtim
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version = "2.11.0" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 # v4 uses Material 3 expressive APIs that are not available in the stable 1.4 line.
-# Keep this known-good alpha pinned until the expressive API reaches stable.
-androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-beta01" }
+# Keep this known-good prerelease pinned until the expressive API reaches stable.
+androidx-material3 = { module = "androidx.compose.material3:material3", version = "1.5.0-rc01" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.10.2" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.4.1" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version = "2.8.5" }
@@ -39,17 +39,17 @@ androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.2" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.12.0" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
 google-material = { module = "com.google.android.material:material", version.ref = "material" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 junit = { module = "junit:junit", version = "4.13.2" }
-mockk = { module = "io.mockk:mockk", version = "1.14.11" }
+mockk = { module = "io.mockk:mockk", version = "1.14.12" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.11.0" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.11.0" }
-zoomable = { module = "net.engawapg.lib:zoomable", version = "2.13.0" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.12.0" }
+zoomable = { module = "net.engawapg.lib:zoomable", version = "2.16.0" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
