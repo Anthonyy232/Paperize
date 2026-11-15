@@ -64,7 +64,7 @@ An Android app that changes the home and lock screen wallpaper on a schedule: Ko
 ## Releases
 
 - Bump `versionCode` and `versionName` in `chore: release vX.Y.Z`; tag `vX.Y.Z`.
-- A pushed `v*` tag is the store submission: F-Droid builds it by itself, and CI attaches the signed `paperize-vX.Y.Z.apk` to a draft release for that tag. F-Droid and IzzyOnDroid only see the release once the draft is published. Never rename a tag or asset.
+- A pushed `v*` tag is the store submission: F-Droid builds it by itself, and CI attaches the signed `paperize-vX.Y.Z.apk` to the draft release for that tag, reusing a draft that already has the notes. F-Droid and IzzyOnDroid only see the release once the draft is published. Never rename a tag or asset.
 - Title `Paperize X.Y.Z`.
 - Notes: banner image first, then `### New`, `### Improved`, `### Fixed` (only those that apply). One line per change, written for users; no internals, dependency lists or test counts. End with the install links (APK, F-Droid, IzzyOnDroid) and the full changelog link.
 - Banner: on the `media` branch, `node banner.cjs vX.Y.Z "short highlight"` (needs Playwright) writes `releases/vX.Y.Z.png`; push it and use `https://raw.githubusercontent.com/Anthonyy232/Paperize/media/releases/vX.Y.Z.png`.
