@@ -9,6 +9,11 @@
       "automerge": true
     },
     {
+      "description": ["Action digests have no release date to age against, so the cooldown would hold them forever"],
+      "matchUpdateTypes": ["digest"],
+      "minimumReleaseAge": null
+    },
+    {
       "description": ["Review Compose as one compatible platform update"],
       "matchPackageNames": ["androidx.compose:**"],
       "groupName": "Jetpack Compose",
@@ -43,5 +48,5 @@
       "automerge": false
     }
   ],
-  "platformAutomerge": true
+  "platformAutomerge": false
 }
