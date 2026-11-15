@@ -35,7 +35,7 @@ An Android app that changes the home and lock screen wallpaper on a schedule: Ko
 - `metadata/en-US` is the F-Droid and IzzyOnDroid store listing: keep its text and screenshots true to the app.
 - F-Droid rebuilds every release from source and compares it with the GitHub APK, so the build must stay reproducible. Its recipe deletes the `foojay` line from `settings.gradle.kts` with `sed`: keep that plugin on one line, and keep `dependenciesInfo` off.
 - F-Droid pins the commit of every version: never rewrite a released commit or move a tag. `renovate/*` and `media` are live branches, not stale ones.
-- Lint has a known baseline of warnings; "zero warnings" means no new ones.
+- `app/lint-baseline.xml` holds only deliberate exceptions; fix new warnings instead of adding them to it.
 
 ## Done means
 
