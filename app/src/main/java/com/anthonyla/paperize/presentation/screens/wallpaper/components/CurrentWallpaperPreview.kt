@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,13 +48,11 @@ fun CurrentWallpaperPreview(
     animate: Boolean
 ) {
     if (homeWallpaperUri == null && lockWallpaperUri == null) return
-    val configuration = LocalConfiguration.current
+    val windowSize = LocalWindowInfo.current.containerSize
 
     // Portrait-oriented preview: shorter screen dimension as width.
-    val screenAspectRatio = remember(configuration) {
-        val screenWidth = configuration.screenWidthDp.toFloat()
-        val screenHeight = configuration.screenHeightDp.toFloat()
-        min(screenWidth, screenHeight) / max(screenWidth, screenHeight)
+    val screenAspectRatio = remember(windowSize) {
+        min(windowSize.width, windowSize.height).toFloat() / max(windowSize.width, windowSize.height)
     }
 
     Surface(
