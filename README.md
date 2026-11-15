@@ -4,6 +4,8 @@
 </picture>
 
 <p align="center">
+  <a href="https://anthonyy232.github.io/Paperize/"><b>Website</b></a>
+  &nbsp;·&nbsp;
   <a href="https://github.com/Anthonyy232/Paperize/releases"><b>GitHub releases</b></a>
   &nbsp;·&nbsp;
   <a href="https://f-droid.org/en/packages/com.anthonyla.paperize/"><b>F-Droid</b></a>
@@ -28,7 +30,7 @@ Paperize is an Android app that changes your home and lock screen wallpaper on a
 
 - **Folder Support** — Organize wallpapers into folders for auto-updating
 - **Multiple Image Formats** — Supports JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF, and TIFF
-- **On-Device Storage** — All wallpapers and settings stored locally on your device
+- **On-Device Storage** — All wallpapers and settings stored locally on your device ([privacy policy](https://anthonyy232.github.io/Paperize/#privacy))
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/readme/feature-schedule-dark.png">
