@@ -2,7 +2,7 @@
 androidGradlePlugin = "9.5.1"
 kotlin = "2.4.21"
 hilt = "2.60.1"
-ksp = "2.3.13"
+ksp = "2.3.14"
 material = "1.14.0"
 coil = "3.6.3"
 
@@ -47,7 +47,7 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version = "1.14.12" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.11.0" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.12.0" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.13.0" }
 zoomable = { module = "net.engawapg.lib:zoomable", version = "2.16.0" }
 
 [plugins]
