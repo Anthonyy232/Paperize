@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="album_create_failed">无法创建相册，请重试。</string>
-  <string name="app_name">Paperize</string>
   <string name="continue_rotation_from_here">从这里继续轮换</string>
   <string name="continue_rotation_from_here_desc">之后按相册顺序更换这张壁纸后面的壁纸</string>
   <string name="import_adding_folder">正在添加文件夹…</string>
