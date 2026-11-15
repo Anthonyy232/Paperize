@@ -15,9 +15,12 @@ updates:
           - com.android.tools.build*
           - org.jetbrains.kotlin*
           - com.google.devtools.ksp*
+      # "*" ranks below toolchain's patterns; without patterns these groups would outrank it
       minor-patch:
+        patterns: ["*"]
         update-types: [minor, patch]
       major:
+        patterns: ["*"]
         update-types: [major]
     commit-message:
       prefix: chore(deps)
