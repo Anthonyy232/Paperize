@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 5
+    groups:
+      # F-Droid rebuilds each release and compares it with ours: toolchain updates are merged by hand
+      toolchain:
+        patterns:
+          - gradle-wrapper
+          - com.android.application*
+          - com.android.tools.build*
+          - org.jetbrains.kotlin*
+          - com.google.devtools.ksp*
+      minor-patch:
+        update-types: [minor, patch]
+      major:
+        update-types: [major]
+    commit-message:
+      prefix: chore(deps)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 5
+    groups:
+      minor-patch:
+        update-types: [minor, patch]
+      major:
+        update-types: [major]
+    commit-message:
+      prefix: chore(deps)
