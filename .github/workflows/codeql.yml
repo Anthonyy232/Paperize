@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
         with:
           languages: actions
           build-mode: none
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
 
   analyze-java-kotlin:
     name: Analyze Java and Kotlin
@@ -48,7 +48,7 @@ jobs:
           cache: gradle
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
         with:
           languages: java-kotlin
           build-mode: manual
@@ -57,4 +57,4 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
