@@ -107,4 +107,3 @@ jobs:
         with:
           files: ./apk-artifact/paperize-v*.apk
           draft: true
-          generate_release_notes: true
