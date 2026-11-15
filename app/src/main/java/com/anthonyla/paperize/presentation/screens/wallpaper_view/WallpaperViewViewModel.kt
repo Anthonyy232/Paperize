@@ -29,10 +29,10 @@ class WallpaperViewViewModel @Inject constructor(
 
     val wallpaperMode = settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, WallpaperMode.STATIC)
 
-    /** The "continue rotation from here" option only applies to the ordered (non-shuffle) sequence. */
+    /** Null until settings load, so the ordered-only option does not flash while shuffling. */
     val shuffleEnabled = settingsRepository.getScheduleSettingsFlow()
-        .map { it.shuffleEnabled }
-        .stateWhileSubscribed(viewModelScope, false)
+        .map<_, Boolean?> { it.shuffleEnabled }
+        .stateWhileSubscribed(viewModelScope, null)
 
     fun applyTo(screenType: ScreenType, startSequenceHere: Boolean) {
         WallpaperChangeService.applyWallpaper(context, route.wallpaperId, screenType, startSequenceHere)

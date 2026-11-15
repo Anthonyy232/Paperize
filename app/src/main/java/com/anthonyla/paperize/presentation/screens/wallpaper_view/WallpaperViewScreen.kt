@@ -60,7 +60,7 @@ fun WallpaperViewScreen(
     val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
     val shuffleEnabled by viewModel.shuffleEnabled.collectAsStateWithLifecycle()
     var showApplyDialog by rememberSaveable { mutableStateOf(false) }
-    var continueFromHere by rememberSaveable { mutableStateOf(true) }
+    var continueFromHere by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -150,7 +150,7 @@ fun WallpaperViewScreen(
             title = { Text(stringResource(R.string.set_wallpaper)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    if (!shuffleEnabled) {
+                    if (shuffleEnabled == false) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -184,7 +184,7 @@ fun WallpaperViewScreen(
                         TextButton(
                             onClick = {
                                 showApplyDialog = false
-                                viewModel.applyTo(screenType, startSequenceHere = !shuffleEnabled && continueFromHere)
+                                viewModel.applyTo(screenType, startSequenceHere = continueFromHere)
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
