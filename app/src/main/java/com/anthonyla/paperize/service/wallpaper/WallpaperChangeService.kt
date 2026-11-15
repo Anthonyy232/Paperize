@@ -50,12 +50,13 @@ class WallpaperChangeService : Service() {
         val action = intent?.action
         val screen = intent?.getStringExtra(EXTRA_SCREEN_TYPE)?.let(ScreenType::fromString)
         val wallpaperId = intent?.getStringExtra(EXTRA_WALLPAPER_ID)
+        val startSequenceHere = intent?.getBooleanExtra(EXTRA_START_SEQUENCE, false) ?: false
         serviceScope.launch {
             wallpaperChangeLock.mutex.withLock {
                 runCatchingCancellable {
                     when (action) {
                         ACTION_CHANGE_WALLPAPER -> changeWallpaper(screen)
-                        ACTION_APPLY_SPECIFIC_WALLPAPER -> applySpecificWallpaper(wallpaperId, screen ?: ScreenType.BOTH)
+                        ACTION_APPLY_SPECIFIC_WALLPAPER -> applySpecificWallpaper(wallpaperId, screen ?: ScreenType.BOTH, startSequenceHere)
                         ACTION_REAPPLY_EFFECTS -> reapplyEffects()
                         else -> Log.w(TAG, "Unknown action: $action")
                     }
@@ -81,14 +82,14 @@ class WallpaperChangeService : Service() {
         }
     }
 
-    private suspend fun applySpecificWallpaper(wallpaperId: String?, screen: ScreenType) {
+    private suspend fun applySpecificWallpaper(wallpaperId: String?, screen: ScreenType, startSequenceHere: Boolean) {
         require(!wallpaperId.isNullOrBlank()) { getString(R.string.wallpaper_not_found) }
         val mode = settingsRepository.getWallpaperMode()
         require(screen != ScreenType.LIVE && mode == WallpaperMode.STATIC) { getString(R.string.static_mode_required) }
         val wallpaper = wallpaperRepository.getWallpaperById(wallpaperId)
             ?: error(getString(R.string.wallpaper_not_found))
         val settings = settingsRepository.getScheduleSettings()
-        wallpaperController.applySpecific(wallpaper.albumId, wallpaper.id, screen, settings)
+        wallpaperController.applySpecific(wallpaper.albumId, wallpaper.id, screen, settings, startSequenceHere)
         wallpaperScheduler.resetAfterManualChange(screen, settings, mode)
     }
 
@@ -151,17 +152,23 @@ class WallpaperChangeService : Service() {
         private const val ACTION_REAPPLY_EFFECTS = "com.anthonyla.paperize.ACTION_REAPPLY_EFFECTS"
         private const val EXTRA_SCREEN_TYPE = Constants.EXTRA_SCREEN_TYPE
         private const val EXTRA_WALLPAPER_ID = "wallpaper_id"
+        private const val EXTRA_START_SEQUENCE = "start_sequence_here"
         private const val ERROR_NOTIFICATION_ID = Constants.NOTIFICATION_ID + 1
 
         /** Without a [screen], changes every screen the current settings rotate (or the live wallpaper). */
         fun changeWallpaper(context: Context, screen: ScreenType? = null) =
             start(context, ACTION_CHANGE_WALLPAPER) { screen?.let { putExtra(EXTRA_SCREEN_TYPE, it.name) } }
 
-        fun applyWallpaper(context: Context, wallpaperId: String, screen: ScreenType) =
-            start(context, ACTION_APPLY_SPECIFIC_WALLPAPER) {
-                putExtra(EXTRA_WALLPAPER_ID, wallpaperId)
-                putExtra(EXTRA_SCREEN_TYPE, screen.name)
-            }
+        fun applyWallpaper(
+            context: Context,
+            wallpaperId: String,
+            screen: ScreenType,
+            startSequenceHere: Boolean = false
+        ) = start(context, ACTION_APPLY_SPECIFIC_WALLPAPER) {
+            putExtra(EXTRA_WALLPAPER_ID, wallpaperId)
+            putExtra(EXTRA_SCREEN_TYPE, screen.name)
+            putExtra(EXTRA_START_SEQUENCE, startSequenceHere)
+        }
 
         /** Re-render the current static wallpapers after display settings change. */
         fun reapplyEffects(context: Context) = start(context, ACTION_REAPPLY_EFFECTS)

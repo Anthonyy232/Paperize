@@ -14,6 +14,7 @@ import com.anthonyla.paperize.service.wallpaper.WallpaperChangeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class WallpaperViewViewModel @Inject constructor(
@@ -28,7 +29,12 @@ class WallpaperViewViewModel @Inject constructor(
 
     val wallpaperMode = settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, WallpaperMode.STATIC)
 
-    fun applyTo(screenType: ScreenType) {
-        WallpaperChangeService.applyWallpaper(context, route.wallpaperId, screenType)
+    /** The "continue rotation from here" option only applies to the ordered (non-shuffle) sequence. */
+    val shuffleEnabled = settingsRepository.getScheduleSettingsFlow()
+        .map { it.shuffleEnabled }
+        .stateWhileSubscribed(viewModelScope, false)
+
+    fun applyTo(screenType: ScreenType, startSequenceHere: Boolean) {
+        WallpaperChangeService.applyWallpaper(context, route.wallpaperId, screenType, startSequenceHere)
     }
 }

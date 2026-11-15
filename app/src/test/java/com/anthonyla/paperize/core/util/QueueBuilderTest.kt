@@ -14,4 +14,31 @@ class QueueBuilderTest {
         assertEquals(setOf("second", "fourth"), merged.drop(2).toSet())
         assertEquals(4, merged.size)
     }
+
+    private val ordered = listOf("1", "2", "3", "4", "5")
+
+    @Test
+    fun `idsAfter continues from the item after the picked one`() {
+        assertEquals(listOf("4", "5"), QueueBuilder.idsAfter(ordered, "3"))
+    }
+
+    @Test
+    fun `idsAfter on the first item queues the rest of the album`() {
+        assertEquals(listOf("2", "3", "4", "5"), QueueBuilder.idsAfter(ordered, "1"))
+    }
+
+    @Test
+    fun `idsAfter on the last item leaves an empty queue so the next rebuild wraps to the start`() {
+        assertEquals(emptyList<String>(), QueueBuilder.idsAfter(ordered, "5"))
+    }
+
+    @Test
+    fun `idsAfter with an unknown id keeps the full order`() {
+        assertEquals(ordered, QueueBuilder.idsAfter(ordered, "missing"))
+    }
+
+    @Test
+    fun `idsAfter on a single item album is empty`() {
+        assertEquals(emptyList<String>(), QueueBuilder.idsAfter(listOf("only"), "only"))
+    }
 }
