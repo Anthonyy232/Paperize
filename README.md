@@ -7,6 +7,7 @@ Generated images for [Paperize](https://github.com/Anthonyy232/Paperize), kept o
 | `lib.cjs` | Fonts and rendering shared by the scripts |
 | `fonts/` | Instrument Serif, under the SIL Open Font License (`OFL.txt`) |
 | `readme/wallpapers.cjs` | Writes the two demo albums, Paper and Dusk, into `readme/wallpapers/` (abstract shapes, six 1080x2400 JPEGs each) |
+| `readme/DemoMode.kt` | An instrumentation "test" that puts the emulator's status bar in demo mode: clock 12:00, full battery, Wi-Fi only, no notification icons |
 | `readme/inputs/` | The raw emulator screenshots, 1080x2400, light and dark |
 | `readme/build.cjs` | Writes `.github/readme/*.png`, `site/img/*.webp` and `metadata/en-US/images/` (`icon.png`, `featureGraphic.png`, `phoneScreenshots/1-5.png`) in the checkout from `readme/inputs/`, and `social-preview.png` here |
 | `social-preview.png` | The 1280x640 GitHub social preview |
@@ -32,7 +33,7 @@ Commit the changed images on `master`, and `social-preview.png` here. GitHub has
 
 ## Capturing the screenshots
 
-The app can only be seen on a device, so the inputs are captured by hand on the `paperize_api36` emulator (Pixel-sized, 1080x2400, API 36), driven from the T3 Code device tools (`agent-device`); `adb` is used only to install the app and push the wallpapers.
+The app can only be seen on a device, so the inputs are captured by hand on the `paperize_api36` emulator (Pixel-sized, 1080x2400, API 36), driven from the T3 Code device tools (`agent-device`); `adb` is used only to install the app, push the wallpapers and run `DemoMode.kt`.
 
 1. Build and install the debug app from the checkout: `./gradlew assembleDebug`, then `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 2. Make the demo albums and push them: `node readme/wallpapers.cjs`, then `adb push readme/wallpapers/Paper /sdcard/Pictures/` and the same for `Dusk`.
@@ -40,7 +41,7 @@ The app can only be seen on a device, so the inputs are captured by hand on the 
 4. Library: add an album **Dusk** and add `dusk-1.jpg` to `dusk-6.jpg` from `Pictures/Dusk` with **Add wallpapers** (select all six in one go). Then add an album **Paper** the same way from `Pictures/Paper`. Paper is created second so the library lists it first.
 5. Open `dusk-5.jpg` in Dusk, **Set wallpaper**, **Home Screen**; open `paper-3.jpg` in Paper, **Set wallpaper**, **Lock Screen**. Leave **Continue rotation from here** unchecked.
 6. Wallpaper tab: turn on **Lock** and **Home**, pick **Paper** as the lock album and **Dusk** as the home album, and turn on **Wallpaper changing** (this applies the first wallpaper of each album: repeat step 5 afterwards so lock shows `paper-3` and home `dusk-5`). Keep the interval at 1 hour, shuffle and individual scheduling off, scaling **Fill**. Under Visual Effects turn on **Blur Effect** for **Home** and set it to **43%**. Everything else stays at its default, including dynamic colour off.
-7. Clear the notification shade (**Clear all**) so the status bar shows nothing but the clock.
+7. Put the status bar in demo mode. Setting a wallpaper re-themes the system UI and drops demo mode, so do this after the last wallpaper change. Copy `readme/DemoMode.kt` to `app/src/androidTest/java/com/anthonyla/paperize/` in the checkout, run `./gradlew installDebugAndroidTest`, and delete the copy. End the `agent-device` session with `agent-device close` (its helper holds the UI automation the test needs), then run `adb shell am instrument -w -e class com.anthonyla.paperize.DemoMode com.anthonyla.paperize.test/androidx.test.runner.AndroidJUnitRunner` and reopen the app. Not `connectedDebugAndroidTest`: it uninstalls the app.
 8. Take each screenshot with `agent-device screenshot readme/inputs/<scheme>-<screen>.png`, positioning the Wallpaper tab by the label positions from `agent-device snapshot --raw` (y is the label's centre on the 2400 px screen):
 
    | Screen | What is on screen |
@@ -56,7 +57,7 @@ The app can only be seen on a device, so the inputs are captured by hand on the 
    Slow `agent-device gesture pan` drags scroll by close to their length (short ones lose about 20 px to touch slop), so reach each position with one long pan and a short correction.
 9. Switch to dark mode with `agent-device settings appearance dark` and take the same seven screens.
 
-The clock is whatever the emulator shows, so it differs between captures.
+Demo mode fixes the status bar at 12:00 in every capture. If a capture shows another time, repeat step 7.
 
 ## Release banners
 
