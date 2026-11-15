@@ -76,80 +76,27 @@ Help translate Paperize into your language! Currently, most translations are pro
 
 ---
 
-## Architecture
-
-- `AlbumRepository` owns library mutations. Imports, removal, covers,
-  and queue invalidation use Room transactions; provider scans run outside them.
-- `DocumentSource` and `WallpaperRenderer` (domain interfaces, Android implementations in
-  `data/source`) keep use cases free of document-provider and bitmap-decoding details.
-- `WallpaperRepository` owns rotation queues and current-wallpaper records.
-  Queue creation checks and writes in one transaction, including synchronized screens.
-  Static changes and the live wallpaper engine both dequeue through
-  `ChangeWallpaperUseCase.dequeueNext`.
-- `WallpaperController` shares static wallpaper application between the service
-  and worker. Callers hold `WallpaperChangeLock` through application and schedule
-  updates. The controller recycles applied bitmaps.
-- `SettingsCoordinator` persists wallpaper settings edits and applies their side effects
-  (schedules, queues, immediate changes) one at a time; ViewModels only hold UI state.
-  `WallpaperChangeService` helpers are the single way to start a manual change.
-- Repositories and use cases throw on failure. ViewModels, services, and workers
-  catch at the edge, using `runCatchingCancellable` where they need a `Result`, so
-  coroutine cancellation always propagates. Progress belongs to UI state.
-- Room migrations preserve versions 1–3 when upgrading to version 4. New schema
-  changes must include a migration; destructive fallback is disabled.
-
 ## Building from Source
 
-### Prerequisites
-
-| Requirement | Version |
-|-------------|---------|
-| Java | 17 |
-| Android Gradle Plugin | 9.3.2 |
-| Gradle | 9.7.1 |
-| Compile SDK | 37 (Android 17) |
-| Minimum SDK | 31 (Android 12) |
-| Target SDK | 36 |
-
-### Build Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Anthonyy232/Paperize.git
-   cd Paperize
-   ```
-
-2. **Open in Android Studio**
-   - Launch Android Studio
-   - Select `File > Open` and navigate to the cloned repository
-
-3. **Build and Run**
-   - Click `▶ Run` to build and install on a connected device, or
-   - Select `Build > Generate Signed Bundle / APK` to create a signed release
-
----
-
-### Verification
-
-Set `ANDROID_HOME` to your Android SDK directory, or configure `sdk.dir` in
-`local.properties`. Use the checked-in Gradle wrapper:
+You need Java 17 and the Android SDK (`ANDROID_HOME`, or `sdk.dir` in `local.properties`). Paperize compiles against SDK 37 and runs on Android 12 (SDK 31) and newer.
 
 ```bash
-./gradlew testDebugUnitTest lintDebug assembleDebug
-./gradlew connectedDebugAndroidTest
+git clone https://github.com/Anthonyy232/Paperize.git
+cd Paperize
+./gradlew assembleDebug
 ```
 
-On Windows, use `gradlew.bat`. Device tests require a running Android emulator or
-connected device (API 31 or newer). They cover rendering, scheduling, document
-provider failures, import rollback, album cleanup, and library controls.
+The APK lands in `app/build/outputs/apk/debug`. Or open the folder in Android Studio and press Run.
+
+---
 
 ## Contributing
 
 Contributions are welcome! Feel free to:
 
-- Report bugs by opening an issue
-- Suggest features or improvements
-- Submit pull requests
+- Report bugs by opening an [issue](https://github.com/Anthonyy232/Paperize/issues)
+- Suggest features or improvements in [Discussions](https://github.com/Anthonyy232/Paperize/discussions)
+- Submit pull requests; [AGENTS.md](AGENTS.md) has the conventions and the checks to run
 
 ---
 
