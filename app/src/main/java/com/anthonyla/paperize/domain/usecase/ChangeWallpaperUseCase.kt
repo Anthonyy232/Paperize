@@ -82,10 +82,8 @@ class ChangeWallpaperUseCase @Inject constructor(
     )
 
     /**
-     * Record a user-selected wallpaper and remove that exact item from the next-change queue.
-     *
-     * With [startSequenceHere] and shuffle off, the queue is instead rebuilt to continue in album
-     * order from the wallpaper after [wallpaperId].
+     * Record a user-selected wallpaper and remove that exact item from the next-change queue,
+     * or with [startSequenceHere] and shuffle off, restart the queue after it.
      */
     suspend fun completeSpecific(
         albumId: String,

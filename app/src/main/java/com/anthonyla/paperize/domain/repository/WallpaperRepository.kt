@@ -30,10 +30,7 @@ interface WallpaperRepository {
         shuffle: Boolean = false
     )
 
-    /**
-     * Replace a screen queue with the album's ordered wallpapers that follow [wallpaperId], so a
-     * sequential rotation continues from a wallpaper the user picked.
-     */
+    /** Requeue only the album-ordered wallpapers after [wallpaperId]. */
     suspend fun startSequenceAfter(
         albumId: String,
         screenType: ScreenType,

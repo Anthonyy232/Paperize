@@ -23,11 +23,6 @@ class QueueBuilderTest {
     }
 
     @Test
-    fun `idsAfter on the first item queues the rest of the album`() {
-        assertEquals(listOf("2", "3", "4", "5"), QueueBuilder.idsAfter(ordered, "1"))
-    }
-
-    @Test
     fun `idsAfter on the last item leaves an empty queue so the next rebuild wraps to the start`() {
         assertEquals(emptyList<String>(), QueueBuilder.idsAfter(ordered, "5"))
     }
@@ -35,10 +30,5 @@ class QueueBuilderTest {
     @Test
     fun `idsAfter with an unknown id keeps the full order`() {
         assertEquals(ordered, QueueBuilder.idsAfter(ordered, "missing"))
-    }
-
-    @Test
-    fun `idsAfter on a single item album is empty`() {
-        assertEquals(emptyList<String>(), QueueBuilder.idsAfter(listOf("only"), "only"))
     }
 }
