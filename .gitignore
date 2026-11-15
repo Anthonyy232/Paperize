@@ -16,6 +16,5 @@
 local.properties
 /app/build
 /app/release
-/app/schemas
 .kotlin
 /.kotlin/sessions
