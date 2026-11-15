@@ -67,7 +67,7 @@ Android wallpaper changer for Android 12 and newer: Kotlin, Jetpack Compose, Mat
 
 ## Releases
 
-- Bump `versionCode` and `versionName` in `app/build.gradle.kts` and add the version to `CHANGELOG.md` in `chore: release vX.Y.Z`; tag `vX.Y.Z`.
+- Bump `versionCode` and `versionName` in `app/build.gradle.kts` in `chore: release vX.Y.Z`; tag `vX.Y.Z`.
 - Pushing the tag is the store submission: CI builds the signed `paperize-vX.Y.Z.apk` into a draft release, and F-Droid and IzzyOnDroid pick up the tag and that asset name on their own. Obtainium reads them too. Never rename a tag or asset.
 - Title `Paperize X.Y.Z`.
 - Notes: banner image first, then `### New`, `### Improved`, `### Fixed` (only those that apply). One line per change, written for users; no internals, dependency lists or test counts. End with the install links (APK, F-Droid, IzzyOnDroid) and the full changelog link.
