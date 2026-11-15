@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -21,12 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
-import com.anthonyla.paperize.presentation.common.components.SettingsCard
+import com.anthonyla.paperize.presentation.common.components.SettingsRow
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -38,7 +36,8 @@ fun TimeIntervalPicker(
     title: String,
     minutes: Int,
     onMinutesChange: (Int) -> Unit,
-    minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES
+    minimumMinutes: Int = Constants.MIN_INTERVAL_MINUTES,
+    note: String? = null
 ) {
     val (initialDays, initialHours, initialMins) = splitInterval(minutes)
 
@@ -57,14 +56,10 @@ fun TimeIntervalPicker(
         }
     }
 
-    SettingsCard(
-        modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
-    ) {
+    SettingsRow(verticalArrangement = Arrangement.spacedBy(AppSpacing.small)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.W500,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -90,11 +85,18 @@ fun TimeIntervalPicker(
 
         Text(
             text = "${stringResource(R.string.total_interval)} ${formatIntervalComposable(minutes)}",
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+        if (note != null) {
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
