@@ -11,7 +11,10 @@ import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.database.entities.AlbumEntity
 import com.anthonyla.paperize.data.mapper.toEntity
 import com.anthonyla.paperize.domain.model.Folder
+import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.Wallpaper
+import com.anthonyla.paperize.domain.source.WallpaperRenderer
+import com.anthonyla.paperize.domain.usecase.ChangeWallpaperUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
@@ -103,6 +106,23 @@ class AlbumRepositoryInstrumentedTest {
         assertEquals(1, albums.addWallpapersToAlbum("album", listOf(image.copy(id = "folder-image", folderId = "folder"))))
         db.folderDao().deleteAlbumFolder("album", "folder")
         assertEquals(0, albums.addWallpapersToAlbum("album", listOf(image.copy(id = "stale", folderId = "folder"))))
+    }
+
+    @Test fun continuingFromAPickedWallpaperFollowsAlbumOrderAndWraps() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        db.wallpaperDao().insertWallpapers((1..5).map {
+            testWallpaper("$it", "album").copy(uri = "content://$it", displayOrder = it).toEntity()
+        })
+        val change = ChangeWallpaperUseCase(wallpapers, SettingsRepositoryImpl(context), object : WallpaperRenderer {
+            override suspend fun render(wallpaper: Wallpaper, screen: ScreenType, settings: ScheduleSettings) = null
+        })
+        suspend fun next() = change.dequeueNext("album", ScreenType.HOME, shuffle = false).id
+
+        change.completeSpecific("album", ScreenType.HOME, "3", shuffle = false, startSequenceHere = true)
+        assertEquals(listOf("4", "5", "1"), List(3) { next() })
+
+        change.completeSpecific("album", ScreenType.HOME, "5", shuffle = false, startSequenceHere = true)
+        assertEquals("1", next())
     }
 
     @Test fun concurrentQueueCreationKeepsBothScreensInSyncAndDoesNotRefillConsumedItems() = runBlocking {
