@@ -45,7 +45,7 @@ Brightness, blur, vignette and a gray filter each have a strength slider and sep
 3. In **Wallpaper**, choose the screens and their albums, and set the time interval.
 4. Leave the rest to Paperize. **Wallpaper changing** pauses and resumes the schedule without clearing your albums.
 
-To skip ahead, use **Change wallpaper now** in the app, the Quick Settings tile, or the shortcut you get by long-pressing the app icon. In static mode you can also open any image in an album and set it as the wallpaper yourself.
+To skip ahead, use **Change wallpaper now** in the app, the Quick Settings tile, or the shortcut you get by long-pressing the app icon. In static mode you can also open any image in an album and set it as the wallpaper yourself. Tick **Continue rotation from here** to have the rotation carry on from that image; it is off by default and hidden while **Shuffle** is on.
 
 ## Static and live modes
 
@@ -74,7 +74,7 @@ Albums and settings stay on your device, and Paperize has no internet permission
 
 ## Translations
 
-Paperize ships in English and Simplified Chinese. To add or improve a language, open a pull request with a `strings.xml` in `app/src/main/res/values-<language>/` (for example `values-b+zh+Hans`), translated from [`values/strings.xml`](app/src/main/res/values/strings.xml).
+Paperize ships in English, Simplified Chinese and Traditional Chinese. To add or improve a language, open a pull request with a `strings.xml` in `app/src/main/res/values-<language>/` (for example `values-b+zh+Hant`), translated from [`values/strings.xml`](app/src/main/res/values/strings.xml).
 
 ## Building from source
 
