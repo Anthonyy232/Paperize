@@ -12,6 +12,10 @@ permissions:
   contents: read
   security-events: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   analyze-actions:
     name: Analyze GitHub Actions
@@ -48,9 +52,6 @@ jobs:
         with:
           languages: java-kotlin
           build-mode: manual
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
 
       - name: Build application for analysis
         run: ./gradlew assembleDebug
