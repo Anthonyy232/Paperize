@@ -14,4 +14,4 @@ On-Device Storage: All your wallpapers and settings are stored on your device, e
 
 Experience the joy of a personalized device with Paperize - A Wallpaper Changer. Your device, your style.
 
-Privacy policy: https://anthonyy232.github.io/Paperize/
+Privacy policy: https://anthonyy232.github.io/Paperize/#privacy
