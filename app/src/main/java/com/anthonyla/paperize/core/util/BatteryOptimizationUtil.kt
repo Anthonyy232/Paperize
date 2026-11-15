@@ -11,7 +11,7 @@ object BatteryOptimizationUtil {
     private const val TAG = "BatteryOptimizationUtil"
 
     fun isIgnoringBatteryOptimizations(context: Context): Boolean {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = context.getSystemService(PowerManager::class.java)
         return powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 

@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.minutes
 
 @AndroidEntryPoint
 class PaperizeLiveWallpaperService : GLWallpaperService() {
@@ -326,9 +327,8 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             if (!shouldRun) return
 
             liveIntervalJob = engineScope.launch {
-                val intervalMillis = intervalMinutes.toLong() * 60_000L
                 while (isActive) {
-                    delay(intervalMillis)
+                    delay(intervalMinutes.minutes)
                     Log.d(TAG, "Visible live interval elapsed; changing wallpaper")
                     renderController.reloadCurrentArtwork()
                 }

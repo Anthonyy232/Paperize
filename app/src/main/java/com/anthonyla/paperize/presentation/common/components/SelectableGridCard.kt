@@ -2,7 +2,6 @@ package com.anthonyla.paperize.presentation.common.components
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -25,7 +24,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SelectableGridCard(
     isSelected: Boolean,

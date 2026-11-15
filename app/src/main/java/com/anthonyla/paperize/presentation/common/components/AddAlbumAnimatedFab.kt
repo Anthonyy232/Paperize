@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import com.anthonyla.paperize.R
 
@@ -49,7 +48,7 @@ fun AddAlbumAnimatedFab(
                     }
                 }
                 Icon(
-                    painter = rememberVectorPainter(imageVector),
+                    imageVector = imageVector,
                     contentDescription = if (fabMenuExpanded) {
                         stringResource(R.string.content_desc_collapse)
                     } else {

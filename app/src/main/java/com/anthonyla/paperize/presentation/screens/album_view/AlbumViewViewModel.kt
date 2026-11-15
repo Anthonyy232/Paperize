@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -118,7 +119,7 @@ class AlbumViewViewModel @Inject constructor(
 
     private fun toggle(selection: MutableStateFlow<Set<String>>, id: String) {
         if (_isDeleting.value) return
-        selection.value = if (id in selection.value) selection.value - id else selection.value + id
+        selection.update { if (id in it) it - id else it + id }
     }
 
     fun selectAll() {

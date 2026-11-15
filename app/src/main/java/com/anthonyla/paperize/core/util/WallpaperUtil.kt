@@ -1,7 +1,6 @@
 package com.anthonyla.paperize.core.util
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
 import android.graphics.Canvas
@@ -41,7 +40,7 @@ private const val BUILT_IN_DISPLAY_CATEGORY =
     "android.hardware.display.category.BUILT_IN_DISPLAYS"
 
 fun getDeviceScreenSize(context: Context): Size {
-    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    val windowManager = context.getSystemService(WindowManager::class.java)
     val metrics: WindowMetrics = windowManager.currentWindowMetrics
     val currentWindow = metrics.bounds.width() to metrics.bounds.height()
 
@@ -245,9 +244,7 @@ fun adjustBitmapBrightness(source: Bitmap, brightnessFactor: Float): Bitmap {
 }
 
 fun getAdaptiveBrightnessMultiplier(context: Context, brightness: Float): Float {
-    val isDarkMode = (context.resources.configuration.uiMode and
-        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-    return BrightnessCalculator.getAdaptiveMultiplier(isDarkMode, brightness)
+    return BrightnessCalculator.getAdaptiveMultiplier(context.resources.configuration.isNightModeActive, brightness)
 }
 
 fun adaptiveBrightnessAdjustment(context: Context, source: Bitmap): Bitmap {

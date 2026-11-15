@@ -6,7 +6,7 @@ import android.provider.OpenableColumns
 import java.util.UUID
 
 fun Uri.isValid(contentResolver: ContentResolver): Boolean {
-    if (scheme != "content") return false
+    if (scheme != ContentResolver.SCHEME_CONTENT) return false
 
     return try {
         contentResolver.query(this, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
