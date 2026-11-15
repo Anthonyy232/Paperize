@@ -34,15 +34,16 @@ const trio = (side, front, x = 0, y = 0, w = 320) => `
     ${phone(`${side}-effects`, `left: ${888 - x - w}px; top: ${79.2 + y}px; width: ${w}px; transform: rotate(5deg)`)}
     ${phone(`${front}-home`, 'left: 360px; top: 44px; width: 320px')}`;
 
-const hero = dark => {
+// Social preview: the light hero squeezed into 1280x640 with square corners.
+const hero = (dark, social = false) => {
   const [front, side] = dark ? ['dark', 'light'] : ['light', 'dark'];
   return `${base(dark)}<style>
-  .card { height: 760px; text-align: center; }
-  .brand { display: inline-flex; align-items: center; gap: 12px; margin-top: 48px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .card { height: ${social ? 640 : 760}px;${social ? ' border-radius: 0;' : ''} text-align: center; }
+  .brand { display: inline-flex; align-items: center; gap: 12px; margin-top: ${social ? 30 : 48}px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
   .brand img { width: 36px; height: 36px; border-radius: 8px; }
-  h1 { margin: 28px 0 0; font-size: 112px; line-height: 0.98; }
-  p { margin: 22px auto 0; max-width: 400px; font-size: 20px; line-height: 1.45; color: var(--muted); }
-  .stage { position: absolute; left: 120px; right: 120px; top: 448px; height: 312px; border-radius: 24px 24px 0 0; }
+  h1 { margin: ${social ? 12 : 28}px 0 0; font-size: ${social ? 92 : 112}px; line-height: 0.98; }
+  p { margin: ${social ? 14 : 22}px auto 0; max-width: 400px; font-size: 20px; line-height: 1.45; color: var(--muted); }
+  .stage { position: absolute; left: 120px; right: 120px; top: ${social ? 356 : 448}px; height: 312px; border-radius: 24px 24px 0 0; }
 </style>
 <div class="card">
   <div class="brand"><img src="${logo()}">Paperize</div>
@@ -125,5 +126,7 @@ async function webp(browser, name, file) {
   await render(browser, featureGraphic, path.join(listing, 'featureGraphic.png'), { width: 1024, height: 500 });
   await render(browser, `<body style="margin:0">${icon(paperize).replace('viewBox="0 0 108 108"', 'viewBox="18 18 72 72" width="512" height="512" style="display:block"')}`,
     path.join(listing, 'icon.png'), { width: 512, height: 512 });
+  // GitHub has no API for the social preview; it is uploaded by hand from this file.
+  await render(browser, hero(false, true), path.join(__dirname, '../social-preview.png'), { width: 1280, height: 640 });
   await browser.close();
 })();

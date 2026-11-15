@@ -1,6 +1,6 @@
 # Paperize media
 
-Generated images for [Paperize](https://github.com/Anthonyy232/Paperize), kept off `master` so it stays light: the README hero and feature panels, the website screenshots, the F-Droid and IzzyOnDroid listing art, and the release banners. Every script takes the path of a Paperize checkout of `master`, reads the logo from its `app/src/main/ic_launcher.svg`, and needs no network.
+Generated images for [Paperize](https://github.com/Anthonyy232/Paperize), kept off `master` so it stays light: the README hero and feature panels, the website screenshots, the F-Droid and IzzyOnDroid listing art, the GitHub social preview, and the release banners. Every script takes the path of a Paperize checkout of `master`, reads the logo from its `app/src/main/ic_launcher.svg`, and needs no network.
 
 | Path | What |
 | --- | --- |
@@ -8,7 +8,8 @@ Generated images for [Paperize](https://github.com/Anthonyy232/Paperize), kept o
 | `fonts/` | Instrument Serif, under the SIL Open Font License (`OFL.txt`) |
 | `readme/wallpapers.cjs` | Writes the two demo albums, Paper and Dusk, into `readme/wallpapers/` (abstract shapes, six 1080x2400 JPEGs each) |
 | `readme/inputs/` | The raw emulator screenshots, 1080x2400, light and dark |
-| `readme/build.cjs` | Writes `.github/readme/*.png`, `site/img/*.webp` and `metadata/en-US/images/` (`icon.png`, `featureGraphic.png`, `phoneScreenshots/1-5.png`) in the checkout from `readme/inputs/` |
+| `readme/build.cjs` | Writes `.github/readme/*.png`, `site/img/*.webp` and `metadata/en-US/images/` (`icon.png`, `featureGraphic.png`, `phoneScreenshots/1-5.png`) in the checkout from `readme/inputs/`, and `social-preview.png` here |
+| `social-preview.png` | The 1280x640 GitHub social preview |
 | `releases/banner.cjs` | Writes `releases/<tag>.png` from `releases/highlights.json` |
 
 ## Setup
@@ -27,7 +28,7 @@ npm ci && npx playwright install chromium
 node readme/build.cjs ../Paperize    # the path of the master checkout
 ```
 
-Commit the changed images on `master`. Re-capture the inputs first when the screens they show have changed.
+Commit the changed images on `master`, and `social-preview.png` here. GitHub has no API for the social preview: upload `social-preview.png` in the repository settings under Social preview. Re-capture the inputs first when the screens they show have changed.
 
 ## Capturing the screenshots
 
