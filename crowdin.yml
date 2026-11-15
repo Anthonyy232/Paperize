@@ -1,0 +1,13 @@
+project_id_env: CROWDIN_PROJECT_ID
+api_token_env: CROWDIN_PERSONAL_TOKEN
+base_path: .
+
+preserve_hierarchy: true
+
+# String-based project: sources go into the Crowdin branch "main", and translations come back
+# through bundle 15, which exports approved strings only.
+files:
+  - source: /app/src/main/res/values/strings.xml
+    translation: /app/src/main/res/values-%android_code%/strings.xml
+    update_strings: true
+    cleanup_mode: true

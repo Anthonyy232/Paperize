@@ -1,0 +1,107 @@
+name: Crowdin Sync
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - app/src/main/res/values/strings.xml
+      - crowdin.yml
+      - .github/workflows/crowdin.yml
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      upload_translations:
+        description: Send the translations in the repository to Crowdin as approved first
+        type: boolean
+        default: false
+
+concurrency:
+  group: crowdin-sync
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+env:
+  BRANCH: crowdin-translations
+
+jobs:
+  synchronize-with-crowdin:
+    name: Synchronize with Crowdin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Upload sources and download approved translations
+        uses: crowdin/github-action@d651c77756acbe11a31d77a6fb79d8a239e1e05a # v3
+        with:
+          crowdin_branch_name: main
+          upload_sources: true
+          upload_translations: ${{ inputs.upload_translations || false }}
+          auto_approve_imported: true
+          download_translations: false
+          download_bundle: 15
+          push_translations: false
+          create_pull_request: false
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      # Keeps every string the repository already ships, drops strings English no longer has,
+      # and only adds a new locale once it covers 90% of the English strings.
+      - name: Merge into the shipped translations
+        shell: python
+        run: |
+          import os, re, shutil, subprocess
+          from pathlib import Path
+
+          res = Path("app/src/main/res")
+          entry = re.compile(r'<(string|plurals|string-array)\b[^>]*?\bname="([^"]+)"[^>]*>.*?</\1>', re.S)
+
+          # Crowdin adds the string's context as a comment attribute.
+          def entries(text):
+              return {m.group(2): re.sub(r' comment="[^"]*"', "", m.group(0), count=1) for m in entry.finditer(text)}
+
+          def shipped(path):
+              out = subprocess.run(["git", "show", f"HEAD:{path.as_posix()}"], capture_output=True, text=True)
+              return out.stdout if out.returncode == 0 else None
+
+          subprocess.run(["sudo", "chown", "-R", str(os.getuid()), str(res)], check=True)
+          source = [k for k, v in entries((res / "values/strings.xml").read_text("utf-8")).items()
+                    if 'translatable="false"' not in v.split(">", 1)[0]]
+          for path in sorted(res.glob("values-*/strings.xml")):
+              old_text = shipped(path)
+              new, old = entries(path.read_text("utf-8")), entries(old_text or "")
+              merged = [new.get(k) or old[k] for k in source if k in new or k in old]
+              if old_text is None and len(merged) < 0.9 * len(source):
+                  shutil.rmtree(path.parent)
+                  continue
+              if merged == [old[k] for k in source if k in old]:
+                  subprocess.run(["git", "checkout", "--", str(path)], check=True)
+                  continue
+              body = "".join(f"  {e}\n" for e in merged)
+              path.write_text(f'<?xml version="1.0" encoding="utf-8"?>\n<resources>\n{body}</resources>\n', "utf-8")
+
+      # Pull requests opened with GITHUB_TOKEN start no workflows, so the checks are dispatched.
+      - name: Open the translations pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain app/src/main/res)" ]; then
+            echo "No translation changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add app/src/main/res
+          git commit -m "chore: update translations"
+          git push --force origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base master --head "$BRANCH" --title "chore: update translations" \
+              --body "Approved translations from [Crowdin](https://crowdin.com/project/paperize)."
+          fi
+          gh workflow run android-release.yml --ref "$BRANCH"
