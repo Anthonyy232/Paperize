@@ -30,11 +30,11 @@ An Android app that changes the home and lock screen wallpaper on a schedule: Ko
 
 - The UI can only be seen on an emulator or device. Run `./gradlew connectedDebugAndroidTest` there for anything touching rendering, scheduling, storage or imports.
 - Dynamic colour swaps the brand palette for the system one, so a design must work with it on and off.
-- English is the source language; other languages arrive as pull requests. New or reworded strings are updated in every locale, and removed strings are removed from every locale.
+- English is the source language. Translations come through Crowdin: the sync workflow uploads `values/strings.xml` and opens its own pull request with approved translations only, adding a locale once most of it is approved. Add or reword strings in English only, and remove deleted strings from every locale. A locale file fixed by hand must also be sent to Crowdin with the sync workflow's upload option, or a later sync can replace the fix.
 - A database schema change needs a migration that keeps user data, never a destructive fallback. Commit the exported schema.
 - `metadata/en-US` is the F-Droid and IzzyOnDroid store listing: keep its text and screenshots true to the app.
 - F-Droid rebuilds every release from source and compares it with the GitHub APK, so the build must stay reproducible. Its recipe deletes the `foojay` line from `settings.gradle.kts` with `sed`: keep that plugin on one line, and keep `dependenciesInfo` off.
-- F-Droid pins the commit of every version: never rewrite a released commit or move a tag. `renovate/*` and `media` are live branches, not stale ones.
+- F-Droid pins the commit of every version: never rewrite a released commit or move a tag. `renovate/*`, `crowdin-translations` and `media` are live branches, not stale ones.
 - `app/lint-baseline.xml` holds only deliberate exceptions; fix new warnings instead of adding them to it.
 
 ## Done means

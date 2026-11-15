@@ -74,7 +74,7 @@ Albums and settings stay on your device, and Paperize has no internet permission
 
 ## Translations
 
-Paperize ships in English, Simplified Chinese and Traditional Chinese. To add or improve a language, open a pull request with a `strings.xml` in `app/src/main/res/values-<language>/` (for example `values-b+zh+Hant`), translated from [`values/strings.xml`](app/src/main/res/values/strings.xml).
+Paperize ships in English, Simplified Chinese and Traditional Chinese. To add or improve a language, translate it on [Crowdin](https://crowdin.com/project/paperize). Translations are reviewed there before they reach the app, and a new language is added once 90% of it has been reviewed.
 
 ## Building from source
 
