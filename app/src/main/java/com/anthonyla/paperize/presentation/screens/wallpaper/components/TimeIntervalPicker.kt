@@ -84,7 +84,7 @@ fun TimeIntervalPicker(
         }
 
         Text(
-            text = "${stringResource(R.string.total_interval)} ${formatIntervalComposable(minutes)}",
+            text = stringResource(R.string.total_interval, formatIntervalComposable(minutes)),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
@@ -104,9 +104,9 @@ fun TimeIntervalPicker(
 private fun formatIntervalComposable(minutes: Int): String {
     val (d, h, m) = splitInterval(minutes)
     return listOfNotNull(
-        if (d > 0) "$d ${pluralStringResource(R.plurals.time_unit_days, d)}" else null,
-        if (h > 0) "$h ${pluralStringResource(R.plurals.time_unit_hours, h)}" else null,
-        if (m > 0 || d == 0 && h == 0)"$m ${stringResource(R.string.time_unit_min)}" else null
+        if (d > 0) pluralStringResource(R.plurals.time_unit_days, d, d) else null,
+        if (h > 0) pluralStringResource(R.plurals.time_unit_hours, h, h) else null,
+        if (m > 0 || d == 0 && h == 0) stringResource(R.string.time_unit_min, m) else null
     ).joinToString(" ")
 }
 

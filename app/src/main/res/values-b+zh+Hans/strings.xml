@@ -6,7 +6,9 @@
   <string name="continue_rotation_from_here_desc">之后按相册顺序更换这张壁纸后面的壁纸</string>
   <string name="import_adding_folder">正在添加文件夹…</string>
   <string name="import_adding_wallpapers">正在添加壁纸…</string>
-  <string name="import_scanning">正在扫描… 已找到 %1$d 张</string>
+  <plurals name="import_scanning">
+    <item quantity="other">正在扫描… 已找到 %d 张</item>
+  </plurals>
   <string name="import_saving">正在保存 %1$d / %2$d</string>
   <string name="home">主页</string>
   <string name="settings_screen">设置</string>
@@ -130,8 +132,8 @@
 
   <!-- Time Interval Picker -->
   <string name="mins">分钟</string>
-  <string name="total_interval">总计： </string>
-  <string name="time_unit_min">分</string>
+  <string name="total_interval">总计：%1$s</string>
+  <string name="time_unit_min">%d 分</string>
   <string name="live_short_interval_note">低于 15 分钟的间隔仅在 Paperize 作为可见的动态壁纸运行时生效。</string>
 
   <!-- Notification Service -->
@@ -149,10 +151,10 @@
 
   <!-- Plurals -->
   <plurals name="time_unit_hours">
-    <item quantity="other">小时</item>
+    <item quantity="other">%d 小时</item>
   </plurals>
   <plurals name="time_unit_days">
-    <item quantity="other">天</item>
+    <item quantity="other">%d 天</item>
   </plurals>
 
   <!-- Material 3 Expressive UI Strings -->

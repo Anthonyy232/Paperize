@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -55,7 +56,7 @@ fun ImportProgressDialog(progress: ImportProgress, onCancel: () -> Unit) {
                         ) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                             Text(
-                                text = stringResource(R.string.import_scanning, active.found),
+                                text = pluralStringResource(R.plurals.import_scanning, active.found, active.found),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
