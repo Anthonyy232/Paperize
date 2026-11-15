@@ -1,35 +1,50 @@
-<div align="center">
-  <img style="display: block" src="https://github.com/user-attachments/assets/e8fb14f5-ec8e-440e-a2ac-8065322b0e28" alt="">
-  <h1>Paperize</h1>
-  <p><strong>A dynamic wallpaper changer that keeps your device's aesthetic fresh and exciting</strong></p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/hero-dark.png">
+  <img src=".github/readme/hero-light.png" alt="Paperize: a fresh wallpaper, right on time. Three phones show the wallpaper tab, the album library and the effects.">
+</picture>
 
-  [![GitHub Downloads](https://img.shields.io/github/downloads/Anthonyy232/Paperize/total?style=flat&logo=github&label=Downloads)](https://github.com/Anthonyy232/Paperize/releases)
-  [![GitHub Release](https://img.shields.io/github/v/release/Anthonyy232/Paperize?style=flat&logo=github)](https://github.com/Anthonyy232/Paperize/releases/latest)
-  [![License](https://img.shields.io/github/license/Anthonyy232/Paperize?style=flat)](LICENSE)
-  [![F-Droid](https://img.shields.io/f-droid/v/com.anthonyla.paperize?style=flat&logo=fdroid)](https://f-droid.org/en/packages/com.anthonyla.paperize/)
-  
-  [![Crowdin](https://badges.crowdin.net/paperize/localized.svg)](https://crowdin.com/project/paperize)
+<p align="center">
+  <a href="https://github.com/Anthonyy232/Paperize/releases"><b>GitHub releases</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://f-droid.org/en/packages/com.anthonyla.paperize/"><b>F-Droid</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize"><b>IzzyOnDroid</b></a>
+</p>
+
+<div align="center">
+
+**A dynamic wallpaper changer that keeps your device's aesthetic fresh and exciting**
+
+[![GitHub Downloads](https://img.shields.io/github/downloads/Anthonyy232/Paperize/total?style=flat&logo=github&label=Downloads)](https://github.com/Anthonyy232/Paperize/releases) [![GitHub Release](https://img.shields.io/github/v/release/Anthonyy232/Paperize?style=flat&logo=github)](https://github.com/Anthonyy232/Paperize/releases/latest) [![License](https://img.shields.io/github/license/Anthonyy232/Paperize?style=flat)](LICENSE) [![F-Droid](https://img.shields.io/f-droid/v/com.anthonyla.paperize?style=flat&logo=fdroid)](https://f-droid.org/en/packages/com.anthonyla.paperize/) [![Crowdin](https://badges.crowdin.net/paperize/localized.svg)](https://crowdin.com/project/paperize)
+
 </div>
 
----
+Paperize is an Android app that changes your home and lock screen wallpaper on a schedule, from albums you build out of your own images and folders. It needs Android 12 or newer.
 
-## Features
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/feature-albums-dark.png">
+  <img src=".github/readme/feature-albums-light.png" alt="01. Albums, on rotation. The library with two albums, and an album open showing its wallpapers.">
+</picture>
 
-- **Dynamic Wallpaper Changer** — Set your wallpaper to change at specific time intervals
-- **Static & Live Wallpapers** — Choose between traditional static wallpapers or smooth live wallpaper transitions
-- **Multiple Image Formats** — Supports JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF, and TIFF
 - **Folder Support** — Organize wallpapers into folders for auto-updating
-- **Dual Screen Support** — Choose the same or separate albums for home and lock screen
-- **Wallpaper Effects** — Apply various effects including brightness, blur, scaling, vignette, and more
+- **Multiple Image Formats** — Supports JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF, and TIFF
 - **On-Device Storage** — All wallpapers and settings stored locally on your device
 
----
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/feature-schedule-dark.png">
+  <img src=".github/readme/feature-schedule-light.png" alt="02. Home and lock, your call. The wallpaper tab with the current lock and home wallpapers, an album for each, and the time interval.">
+</picture>
 
-## Download
+- **Dynamic Wallpaper Changer** — Set your wallpaper to change at specific time intervals
+- **Dual Screen Support** — Choose the same or separate albums for home and lock screen
+- **Static & Live Wallpapers** — Choose between traditional static wallpapers or smooth live wallpaper transitions
 
-[<img src="https://github.com/Anthonyy232/Paperize/assets/60626873/1c034414-21cd-4a0a-838d-89fe7bd56910" alt="Download from GitHub" height="60">](https://github.com/Anthonyy232/Paperize/releases)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="60">](https://f-droid.org/en/packages/com.anthonyla.paperize/)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="60">](https://apt.izzysoft.de/fdroid/index/apk/com.anthonyla.paperize)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/feature-effects-dark.png">
+  <img src=".github/readme/feature-effects-light.png" alt="03. Effects, to taste. Brightness, blur and vignette, each with a switch for home and lock and a strength slider.">
+</picture>
+
+- **Wallpaper Effects** — Apply various effects including brightness, blur, scaling, vignette, and more
 
 ---
 
