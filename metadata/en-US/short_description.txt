@@ -1,1 +1,1 @@
-Paperize is an efficient wallpaper changer application with a clean design
+Changes your home and lock screen wallpaper on a schedule, from your own albums
