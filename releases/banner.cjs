@@ -2,7 +2,7 @@
 //   with a tag: records the highlight in releases/highlights.json and renders that banner; without: renders every banner
 const fs = require('fs');
 const path = require('path');
-const { chromium, fonts, paperizeCheckout, sheets, render } = require('../lib.cjs');
+const { launch, fonts, paperizeCheckout, sheets, render } = require('../lib.cjs');
 
 const file = path.join(__dirname, 'highlights.json');
 const highlights = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -31,7 +31,7 @@ const html = ([number, pre], text) => `<!doctype html><meta charset="utf-8">${fo
 ${sheets(paperize, '24 28 60 56', 'class="mark"')}`;
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await launch();
   for (const t of tag ? [tag] : Object.keys(highlights)) {
     await render(browser, html(t.slice(1).split('-'), highlights[t]), path.join(__dirname, `${t}.png`), { width: 1280, height: 640 });
   }

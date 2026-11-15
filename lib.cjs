@@ -18,6 +18,9 @@ const icon = paperize => fs.readFileSync(path.join(paperize, 'app/src/main/ic_la
 const sheets = (paperize, viewBox, attrs = '') => icon(paperize)
   .replace(/viewBox="[^"]*"/, `viewBox="${viewBox}" ${attrs}`).replace(/\s*<rect[^>]*\/>/, '');
 
+// One raster thread: with more, rotated images come out a few pixels different from run to run.
+const launch = () => chromium.launch({ args: ['--num-raster-threads=1'] });
+
 async function render(browser, html, file, { width, height, scale = 1, transparent = false, type = 'png' }) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: scale });
   await page.setContent(html, { waitUntil: 'load' });
@@ -27,4 +30,4 @@ async function render(browser, html, file, { width, height, scale = 1, transpare
   await page.close();
 }
 
-module.exports = { chromium, fonts, paperizeCheckout, icon, sheets, render };
+module.exports = { launch, fonts, paperizeCheckout, icon, sheets, render };

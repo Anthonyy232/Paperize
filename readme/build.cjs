@@ -1,7 +1,7 @@
 // node readme/build.cjs <paperize checkout> : README hero and feature panels, site screenshots and store listing art, from readme/inputs/
 const fs = require('fs');
 const path = require('path');
-const { chromium, fonts, paperizeCheckout, icon, render } = require('../lib.cjs');
+const { launch, fonts, paperizeCheckout, icon, render } = require('../lib.cjs');
 
 const paperize = paperizeCheckout(process.argv[2]);
 const inputs = path.join(__dirname, 'inputs');
@@ -110,7 +110,7 @@ async function webp(browser, name, file) {
 }
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await launch();
   for (const scheme of ['light', 'dark']) {
     await render(browser, hero(scheme === 'dark'), out(`.github/readme/hero-${scheme}.png`), { width: 1280, height: 760, scale: 1.6, transparent: true });
     for (const [name, html] of Object.entries(features(scheme))) {
