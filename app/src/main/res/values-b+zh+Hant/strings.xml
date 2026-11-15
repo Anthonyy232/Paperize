@@ -2,7 +2,7 @@
 <resources>
   <string name="album_create_failed">無法建立相簿，請再試一次。</string>
   <string name="continue_rotation_from_here">從這裡繼續輪播</string>
-  <string name="continue_rotation_from_here_desc">之後依相簿順序更換這張桌布後面的桌布</string>
+  <string name="continue_rotation_from_here_desc">之後會從這張桌布開始，依相簿順序更換</string>
   <string name="import_adding_folder">正在新增資料夾…</string>
   <string name="import_adding_wallpapers">正在加入桌布…</string>
   <plurals name="import_scanning">
@@ -100,16 +100,12 @@
   <string name="notification_permission_title">開啟通知</string>
   <string name="notification_permission_description">允許 Paperize 發送桌布更換通知，以及在背景執行時顯示通知。你可以隨時在設定中更改。</string>
   <string name="skip">略過</string>
-
-  <!-- Content Descriptions for Accessibility -->
   <string name="content_desc_clear_selection">清除選取</string>
   <string name="content_desc_select_all">全選</string>
   <string name="content_desc_delete_selected">刪除選取項目</string>
   <string name="content_desc_collapse">收合</string>
   <string name="content_desc_current_lock_wallpaper">目前的鎖定畫面桌布</string>
   <string name="content_desc_current_home_wallpaper">目前的主畫面桌布</string>
-
-  <!-- UI Labels and Status -->
   <string name="wallpaper_changer">定時更換</string>
   <string name="wallpaper_changer_description">暫停或繼續定時更換，不會清除你的相簿。</string>
   <string name="horizontal_wallpaper_scrolling">水平捲動</string>
@@ -120,60 +116,40 @@
   <string name="visual_effects">視覺效果</string>
   <string name="interactive_effects">互動效果</string>
   <string name="current_wallpapers">目前桌布</string>
-
-  <!-- Sort Options -->
   <string name="sort_name_asc">名稱（A 到 Z）</string>
   <string name="sort_name_desc">名稱（Z 到 A）</string>
   <string name="sort_date_added_asc">加入日期（由舊到新）</string>
   <string name="sort_date_added_desc">加入日期（由新到舊）</string>
   <string name="sort_date_modified_asc">修改日期（由舊到新）</string>
   <string name="sort_date_modified_desc">修改日期（由新到舊）</string>
-
-  <!-- Time Interval Picker -->
   <string name="mins">分鐘</string>
   <string name="total_interval">總計：%1$s</string>
-  <string name="time_unit_min">%d 分</string>
+  <string name="time_unit_min">%d 分鐘</string>
   <string name="live_short_interval_note">短於 15 分鐘的間隔，只在 Paperize 作為目前顯示的動態桌布時才會執行。</string>
-
-  <!-- Notification Service -->
   <string name="notification_channel_description">桌布更換通知</string>
   <string name="no_wallpapers_in_album">相簿中沒有桌布</string>
   <string name="wallpaper_changer_disabled_empty_album">相簿是空的，已停用定時更換。</string>
-
-  <!-- Error Messages -->
   <string name="error_no_valid_wallpaper_after_retries">多次重試後仍找不到可用的桌布</string>
   <string name="wallpaper_not_found">這張桌布已無法使用。</string>
   <string name="static_mode_required">請先切換到靜態桌布模式，再套用單張桌布。</string>
-
-  <!-- OEM Compatibility Warnings -->
   <string name="parallax_may_not_work">視差效果可能無法在你的系統或桌面上運作。</string>
-
-  <!-- Plurals -->
   <plurals name="time_unit_hours">
     <item quantity="other">%d 小時</item>
   </plurals>
   <plurals name="time_unit_days">
     <item quantity="other">%d 天</item>
   </plurals>
-
-  <!-- Material 3 Expressive UI Strings -->
   <string name="create_first_album_hint">輕觸 + 來建立第一本相簿</string>
-
-  <!-- Wallpaper Mode Selection -->
   <string name="choose_wallpaper_mode">選擇桌布模式</string>
   <string name="change_later_in_settings">之後可以在設定中更改</string>
   <string name="static_mode">靜態模式</string>
   <string name="static_mode_description">透過系統桌布功能更換，簡單省電，僅支援圖片。</string>
   <string name="live_wallpaper_mode">動態桌布模式</string>
   <string name="live_wallpaper_mode_description">進階動態桌布，具硬體加速特效與互動功能（點兩下、視差）。</string>
-
-  <!-- Live Wallpaper Selection Dialog -->
   <string name="select_live_wallpaper">選擇動態桌布</string>
   <string name="select_live_wallpaper_instruction">若要以動態桌布模式使用 Paperize，請在系統設定中將它設為動態桌布。</string>
   <string name="open_wallpaper_picker">開啟桌布選擇器</string>
   <string name="later">稍後</string>
-
-  <!-- Settings Mode Switcher -->
   <string name="wallpaper_mode_setting">桌布模式</string>
   <string name="current_mode">目前模式</string>
   <string name="mode_static">靜態</string>
@@ -197,7 +173,6 @@
   <string name="home_and_lock_screens">主畫面和鎖定畫面</string>
   <string name="individual_wallpaper_static_only">請切換到靜態模式以設定單張桌布。</string>
   <string name="change_next_wallpaper_shortcut">更換為下一張已設定的桌布</string>
-
   <string name="import_failed">無法完成匯入。請確認檔案或資料夾仍可使用，然後再試一次。</string>
   <string name="import_permission_error">無法保留這次選取的存取權限。請從可存取的位置重新選取檔案或資料夾。</string>
   <string name="import_already_added">選取的內容已在此相簿中。</string>
