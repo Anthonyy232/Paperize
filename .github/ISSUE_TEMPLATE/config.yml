@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Feature idea
+    url: https://github.com/Anthonyy232/Paperize/discussions/categories/ideas
+    about: Suggest a feature or improvement in Discussions
+  - name: Question
+    url: https://github.com/Anthonyy232/Paperize/discussions/categories/q-a
+    about: Ask how something works

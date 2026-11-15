@@ -1,0 +1,35 @@
+name: Bug report
+description: Something in Paperize doesn't work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you got. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Paperize version
+      placeholder: 4.2.2 from F-Droid
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Pixel 9, Android 16
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Wallpaper mode
+      options:
+        - Static
+        - Live
+        - Not sure
+    validations:
+      required: true

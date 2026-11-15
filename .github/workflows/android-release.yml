@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   test:
     name: Run Unit Tests
@@ -25,14 +29,8 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run unit tests
-        run: ./gradlew clean test
-
-      - name: Run Android lint
-        run: ./gradlew :app:lintDebug
+      - name: Run unit tests and lint
+        run: ./gradlew testDebugUnitTest lintDebug
 
   build:
     name: Build Signed APK
@@ -49,9 +47,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
 
       - name: Decode Base64 Keystore
         env:
