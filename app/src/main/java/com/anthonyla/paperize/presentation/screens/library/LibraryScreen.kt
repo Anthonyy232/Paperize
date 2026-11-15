@@ -75,14 +75,14 @@ fun LibraryScreen(
                     .fillMaxSize()
                     .padding(paddingValues),
                 columns = GridCells.Adaptive(AppGrid.itemMinSize),
-                contentPadding = PaddingValues(AppSpacing.gridPadding),
-                horizontalArrangement = Arrangement.Start
+                contentPadding = PaddingValues(AppSpacing.medium),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
                 items(albums, key = { album -> album.id }) { album ->
                     AlbumItem(
                         album = album,
-                        onAlbumViewClick = { onViewAlbum(album.id) },
-                        modifier = Modifier.padding(AppSpacing.gridPadding)
+                        onAlbumViewClick = { onViewAlbum(album.id) }
                     )
                 }
             }

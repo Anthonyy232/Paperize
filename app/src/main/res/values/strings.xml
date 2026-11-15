@@ -108,16 +108,13 @@
   <string name="content_desc_current_home_wallpaper">Current home screen wallpaper</string>
 
   <!-- UI Labels and Status -->
-  <string name="enabled">Enabled</string>
   <string name="wallpaper_changer">Wallpaper changing</string>
   <string name="wallpaper_changer_description">Pause or resume scheduled changes without clearing your albums.</string>
   <string name="horizontal_wallpaper_scrolling">Horizontal scrolling</string>
   <string name="horizontal_wallpaper_scrolling_description">Allow wide Fill wallpapers to move between home-screen pages. Lock-screen wallpapers remain centered.</string>
-  <string name="disabled">Disabled</string>
   <string name="lock_album_label">Lock Album</string>
   <string name="home_album_label">Home Album</string>
   <string name="scaling">Scaling</string>
-  <string name="wallpaper_effects_title">Wallpaper Effects</string>
   <string name="visual_effects">Visual Effects</string>
   <string name="interactive_effects">Interactive Effects</string>
   <string name="current_wallpapers">Current Wallpapers</string>

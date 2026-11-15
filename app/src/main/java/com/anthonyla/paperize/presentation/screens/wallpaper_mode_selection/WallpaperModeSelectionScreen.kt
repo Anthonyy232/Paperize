@@ -1,6 +1,5 @@
 package com.anthonyla.paperize.presentation.screens.wallpaper_mode_selection
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LiveTv
@@ -11,9 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
@@ -108,12 +105,8 @@ private fun ModeSelectionCard(
             containerColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
             else
-                MaterialTheme.colorScheme.surfaceContainerLow
+                MaterialTheme.colorScheme.surfaceContainer
         ),
-        border = if (isSelected)
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        else
-            null
     ) {
         Row(
             modifier = Modifier
@@ -139,7 +132,6 @@ private fun ModeSelectionCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
                     color = if (isSelected)
                         MaterialTheme.colorScheme.onPrimaryContainer
                     else
@@ -150,7 +142,7 @@ private fun ModeSelectionCard(
 
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = if (isSelected)
                         MaterialTheme.colorScheme.onPrimaryContainer
                     else
@@ -158,13 +150,8 @@ private fun ModeSelectionCard(
                 )
             }
 
-            if (isSelected) {
-                Spacer(modifier = Modifier.width(AppSpacing.small))
-                RadioButton(
-                    selected = true,
-                    onClick = null
-                )
-            }
+            Spacer(modifier = Modifier.width(AppSpacing.small))
+            RadioButton(selected = isSelected, onClick = null)
         }
     }
 }

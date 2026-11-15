@@ -3,6 +3,7 @@ package com.anthonyla.paperize.presentation.common.theme
 import androidx.compose.ui.unit.dp
 
 object AppSpacing {
+    val hairline = 2.dp
     val extraSmall = 6.dp
     val small = 12.dp
     val medium = 16.dp

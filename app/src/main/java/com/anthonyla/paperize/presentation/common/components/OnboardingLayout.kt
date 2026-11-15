@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.anthonyla.paperize.presentation.common.navigation.util.NavConstants
@@ -91,7 +90,6 @@ fun OnboardingLayout(
                         text = title,
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -130,7 +128,6 @@ fun OnboardingButton(
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(vertical = AppSpacing.small)
         )
     }
