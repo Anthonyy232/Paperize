@@ -42,11 +42,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 class PaperizeLiveWallpaperService : GLWallpaperService() {
@@ -103,6 +107,8 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         private var latestSettings = ScheduleSettings()
         private var latestWallpaperMode = WallpaperMode.STATIC
         private var liveIntervalJob: Job? = null
+        private var screenOffChangeJob: Job? = null
+        private val engineVisible = MutableStateFlow(false)
 
         private val gestureDetector = GestureDetector(
             this@PaperizeLiveWallpaperService,
@@ -251,6 +257,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
 
         override fun onVisibilityChanged(visible: Boolean) {
             renderController.visible = visible
+            engineVisible.value = visible
             if (visible) {
                 // Re-evaluate draw-time effects such as adaptive brightness after
                 // configuration changes while the wallpaper was hidden.
@@ -303,9 +310,12 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         }
 
         private fun handleScreenOff() {
-            engineScope.launch {
+            screenOffChangeJob?.cancel()
+            screenOffChangeJob = engineScope.launch {
                 val settings = settingsRepository.getScheduleSettings()
                 if (settings.liveEffects.enableChangeOnScreenOff) {
+                    // Some skins still draw the wallpaper through their screen-off animation; an always-on display never hides it.
+                    withTimeoutOrNull(2.seconds) { engineVisible.first { !it } }
                     Log.d(TAG, "Screen off - changing wallpaper")
                     renderController.forceReloadCurrentArtwork()
                 }
