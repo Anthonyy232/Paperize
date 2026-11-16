@@ -75,6 +75,8 @@ android {
 
     lint {
         baseline = file("lint-baseline.xml")
+        // Crowdin exports no "many" form for Romance languages; Android falls back to "other".
+        disable += "MissingQuantity"
     }
 
     dependenciesInfo {
