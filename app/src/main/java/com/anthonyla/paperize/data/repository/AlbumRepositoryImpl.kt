@@ -73,6 +73,30 @@ class AlbumRepositoryImpl @Inject constructor(
         true
     }
 
+    override suspend fun syncFolderWallpapers(
+        albumId: String,
+        folderId: String,
+        wallpapers: List<Wallpaper>,
+        onProgress: (Int, Int) -> Unit
+    ): Int = database.withTransaction {
+        checkNotNull(albumDao.getAlbumById(albumId))
+        val scanned = wallpapers.mapTo(HashSet()) { it.uri }
+        // An empty scan can be an unavailable provider, so it removes nothing.
+        val stale = if (scanned.isEmpty()) emptyList()
+            else wallpaperDao.getUrisInCollection(albumId, folderId).filterNot { it in scanned }
+        var removed = 0
+        stale.chunked(WALLPAPER_BATCH_SIZE).forEach {
+            removed += wallpaperDao.deleteFolderWallpapersByUris(albumId, folderId, it)
+        }
+        val added = insertNewWallpapers(albumId, wallpapers, onProgress)
+        if (removed > 0) {
+            folderDao.updateFolderCover(folderId, wallpaperDao.getFolderCoverUri(folderId))
+            updateAlbumCoverIfNeeded(albumId)
+            albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
+        }
+        added
+    }
+
     private suspend fun insertNewWallpapers(
         albumId: String,
         wallpapers: List<Wallpaper>,

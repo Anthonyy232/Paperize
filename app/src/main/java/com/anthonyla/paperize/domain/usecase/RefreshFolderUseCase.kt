@@ -13,8 +13,8 @@ class RefreshFolderUseCase @Inject constructor(
     suspend operator fun invoke(folderId: String): Int {
         val folder = albumRepository.getFolderById(folderId).first() ?: return 0
         val source = documents.readFolder(folder.uri)
-        return albumRepository.addWallpapersToAlbum(
-            folder.albumId, source.images.map { it.toWallpaper(folder.albumId, folderId) }
+        return albumRepository.syncFolderWallpapers(
+            folder.albumId, folderId, source.images.map { it.toWallpaper(folder.albumId, folderId) }
         )
     }
 }

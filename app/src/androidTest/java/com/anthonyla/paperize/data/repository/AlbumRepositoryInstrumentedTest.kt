@@ -140,4 +140,32 @@ class AlbumRepositoryInstrumentedTest {
         wallpapers.ensureWallpaperQueue("album", ScreenType.HOME, true)
         assertEquals(expected.drop(1), db.wallpaperQueueDao().getQueueItems("album", ScreenType.HOME).map { it.wallpaperId })
     }
+
+    @Test fun syncFolderWallpapersRemovesOnlyThatFoldersMissingFilesAndAddsNewOnes() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        albums.addFolderToAlbum("album", testFolder("folder", "album").copy(
+            wallpapers = (1..5).map { testWallpaper("image-$it", "album").copy(folderId = "folder", uri = "content://photo-$it") }
+        ))
+        albums.addWallpapersToAlbum("album", listOf(testWallpaper("direct", "album").copy(uri = "content://photo-3")))
+
+        val scanned = listOf(1, 2, 4, 5, 6).map { testWallpaper("image-$it", "album").copy(folderId = "folder", uri = "content://photo-$it") }
+        val added = albums.syncFolderWallpapers("album", "folder", scanned)
+
+        assertEquals(1, added)
+        assertEquals(
+            listOf(1, 2, 4, 5, 6).map { "content://photo-$it" }.toSet(),
+            db.wallpaperDao().getUrisInCollection("album", "folder").toSet()
+        )
+        assertEquals(listOf("content://photo-3"), db.wallpaperDao().getUrisInCollection("album", null))
+    }
+
+    @Test fun syncFolderWallpapersKeepsRowsWhenScanIsEmpty() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        albums.addFolderToAlbum("album", testFolder("folder", "album").copy(
+            wallpapers = listOf(testWallpaper("image-1", "album").copy(folderId = "folder", uri = "content://photo-1"))
+        ))
+
+        assertEquals(0, albums.syncFolderWallpapers("album", "folder", emptyList()))
+        assertEquals(1, db.wallpaperDao().getUrisInCollection("album", "folder").size)
+    }
 }

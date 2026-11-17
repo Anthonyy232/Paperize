@@ -31,6 +31,14 @@ interface AlbumRepository {
         onProgress: (saved: Int, total: Int) -> Unit = { _, _ -> }
     ): Boolean
 
+    /** Makes a folder match a complete scan of it. Returns the number of new images. */
+    suspend fun syncFolderWallpapers(
+        albumId: String,
+        folderId: String,
+        wallpapers: List<Wallpaper>,
+        onProgress: (saved: Int, total: Int) -> Unit = { _, _ -> }
+    ): Int
+
     suspend fun removeWallpapersFromAlbum(albumId: String, wallpaperIds: List<String>)
 
     suspend fun removeFolderFromAlbum(albumId: String, folderId: String)

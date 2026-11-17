@@ -122,10 +122,12 @@ internal suspend fun Uri.scanFolderImages(context: Context, onProgress: (found: 
                 currentCoroutineContext().ensureActive()
                 val documentId = cursor.getString(idColumn) ?: continue
                 if (!visitedDocuments.add(documentId)) continue
+                val name = cursor.getString(nameColumn) ?: continue
+                // Galleries rename deleted files in place: .trashed-…, .Trash-…
+                if (name.startsWith(".trash", ignoreCase = true)) continue
                 if (cursor.getString(mimeColumn) == DocumentsContract.Document.MIME_TYPE_DIR) {
                     pendingDirs.addLast(documentId)
                 } else {
-                    val name = cursor.getString(nameColumn) ?: continue
                     val extension = name.substringAfterLast('.', "").lowercase()
                     if (extension in Constants.SUPPORTED_IMAGE_EXTENSIONS) {
                         results.add(

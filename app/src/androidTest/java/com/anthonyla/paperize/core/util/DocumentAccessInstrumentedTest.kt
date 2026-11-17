@@ -98,6 +98,25 @@ class DocumentAccessInstrumentedTest {
         assertEquals(2, provider.queries)
     }
 
+    @Test fun scanSkipsTrashNamesButKeepsImagesInHiddenFolders() = runBlocking {
+        provider.answer = { uri ->
+            when (DocumentsContract.getDocumentId(uri)) {
+                "root" -> directoryCursor().apply {
+                    addRow(arrayOf<Any>("trashed", ".trashed54970.jpg", "image/jpeg", 1L))
+                    addRow(arrayOf<Any>("trash", ".Trash-123.png", "image/png", 2L))
+                    addRow(arrayOf<Any>("walls", ".walls", DocumentsContract.Document.MIME_TYPE_DIR, 0L))
+                    addRow(arrayOf<Any>("plain", "photo.jpg", "image/jpeg", 3L))
+                }
+                "walls" -> directoryCursor().apply {
+                    addRow(arrayOf<Any>("hidden-photo", "wall.png", "image/png", 4L))
+                }
+                else -> directoryCursor()
+            }
+        }
+        val found = treeUri.scanFolderImages(context)
+        assertEquals(setOf("photo.jpg", "wall.png"), found.map { it.name }.toSet())
+    }
+
     @Test fun failureInChildFolderDoesNotReturnPartialImport() = runBlocking {
         provider.answer = { uri ->
             if (DocumentsContract.getDocumentId(uri) == "root") directoryCursor().apply {

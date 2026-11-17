@@ -14,6 +14,9 @@ interface WallpaperDao {
     @Query("SELECT uri FROM wallpapers WHERE albumId = :albumId AND folderId IS :folderId")
     suspend fun getUrisInCollection(albumId: String, folderId: String?): List<String>
 
+    @Query("DELETE FROM wallpapers WHERE albumId = :albumId AND folderId = :folderId AND uri IN (:uris)")
+    suspend fun deleteFolderWallpapersByUris(albumId: String, folderId: String, uris: List<String>): Int
+
     @Query("SELECT COALESCE(MAX(displayOrder), -1) FROM wallpapers WHERE albumId = :albumId")
     suspend fun getMaxOrder(albumId: String): Int
 

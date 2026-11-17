@@ -22,9 +22,9 @@ class RefreshFolderUseCaseTest {
         coEvery { documents.readFolder("tree", any()) } returns SourceFolder("Photos", listOf(
             SourceImage("existing", "old.png", 1L), SourceImage("new", "new.png", 2L)
         ))
-        coEvery { albums.addWallpapersToAlbum("album", any(), any()) } returns 1
+        coEvery { albums.syncFolderWallpapers("album", "folder", any(), any()) } returns 1
         assertEquals(1, refresh("folder"))
-        coVerify { albums.addWallpapersToAlbum("album", match {
+        coVerify { albums.syncFolderWallpapers("album", "folder", match {
             it.size == 2 && it.all { image -> image.albumId == "album" && image.folderId == "folder" }
         }, any()) }
     }
