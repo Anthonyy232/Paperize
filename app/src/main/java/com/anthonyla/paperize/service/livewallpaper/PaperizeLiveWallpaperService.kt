@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.Build
+import android.os.PowerManager
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -315,7 +316,11 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                 val settings = settingsRepository.getScheduleSettings()
                 if (settings.liveEffects.enableChangeOnScreenOff) {
                     // Some skins still draw the wallpaper through their screen-off animation; an always-on display never hides it.
-                    withTimeoutOrNull(2.seconds) { engineVisible.first { !it } }
+                    val hidden = withTimeoutOrNull(2.seconds) { engineVisible.first { !it } } != null
+                    if (!hidden && getSystemService(PowerManager::class.java).isInteractive) {
+                        Log.d(TAG, "Screen turned back on before wallpaper hid - skipping change")
+                        return@launch
+                    }
                     Log.d(TAG, "Screen off - changing wallpaper")
                     renderController.forceReloadCurrentArtwork()
                 }
