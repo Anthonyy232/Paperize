@@ -95,7 +95,7 @@ class WallpaperController @Inject constructor(
         wallpaperId: String,
         screen: ScreenType,
         settings: ScheduleSettings,
-        startSequenceHere: Boolean = false
+        startSequenceHere: Boolean
     ) {
         val targets = if (screen == ScreenType.BOTH && !settings.sameStaticPresentation()) {
             listOf(ScreenType.HOME, ScreenType.LOCK)

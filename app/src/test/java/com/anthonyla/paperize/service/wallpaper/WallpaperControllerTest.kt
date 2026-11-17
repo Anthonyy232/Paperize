@@ -90,7 +90,7 @@ class WallpaperControllerTest {
     @Test fun `specific selection commits both screens without advancing a queue`() = runTest {
         coEvery { render("album", ScreenType.HOME, "selected") } returns bitmap
         every { manager.setBitmap(bitmap, null, true, 3) } returns 1
-        controller.applySpecific("album", "selected", ScreenType.BOTH, settings)
+        controller.applySpecific("album", "selected", ScreenType.BOTH, settings, startSequenceHere = false)
         coVerify(exactly = 0) { prepare(any(), any()) }
         coVerify { prepare.completeSpecific("album", ScreenType.HOME, "selected", false, false) }
         coVerify { prepare.completeSpecific("album", ScreenType.LOCK, "selected", false, false) }

@@ -163,7 +163,7 @@ class WallpaperChangeService : Service() {
             context: Context,
             wallpaperId: String,
             screen: ScreenType,
-            startSequenceHere: Boolean = false
+            startSequenceHere: Boolean
         ) = start(context, ACTION_APPLY_SPECIFIC_WALLPAPER) {
             putExtra(EXTRA_WALLPAPER_ID, wallpaperId)
             putExtra(EXTRA_SCREEN_TYPE, screen.name)
