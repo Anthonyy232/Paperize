@@ -7,11 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.database.ContentObserver
-import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -24,7 +20,7 @@ import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.core.util.isValid
+import com.anthonyla.paperize.core.util.isReadable
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.model.usesVisibleLiveTimer
@@ -129,14 +125,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             }
         }
 
-        // Registered only while no wallpaper is readable, e.g. storage still mounting after boot.
-        private var watchingSource = false
-        private val sourceObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-            override fun onChange(selfChange: Boolean) {
-                renderController.reloadCurrentArtwork()
-            }
-        }
-
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
             Log.d(TAG, "Engine created")
@@ -178,53 +166,24 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             val settings = settingsRepository.getScheduleSettings()
             val albumId = settings.liveAlbumId ?: return EmptyImageLoader
 
-            var unreadable: Uri? = null
-            suspend fun nextReadable() = withContext(Dispatchers.IO) {
-                changeWallpaperUseCase.dequeueReadable(albumId, ScreenType.LIVE, settings.shuffleEnabled) { candidate ->
-                    val uri = candidate.uri.toUri()
-                    if (uri.isValid(contentResolver)) {
-                        currentWallpaper = candidate
-                        ContentUriImageLoader(contentResolver, uri, settings.liveScalingType)
-                    } else {
-                        unreadable = uri
-                        null
+            return try {
+                val loader = withContext(Dispatchers.IO) {
+                    changeWallpaperUseCase.dequeueReadable(albumId, ScreenType.LIVE, settings.shuffleEnabled) { candidate ->
+                        val uri = candidate.uri.toUri()
+                        if (uri.isReadable(contentResolver)) {
+                            currentWallpaper = candidate
+                            ContentUriImageLoader(contentResolver, uri, settings.liveScalingType)
+                        } else {
+                            null
+                        }
                     }
                 }
-            }
-
-            return try {
-                var loader = nextReadable()
-                if (loader == null && !watchingSource) {
-                    unreadable?.let(::watchSource)
-                    // The source may have come back before the observer was registered.
-                    loader = nextReadable()
-                }
-                if (loader == null) {
-                    Log.w(TAG, "No readable wallpaper in album $albumId")
-                } else {
-                    stopWatchingSource()
-                }
+                if (loader == null) Log.w(TAG, "No readable wallpaper in album $albumId")
                 loader
             } catch (_: EmptyAlbumException) {
                 Log.w(TAG, "No wallpapers in album $albumId")
                 EmptyImageLoader
             }
-        }
-
-        /** A provider notifies its documents when their root changes, e.g. a volume is mounted. */
-        private fun watchSource(uri: Uri) {
-            try {
-                contentResolver.registerContentObserver(uri, false, sourceObserver)
-                watchingSource = true
-            } catch (e: SecurityException) {
-                Log.w(TAG, "Cannot watch $uri", e)
-            }
-        }
-
-        private fun stopWatchingSource() {
-            if (!watchingSource) return
-            contentResolver.unregisterContentObserver(sourceObserver)
-            watchingSource = false
         }
 
         private fun observeSettings() {
@@ -328,7 +287,6 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         override fun onDestroy() {
             engines -= this
             applicationContext.unregisterReceiver(screenOffReceiver)
-            stopWatchingSource()
 
             renderer.cancelLoading()
 
