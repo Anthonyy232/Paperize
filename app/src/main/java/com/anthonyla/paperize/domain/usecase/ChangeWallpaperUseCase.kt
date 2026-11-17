@@ -32,13 +32,10 @@ class ChangeWallpaperUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(albumId: String, screenType: ScreenType): PreparedWallpaper {
         val settings = settingsRepository.getScheduleSettings()
-        repeat(Constants.MAX_WALLPAPER_LOAD_RETRIES) {
-            currentCoroutineContext().ensureActive()
-            val candidate = dequeueNext(albumId, screenType, settings.shuffleEnabled)
+        return dequeueReadable(albumId, screenType, settings.shuffleEnabled) { candidate ->
             try {
-                val bitmap = renderer.render(candidate, screenType, settings)
-                if (bitmap != null) {
-                    return PreparedWallpaper(bitmap, albumId, screenType, candidate.id, settings.shuffleEnabled)
+                renderer.render(candidate, screenType, settings)?.let { bitmap ->
+                    PreparedWallpaper(bitmap, albumId, screenType, candidate.id, settings.shuffleEnabled)
                 }
             } catch (e: CancellationException) {
                 // Cancelling preparation must not consume the selected queue item.
@@ -51,10 +48,33 @@ class ChangeWallpaperUseCase @Inject constructor(
                 }
                 throw e
             } catch (_: Exception) {
-                // Unreadable images are skipped for this cycle; refresh owns permanent pruning.
+                null
             }
+        } ?: throw NoValidWallpaperException()
+    }
+
+    /**
+     * Dequeue until [open] reads an item. Unreadable items are skipped for this cycle; refresh
+     * owns permanent pruning. When none is readable the source itself is likely unavailable
+     * (storage still mounting, a revoked permission), so the queue is left as it was.
+     */
+    suspend fun <T : Any> dequeueReadable(
+        albumId: String,
+        screenType: ScreenType,
+        shuffle: Boolean,
+        open: suspend (Wallpaper) -> T?
+    ): T? {
+        val unreadable = mutableListOf<Wallpaper>()
+        repeat(Constants.MAX_WALLPAPER_LOAD_RETRIES) {
+            currentCoroutineContext().ensureActive()
+            val candidate = dequeueNext(albumId, screenType, shuffle)
+            open(candidate)?.let { return it }
+            unreadable += candidate
         }
-        throw NoValidWallpaperException()
+        unreadable.asReversed().forEach {
+            wallpaperRepository.restoreWallpaperToQueueFront(albumId, screenType, it.id)
+        }
+        return null
     }
 
     /** Dequeue the next item, rebuilding an empty queue once. Throws [EmptyAlbumException] if none remain. */

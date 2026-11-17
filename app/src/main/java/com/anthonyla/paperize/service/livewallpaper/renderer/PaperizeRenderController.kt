@@ -5,11 +5,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/** All calls run on the engine's main dispatcher; its scope owns cancellation. */
+/**
+ * All calls run on the engine's main dispatcher; its scope owns cancellation.
+ * [openCurrentArtwork] returns null while no wallpaper is readable, which keeps what is shown.
+ */
 class PaperizeRenderController(
     private val queueWallpaper: (ImageLoader, Boolean) -> Unit,
     private val controllerScope: CoroutineScope,
-    private val openCurrentArtwork: suspend () -> ImageLoader
+    private val openCurrentArtwork: suspend () -> ImageLoader?
 ) {
     var visible = false
         set(value) {
@@ -42,7 +45,7 @@ class PaperizeRenderController(
         controllerScope.launch {
             try {
                 val loader = openCurrentArtwork()
-                if (isActive && !hasPendingReload) {
+                if (loader != null && isActive && !hasPendingReload) {
                     queueWallpaper(loader, skipCrossfade)
                 }
             } catch (e: Exception) {

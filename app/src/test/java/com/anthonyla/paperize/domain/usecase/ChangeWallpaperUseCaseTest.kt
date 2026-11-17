@@ -16,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -93,6 +94,30 @@ class ChangeWallpaperUseCaseTest {
 
         assertTrue(runCatching { useCase("album", ScreenType.HOME) }.exceptionOrNull() is NoValidWallpaperException)
         coVerify(exactly = Constants.MAX_WALLPAPER_LOAD_RETRIES) { renderer.render(wallpaper, ScreenType.HOME, any()) }
+    }
+
+    @Test
+    fun `an unreadable source leaves the queue as it was`() = runTest {
+        val queued = List(Constants.MAX_WALLPAPER_LOAD_RETRIES) { testWallpaper("image$it", "album") }
+        coEvery { repository.getAndDequeueWallpaper("album", ScreenType.HOME) } returnsMany queued
+        coEvery { renderer.render(any(), ScreenType.HOME, any()) } returns null
+
+        assertTrue(runCatching { useCase("album", ScreenType.HOME) }.exceptionOrNull() is NoValidWallpaperException)
+        coVerifyOrder {
+            queued.asReversed().forEach { repository.restoreWallpaperToQueueFront("album", ScreenType.HOME, it.id) }
+        }
+    }
+
+    @Test
+    fun `unreadable items before a readable one stay skipped`() = runTest {
+        val readable = testWallpaper("readable", "album")
+        coEvery { repository.getAndDequeueWallpaper("album", ScreenType.HOME) } returnsMany
+            listOf(testWallpaper("gone", "album"), readable)
+
+        val opened = useCase.dequeueReadable("album", ScreenType.HOME, shuffle = false) { candidate -> candidate.takeIf { it == readable } }
+
+        assertEquals(readable, opened)
+        coVerify(exactly = 0) { repository.restoreWallpaperToQueueFront(any(), any(), any()) }
     }
 
     @Test

@@ -7,7 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.database.ContentObserver
+import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -20,7 +24,6 @@ import com.anthonyla.paperize.core.EmptyAlbumException
 import com.anthonyla.paperize.core.ScalingType
 import com.anthonyla.paperize.core.ScreenType
 import com.anthonyla.paperize.core.WallpaperMode
-import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.isValid
 import com.anthonyla.paperize.domain.model.ScheduleSettings
 import com.anthonyla.paperize.domain.model.Wallpaper
@@ -126,6 +129,14 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             }
         }
 
+        // Registered only while no wallpaper is readable, e.g. storage still mounting after boot.
+        private var watchingSource = false
+        private val sourceObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                renderController.reloadCurrentArtwork()
+            }
+        }
+
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
             Log.d(TAG, "Engine created")
@@ -135,9 +146,8 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             setTouchEventsEnabled(true)
 
             renderer = PaperizeWallpaperRenderer(applicationContext, this)
-            renderController = PaperizeRenderController(renderer::queueWallpaper, engineScope) {
-                withContext(Dispatchers.IO) { openNextWallpaper() }
-            }
+            renderController =
+                PaperizeRenderController(renderer::queueWallpaper, engineScope, ::openNextWallpaper)
 
             setRenderer(renderer)
             requestRender()
@@ -161,29 +171,60 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
             )
         }
 
-        /** Dequeue the next readable live wallpaper. Queue and database errors reach the controller. */
-        private suspend fun openNextWallpaper(): ImageLoader {
+        /** Null while no wallpaper is readable. Queue and database errors reach the controller. */
+        private suspend fun openNextWallpaper(): ImageLoader? {
             // In STATIC mode the static wallpaper worker owns HOME/LOCK; the engine stays empty.
             if (settingsRepository.getWallpaperMode() != WallpaperMode.LIVE) return EmptyImageLoader
             val settings = settingsRepository.getScheduleSettings()
             val albumId = settings.liveAlbumId ?: return EmptyImageLoader
 
-            repeat(Constants.MAX_WALLPAPER_LOAD_RETRIES) {
-                val candidate = try {
-                    changeWallpaperUseCase.dequeueNext(albumId, ScreenType.LIVE, settings.shuffleEnabled)
-                } catch (_: EmptyAlbumException) {
-                    Log.w(TAG, "No wallpapers in album $albumId")
-                    return EmptyImageLoader
-                }
-                // Skip unreadable items without deleting them: a permission or storage issue may be
-                // transient. AlbumRefreshWorker prunes documents that are actually gone.
-                if (candidate.uri.toUri().isValid(contentResolver)) {
-                    currentWallpaper = candidate
-                    return ContentUriImageLoader(contentResolver, candidate.uri.toUri(), settings.liveScalingType)
+            var unreadable: Uri? = null
+            suspend fun nextReadable() = withContext(Dispatchers.IO) {
+                changeWallpaperUseCase.dequeueReadable(albumId, ScreenType.LIVE, settings.shuffleEnabled) { candidate ->
+                    val uri = candidate.uri.toUri()
+                    if (uri.isValid(contentResolver)) {
+                        currentWallpaper = candidate
+                        ContentUriImageLoader(contentResolver, uri, settings.liveScalingType)
+                    } else {
+                        unreadable = uri
+                        null
+                    }
                 }
             }
-            Log.w(TAG, "No valid wallpaper found after retries")
-            return EmptyImageLoader
+
+            return try {
+                var loader = nextReadable()
+                if (loader == null && !watchingSource) {
+                    unreadable?.let(::watchSource)
+                    // The source may have come back before the observer was registered.
+                    loader = nextReadable()
+                }
+                if (loader == null) {
+                    Log.w(TAG, "No readable wallpaper in album $albumId")
+                } else {
+                    stopWatchingSource()
+                }
+                loader
+            } catch (_: EmptyAlbumException) {
+                Log.w(TAG, "No wallpapers in album $albumId")
+                EmptyImageLoader
+            }
+        }
+
+        /** A provider notifies its documents when their root changes, e.g. a volume is mounted. */
+        private fun watchSource(uri: Uri) {
+            try {
+                contentResolver.registerContentObserver(uri, false, sourceObserver)
+                watchingSource = true
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Cannot watch $uri", e)
+            }
+        }
+
+        private fun stopWatchingSource() {
+            if (!watchingSource) return
+            contentResolver.unregisterContentObserver(sourceObserver)
+            watchingSource = false
         }
 
         private fun observeSettings() {
@@ -287,6 +328,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
         override fun onDestroy() {
             engines -= this
             applicationContext.unregisterReceiver(screenOffReceiver)
+            stopWatchingSource()
 
             renderer.cancelLoading()
 
