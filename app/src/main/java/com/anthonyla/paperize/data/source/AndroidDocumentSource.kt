@@ -124,7 +124,9 @@ internal suspend fun Uri.scanFolderImages(context: Context, onProgress: (found: 
                 if (!visitedDocuments.add(documentId)) continue
                 val name = cursor.getString(nameColumn) ?: continue
                 // Galleries rename deleted files in place: .trashed-…, .Trash-…
-                if (name.startsWith(".trash", ignoreCase = true)) continue
+                // HyperOS keeps reporting the old display name, so the id is checked too.
+                val fileName = documentId.substringAfterLast('/').substringAfterLast(':')
+                if (listOf(name, fileName).any { it.startsWith(".trash", ignoreCase = true) }) continue
                 if (cursor.getString(mimeColumn) == DocumentsContract.Document.MIME_TYPE_DIR) {
                     pendingDirs.addLast(documentId)
                 } else {
