@@ -1,6 +1,6 @@
 Paperize changes your home and lock screen wallpaper on a schedule, from albums you build out of your own images and folders. It works offline and has no internet permission.
 
-Albums: an album holds single images, whole folders, or both. Folders are rescanned when you open the app, and daily while a schedule is running, so new files join the rotation by themselves.
+Albums: an album holds single images, whole folders, or both. Folders are rescanned when you open the app, and daily while a schedule is running, so new files join the rotation and deleted ones leave it by themselves.
 
 Schedule: turn on the lock screen, the home screen or both, and pick an album for each. One interval covers both screens, from 15 minutes to 30 days, or each screen can have its own. Wallpapers go in order or shuffled.
 

@@ -20,7 +20,7 @@ Paperize is an Android app that changes your home and lock screen wallpaper on a
   <img src=".github/readme/feature-albums-light.png" alt="01. Albums, on rotation. The library with two albums, and an album open showing its wallpapers.">
 </picture>
 
-An album holds single images, whole folders, or both. Paperize rescans folders each time you open the app, and once a day while a schedule is running, so new files join the rotation by themselves; **Refresh folder** rescans one straight away. Removing something from an album never touches the file on your device.
+An album holds single images, whole folders, or both. Paperize rescans folders each time you open the app, and once a day while a schedule is running, so new files join the rotation and deleted ones leave it by themselves; **Refresh folder** rescans one straight away. Removing something from an album never touches the file on your device.
 
 Supported formats: JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF and TIFF.
 
