@@ -65,6 +65,6 @@ Demo mode fixes the status bar at 12:00 in every capture. If a capture shows ano
 node releases/banner.cjs ../Paperize v4.3.0 "One short highlight"
 ```
 
-That records the highlight in `releases/highlights.json` and writes `releases/v4.3.0.png` (1280x640). Without a tag it redraws every banner. Commit, push, and use the raw URL in the release notes:
+That records the highlight in `releases/highlights.json` and writes `releases/v4.3.0.png` (1280x640 at 2x). Without a tag it redraws every banner. Commit, push, and use the raw URL in the release notes:
 
 `https://raw.githubusercontent.com/Anthonyy232/Paperize/media/releases/v4.3.0.png`

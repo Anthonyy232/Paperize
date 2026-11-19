@@ -1,4 +1,4 @@
-// node releases/banner.cjs <paperize checkout> [<tag> "<highlight>"] : 1280x640 release banners in releases/<tag>.png
+// node releases/banner.cjs <paperize checkout> [<tag> "<highlight>"] : release banners, 1280x640 at 2x, in releases/<tag>.png
 //   with a tag: records the highlight in releases/highlights.json and renders that banner; without: renders every banner
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +33,7 @@ ${sheets(paperize, '24 28 60 56', 'class="mark"')}`;
 (async () => {
   const browser = await launch();
   for (const t of tag ? [tag] : Object.keys(highlights)) {
-    await render(browser, html(t.slice(1).split('-'), highlights[t]), path.join(__dirname, `${t}.png`), { width: 1280, height: 640 });
+    await render(browser, html(t.slice(1).split('-'), highlights[t]), path.join(__dirname, `${t}.png`), { width: 1280, height: 640, scale: 2 });
   }
   await browser.close();
 })();
