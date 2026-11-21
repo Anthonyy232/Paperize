@@ -2,7 +2,7 @@
 <resources>
   <string name="album_create_failed">無法建立相簿，請再試一次。</string>
   <string name="continue_rotation_from_here">從這裡繼續輪播</string>
-  <string name="continue_rotation_from_here_desc">之後會從這張桌布開始，依相簿順序更換</string>
+  <string name="continue_rotation_from_here_desc">從這張桌布之後依相簿順序更換</string>
   <string name="import_adding_folder">正在新增資料夾…</string>
   <string name="import_adding_wallpapers">正在加入桌布…</string>
   <plurals name="import_scanning">
