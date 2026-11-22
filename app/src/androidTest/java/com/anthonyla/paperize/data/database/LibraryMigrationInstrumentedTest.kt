@@ -16,7 +16,7 @@ class LibraryMigrationInstrumentedTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test fun everyLegacyVersionPreservesLibraryAndQueue() = runBlocking {
-        for (version in 1..3) {
+        for (version in 1..4) {
             val name = "migration-test-$version"
             context.deleteDatabase(name)
             try {
@@ -34,6 +34,7 @@ class LibraryMigrationInstrumentedTest {
                     assertEquals("content://image", db.folderDao().getFolderById("folder")?.coverUri)
                     assertEquals(listOf("image"), db.wallpaperQueueDao().getQueueItems("album", ScreenType.HOME).map { it.wallpaperId })
                     assertEquals(if (version >= 3) "image" else null, db.wallpaperCurrentDao().getCurrentWallpaperFlow("album", ScreenType.HOME).first()?.id)
+                    assertTrue(db.excludedWallpaperDao().getUris("folder").isEmpty())
                     db.openHelper.readableDatabase.query("PRAGMA foreign_key_check").use { assertEquals(0, it.count) }
                     db.albumDao().deleteAlbumById("album")
                     assertNull(db.wallpaperDao().getWallpaperById("image"))
@@ -57,9 +58,10 @@ class LibraryMigrationInstrumentedTest {
                 if (table == "wallpaper_current" && version < 3) continue
                 var create = entity.getString("createSql").replace("\${TABLE_NAME}", table)
                 // Verified against the version 1, 2 and 3 entities in Git history.
-                if (table == "wallpapers") {
-                    create = if (version == 1) create.replace("`mediaType` TEXT NOT NULL, ", "")
-                    else create.replace("PRIMARY KEY(`id`)", "`cropOffsetX` REAL, `cropOffsetY` REAL, `cropScale` REAL, PRIMARY KEY(`id`)")
+                if (table == "wallpapers") create = when (version) {
+                    1 -> create.replace("`mediaType` TEXT NOT NULL, ", "")
+                    2, 3 -> create.replace("PRIMARY KEY(`id`)", "`cropOffsetX` REAL, `cropOffsetY` REAL, `cropScale` REAL, PRIMARY KEY(`id`)")
+                    else -> create
                 }
                 db.execSQL(create)
                 val indices = entity.optJSONArray("indices")

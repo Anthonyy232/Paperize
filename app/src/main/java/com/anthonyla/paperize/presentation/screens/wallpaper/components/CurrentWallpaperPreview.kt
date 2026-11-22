@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +35,7 @@ import coil3.request.crossfade
 import coil3.size.Size
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 import kotlin.math.max
 import kotlin.math.min
@@ -43,11 +48,12 @@ private val PreviewHeight = 240.dp
  */
 @Composable
 fun CurrentWallpaperPreview(
-    homeWallpaperUri: String?,
-    lockWallpaperUri: String?,
-    animate: Boolean
+    homeWallpaper: Wallpaper?,
+    lockWallpaper: Wallpaper?,
+    animate: Boolean,
+    onRemove: (Wallpaper) -> Unit
 ) {
-    if (homeWallpaperUri == null && lockWallpaperUri == null) return
+    if (homeWallpaper == null && lockWallpaper == null) return
     val windowSize = LocalWindowInfo.current.containerSize
 
     // Portrait-oriented preview: shorter screen dimension as width.
@@ -73,21 +79,25 @@ fun CurrentWallpaperPreview(
                     .padding(top = AppSpacing.medium),
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.large, Alignment.CenterHorizontally)
             ) {
-                if (lockWallpaperUri != null) {
+                if (lockWallpaper != null) {
                     WallpaperPreviewBox(
-                        wallpaperUri = lockWallpaperUri,
+                        wallpaperUri = lockWallpaper.uri,
                         aspectRatio = screenAspectRatio,
                         label = stringResource(R.string.lock),
                         contentDescription = stringResource(R.string.content_desc_current_lock_wallpaper),
+                        removeDescription = stringResource(R.string.content_desc_remove_lock_wallpaper),
+                        onRemove = { onRemove(lockWallpaper) },
                         animate = animate
                     )
                 }
-                if (homeWallpaperUri != null) {
+                if (homeWallpaper != null) {
                     WallpaperPreviewBox(
-                        wallpaperUri = homeWallpaperUri,
+                        wallpaperUri = homeWallpaper.uri,
                         aspectRatio = screenAspectRatio,
                         label = stringResource(R.string.home),
                         contentDescription = stringResource(R.string.content_desc_current_home_wallpaper),
+                        removeDescription = stringResource(R.string.content_desc_remove_home_wallpaper),
+                        onRemove = { onRemove(homeWallpaper) },
                         animate = animate
                     )
                 }
@@ -102,6 +112,8 @@ private fun WallpaperPreviewBox(
     aspectRatio: Float,
     label: String,
     contentDescription: String,
+    removeDescription: String,
+    onRemove: () -> Unit,
     animate: Boolean
 ) {
     val context = LocalContext.current
@@ -130,6 +142,11 @@ private fun WallpaperPreviewBox(
                 modifier = Modifier.matchParentSize()
             )
         }
-        Text(text = label, style = MaterialTheme.typography.labelLarge)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = label, style = MaterialTheme.typography.labelLarge)
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Default.Delete, contentDescription = removeDescription)
+            }
+        }
     }
 }

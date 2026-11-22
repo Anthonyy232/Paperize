@@ -29,7 +29,7 @@ Supported formats: JPG, PNG, WEBP, AVIF, HEIC/HEIF, BMP, GIF and TIFF.
   <img src=".github/readme/feature-schedule-light.png" alt="02. Home and lock, your call. The wallpaper tab with the current lock and home wallpapers, an album for each, and the time interval.">
 </picture>
 
-Turn on **Lock**, **Home** or both and pick an album for each. One interval covers both screens, from 15 minutes to 30 days; **Individual Scheduling** gives each screen its own. Wallpapers go in order unless **Shuffle** is on.
+Turn on **Lock**, **Home** or both and pick an album for each. One interval covers both screens, from 15 minutes to 30 days; **Individual Scheduling** gives each screen its own. Wallpapers go in order unless **Shuffle** is on. Tired of the one on screen? Tap the bin under it in **Current Wallpapers** to take it out of its album and move on to the next. An image removed from a folder stays out when the folder is rescanned, and tapping it under **Removed** in that folder puts it back.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/readme/feature-effects-dark.png">

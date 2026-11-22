@@ -85,8 +85,8 @@ class SettingsCoordinator @Inject constructor(
         }
     }
 
-    /** Change every screen the current settings rotate, or reload the live wallpaper. */
-    fun changeWallpaperNow() = WallpaperChangeService.changeWallpaper(context)
+    /** Change [screen], or without one every screen the current settings rotate or the live wallpaper. */
+    fun changeWallpaperNow(screen: ScreenType? = null) = WallpaperChangeService.changeWallpaper(context, screen)
 
     /** Stop rotation if the user replaced Paperize's live wallpaper outside the app. */
     suspend fun disableIfLiveWallpaperReplaced() = mutex.withLock {

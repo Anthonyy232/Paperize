@@ -28,12 +28,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anthonyla.paperize.R
+import com.anthonyla.paperize.presentation.common.components.SnackbarMessageEffect
 import com.anthonyla.paperize.presentation.screens.library.LibraryScreen
 import com.anthonyla.paperize.presentation.screens.wallpaper.WallpaperScreen
 import com.anthonyla.paperize.service.livewallpaper.PaperizeLiveWallpaperService
@@ -72,14 +79,27 @@ fun HomeScreen(
     val animate by viewModel.animate.collectAsStateWithLifecycle()
     val wallpaperMode by viewModel.wallpaperMode.collectAsStateWithLifecycle()
     val showLiveWallpaperPrompt by viewModel.showLiveWallpaperPrompt.collectAsStateWithLifecycle()
-    val currentHomeWallpaperUri by viewModel.currentHomeWallpaperUri.collectAsStateWithLifecycle()
-    val currentLockWallpaperUri by viewModel.currentLockWallpaperUri.collectAsStateWithLifecycle()
+    val currentHomeWallpaper by viewModel.currentHomeWallpaper.collectAsStateWithLifecycle()
+    val currentLockWallpaper by viewModel.currentLockWallpaper.collectAsStateWithLifecycle()
+    val removedWallpaper by viewModel.removedWallpaper.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarMessageEffect(message, snackbarHostState, viewModel::dismissMessage)
+    val removedText = stringResource(R.string.wallpaper_removed)
+    val undoText = stringResource(R.string.undo)
+    LaunchedEffect(removedWallpaper) {
+        val wallpaper = removedWallpaper ?: return@LaunchedEffect
+        val result = snackbarHostState.showSnackbar(removedText, undoText, duration = SnackbarDuration.Long)
+        if (result == SnackbarResult.ActionPerformed) viewModel.restoreWallpaper(wallpaper)
+        else viewModel.dismissRemovedWallpaper()
+    }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val pagerState = rememberPagerState { homeTabs.size }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
@@ -138,8 +158,9 @@ fun HomeScreen(
                                 onUpdateScheduleSettings = viewModel::updateScheduleSettings,
                                 onUpdateScheduleSettingsDebounced = viewModel::updateScheduleSettingsDebounced,
                                 onChangeWallpaperNow = viewModel::changeWallpaperNow,
-                                homeWallpaperUri = currentHomeWallpaperUri,
-                                lockWallpaperUri = currentLockWallpaperUri
+                                homeWallpaper = currentHomeWallpaper,
+                                lockWallpaper = currentLockWallpaper,
+                                onRemoveWallpaper = viewModel::removeCurrentWallpaper
                             )
                         }
                     }

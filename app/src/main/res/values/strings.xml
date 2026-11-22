@@ -217,5 +217,13 @@
   <string name="refresh_folder">Refresh folder</string>
   <string name="folder_refreshed">Folder checked for new wallpapers.</string>
   <string name="folder_refresh_failed">Could not refresh this folder. Check that it is accessible, then try again.</string>
+  <string name="content_desc_remove_home_wallpaper">Remove the home screen wallpaper from its album</string>
+  <string name="content_desc_remove_lock_wallpaper">Remove the lock screen wallpaper from its album</string>
+  <string name="wallpaper_removed">Wallpaper removed from the album</string>
+  <string name="undo">Undo</string>
+  <string name="remove_wallpaper_failed">Could not remove the wallpaper. Please try again.</string>
+  <string name="restore_wallpaper_failed">Could not put the wallpaper back. Please try again.</string>
+  <string name="removed_wallpapers">Removed</string>
+  <string name="removed_wallpapers_hint">These stay out of rotation when the folder is checked again. Tap one to put it back.</string>
   <string name="reset_failed">Could not finish resetting data. Please try again.</string>
 </resources>

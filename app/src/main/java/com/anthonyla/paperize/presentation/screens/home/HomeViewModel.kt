@@ -9,6 +9,7 @@ import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
@@ -29,11 +30,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    albumRepository: AlbumRepository,
+    private val albumRepository: AlbumRepository,
     settingsRepository: SettingsRepository,
     private val wallpaperRepository: WallpaperRepository,
     private val createAlbumUseCase: CreateAlbumUseCase,
@@ -53,13 +55,20 @@ class HomeViewModel @Inject constructor(
         settingsRepository.getWallpaperModeFlow().stateWhileSubscribed(viewModelScope, null)
 
     /**
-     * URI of the wallpaper Paperize last applied for the home / lock screen, for the in-app preview.
+     * Wallpaper Paperize last applied for the home / lock screen, for the in-app preview.
      * Reading the source URI (rather than WallpaperManager.getDrawable) avoids the storage permission
      * the preview would otherwise need. Falls back to the BOTH-mode record when home/lock are synced.
      */
-    val currentHomeWallpaperUri: StateFlow<String?> = currentWallpaperUri(ScreenType.HOME) { it.homeAlbumId }
+    val currentHomeWallpaper: StateFlow<Wallpaper?> = currentWallpaper(ScreenType.HOME) { it.homeAlbumId }
 
-    val currentLockWallpaperUri: StateFlow<String?> = currentWallpaperUri(ScreenType.LOCK) { it.lockAlbumId }
+    val currentLockWallpaper: StateFlow<Wallpaper?> = currentWallpaper(ScreenType.LOCK) { it.lockAlbumId }
+
+    private val _removedWallpaper = MutableStateFlow<Wallpaper?>(null)
+    /** The last wallpaper removed from the preview, while its undo is offered. */
+    val removedWallpaper: StateFlow<Wallpaper?> = _removedWallpaper.asStateFlow()
+
+    private val _message = MutableStateFlow<Int?>(null)
+    val message: StateFlow<Int?> = _message.asStateFlow()
 
     private val _showLiveWallpaperPrompt = MutableStateFlow(false)
     val showLiveWallpaperPrompt: StateFlow<Boolean> = _showLiveWallpaperPrompt.asStateFlow()
@@ -108,16 +117,47 @@ class HomeViewModel @Inject constructor(
 
     fun changeWallpaperNow() = coordinator.changeWallpaperNow()
 
+    /** Removes [wallpaper] from its album and replaces it on every screen that shows it. */
+    fun removeCurrentWallpaper(wallpaper: Wallpaper) {
+        val home = currentHomeWallpaper.value?.id == wallpaper.id
+        val lock = currentLockWallpaper.value?.id == wallpaper.id
+        viewModelScope.launch {
+            runCatchingCancellable { albumRepository.removeWallpaper(wallpaper.id) }
+                .onSuccess { removed ->
+                    if (removed == null) return@onSuccess
+                    _removedWallpaper.value = removed
+                    coordinator.changeWallpaperNow(
+                        if (home && lock) ScreenType.BOTH else if (lock) ScreenType.LOCK else ScreenType.HOME
+                    )
+                }
+                .onFailure { _message.value = R.string.remove_wallpaper_failed }
+        }
+    }
+
+    fun restoreWallpaper(wallpaper: Wallpaper) {
+        _removedWallpaper.value = null
+        viewModelScope.launch {
+            runCatchingCancellable { albumRepository.restoreWallpaper(wallpaper) }
+                .onFailure { _message.value = R.string.restore_wallpaper_failed }
+        }
+    }
+
+    fun dismissRemovedWallpaper() { _removedWallpaper.value = null }
+
+    fun dismissMessage() { _message.value = null }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun currentWallpaperUri(screen: ScreenType, albumId: (ScheduleSettings) -> String?): StateFlow<String?> =
+    private fun currentWallpaper(screen: ScreenType, albumId: (ScheduleSettings) -> String?): StateFlow<Wallpaper?> =
         scheduleSettings
             .map(albumId)
             .distinctUntilChanged()
-            .flatMapLatest { id -> if (id == null) flowOf(null) else currentWallpaperUriFlow(id, screen) }
+            .flatMapLatest { id -> if (id == null) flowOf(null) else currentWallpaperFlow(id, screen) }
             .stateWhileSubscribed(viewModelScope, null)
 
-    private fun currentWallpaperUriFlow(albumId: String, screen: ScreenType): Flow<String?> = combine(
+    private fun currentWallpaperFlow(albumId: String, screen: ScreenType): Flow<Wallpaper?> = combine(
         wallpaperRepository.getCurrentWallpaperFlow(albumId, screen),
         wallpaperRepository.getCurrentWallpaperFlow(albumId, ScreenType.BOTH)
-    ) { specific, both -> (specific ?: both)?.uri }
+    ) { specific, both -> specific ?: both }
+        // Removing the shown image drops its record until the replacement is applied.
+        .scan(null as Wallpaper?) { last, current -> current ?: last }
 }

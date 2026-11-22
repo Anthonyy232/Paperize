@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.presentation.screens.home
 
 import com.anthonyla.paperize.testAlbumSummary
+import com.anthonyla.paperize.testWallpaper
 import androidx.lifecycle.ViewModelStore
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.ScreenType
@@ -9,6 +10,7 @@ import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.AppSettings
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.repository.SettingsRepository
 import com.anthonyla.paperize.domain.repository.WallpaperRepository
@@ -109,7 +111,7 @@ class HomeViewModelTest {
     }
 
     @Test fun `effect edits do not restart preview subscriptions but album changes do`() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.currentHomeWallpaperUri.collect() }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.currentHomeWallpaper.collect() }
         runCurrent()
         stored.value = stored.value.copy(homeEffects = stored.value.homeEffects.copy(blurPercentage = 60))
         runCurrent()
@@ -122,6 +124,21 @@ class HomeViewModelTest {
         verify(exactly = 1) { wallpapers.getCurrentWallpaperFlow("new", ScreenType.BOTH) }
     }
 
+    @Test fun `preview keeps the removed wallpaper until its replacement is applied`() = runTest {
+        val current = MutableStateFlow<Wallpaper?>(testWallpaper("shown", "old"))
+        every { wallpapers.getCurrentWallpaperFlow("old", ScreenType.HOME) } returns current
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.currentHomeWallpaper.collect() }
+        runCurrent()
+
+        current.value = null
+        runCurrent()
+        assertEquals("shown", viewModel.currentHomeWallpaper.value?.id)
+
+        current.value = testWallpaper("next", "old")
+        runCurrent()
+        assertEquals("next", viewModel.currentHomeWallpaper.value?.id)
+    }
+
     @Test fun `album creation reports taken names and failed saves`() = runTest {
         coEvery { createAlbum("nature") } returns false
         assertEquals(R.string.album_name_exists_error, viewModel.createAlbum("nature"))
@@ -131,5 +148,31 @@ class HomeViewModelTest {
 
         coEvery { createAlbum("Trips") } returns true
         assertNull(viewModel.createAlbum("Trips"))
+    }
+
+    @Test fun `removing a wallpaper replaces it only on the screens that show it`() = runTest {
+        stored.value = stored.value.copy(lockEnabled = true, lockAlbumId = "old")
+        val shown = testWallpaper("shown", "old")
+        val lockCurrent = MutableStateFlow<Wallpaper?>(testWallpaper("other", "old"))
+        every { wallpapers.getCurrentWallpaperFlow("old", ScreenType.HOME) } returns flowOf(shown)
+        every { wallpapers.getCurrentWallpaperFlow("old", ScreenType.LOCK) } returns lockCurrent
+        coEvery { albums.removeWallpaper("shown") } returns shown
+        val coordinator = mockk<SettingsCoordinator>(relaxed = true)
+        val viewModel = HomeViewModel(albums, settings, wallpapers, createAlbum, coordinator)
+        store.put("remove", viewModel)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.currentHomeWallpaper.collect() }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.currentLockWallpaper.collect() }
+        runCurrent()
+
+        viewModel.removeCurrentWallpaper(shown)
+        advanceUntilIdle()
+        verify { coordinator.changeWallpaperNow(ScreenType.HOME) }
+        assertEquals(shown, viewModel.removedWallpaper.value)
+
+        lockCurrent.value = shown
+        runCurrent()
+        viewModel.removeCurrentWallpaper(shown)
+        advanceUntilIdle()
+        verify { coordinator.changeWallpaperNow(ScreenType.BOTH) }
     }
 }

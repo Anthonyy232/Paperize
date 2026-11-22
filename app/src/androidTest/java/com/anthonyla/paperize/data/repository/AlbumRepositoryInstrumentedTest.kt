@@ -168,4 +168,43 @@ class AlbumRepositoryInstrumentedTest {
         assertEquals(0, albums.syncFolderWallpapers("album", "folder", emptyList()))
         assertEquals(1, db.wallpaperDao().getUrisInCollection("album", "folder").size)
     }
+
+    @Test fun removedFolderImageStaysOutOfRescansUntilRestoredInPlace() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        val images = (1..3).map { testWallpaper("image-$it", "album").copy(folderId = "folder", uri = "content://photo-$it") }
+        albums.addFolderToAlbum("album", testFolder("folder", "album").copy(wallpapers = images))
+        val removed = albums.removeWallpaper("image-2")!!
+
+        assertEquals(0, albums.syncFolderWallpapers("album", "folder", images))
+        val folder = albums.getFolderById("folder").first()!!
+        assertEquals(setOf("image-1", "image-3"), folder.wallpapers.map { it.id }.toSet())
+        assertEquals(listOf(removed), folder.removedWallpapers)
+
+        albums.restoreWallpaper(removed)
+        assertEquals(listOf("image-1", "image-2", "image-3"), db.wallpaperDao().getOrderedWallpaperIdsByAlbum("album"))
+        assertTrue(albums.getFolderById("folder").first()!!.removedWallpapers.isEmpty())
+    }
+
+    @Test fun rescanForgetsRemovedImagesWhoseFilesAreGone() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        val images = (1..2).map { testWallpaper("image-$it", "album").copy(folderId = "folder", uri = "content://photo-$it") }
+        albums.addFolderToAlbum("album", testFolder("folder", "album").copy(wallpapers = images))
+        albums.removeWallpaper("image-1")
+
+        albums.syncFolderWallpapers("album", "folder", images.drop(1))
+        assertTrue(albums.getFolderById("folder").first()!!.removedWallpapers.isEmpty())
+        // The file coming back later is a new image, not a removed one.
+        assertEquals(1, albums.syncFolderWallpapers("album", "folder", images))
+    }
+
+    @Test fun undoingADirectImageImportedAgainAddsNoDuplicate() = runBlocking {
+        db.albumDao().insertAlbum(AlbumEntity("album", "Album", null))
+        val image = testWallpaper("image", "album").copy(uri = "content://photo")
+        albums.addWallpapersToAlbum("album", listOf(image))
+        val removed = albums.removeWallpaper("image")!!
+        albums.addWallpapersToAlbum("album", listOf(image.copy(id = "again")))
+
+        albums.restoreWallpaper(removed)
+        assertEquals(listOf("again"), db.wallpaperDao().getWallpaperIdsByAlbum("album"))
+    }
 }

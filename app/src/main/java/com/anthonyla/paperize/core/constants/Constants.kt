@@ -2,7 +2,7 @@ package com.anthonyla.paperize.core.constants
 
 object Constants {
     const val DATABASE_NAME = "paperize_database"
-    const val DATABASE_VERSION = 4
+    const val DATABASE_VERSION = 5
 
     const val PREFERENCES_NAME = "paperize_preferences"
 

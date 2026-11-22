@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.runCatchingCancellable
 import com.anthonyla.paperize.domain.model.Folder
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.repository.AlbumRepository
 import com.anthonyla.paperize.domain.usecase.RefreshFolderUseCase
 import com.anthonyla.paperize.presentation.common.launchBusy
@@ -17,11 +18,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class FolderViewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    albumRepository: AlbumRepository,
+    private val albumRepository: AlbumRepository,
     private val refreshFolderUseCase: RefreshFolderUseCase
 ) : ViewModel() {
 
@@ -46,6 +48,13 @@ class FolderViewViewModel @Inject constructor(
             } else {
                 R.string.folder_refresh_failed
             }
+        }
+    }
+
+    fun restore(wallpaper: Wallpaper) {
+        viewModelScope.launch {
+            runCatchingCancellable { albumRepository.restoreWallpaper(wallpaper) }
+                .onFailure { _message.value = R.string.restore_wallpaper_failed }
         }
     }
 }

@@ -6,7 +6,8 @@ import com.anthonyla.paperize.domain.model.Folder
 import com.anthonyla.paperize.domain.model.Wallpaper
 
 fun FolderEntity.toDomainModel(
-    wallpapers: List<Wallpaper> = emptyList()
+    wallpapers: List<Wallpaper> = emptyList(),
+    removedWallpapers: List<Wallpaper> = emptyList()
 ): Folder = Folder(
     id = id,
     albumId = albumId,
@@ -16,6 +17,7 @@ fun FolderEntity.toDomainModel(
     dateModified = dateModified,
     displayOrder = displayOrder,
     wallpapers = wallpapers,
+    removedWallpapers = removedWallpapers,
     addedAt = addedAt
 )
 
@@ -31,5 +33,6 @@ fun Folder.toEntity(): FolderEntity = FolderEntity(
 )
 
 fun FolderWithWallpapers.toDomainModel(): Folder = folder.toDomainModel(
-    wallpapers = wallpapers.map { it.toDomainModel() }
+    wallpapers = wallpapers.map { it.toDomainModel() },
+    removedWallpapers = excluded.map { it.toDomainModel(folder.albumId) }
 )

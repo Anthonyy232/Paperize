@@ -1,9 +1,11 @@
 package com.anthonyla.paperize.presentation.screens.folder_view
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -11,9 +13,11 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,6 +39,10 @@ import com.anthonyla.paperize.presentation.common.components.SortOption
 import com.anthonyla.paperize.presentation.common.components.WallpaperGrid
 import com.anthonyla.paperize.presentation.common.components.WallpaperItem
 import com.anthonyla.paperize.presentation.common.components.wallpaperGridItem
+import com.anthonyla.paperize.presentation.common.theme.AppSpacing
+
+private const val REMOVED_HEADER_KEY = "removed"
+private const val REMOVED_ALPHA = 0.5f
 
 @Composable
 fun FolderViewScreen(
@@ -52,8 +61,12 @@ fun FolderViewScreen(
     var showSortSheet by rememberSaveable { mutableStateOf(false) }
     var sortOption by rememberSaveable { mutableStateOf(SortOption.DATE_ADDED_DESC) }
 
+    val removedWallpapers = folder?.removedWallpapers.orEmpty()
     val sortedWallpapers = remember(wallpapers, sortOption) {
         wallpapers.sortedWith(sortOption.wallpaperComparator)
+    }
+    val sortedRemoved = remember(removedWallpapers, sortOption) {
+        removedWallpapers.sortedWith(sortOption.wallpaperComparator)
     }
 
     Scaffold(
@@ -70,7 +83,7 @@ fun FolderViewScreen(
         }
     ) { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
-            if (folder != null && wallpapers.isEmpty()) {
+            if (folder != null && wallpapers.isEmpty() && removedWallpapers.isEmpty()) {
                 EmptyCollection(
                     title = stringResource(R.string.folder_empty_title),
                     hint = stringResource(R.string.folder_empty_hint)
@@ -90,6 +103,29 @@ fun FolderViewScreen(
                             onLongClick = null,
                             modifier = Modifier.wallpaperGridItem(this)
                         )
+                    }
+                    if (sortedRemoved.isNotEmpty()) {
+                        item(key = REMOVED_HEADER_KEY, span = { GridItemSpan(maxLineSpan) }) {
+                            Column(modifier = Modifier.padding(top = AppSpacing.large)) {
+                                Text(stringResource(R.string.removed_wallpapers), style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    stringResource(R.string.removed_wallpapers_hint),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        items(items = sortedRemoved, key = { wallpaper -> wallpaper.id }) { wallpaper ->
+                            WallpaperItem(
+                                wallpaperUri = wallpaper.uri,
+                                wallpaperName = wallpaper.displayFileName,
+                                isSelected = false,
+                                isSelectionMode = false,
+                                onClick = { viewModel.restore(wallpaper) },
+                                onLongClick = null,
+                                modifier = Modifier.wallpaperGridItem(this).alpha(REMOVED_ALPHA)
+                            )
+                        }
                     }
                 }
             }

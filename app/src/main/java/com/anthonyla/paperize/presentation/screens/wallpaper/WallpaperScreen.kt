@@ -46,6 +46,7 @@ import com.anthonyla.paperize.core.WallpaperMode
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.ScheduleSettings
+import com.anthonyla.paperize.domain.model.Wallpaper
 import com.anthonyla.paperize.domain.model.WallpaperEffects
 import com.anthonyla.paperize.presentation.common.components.AlbumCover
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchItem
@@ -70,8 +71,9 @@ fun WallpaperScreen(
     onUpdateScheduleSettings: (ScheduleSettings) -> Unit,
     onUpdateScheduleSettingsDebounced: (ScheduleSettings) -> Unit,
     onChangeWallpaperNow: () -> Unit,
-    homeWallpaperUri: String?,
-    lockWallpaperUri: String?,
+    homeWallpaper: Wallpaper?,
+    lockWallpaper: Wallpaper?,
+    onRemoveWallpaper: (Wallpaper) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var albumPickerScreen by rememberSaveable { mutableStateOf<ScreenType?>(null) }
@@ -139,9 +141,10 @@ fun WallpaperScreen(
     ) {
         if (wallpaperMode == WallpaperMode.STATIC) {
             CurrentWallpaperPreview(
-                homeWallpaperUri = homeWallpaperUri,
-                lockWallpaperUri = lockWallpaperUri,
-                animate = animate
+                homeWallpaper = homeWallpaper,
+                lockWallpaper = lockWallpaper,
+                animate = animate,
+                onRemove = onRemoveWallpaper
             )
             MultiChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 ScreenToggle(

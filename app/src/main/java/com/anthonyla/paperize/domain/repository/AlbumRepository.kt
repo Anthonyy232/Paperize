@@ -41,6 +41,12 @@ interface AlbumRepository {
 
     suspend fun removeWallpapersFromAlbum(albumId: String, wallpaperIds: List<String>)
 
+    /** Removes one wallpaper; a folder image is also kept out of later rescans. Returns it for [restoreWallpaper]. */
+    suspend fun removeWallpaper(wallpaperId: String): Wallpaper?
+
+    /** Puts a removed wallpaper back where it was. */
+    suspend fun restoreWallpaper(wallpaper: Wallpaper)
+
     suspend fun removeFolderFromAlbum(albumId: String, folderId: String)
 
     suspend fun deleteAllAlbums()

@@ -5,6 +5,7 @@ import com.anthonyla.paperize.core.util.generateId
 import com.anthonyla.paperize.data.database.PaperizeDatabase
 import com.anthonyla.paperize.data.mapper.toDomainModel
 import com.anthonyla.paperize.data.mapper.toEntity
+import com.anthonyla.paperize.data.mapper.toExcludedEntity
 import com.anthonyla.paperize.domain.model.Album
 import com.anthonyla.paperize.domain.model.AlbumSummary
 import com.anthonyla.paperize.domain.model.Folder
@@ -24,6 +25,7 @@ class AlbumRepositoryImpl @Inject constructor(
     private val albumDao = database.albumDao()
     private val wallpaperDao = database.wallpaperDao()
     private val folderDao = database.folderDao()
+    private val excludedDao = database.excludedWallpaperDao()
 
     companion object {
         private const val WALLPAPER_BATCH_SIZE = 500
@@ -84,11 +86,15 @@ class AlbumRepositoryImpl @Inject constructor(
         // An empty scan can be an unavailable provider, so it removes nothing.
         val stale = if (scanned.isEmpty()) emptyList()
             else wallpaperDao.getUrisInCollection(albumId, folderId).filterNot { it in scanned }
+        val excluded = excludedDao.getUris(folderId).toHashSet()
+        if (scanned.isNotEmpty()) excluded.filterNot { it in scanned }.chunked(WALLPAPER_BATCH_SIZE).forEach {
+            excludedDao.deleteUris(folderId, it)
+        }
         var removed = 0
         stale.chunked(WALLPAPER_BATCH_SIZE).forEach {
             removed += wallpaperDao.deleteFolderWallpapersByUris(albumId, folderId, it)
         }
-        val added = insertNewWallpapers(albumId, wallpapers, onProgress)
+        val added = insertNewWallpapers(albumId, wallpapers.filterNot { it.uri in excluded }, onProgress)
         if (removed > 0) {
             folderDao.updateFolderCover(folderId, wallpaperDao.getFolderCoverUri(folderId))
             updateAlbumCoverIfNeeded(albumId)
@@ -152,6 +158,26 @@ class AlbumRepositoryImpl @Inject constructor(
             folderDao.refreshFolderCovers(albumId)
             updateAlbumCoverIfNeeded(albumId)
         }
+    }
+
+    override suspend fun removeWallpaper(wallpaperId: String): Wallpaper? = database.withTransaction {
+        val wallpaper = wallpaperDao.getWallpaperById(wallpaperId)?.toDomainModel() ?: return@withTransaction null
+        wallpaper.folderId?.let { excludedDao.insert(wallpaper.toExcludedEntity(it)) }
+        removeWallpapersFromAlbum(wallpaper.albumId, listOf(wallpaperId))
+        wallpaper
+    }
+
+    override suspend fun restoreWallpaper(wallpaper: Wallpaper) = database.withTransaction {
+        val albumId = wallpaper.albumId
+        val folderId = wallpaper.folderId
+        if (folderId != null) excludedDao.deleteUris(folderId, listOf(wallpaper.uri))
+        // The same image can be imported again before an undo.
+        if (wallpaper.uri in wallpaperDao.getUrisInCollection(albumId, folderId)) return@withTransaction
+        wallpaperDao.insertWallpapers(listOf(wallpaper.toEntity()))
+        database.wallpaperQueueDao().clearAllQueues(albumId)
+        albumDao.updateAlbumModifiedTime(albumId, System.currentTimeMillis())
+        folderDao.refreshFolderCovers(albumId)
+        updateAlbumCoverIfNeeded(albumId)
     }
 
     override suspend fun removeFolderFromAlbum(albumId: String, folderId: String) {

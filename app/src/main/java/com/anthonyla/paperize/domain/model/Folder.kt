@@ -11,6 +11,7 @@ data class Folder(
     val dateModified: Long,
     val displayOrder: Int = 0,
     val wallpapers: List<Wallpaper> = emptyList(),
+    val removedWallpapers: List<Wallpaper> = emptyList(),
     val addedAt: Long = System.currentTimeMillis()
 ) {
     val displayName: String

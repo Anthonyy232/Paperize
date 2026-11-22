@@ -56,7 +56,7 @@ class AlbumUiInstrumentedTest {
                     onToggleChanger = {}, onSelectAlbum = { _, _ -> },
                     onUpdateScheduleSettings = { latest = it },
                     onUpdateScheduleSettingsDebounced = { latest = it },
-                    onChangeWallpaperNow = {}, homeWallpaperUri = null, lockWallpaperUri = null
+                    onChangeWallpaperNow = {}, homeWallpaper = null, lockWallpaper = null, onRemoveWallpaper = {}
                 )
             }
         }
