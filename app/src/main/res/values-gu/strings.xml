@@ -191,5 +191,13 @@
   <string name="refresh_folder">ફોલ્ડર રિફ્રેશ કરો</string>
   <string name="folder_refreshed">નવા વૉલપેપર માટે ફોલ્ડર તપાસવામાં આવ્યું.</string>
   <string name="folder_refresh_failed">આ ફોલ્ડર રિફ્રેશ કરી શકાયું નથી. તે ઍક્સેસ કરી શકાય તેવું છે કે નહીં તે તપાસો, પછી ફરી પ્રયાસ કરો.</string>
+  <string name="content_desc_remove_home_wallpaper">હોમ સ્ક્રીન વૉલપેપરને તેના આલ્બમમાંથી દૂર કરો</string>
+  <string name="content_desc_remove_lock_wallpaper">લૉક સ્ક્રીન વૉલપેપરને તેના આલ્બમમાંથી દૂર કરો</string>
+  <string name="wallpaper_removed">વૉલપેપર આલ્બમમાંથી દૂર કર્યું</string>
+  <string name="undo">પૂર્વવત્ કરો</string>
+  <string name="remove_wallpaper_failed">વૉલપેપર દૂર કરી શકાયું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.</string>
+  <string name="restore_wallpaper_failed">વૉલપેપર પાછું મૂકી શકાયું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.</string>
+  <string name="removed_wallpapers">દૂર કરેલાં</string>
+  <string name="removed_wallpapers_hint">ફોલ્ડર ફરી તપાસવામાં આવે ત્યારે પણ આ રોટેશનની બહાર રહે છે. પાછું મૂકવા માટે કોઈ એક પર ટૅપ કરો.</string>
   <string name="reset_failed">ડેટા રીસેટ પૂર્ણ થઈ શક્યું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.</string>
 </resources>

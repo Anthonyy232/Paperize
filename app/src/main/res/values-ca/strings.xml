@@ -191,5 +191,13 @@
   <string name="refresh_folder">Actualitza la carpeta</string>
   <string name="folder_refreshed">S\'ha comprovat si la carpeta té fons de pantalla nous.</string>
   <string name="folder_refresh_failed">No s\'ha pogut actualitzar aquesta carpeta. Comprova que sigui accessible i torna-ho a provar.</string>
+  <string name="content_desc_remove_home_wallpaper">Treu el fons de pantalla de la pantalla d\'inici del seu àlbum</string>
+  <string name="content_desc_remove_lock_wallpaper">Treu el fons de pantalla de la pantalla de bloqueig del seu àlbum</string>
+  <string name="wallpaper_removed">S\'ha tret el fons de pantalla de l\'àlbum</string>
+  <string name="undo">Desfés</string>
+  <string name="remove_wallpaper_failed">No s\'ha pogut treure el fons de pantalla. Torna-ho a provar.</string>
+  <string name="restore_wallpaper_failed">No s\'ha pogut tornar a posar el fons de pantalla. Torna-ho a provar.</string>
+  <string name="removed_wallpapers">Trets</string>
+  <string name="removed_wallpapers_hint">Aquests queden fora de la rotació quan es torna a comprovar la carpeta. Toca\'n un per tornar-lo a posar.</string>
   <string name="reset_failed">No s\'ha pogut acabar de restablir les dades. Torna-ho a provar.</string>
 </resources>

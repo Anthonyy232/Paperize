@@ -191,5 +191,13 @@
   <string name="refresh_folder">Mappa frissítése</string>
   <string name="folder_refreshed">Az új háttérképek keresése a mappában befejeződött.</string>
   <string name="folder_refresh_failed">A mappa frissítése nem sikerült. Ellenőrizze, hogy elérhető-e, majd próbálja újra.</string>
+  <string name="content_desc_remove_home_wallpaper">A kezdőképernyő hátterének eltávolítása az albumából</string>
+  <string name="content_desc_remove_lock_wallpaper">A zárolási képernyő hátterének eltávolítása az albumából</string>
+  <string name="wallpaper_removed">A háttérkép eltávolítva az albumból</string>
+  <string name="undo">Visszavonás</string>
+  <string name="remove_wallpaper_failed">Nem sikerült eltávolítani a háttérképet. Próbálja újra.</string>
+  <string name="restore_wallpaper_failed">Nem sikerült visszatenni a háttérképet. Próbálja újra.</string>
+  <string name="removed_wallpapers">Eltávolítva</string>
+  <string name="removed_wallpapers_hint">Ezek a mappa újbóli ellenőrzésekor is kimaradnak a váltakozásból. Koppintson egyre a visszatételéhez.</string>
   <string name="reset_failed">Az adatok visszaállítása nem fejeződött be. Próbálja újra.</string>
 </resources>

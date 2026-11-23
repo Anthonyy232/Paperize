@@ -191,5 +191,13 @@
   <string name="refresh_folder">Map vernieuwen</string>
   <string name="folder_refreshed">Map gecontroleerd op nieuwe achtergronden.</string>
   <string name="folder_refresh_failed">De map kon niet worden vernieuwd. Controleer of deze toegankelijk is en probeer het opnieuw.</string>
+  <string name="content_desc_remove_home_wallpaper">Achtergrond van het startscherm uit het album verwijderen</string>
+  <string name="content_desc_remove_lock_wallpaper">Achtergrond van het vergrendelscherm uit het album verwijderen</string>
+  <string name="wallpaper_removed">Achtergrond uit het album verwijderd</string>
+  <string name="undo">Ongedaan maken</string>
+  <string name="remove_wallpaper_failed">De achtergrond kon niet worden verwijderd. Probeer het opnieuw.</string>
+  <string name="restore_wallpaper_failed">De achtergrond kon niet worden teruggezet. Probeer het opnieuw.</string>
+  <string name="removed_wallpapers">Verwijderd</string>
+  <string name="removed_wallpapers_hint">Deze blijven buiten de rotatie wanneer de map opnieuw wordt gecontroleerd. Tik op een afbeelding om die terug te zetten.</string>
   <string name="reset_failed">Het resetten van de gegevens kon niet worden voltooid. Probeer het opnieuw.</string>
 </resources>

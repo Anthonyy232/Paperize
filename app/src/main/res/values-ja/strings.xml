@@ -187,5 +187,13 @@
   <string name="refresh_folder">フォルダを更新</string>
   <string name="folder_refreshed">フォルダ内の新しい壁紙を確認しました。</string>
   <string name="folder_refresh_failed">フォルダを更新できませんでした。アクセス可能か確認して、もう一度お試しください。</string>
+  <string name="content_desc_remove_home_wallpaper">ホーム画面の壁紙をアルバムから削除</string>
+  <string name="content_desc_remove_lock_wallpaper">ロック画面の壁紙をアルバムから削除</string>
+  <string name="wallpaper_removed">壁紙をアルバムから削除しました</string>
+  <string name="undo">元に戻す</string>
+  <string name="remove_wallpaper_failed">壁紙を削除できませんでした。もう一度お試しください。</string>
+  <string name="restore_wallpaper_failed">壁紙を元に戻せませんでした。もう一度お試しください。</string>
+  <string name="removed_wallpapers">削除済み</string>
+  <string name="removed_wallpapers_hint">フォルダを再確認しても、これらはローテーションに戻りません。タップすると元に戻せます。</string>
   <string name="reset_failed">データのリセットを完了できませんでした。もう一度お試しください。</string>
 </resources>

@@ -207,5 +207,13 @@
   <string name="refresh_folder">حدّث المجلد</string>
   <string name="folder_refreshed">المجلد اتفحص عن خلفيات جديدة.</string>
   <string name="folder_refresh_failed">معرفناش نحدّث المجلد ده. اتأكد إنه متاح وجرب تاني.</string>
+  <string name="content_desc_remove_home_wallpaper">شيل خلفية الشاشة الرئيسية من الألبوم بتاعها</string>
+  <string name="content_desc_remove_lock_wallpaper">شيل خلفية شاشة القفل من الألبوم بتاعها</string>
+  <string name="wallpaper_removed">الخلفية اتشالت من الألبوم</string>
+  <string name="undo">تراجع</string>
+  <string name="remove_wallpaper_failed">معرفناش نشيل الخلفية. جرب تاني.</string>
+  <string name="restore_wallpaper_failed">معرفناش نرجّع الخلفية. جرب تاني.</string>
+  <string name="removed_wallpapers">اتشالت</string>
+  <string name="removed_wallpapers_hint">دي مش هترجع للتدوير لما المجلد يتفحص تاني. اضغط على أي واحدة عشان ترجعها.</string>
   <string name="reset_failed">إعادة ظبط البيانات مخلصتش. جرب تاني.</string>
 </resources>

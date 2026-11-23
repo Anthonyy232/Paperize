@@ -191,5 +191,13 @@
   <string name="refresh_folder">Päivitä kansio</string>
   <string name="folder_refreshed">Kansio tarkistettu uusien taustakuvien varalta.</string>
   <string name="folder_refresh_failed">Kansion päivittäminen epäonnistui. Tarkista, että siihen on pääsy, ja yritä uudelleen.</string>
+  <string name="content_desc_remove_home_wallpaper">Poista aloitusnäytön taustakuva sen albumista</string>
+  <string name="content_desc_remove_lock_wallpaper">Poista lukitusnäytön taustakuva sen albumista</string>
+  <string name="wallpaper_removed">Taustakuva poistettu albumista</string>
+  <string name="undo">Kumoa</string>
+  <string name="remove_wallpaper_failed">Taustakuvaa ei voitu poistaa. Yritä uudelleen.</string>
+  <string name="restore_wallpaper_failed">Taustakuvaa ei voitu palauttaa. Yritä uudelleen.</string>
+  <string name="removed_wallpapers">Poistetut</string>
+  <string name="removed_wallpapers_hint">Nämä pysyvät pois kierrosta, kun kansio tarkistetaan uudelleen. Palauta kuva napauttamalla sitä.</string>
   <string name="reset_failed">Tietojen nollaaminen ei onnistunut loppuun asti. Yritä uudelleen.</string>
 </resources>

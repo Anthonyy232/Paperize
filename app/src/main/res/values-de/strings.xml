@@ -191,5 +191,13 @@
   <string name="refresh_folder">Ordner aktualisieren</string>
   <string name="folder_refreshed">Ordner auf neue Hintergrundbilder geprüft.</string>
   <string name="folder_refresh_failed">Der Ordner konnte nicht aktualisiert werden. Prüfen Sie, ob er zugänglich ist, und versuchen Sie es erneut.</string>
+  <string name="content_desc_remove_home_wallpaper">Hintergrundbild des Startbildschirms aus seinem Album entfernen</string>
+  <string name="content_desc_remove_lock_wallpaper">Hintergrundbild des Sperrbildschirms aus seinem Album entfernen</string>
+  <string name="wallpaper_removed">Hintergrundbild aus dem Album entfernt</string>
+  <string name="undo">Rückgängig</string>
+  <string name="remove_wallpaper_failed">Das Hintergrundbild konnte nicht entfernt werden. Bitte versuchen Sie es erneut.</string>
+  <string name="restore_wallpaper_failed">Das Hintergrundbild konnte nicht wiederhergestellt werden. Bitte versuchen Sie es erneut.</string>
+  <string name="removed_wallpapers">Entfernt</string>
+  <string name="removed_wallpapers_hint">Diese bleiben auch bei der nächsten Prüfung des Ordners außerhalb der Rotation. Tippen Sie auf eines, um es zurückzuholen.</string>
   <string name="reset_failed">Das Zurücksetzen der Daten konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.</string>
 </resources>

@@ -191,5 +191,13 @@
   <string name="refresh_folder">ਫੋਲਡਰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ</string>
   <string name="folder_refreshed">ਨਵੇਂ ਵਾਲਪੇਪਰਾਂ ਲਈ ਫੋਲਡਰ ਦੀ ਜਾਂਚ ਕੀਤੀ ਗਈ।</string>
   <string name="folder_refresh_failed">ਇਹ ਫੋਲਡਰ ਰਿਫ੍ਰੈਸ਼ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਜਾਂਚ ਕਰੋ ਕਿ ਇਹ ਪਹੁੰਚਯੋਗ ਹੈ, ਫਿਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+  <string name="content_desc_remove_home_wallpaper">ਹੋਮ ਸਕ੍ਰੀਨ ਵਾਲਪੇਪਰ ਨੂੰ ਉਸਦੀ ਐਲਬਮ ਵਿੱਚੋਂ ਹਟਾਓ</string>
+  <string name="content_desc_remove_lock_wallpaper">ਲਾਕ ਸਕ੍ਰੀਨ ਵਾਲਪੇਪਰ ਨੂੰ ਉਸਦੀ ਐਲਬਮ ਵਿੱਚੋਂ ਹਟਾਓ</string>
+  <string name="wallpaper_removed">ਵਾਲਪੇਪਰ ਐਲਬਮ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ</string>
+  <string name="undo">ਅਣਕੀਤਾ ਕਰੋ</string>
+  <string name="remove_wallpaper_failed">ਵਾਲਪੇਪਰ ਹਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+  <string name="restore_wallpaper_failed">ਵਾਲਪੇਪਰ ਵਾਪਸ ਨਹੀਂ ਲਿਆਂਦਾ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+  <string name="removed_wallpapers">ਹਟਾਏ ਗਏ</string>
+  <string name="removed_wallpapers_hint">ਫੋਲਡਰ ਦੁਬਾਰਾ ਜਾਂਚੇ ਜਾਣ ਤੇ ਵੀ ਇਹ ਰੋਟੇਸ਼ਨ ਤੋਂ ਬਾਹਰ ਰਹਿੰਦੇ ਹਨ। ਵਾਪਸ ਲਿਆਉਣ ਲਈ ਕਿਸੇ ਇੱਕ ਤੇ ਟੈਪ ਕਰੋ।</string>
   <string name="reset_failed">ਡਾਟਾ ਰੀਸੈੱਟ ਪੂਰਾ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
 </resources>

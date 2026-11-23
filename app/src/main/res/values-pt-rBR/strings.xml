@@ -191,5 +191,13 @@
   <string name="refresh_folder">Atualizar pasta</string>
   <string name="folder_refreshed">Pasta verificada em busca de novos papéis de parede.</string>
   <string name="folder_refresh_failed">Não foi possível atualizar esta pasta. Verifique se ela está acessível e tente novamente.</string>
+  <string name="content_desc_remove_home_wallpaper">Remover o papel de parede da tela inicial do álbum</string>
+  <string name="content_desc_remove_lock_wallpaper">Remover o papel de parede da tela de bloqueio do álbum</string>
+  <string name="wallpaper_removed">Papel de parede removido do álbum</string>
+  <string name="undo">Desfazer</string>
+  <string name="remove_wallpaper_failed">Não foi possível remover o papel de parede. Tente novamente.</string>
+  <string name="restore_wallpaper_failed">Não foi possível devolver o papel de parede. Tente novamente.</string>
+  <string name="removed_wallpapers">Removidos</string>
+  <string name="removed_wallpapers_hint">Estes ficam fora da rotação quando a pasta é verificada de novo. Toque em um para devolvê-lo.</string>
   <string name="reset_failed">Não foi possível concluir a redefinição dos dados. Tente novamente.</string>
 </resources>

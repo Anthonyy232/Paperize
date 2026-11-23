@@ -187,5 +187,13 @@
   <string name="refresh_folder">重新整理資料夾</string>
   <string name="folder_refreshed">已檢查資料夾是否有新桌布。</string>
   <string name="folder_refresh_failed">無法重新整理此資料夾。請確認它仍可存取，然後再試一次。</string>
+  <string name="content_desc_remove_home_wallpaper">從相簿移除目前的主畫面桌布</string>
+  <string name="content_desc_remove_lock_wallpaper">從相簿移除目前的鎖定畫面桌布</string>
+  <string name="wallpaper_removed">已從相簿移除桌布</string>
+  <string name="undo">復原</string>
+  <string name="remove_wallpaper_failed">無法移除桌布，請再試一次。</string>
+  <string name="restore_wallpaper_failed">無法放回桌布，請再試一次。</string>
+  <string name="removed_wallpapers">已移除</string>
+  <string name="removed_wallpapers_hint">再次檢查資料夾時，這些圖片不會重新加入輪播。輕觸任一圖片即可放回。</string>
   <string name="reset_failed">無法完成資料重設，請再試一次。</string>
 </resources>

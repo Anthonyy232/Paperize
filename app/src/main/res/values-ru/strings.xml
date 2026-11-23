@@ -199,5 +199,13 @@
   <string name="refresh_folder">Обновить папку</string>
   <string name="folder_refreshed">Папка проверена на наличие новых обоев.</string>
   <string name="folder_refresh_failed">Не удалось обновить папку. Убедитесь, что она доступна, и повторите попытку.</string>
+  <string name="content_desc_remove_home_wallpaper">Убрать обои главного экрана из альбома</string>
+  <string name="content_desc_remove_lock_wallpaper">Убрать обои экрана блокировки из альбома</string>
+  <string name="wallpaper_removed">Обои убраны из альбома</string>
+  <string name="undo">Отменить</string>
+  <string name="remove_wallpaper_failed">Не удалось убрать обои. Повторите попытку.</string>
+  <string name="restore_wallpaper_failed">Не удалось вернуть обои. Повторите попытку.</string>
+  <string name="removed_wallpapers">Убранные</string>
+  <string name="removed_wallpapers_hint">Они не вернутся в ротацию при повторной проверке папки. Нажмите на изображение, чтобы вернуть его.</string>
   <string name="reset_failed">Не удалось завершить сброс данных. Попробуйте ещё раз.</string>
 </resources>

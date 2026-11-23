@@ -195,5 +195,13 @@
   <string name="refresh_folder">Reîmprospătează dosarul</string>
   <string name="folder_refreshed">Dosarul a fost verificat pentru tapete noi.</string>
   <string name="folder_refresh_failed">Dosarul nu a putut fi reîmprospătat. Verifică dacă este accesibil, apoi încearcă din nou.</string>
+  <string name="content_desc_remove_home_wallpaper">Elimină tapetul ecranului de pornire din album</string>
+  <string name="content_desc_remove_lock_wallpaper">Elimină tapetul ecranului de blocare din album</string>
+  <string name="wallpaper_removed">Tapetul a fost eliminat din album</string>
+  <string name="undo">Anulează</string>
+  <string name="remove_wallpaper_failed">Tapetul nu a putut fi eliminat. Încearcă din nou.</string>
+  <string name="restore_wallpaper_failed">Tapetul nu a putut fi readus. Încearcă din nou.</string>
+  <string name="removed_wallpapers">Eliminate</string>
+  <string name="removed_wallpapers_hint">Acestea rămân în afara rotației când dosarul este verificat din nou. Atinge unul pentru a-l readuce.</string>
   <string name="reset_failed">Resetarea datelor nu a putut fi finalizată. Încearcă din nou.</string>
 </resources>

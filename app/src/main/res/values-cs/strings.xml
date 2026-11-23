@@ -199,5 +199,13 @@
   <string name="refresh_folder">Obnovit složku</string>
   <string name="folder_refreshed">Složka byla zkontrolována na nové tapety.</string>
   <string name="folder_refresh_failed">Tuto složku se nepodařilo obnovit. Zkontrolujte, zda je dostupná, a zkuste to znovu.</string>
+  <string name="content_desc_remove_home_wallpaper">Odebrat tapetu domovské obrazovky z jejího alba</string>
+  <string name="content_desc_remove_lock_wallpaper">Odebrat tapetu obrazovky zámku z jejího alba</string>
+  <string name="wallpaper_removed">Tapeta byla odebrána z alba</string>
+  <string name="undo">Zpět</string>
+  <string name="remove_wallpaper_failed">Tapetu se nepodařilo odebrat. Zkuste to prosím znovu.</string>
+  <string name="restore_wallpaper_failed">Tapetu se nepodařilo vrátit. Zkuste to prosím znovu.</string>
+  <string name="removed_wallpapers">Odebrané</string>
+  <string name="removed_wallpapers_hint">Při další kontrole složky zůstanou mimo střídání. Klepnutím na některou ji vrátíte.</string>
   <string name="reset_failed">Obnovení dat se nepodařilo dokončit. Zkuste to prosím znovu.</string>
 </resources>

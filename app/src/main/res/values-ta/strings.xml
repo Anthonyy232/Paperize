@@ -191,5 +191,13 @@
   <string name="refresh_folder">கோப்புறையைப் புதுப்பி</string>
   <string name="folder_refreshed">புதிய வால்பேப்பர்களுக்காக கோப்புறை சரிபார்க்கப்பட்டது.</string>
   <string name="folder_refresh_failed">இந்தக் கோப்புறையைப் புதுப்பிக்க முடியவில்லை. இதை அணுக முடிகிறதா என்று சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+  <string name="content_desc_remove_home_wallpaper">முகப்புத் திரை வால்பேப்பரை அதன் ஆல்பத்திலிருந்து அகற்று</string>
+  <string name="content_desc_remove_lock_wallpaper">பூட்டுத் திரை வால்பேப்பரை அதன் ஆல்பத்திலிருந்து அகற்று</string>
+  <string name="wallpaper_removed">வால்பேப்பர் ஆல்பத்திலிருந்து அகற்றப்பட்டது</string>
+  <string name="undo">செயல்தவிர்</string>
+  <string name="remove_wallpaper_failed">வால்பேப்பரை அகற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+  <string name="restore_wallpaper_failed">வால்பேப்பரை மீண்டும் சேர்க்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+  <string name="removed_wallpapers">அகற்றப்பட்டவை</string>
+  <string name="removed_wallpapers_hint">கோப்புறை மீண்டும் சரிபார்க்கப்படும்போதும் இவை சுழற்சியில் சேராது. மீண்டும் சேர்க்க ஒன்றைத் தட்டவும்.</string>
   <string name="reset_failed">தரவை மீட்டமைக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
 </resources>

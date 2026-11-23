@@ -191,5 +191,13 @@
   <string name="refresh_folder">Aggiorna cartella</string>
   <string name="folder_refreshed">Cartella controllata alla ricerca di nuovi sfondi.</string>
   <string name="folder_refresh_failed">Impossibile aggiornare questa cartella. Verifica che sia accessibile, poi riprova.</string>
+  <string name="content_desc_remove_home_wallpaper">Rimuovi lo sfondo della schermata Home dal suo album</string>
+  <string name="content_desc_remove_lock_wallpaper">Rimuovi lo sfondo della schermata di blocco dal suo album</string>
+  <string name="wallpaper_removed">Sfondo rimosso dall’album</string>
+  <string name="undo">Annulla</string>
+  <string name="remove_wallpaper_failed">Impossibile rimuovere lo sfondo. Riprova.</string>
+  <string name="restore_wallpaper_failed">Impossibile rimettere lo sfondo. Riprova.</string>
+  <string name="removed_wallpapers">Rimossi</string>
+  <string name="removed_wallpapers_hint">Questi restano fuori dalla rotazione quando la cartella viene ricontrollata. Toccane uno per rimetterlo.</string>
   <string name="reset_failed">Impossibile completare il ripristino dei dati. Riprova.</string>
 </resources>

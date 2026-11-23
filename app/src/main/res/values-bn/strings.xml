@@ -191,5 +191,13 @@
   <string name="refresh_folder">ফোল্ডার রিফ্রেশ করুন</string>
   <string name="folder_refreshed">নতুন ওয়ালপেপারের জন্য ফোল্ডার পরীক্ষা করা হয়েছে।</string>
   <string name="folder_refresh_failed">এই ফোল্ডার রিফ্রেশ করা যায়নি। এটি অ্যাক্সেসযোগ্য কি না দেখে আবার চেষ্টা করুন।</string>
+  <string name="content_desc_remove_home_wallpaper">হোম স্ক্রিন ওয়ালপেপারটি তার অ্যালবাম থেকে সরান</string>
+  <string name="content_desc_remove_lock_wallpaper">লক স্ক্রিন ওয়ালপেপারটি তার অ্যালবাম থেকে সরান</string>
+  <string name="wallpaper_removed">ওয়ালপেপারটি অ্যালবাম থেকে সরানো হয়েছে</string>
+  <string name="undo">পূর্বাবস্থায় ফেরান</string>
+  <string name="remove_wallpaper_failed">ওয়ালপেপারটি সরানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+  <string name="restore_wallpaper_failed">ওয়ালপেপারটি ফিরিয়ে আনা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+  <string name="removed_wallpapers">সরানো হয়েছে</string>
+  <string name="removed_wallpapers_hint">ফোল্ডারটি আবার যাচাই করা হলেও এগুলো ঘূর্ণনের বাইরে থাকবে। ফিরিয়ে আনতে যেকোনো একটিতে ট্যাপ করুন।</string>
   <string name="reset_failed">ডেটা রিসেট সম্পন্ন করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
 </resources>

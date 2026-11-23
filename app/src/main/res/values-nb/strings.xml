@@ -191,5 +191,13 @@
   <string name="refresh_folder">Oppdater mappe</string>
   <string name="folder_refreshed">Mappen er sjekket for nye bakgrunnsbilder.</string>
   <string name="folder_refresh_failed">Kunne ikke oppdatere denne mappen. Sjekk at den er tilgjengelig, og prøv igjen.</string>
+  <string name="content_desc_remove_home_wallpaper">Fjern bakgrunnsbildet på startskjermen fra albumet</string>
+  <string name="content_desc_remove_lock_wallpaper">Fjern bakgrunnsbildet på låseskjermen fra albumet</string>
+  <string name="wallpaper_removed">Bakgrunnsbildet er fjernet fra albumet</string>
+  <string name="undo">Angre</string>
+  <string name="remove_wallpaper_failed">Kunne ikke fjerne bakgrunnsbildet. Prøv igjen.</string>
+  <string name="restore_wallpaper_failed">Kunne ikke legge tilbake bakgrunnsbildet. Prøv igjen.</string>
+  <string name="removed_wallpapers">Fjernet</string>
+  <string name="removed_wallpapers_hint">Disse holdes utenfor rotasjonen når mappen sjekkes på nytt. Trykk på ett for å legge det tilbake.</string>
   <string name="reset_failed">Kunne ikke fullføre tilbakestillingen av data. Prøv igjen.</string>
 </resources>

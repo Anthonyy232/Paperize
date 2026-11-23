@@ -187,5 +187,13 @@
   <string name="refresh_folder">Làm mới thư mục</string>
   <string name="folder_refreshed">Đã kiểm tra thư mục để tìm hình nền mới.</string>
   <string name="folder_refresh_failed">Không thể làm mới thư mục này. Hãy kiểm tra thư mục còn truy cập được không rồi thử lại.</string>
+  <string name="content_desc_remove_home_wallpaper">Gỡ hình nền màn hình chính khỏi album</string>
+  <string name="content_desc_remove_lock_wallpaper">Gỡ hình nền màn hình khóa khỏi album</string>
+  <string name="wallpaper_removed">Đã gỡ hình nền khỏi album</string>
+  <string name="undo">Hoàn tác</string>
+  <string name="remove_wallpaper_failed">Không thể gỡ hình nền. Vui lòng thử lại.</string>
+  <string name="restore_wallpaper_failed">Không thể đưa hình nền trở lại. Vui lòng thử lại.</string>
+  <string name="removed_wallpapers">Đã gỡ</string>
+  <string name="removed_wallpapers_hint">Các ảnh này sẽ không quay lại vòng xoay khi thư mục được kiểm tra lại. Nhấn vào một ảnh để đưa ảnh đó trở lại.</string>
   <string name="reset_failed">Không thể hoàn tất việc đặt lại dữ liệu. Vui lòng thử lại.</string>
 </resources>

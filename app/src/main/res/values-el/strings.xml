@@ -191,5 +191,13 @@
   <string name="refresh_folder">Ανανέωση φακέλου</string>
   <string name="folder_refreshed">Ο φάκελος ελέγχθηκε για νέες ταπετσαρίες.</string>
   <string name="folder_refresh_failed">Δεν ήταν δυνατή η ανανέωση αυτού του φακέλου. Βεβαιωθείτε ότι είναι προσβάσιμος και δοκιμάστε ξανά.</string>
+  <string name="content_desc_remove_home_wallpaper">Αφαίρεση της ταπετσαρίας αρχικής οθόνης από το άλμπουμ της</string>
+  <string name="content_desc_remove_lock_wallpaper">Αφαίρεση της ταπετσαρίας οθόνης κλειδώματος από το άλμπουμ της</string>
+  <string name="wallpaper_removed">Η ταπετσαρία αφαιρέθηκε από το άλμπουμ</string>
+  <string name="undo">Αναίρεση</string>
+  <string name="remove_wallpaper_failed">Δεν ήταν δυνατή η αφαίρεση της ταπετσαρίας. Δοκιμάστε ξανά.</string>
+  <string name="restore_wallpaper_failed">Δεν ήταν δυνατή η επαναφορά της ταπετσαρίας. Δοκιμάστε ξανά.</string>
+  <string name="removed_wallpapers">Αφαιρέθηκαν</string>
+  <string name="removed_wallpapers_hint">Αυτές μένουν εκτός εναλλαγής όταν ο φάκελος ελεγχθεί ξανά. Πατήστε μία για να την επαναφέρετε.</string>
   <string name="reset_failed">Δεν ήταν δυνατή η ολοκλήρωση της επαναφοράς δεδομένων. Δοκιμάστε ξανά.</string>
 </resources>

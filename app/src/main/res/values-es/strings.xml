@@ -191,5 +191,13 @@
   <string name="refresh_folder">Actualizar carpeta</string>
   <string name="folder_refreshed">Se buscaron nuevos fondos en la carpeta.</string>
   <string name="folder_refresh_failed">No se pudo actualizar esta carpeta. Comprueba que sea accesible e inténtalo de nuevo.</string>
+  <string name="content_desc_remove_home_wallpaper">Quitar el fondo de la pantalla de inicio de su álbum</string>
+  <string name="content_desc_remove_lock_wallpaper">Quitar el fondo de la pantalla de bloqueo de su álbum</string>
+  <string name="wallpaper_removed">Fondo quitado del álbum</string>
+  <string name="undo">Deshacer</string>
+  <string name="remove_wallpaper_failed">No se pudo quitar el fondo. Inténtalo de nuevo.</string>
+  <string name="restore_wallpaper_failed">No se pudo volver a poner el fondo. Inténtalo de nuevo.</string>
+  <string name="removed_wallpapers">Quitados</string>
+  <string name="removed_wallpapers_hint">Estos quedan fuera de la rotación cuando se vuelve a revisar la carpeta. Toca uno para volver a ponerlo.</string>
   <string name="reset_failed">No se pudo terminar el restablecimiento de datos. Inténtalo de nuevo.</string>
 </resources>

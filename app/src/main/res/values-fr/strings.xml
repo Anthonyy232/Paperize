@@ -191,5 +191,13 @@
   <string name="refresh_folder">Actualiser le dossier</string>
   <string name="folder_refreshed">Recherche de nouveaux fonds d’écran effectuée dans le dossier.</string>
   <string name="folder_refresh_failed">Impossible d’actualiser ce dossier. Vérifiez qu’il est accessible, puis réessayez.</string>
+  <string name="content_desc_remove_home_wallpaper">Retirer le fond d’écran de l’écran d’accueil de son album</string>
+  <string name="content_desc_remove_lock_wallpaper">Retirer le fond d’écran de l’écran de verrouillage de son album</string>
+  <string name="wallpaper_removed">Fond d’écran retiré de l’album</string>
+  <string name="undo">Annuler</string>
+  <string name="remove_wallpaper_failed">Impossible de retirer le fond d’écran. Veuillez réessayer.</string>
+  <string name="restore_wallpaper_failed">Impossible de remettre le fond d’écran. Veuillez réessayer.</string>
+  <string name="removed_wallpapers">Retirés</string>
+  <string name="removed_wallpapers_hint">Ces images restent hors de la rotation lorsque le dossier est revérifié. Appuyez sur l’une d’elles pour la remettre.</string>
   <string name="reset_failed">Impossible de terminer la réinitialisation des données. Veuillez réessayer.</string>
 </resources>

@@ -191,5 +191,13 @@
   <string name="refresh_folder">फोल्डर रिफ्रेश करा</string>
   <string name="folder_refreshed">नवीन वॉलपेपरसाठी फोल्डर तपासला.</string>
   <string name="folder_refresh_failed">हा फोल्डर रिफ्रेश करता आला नाही. तो ॲक्सेस करता येतो याची खात्री करा आणि पुन्हा प्रयत्न करा.</string>
+  <string name="content_desc_remove_home_wallpaper">होम स्क्रीन वॉलपेपर त्याच्या अल्बममधून काढा</string>
+  <string name="content_desc_remove_lock_wallpaper">लॉक स्क्रीन वॉलपेपर त्याच्या अल्बममधून काढा</string>
+  <string name="wallpaper_removed">वॉलपेपर अल्बममधून काढला</string>
+  <string name="undo">पूर्ववत करा</string>
+  <string name="remove_wallpaper_failed">वॉलपेपर काढता आला नाही. कृपया पुन्हा प्रयत्न करा.</string>
+  <string name="restore_wallpaper_failed">वॉलपेपर परत ठेवता आला नाही. कृपया पुन्हा प्रयत्न करा.</string>
+  <string name="removed_wallpapers">काढलेले</string>
+  <string name="removed_wallpapers_hint">फोल्डर पुन्हा तपासला तरी हे रोटेशनच्या बाहेर राहतात. परत ठेवण्यासाठी एकावर टॅप करा.</string>
   <string name="reset_failed">डेटा रीसेट पूर्ण करता आला नाही. कृपया पुन्हा प्रयत्न करा.</string>
 </resources>

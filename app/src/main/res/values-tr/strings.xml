@@ -191,5 +191,13 @@
   <string name="refresh_folder">Klasörü yenile</string>
   <string name="folder_refreshed">Klasör yeni duvar kağıtları için kontrol edildi.</string>
   <string name="folder_refresh_failed">Klasör yenilenemedi. Erişilebilir olduğunu kontrol edip tekrar deneyin.</string>
+  <string name="content_desc_remove_home_wallpaper">Ana ekran duvar kağıdını albümünden kaldır</string>
+  <string name="content_desc_remove_lock_wallpaper">Kilit ekranı duvar kağıdını albümünden kaldır</string>
+  <string name="wallpaper_removed">Duvar kağıdı albümden kaldırıldı</string>
+  <string name="undo">Geri al</string>
+  <string name="remove_wallpaper_failed">Duvar kağıdı kaldırılamadı. Lütfen tekrar deneyin.</string>
+  <string name="restore_wallpaper_failed">Duvar kağıdı geri konulamadı. Lütfen tekrar deneyin.</string>
+  <string name="removed_wallpapers">Kaldırılanlar</string>
+  <string name="removed_wallpapers_hint">Bunlar klasör yeniden kontrol edildiğinde döngünün dışında kalır. Geri koymak için birine dokunun.</string>
   <string name="reset_failed">Veriler sıfırlanamadı. Lütfen tekrar deneyin.</string>
 </resources>

@@ -199,5 +199,13 @@
   <string name="refresh_folder">Odśwież folder</string>
   <string name="folder_refreshed">Sprawdzono folder pod kątem nowych tapet.</string>
   <string name="folder_refresh_failed">Nie udało się odświeżyć tego folderu. Sprawdź, czy jest dostępny, i spróbuj ponownie.</string>
+  <string name="content_desc_remove_home_wallpaper">Usuń tapetę ekranu głównego z jej albumu</string>
+  <string name="content_desc_remove_lock_wallpaper">Usuń tapetę ekranu blokady z jej albumu</string>
+  <string name="wallpaper_removed">Tapeta usunięta z albumu</string>
+  <string name="undo">Cofnij</string>
+  <string name="remove_wallpaper_failed">Nie udało się usunąć tapety. Spróbuj ponownie.</string>
+  <string name="restore_wallpaper_failed">Nie udało się przywrócić tapety. Spróbuj ponownie.</string>
+  <string name="removed_wallpapers">Usunięte</string>
+  <string name="removed_wallpapers_hint">Te obrazy pozostaną poza rotacją przy ponownym sprawdzeniu folderu. Dotknij jednego, aby go przywrócić.</string>
   <string name="reset_failed">Nie udało się dokończyć resetowania danych. Spróbuj ponownie.</string>
 </resources>

@@ -191,5 +191,13 @@
   <string name="refresh_folder">فولڈر ریفریش کریں</string>
   <string name="folder_refreshed">نئے وال پیپرز کے لیے فولڈر چیک کیا گیا۔</string>
   <string name="folder_refresh_failed">یہ فولڈر ریفریش نہیں ہو سکا۔ دیکھیں کہ یہ قابل رسائی ہے، پھر دوبارہ کوشش کریں۔</string>
+  <string name="content_desc_remove_home_wallpaper">ہوم اسکرین وال پیپر کو اس کے البم سے ہٹائیں</string>
+  <string name="content_desc_remove_lock_wallpaper">لاک اسکرین وال پیپر کو اس کے البم سے ہٹائیں</string>
+  <string name="wallpaper_removed">وال پیپر البم سے ہٹا دیا گیا</string>
+  <string name="undo">کالعدم کریں</string>
+  <string name="remove_wallpaper_failed">وال پیپر ہٹایا نہیں جا سکا۔ براہ کرم دوبارہ کوشش کریں۔</string>
+  <string name="restore_wallpaper_failed">وال پیپر واپس نہیں لایا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔</string>
+  <string name="removed_wallpapers">ہٹائے گئے</string>
+  <string name="removed_wallpapers_hint">فولڈر دوبارہ چیک ہونے پر بھی یہ گردش سے باہر رہتے ہیں۔ واپس لانے کے لیے کسی ایک کو تھپتھپائیں۔</string>
   <string name="reset_failed">ڈیٹا ری سیٹ مکمل نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔</string>
 </resources>

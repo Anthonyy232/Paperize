@@ -191,5 +191,13 @@
   <string name="refresh_folder">Verfris vouer</string>
   <string name="folder_refreshed">Vouer is vir nuwe muurpapiere gekontroleer.</string>
   <string name="folder_refresh_failed">Kon nie hierdie vouer verfris nie. Maak seker dit is toeganklik en probeer weer.</string>
+  <string name="content_desc_remove_home_wallpaper">Verwyder die tuisskerm-muurpapier uit sy album</string>
+  <string name="content_desc_remove_lock_wallpaper">Verwyder die sluitskerm-muurpapier uit sy album</string>
+  <string name="wallpaper_removed">Muurpapier uit die album verwyder</string>
+  <string name="undo">Ontdoen</string>
+  <string name="remove_wallpaper_failed">Kon nie die muurpapier verwyder nie. Probeer asseblief weer.</string>
+  <string name="restore_wallpaper_failed">Kon nie die muurpapier terugsit nie. Probeer asseblief weer.</string>
+  <string name="removed_wallpapers">Verwyder</string>
+  <string name="removed_wallpapers_hint">Hierdie bly uit die rotasie wanneer die vouer weer nagegaan word. Tik op een om dit terug te sit.</string>
   <string name="reset_failed">Kon nie klaar data terugstel nie. Probeer asseblief weer.</string>
 </resources>

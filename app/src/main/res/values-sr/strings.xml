@@ -195,5 +195,13 @@
   <string name="refresh_folder">Освежи фасциклу</string>
   <string name="folder_refreshed">Фасцикла је проверена за нове тапете.</string>
   <string name="folder_refresh_failed">Фасциклу није могуће освежити. Проверите да ли је доступна и покушајте поново.</string>
+  <string name="content_desc_remove_home_wallpaper">Уклони тапет почетног екрана из његовог албума</string>
+  <string name="content_desc_remove_lock_wallpaper">Уклони тапет закључаног екрана из његовог албума</string>
+  <string name="wallpaper_removed">Тапет је уклоњен из албума</string>
+  <string name="undo">Опозови</string>
+  <string name="remove_wallpaper_failed">Тапет није могао да се уклони. Покушајте поново.</string>
+  <string name="restore_wallpaper_failed">Тапет није могао да се врати. Покушајте поново.</string>
+  <string name="removed_wallpapers">Уклоњени</string>
+  <string name="removed_wallpapers_hint">Ови остају ван ротације када се фасцикла поново провери. Додирните један да бисте га вратили.</string>
   <string name="reset_failed">Ресетовање података није завршено. Покушајте поново.</string>
 </resources>

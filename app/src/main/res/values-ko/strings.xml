@@ -187,5 +187,13 @@
   <string name="refresh_folder">폴더 새로고침</string>
   <string name="folder_refreshed">새 배경화면이 있는지 폴더를 확인했어요.</string>
   <string name="folder_refresh_failed">이 폴더를 새로고침하지 못했어요. 접근할 수 있는지 확인한 후 다시 시도해 주세요.</string>
+  <string name="content_desc_remove_home_wallpaper">홈 화면 배경화면을 앨범에서 제거</string>
+  <string name="content_desc_remove_lock_wallpaper">잠금 화면 배경화면을 앨범에서 제거</string>
+  <string name="wallpaper_removed">배경화면을 앨범에서 제거했어요</string>
+  <string name="undo">실행취소</string>
+  <string name="remove_wallpaper_failed">배경화면을 제거하지 못했어요. 다시 시도해 주세요.</string>
+  <string name="restore_wallpaper_failed">배경화면을 되돌리지 못했어요. 다시 시도해 주세요.</string>
+  <string name="removed_wallpapers">제거됨</string>
+  <string name="removed_wallpapers_hint">폴더를 다시 확인해도 이 항목들은 순환에서 제외돼요. 되돌리려면 하나를 탭하세요.</string>
   <string name="reset_failed">데이터 초기화를 마치지 못했어요. 다시 시도해 주세요.</string>
 </resources>

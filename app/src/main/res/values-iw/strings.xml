@@ -195,5 +195,13 @@
   <string name="refresh_folder">רענון התיקייה</string>
   <string name="folder_refreshed">התיקייה נבדקה לאיתור טפטים חדשים.</string>
   <string name="folder_refresh_failed">לא ניתן לרענן את התיקייה. יש לוודא שהיא נגישה ולנסות שוב.</string>
+  <string name="content_desc_remove_home_wallpaper">הסרת הטפט של מסך הבית מהאלבום שלו</string>
+  <string name="content_desc_remove_lock_wallpaper">הסרת הטפט של מסך הנעילה מהאלבום שלו</string>
+  <string name="wallpaper_removed">הטפט הוסר מהאלבום</string>
+  <string name="undo">ביטול</string>
+  <string name="remove_wallpaper_failed">לא ניתן היה להסיר את הטפט. יש לנסות שוב.</string>
+  <string name="restore_wallpaper_failed">לא ניתן היה להחזיר את הטפט. יש לנסות שוב.</string>
+  <string name="removed_wallpapers">הוסרו</string>
+  <string name="removed_wallpapers_hint">אלה נשארים מחוץ לסבב כשהתיקייה נבדקת שוב. יש להקיש על אחד מהם כדי להחזיר אותו.</string>
   <string name="reset_failed">איפוס הנתונים לא הושלם. יש לנסות שוב.</string>
 </resources>

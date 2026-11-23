@@ -207,5 +207,13 @@
   <string name="refresh_folder">تحديث المجلد</string>
   <string name="folder_refreshed">تم فحص المجلد بحثاً عن خلفيات جديدة.</string>
   <string name="folder_refresh_failed">تعذر تحديث هذا المجلد. تأكد من إمكانية الوصول إليه ثم حاول مرة أخرى.</string>
+  <string name="content_desc_remove_home_wallpaper">إزالة خلفية الشاشة الرئيسية من ألبومها</string>
+  <string name="content_desc_remove_lock_wallpaper">إزالة خلفية شاشة القفل من ألبومها</string>
+  <string name="wallpaper_removed">تمت إزالة الخلفية من الألبوم</string>
+  <string name="undo">تراجع</string>
+  <string name="remove_wallpaper_failed">تعذرت إزالة الخلفية. يرجى المحاولة مرة أخرى.</string>
+  <string name="restore_wallpaper_failed">تعذرت إعادة الخلفية. يرجى المحاولة مرة أخرى.</string>
+  <string name="removed_wallpapers">المُزالة</string>
+  <string name="removed_wallpapers_hint">تبقى هذه خارج التدوير عند فحص المجلد مجددًا. انقر على إحداها لإعادتها.</string>
   <string name="reset_failed">تعذر إكمال إعادة تعيين البيانات. يرجى المحاولة مرة أخرى.</string>
 </resources>

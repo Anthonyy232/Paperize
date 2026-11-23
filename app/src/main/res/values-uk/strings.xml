@@ -199,5 +199,13 @@
   <string name="refresh_folder">Оновити папку</string>
   <string name="folder_refreshed">Папку перевірено на наявність нових шпалер.</string>
   <string name="folder_refresh_failed">Не вдалося оновити цю папку. Переконайтеся, що вона доступна, і спробуйте ще раз.</string>
+  <string name="content_desc_remove_home_wallpaper">Вилучити шпалери головного екрана з альбому</string>
+  <string name="content_desc_remove_lock_wallpaper">Вилучити шпалери екрана блокування з альбому</string>
+  <string name="wallpaper_removed">Шпалери вилучено з альбому</string>
+  <string name="undo">Скасувати</string>
+  <string name="remove_wallpaper_failed">Не вдалося вилучити шпалери. Спробуйте ще раз.</string>
+  <string name="restore_wallpaper_failed">Не вдалося повернути шпалери. Спробуйте ще раз.</string>
+  <string name="removed_wallpapers">Вилучені</string>
+  <string name="removed_wallpapers_hint">Вони не повертаються до ротації під час повторної перевірки папки. Натисніть на зображення, щоб повернути його.</string>
   <string name="reset_failed">Не вдалося завершити скидання даних. Спробуйте ще раз.</string>
 </resources>
