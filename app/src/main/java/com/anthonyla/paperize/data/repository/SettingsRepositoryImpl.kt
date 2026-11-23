@@ -48,6 +48,7 @@ private val HOME_SCALING_TYPE = stringPreferencesKey("home_scaling_type")
 private val LOCK_SCALING_TYPE = stringPreferencesKey("lock_scaling_type")
 private val LIVE_SCALING_TYPE = stringPreferencesKey("live_scaling_type")
 private val HOME_SCROLLING_ENABLED = booleanPreferencesKey("home_scrolling_enabled")
+private val BLUR_FIT_BACKGROUND = booleanPreferencesKey("blur_fit_background")
 private val ADAPTIVE_BRIGHTNESS = booleanPreferencesKey("adaptive_brightness")
 
 /** Effect keys are "<screen>_<field>", e.g. "home_enable_blur" or "live_parallax_intensity". */
@@ -123,6 +124,7 @@ class SettingsRepositoryImpl @Inject constructor(
             prefs[LOCK_SCALING_TYPE] = settings.lockScalingType.name
             prefs[LIVE_SCALING_TYPE] = settings.liveScalingType.name
             prefs[HOME_SCROLLING_ENABLED] = settings.homeScrollingEnabled
+            prefs[BLUR_FIT_BACKGROUND] = settings.blurFitBackground
             prefs.writeEffects(HOME_EFFECTS, settings.homeEffects)
             prefs.writeEffects(LOCK_EFFECTS, settings.lockEffects)
             prefs.writeEffects(LIVE_EFFECTS, settings.liveEffects)
@@ -199,6 +201,7 @@ class SettingsRepositoryImpl @Inject constructor(
             lockScalingType = ScalingType.fromString(prefs[LOCK_SCALING_TYPE]),
             liveScalingType = ScalingType.fromString(prefs[LIVE_SCALING_TYPE]),
             homeScrollingEnabled = prefs[HOME_SCROLLING_ENABLED] ?: defaults.homeScrollingEnabled,
+            blurFitBackground = prefs[BLUR_FIT_BACKGROUND] ?: defaults.blurFitBackground,
             homeEffects = prefs.readEffects(HOME_EFFECTS),
             lockEffects = prefs.readEffects(LOCK_EFFECTS),
             liveEffects = prefs.readEffects(LIVE_EFFECTS),

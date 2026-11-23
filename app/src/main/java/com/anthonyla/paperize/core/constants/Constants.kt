@@ -43,6 +43,8 @@ object Constants {
     const val PREVIEW_THUMBNAIL_HEIGHT = 1200
 
     const val MAX_BLUR_RADIUS = 25.0f
+    const val BACKDROP_MAX_SIZE = 64
+    const val BACKDROP_BLUR_PERCENT = 25
     const val BRIGHTNESS_SAMPLE_SIZE = 10
 
     // ITU-R BT.709

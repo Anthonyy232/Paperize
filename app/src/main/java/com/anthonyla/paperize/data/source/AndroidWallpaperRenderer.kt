@@ -34,7 +34,8 @@ class AndroidWallpaperRenderer @Inject constructor(
         }
         val size = getDeviceScreenSize(context)
         var bitmap = retrieveBitmap(context, wallpaper.uri.toUri(), size.width, size.height, scaling,
-            usesLauncherManagedScrolling(screen, scaling, settings.homeScrollingEnabled)) ?: return null
+            usesLauncherManagedScrolling(screen, scaling, settings.homeScrollingEnabled),
+            settings.blurFitBackground) ?: return null
         try {
             val processed = processBitmap(
                 source = bitmap,

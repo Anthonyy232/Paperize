@@ -4,7 +4,7 @@ Albums: an album holds single images, whole folders, or both. Folders are rescan
 
 Schedule: turn on the lock screen, the home screen or both, and pick an album for each. One interval covers both screens, from 15 minutes to 30 days, or each screen can have its own. Wallpapers go in order or shuffled.
 
-Effects: brightness, blur, vignette and a gray filter, each with a strength slider and separate switches for home and lock. Adaptive brightness adjusts the wallpaper to light or dark mode. Scaling is Fill, Fit, Stretch or None.
+Effects: brightness, blur, vignette and a gray filter, each with a strength slider and separate switches for home and lock. Adaptive brightness adjusts the wallpaper to light or dark mode. Scaling is Fill, Fit, Stretch or None, and Fit can fill its borders with a blurred copy of the image.
 
 Live wallpaper mode: instead of ordinary static wallpapers, Paperize can run as a live wallpaper that crossfades between images, changes on a double tap or when the screen turns off, moves with your home-screen pages (parallax), and allows intervals down to 1 minute.
 

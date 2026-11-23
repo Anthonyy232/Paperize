@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.core.util.BrightnessCalculator
+import com.anthonyla.paperize.core.util.createBlurredBackdrop
 import com.anthonyla.paperize.core.util.getAdaptiveBrightnessMultiplier
 import com.anthonyla.paperize.core.ScalingType
 
@@ -77,9 +78,9 @@ class PaperizeWallpaperRenderer(
     private var blurFbo2 = 0
     private var blurTexture2 = 0
 
-    private var currentPicture: GLPicture? = null
+    private var currentLayer: Layer? = null
 
-    private var nextPicture: GLPicture? = null
+    private var nextLayer: Layer? = null
     private var crossfadeStartTimeNanos = 0L
 
     @Volatile private var currentEffects = WallpaperEffects()
@@ -89,6 +90,8 @@ class PaperizeWallpaperRenderer(
     @Volatile private var currentScalingType = ScalingType.FILL
 
     @Volatile private var adaptiveBrightnessEnabled = false
+
+    @Volatile private var blurFitBackground = false
 
     // Retain the latest request, including images still decoding or waiting for upload,
     // so a fold/unfold cannot replace it with the previously displayed wallpaper.
@@ -106,8 +109,8 @@ class PaperizeWallpaperRenderer(
 
         // A recreated surface has a new EGL context; old handles no longer belong to it.
         surfaceSize.value = null
-        currentPicture = null
-        nextPicture = null
+        currentLayer = null
+        nextLayer = null
         blurFbo1 = 0
         blurFbo2 = 0
         blurTexture1 = 0
@@ -141,7 +144,7 @@ class PaperizeWallpaperRenderer(
 
         deleteBlurResources()
 
-        if (sizeChanged || currentPicture == null) {
+        if (sizeChanged || currentLayer == null) {
             synchronized(this) {
                 requestedImageLoader?.let { loader ->
                     queueWallpaper(loader, skipCrossfade = true)
@@ -157,8 +160,8 @@ class PaperizeWallpaperRenderer(
             return
         }
 
-        val current = currentPicture
-        val next = nextPicture
+        val current = currentLayer
+        val next = nextLayer
 
         if (current == null && next == null) {
             return
@@ -179,17 +182,17 @@ class PaperizeWallpaperRenderer(
 
         // The current layer stays opaque while the next fades over it; fading both
         // produces a visible brightness dip at the midpoint.
-        current?.let { picture ->
-            drawPictureWithEffects(picture, 1f, blurRadius)
+        current?.let { layer ->
+            drawPictureWithEffects(layer, 1f, blurRadius)
         }
 
-        next?.let { picture ->
-            drawPictureWithEffects(picture, crossfadeProgress, blurRadius)
+        next?.let { layer ->
+            drawPictureWithEffects(layer, crossfadeProgress, blurRadius)
 
             if (crossfadeProgress >= 1.0f) {
-                currentPicture?.recycle()
-                currentPicture = picture
-                nextPicture = null
+                currentLayer?.recycle()
+                currentLayer = layer
+                nextLayer = null
 
                 Log.d(TAG, "Crossfade complete")
             } else {
@@ -198,61 +201,71 @@ class PaperizeWallpaperRenderer(
         }
     }
 
-    private fun drawPictureWithEffects(picture: GLPicture, alpha: Float, blurRadius: Float) {
-        calculateMvpMatrix(picture, mvpMatrix)
-
-        if (blurRadius > Constants.BLUR_MIN_THRESHOLD) {
-            drawWithBlur(picture, alpha, blurRadius)
+    private fun drawPictureWithEffects(layer: Layer, alpha: Float, blurRadius: Float) {
+        if (blurRadius > Constants.BLUR_MIN_THRESHOLD || showsBackdrop()) {
+            drawComposited(layer, alpha, blurRadius)
         } else {
-            drawWithColorEffects(picture, alpha)
+            setEffectUniforms(layer.picture, alpha)
+            drawLayer(layer, flipY = false) {
+                it.draw(aPositionHandle, aTexCoordHandle, mvpMatrix, uMvpMatrixHandle)
+            }
         }
     }
 
+    private fun showsBackdrop() = blurFitBackground && currentScalingType == ScalingType.FIT
+
+    private fun drawLayer(layer: Layer, flipY: Boolean, draw: (GLPicture) -> Unit) {
+        if (showsBackdrop()) {
+            calculateMvpMatrix(layer.backdrop, mvpMatrix, ScalingType.FILL, flipY)
+            draw(layer.backdrop)
+        }
+        calculateMvpMatrix(layer.picture, mvpMatrix, currentScalingType, flipY)
+        draw(layer.picture)
+    }
+
     /**
-     * Draw picture with proper 3-pass blur + effects pipeline.
-     * Pass 1: Source texture → Horizontal blur → FBO1
-     * Pass 2: FBO1 texture → Vertical blur → FBO2
-     * Pass 3: FBO2 texture → Color effects → Screen
+     * Blur and color effects run on the whole screen, as in static mode, so they cross the edges
+     * between a Fit picture and its backdrop instead of outlining the picture.
+     * Pass 1: Layer → FBO1, unblurred
+     * Pass 2: FBO1 → Horizontal blur → FBO2
+     * Pass 3: FBO2 → Vertical blur → FBO1
+     * Pass 4: FBO1 → Color effects → Screen
      */
-    private fun drawWithBlur(picture: GLPicture, alpha: Float, blurRadius: Float) {
+    private fun drawComposited(layer: Layer, alpha: Float, blurRadius: Float) {
         if (blurFbo1 == 0) createBlurFramebuffers(surfaceWidth, surfaceHeight)
 
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo1)
         GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight)
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
         GLES20.glUseProgram(blurProgram)
-        GLES20.glUniform2f(blurDirectionHandle, 1f, 0f)
         GLES20.glUniform2f(blurResolutionHandle, surfaceWidth.toFloat(), surfaceHeight.toFloat())
-        GLES20.glUniform1f(blurRadiusHandle, blurRadius)
         GLES20.glUniform1i(blurTextureHandle, 0)
 
-        picture.draw(blurPositionHandle, blurTexCoordHandle, mvpMatrix, blurMvpMatrixHandle)
-
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo2)
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, blurFbo1)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES20.glUniform1f(blurRadiusHandle, 0f)
+        // Each framebuffer-to-framebuffer quad flips the image and three follow, so start upside down.
+        drawLayer(layer, flipY = true) {
+            it.draw(blurPositionHandle, blurTexCoordHandle, mvpMatrix, blurMvpMatrixHandle)
+        }
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, blurTexture1)
-
-        GLES20.glUniform2f(blurDirectionHandle, 0f, 1f)
-        drawQuad(blurPositionHandle, blurTexCoordHandle, blurMvpMatrixHandle)
+        GLES20.glUniform1f(blurRadiusHandle, blurRadius)
+        drawBlurPass(target = blurFbo2, source = blurTexture1, directionX = 1f, directionY = 0f)
+        drawBlurPass(target = blurFbo1, source = blurTexture2, directionX = 0f, directionY = 1f)
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
-        GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight)
-
-        setEffectUniforms(picture, alpha)
-
+        setEffectUniforms(layer.picture, alpha)
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, blurTexture2)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, blurTexture1)
         GLES20.glUniform1i(uTextureHandle, 0)
-
         drawQuad(aPositionHandle, aTexCoordHandle, uMvpMatrixHandle)
     }
 
-    private fun drawWithColorEffects(picture: GLPicture, alpha: Float) {
-        setEffectUniforms(picture, alpha)
-        picture.draw(aPositionHandle, aTexCoordHandle, mvpMatrix, uMvpMatrixHandle)
+    private fun drawBlurPass(target: Int, source: Int, directionX: Float, directionY: Float) {
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, target)
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, source)
+        GLES20.glUniform2f(blurDirectionHandle, directionX, directionY)
+        drawQuad(blurPositionHandle, blurTexCoordHandle, blurMvpMatrixHandle)
     }
 
     private fun setEffectUniforms(picture: GLPicture, alpha: Float) {
@@ -275,7 +288,7 @@ class PaperizeWallpaperRenderer(
 
     }
 
-    private fun calculateMvpMatrix(picture: GLPicture, matrix: FloatArray) {
+    private fun calculateMvpMatrix(picture: GLPicture, matrix: FloatArray, scalingType: ScalingType, flipY: Boolean) {
         val viewWidth = surfaceWidth.toFloat()
         val viewHeight = surfaceHeight.toFloat()
         val imageWidth = picture.width.toFloat()
@@ -286,13 +299,14 @@ class PaperizeWallpaperRenderer(
             viewHeight = viewHeight,
             imageWidth = imageWidth,
             imageHeight = imageHeight,
-            scalingType = currentScalingType,
+            scalingType = scalingType,
             parallaxEnabled = currentEffects.enableParallax,
             parallaxIntensity = currentEffects.parallaxIntensity,
             normalizedOffsetX = normalOffsetX
         )
 
-        Matrix.orthoM(matrix, 0, -viewWidth / 2f, viewWidth / 2f, -viewHeight / 2f, viewHeight / 2f, -1f, 1f)
+        val halfHeight = if (flipY) -viewHeight / 2f else viewHeight / 2f
+        Matrix.orthoM(matrix, 0, -viewWidth / 2f, viewWidth / 2f, -halfHeight, halfHeight, -1f, 1f)
         Matrix.translateM(matrix, 0, transform.horizontalOffset, 0f, 0f)
         // The quad spans -1..1, so scale by half the displayed image dimensions.
         Matrix.scaleM(
@@ -443,15 +457,20 @@ class PaperizeWallpaperRenderer(
 
                     val sourceBrightness =
                         BrightnessCalculator.calculateBitmapBrightness(bitmap)
+                    val backdrop = createBlurredBackdrop(bitmap)
 
                     val queued = callbacks.queueEventOnGlThread {
                         if (loadGeneration.get() == generation) {
-                            uploadBitmap(bitmap, sourceBrightness, skipCrossfade)
+                            uploadBitmap(bitmap, backdrop, sourceBrightness, skipCrossfade)
                         } else {
                             bitmap.recycle()
+                            backdrop.recycle()
                         }
                     }
-                    if (!queued) bitmap.recycle()
+                    if (!queued) {
+                        bitmap.recycle()
+                        backdrop.recycle()
+                    }
                 } else {
                     Log.w(TAG, "Failed to load wallpaper (null bitmap)")
                 }
@@ -463,25 +482,32 @@ class PaperizeWallpaperRenderer(
         }
     }
 
-    /** Consumes [bitmap] on the GL thread, then swaps or crossfades to it. */
+    /** Consumes [bitmap] and [backdrop] on the GL thread, then swaps or crossfades to them. */
     private fun uploadBitmap(
         bitmap: Bitmap,
+        backdrop: Bitmap,
         sourceBrightness: Float,
         skipCrossfade: Boolean
     ) {
         try {
             val picture = GLPicture(bitmap, sourceBrightness)
+            val layer = try {
+                Layer(picture, GLPicture(backdrop, sourceBrightness))
+            } catch (e: Throwable) {
+                picture.recycle()
+                throw e
+            }
 
             if (skipCrossfade) {
-                currentPicture?.recycle()
-                nextPicture?.recycle()
-                currentPicture = picture
-                nextPicture = null
+                currentLayer?.recycle()
+                nextLayer?.recycle()
+                currentLayer = layer
+                nextLayer = null
 
                 Log.d(TAG, "Wallpaper instantly swapped (no crossfade): ${picture.width}x${picture.height}")
             } else {
-                nextPicture?.recycle()
-                nextPicture = picture
+                nextLayer?.recycle()
+                nextLayer = layer
 
                 crossfadeStartTimeNanos = System.nanoTime()
                 Log.d(TAG, "Wallpaper uploaded to GPU with crossfade: ${picture.width}x${picture.height}")
@@ -492,6 +518,7 @@ class PaperizeWallpaperRenderer(
             Log.e(TAG, "Failed to upload bitmap to GPU", e)
         } finally {
             bitmap.recycle()
+            backdrop.recycle()
         }
     }
 
@@ -531,6 +558,13 @@ class PaperizeWallpaperRenderer(
             1f
         }
 
+    fun updateBlurFitBackground(enabled: Boolean) {
+        if (blurFitBackground != enabled) {
+            blurFitBackground = enabled
+            callbacks.requestRender()
+        }
+    }
+
     fun updateScalingType(scalingType: ScalingType) {
         if (currentScalingType != scalingType) {
             currentScalingType = scalingType
@@ -544,5 +578,12 @@ class PaperizeWallpaperRenderer(
         loadGeneration.incrementAndGet()
         loadingScope.cancel()
         requestedImageLoader = null
+    }
+
+    private class Layer(val picture: GLPicture, val backdrop: GLPicture) {
+        fun recycle() {
+            picture.recycle()
+            backdrop.recycle()
+        }
     }
 }

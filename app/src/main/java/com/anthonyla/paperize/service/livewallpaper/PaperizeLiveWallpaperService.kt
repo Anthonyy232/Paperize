@@ -220,6 +220,7 @@ class PaperizeLiveWallpaperService : GLWallpaperService() {
                     renderer.updateEffects(effects)
                     renderer.updateScalingType(scalingType)
                     renderer.updateAdaptiveBrightness(settings.adaptiveBrightness)
+                    renderer.updateBlurFitBackground(settings.blurFitBackground)
 
                     val scalingChanged =
                         observedScalingType != null && observedScalingType != scalingType

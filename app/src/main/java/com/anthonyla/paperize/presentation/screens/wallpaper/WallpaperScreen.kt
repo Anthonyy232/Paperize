@@ -291,6 +291,16 @@ fun WallpaperScreen(
                     }
                 }
             }
+            if (selectedScaling == ScalingType.FIT) {
+                SettingSwitchItem(
+                    title = stringResource(R.string.blur_fit_background),
+                    description = stringResource(R.string.blur_fit_background_description),
+                    checked = scheduleSettings.blurFitBackground,
+                    onCheckedChange = { enabled ->
+                        updateSettingsImmediate(scheduleSettings.copy(blurFitBackground = enabled))
+                    }
+                )
+            }
             if (wallpaperMode == WallpaperMode.STATIC) {
                 SettingSwitchItem(
                     title = stringResource(R.string.horizontal_wallpaper_scrolling),

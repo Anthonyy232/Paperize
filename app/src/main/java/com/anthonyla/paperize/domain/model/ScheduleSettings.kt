@@ -19,6 +19,7 @@ data class ScheduleSettings(
     val homeScalingType: ScalingType = ScalingType.FILL,
     val lockScalingType: ScalingType = ScalingType.FILL,
     val homeScrollingEnabled: Boolean = false,
+    val blurFitBackground: Boolean = false,
     val homeEffects: WallpaperEffects = WallpaperEffects(),
     val lockEffects: WallpaperEffects = WallpaperEffects(),
     val liveAlbumId: String? = null,
@@ -87,6 +88,7 @@ data class ScheduleSettings(
         return homeScalingType != other.homeScalingType ||
                lockScalingType != other.lockScalingType ||
                homeScrollingEnabled != other.homeScrollingEnabled ||
+               blurFitBackground != other.blurFitBackground ||
                homeEffects != other.homeEffects ||
                lockEffects != other.lockEffects ||
                liveEffects != other.liveEffects ||

@@ -150,6 +150,38 @@ class WallpaperUtilInstrumentedTest {
     }
 
     @Test
+    fun blurredFitBackgroundFillsTheBarsFromTheImage() {
+        val source = mutableBitmap(80, 40, Color.RED)
+        val result = finalizeToCanvas(source, 40, 80, ScalingType.FIT, blurFitBackground = true)
+        try {
+            assertEquals(Color.RED, result.getPixel(20, 0))
+            assertEquals(Color.RED, result.getPixel(20, 40))
+        } finally {
+            result.recycle()
+        }
+    }
+
+    @Test
+    fun blurredBackdropAveragesFineDetailInsteadOfSamplingIt() {
+        val source = Bitmap.createBitmap(512, 256, Bitmap.Config.ARGB_8888)
+        val checker = IntArray(512 * 256) { i -> if ((i % 512 + i / 512) % 2 == 0) Color.WHITE else Color.BLACK }
+        source.setPixels(checker, 0, 512, 0, 0, 512, 256)
+        val backdrop = createBlurredBackdrop(source)
+        try {
+            assertEquals(64, backdrop.width)
+            assertEquals(32, backdrop.height)
+            for (y in 0 until backdrop.height) {
+                for (x in 0 until backdrop.width) {
+                    assertTrue("Pixel $x,$y", Color.red(backdrop.getPixel(x, y)) in 100..155)
+                }
+            }
+        } finally {
+            source.recycle()
+            backdrop.recycle()
+        }
+    }
+
+    @Test
     fun disabledStaticEffectsLeaveBitmapUntouched() {
         val source = mutableBitmap(32, 32, Color.rgb(240, 80, 20))
 

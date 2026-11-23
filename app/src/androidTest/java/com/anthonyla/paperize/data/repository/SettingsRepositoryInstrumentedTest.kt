@@ -62,7 +62,7 @@ class SettingsRepositoryInstrumentedTest {
                 homeEnabled = true, lockEnabled = true, homeAlbumId = "home", lockAlbumId = "lock", liveAlbumId = "live",
                 homeIntervalMinutes = 25, lockIntervalMinutes = 35, liveIntervalMinutes = 45,
                 homeScalingType = ScalingType.FIT, lockScalingType = ScalingType.STRETCH, liveScalingType = ScalingType.NONE,
-                homeScrollingEnabled = true, homeEffects = effects, lockEffects = lockEffects, liveEffects = liveEffects,
+                homeScrollingEnabled = true, blurFitBackground = true, homeEffects = effects, lockEffects = lockEffects, liveEffects = liveEffects,
                 adaptiveBrightness = true
             )
             preferences.updateScheduleSettings(full)

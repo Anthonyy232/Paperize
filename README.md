@@ -36,7 +36,7 @@ Turn on **Lock**, **Home** or both and pick an album for each. One interval cove
   <img src=".github/readme/feature-effects-light.png" alt="03. Effects, to taste. Brightness, blur and vignette, each with a switch for home and lock and a strength slider.">
 </picture>
 
-Brightness, blur, vignette and a gray filter each have a strength slider and separate switches for home and lock. **Adaptive Brightness** adjusts the wallpaper to the system's light or dark mode. Scaling is Fill, Fit, Stretch or None, and **Horizontal scrolling** lets a wide Fill wallpaper move between home-screen pages.
+Brightness, blur, vignette and a gray filter each have a strength slider and separate switches for home and lock. **Adaptive Brightness** adjusts the wallpaper to the system's light or dark mode. Scaling is Fill, Fit, Stretch or None. **Blurred background** fills the space around a Fit wallpaper with a blurred copy of it instead of black, and **Horizontal scrolling** lets a wide Fill wallpaper move between home-screen pages.
 
 ## How it works
 

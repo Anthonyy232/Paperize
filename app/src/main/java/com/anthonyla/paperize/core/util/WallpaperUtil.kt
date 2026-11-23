@@ -116,7 +116,8 @@ fun retrieveBitmap(
     width: Int,
     height: Int,
     scaling: ScalingType = ScalingType.FIT,
-    preserveSourceOverflow: Boolean = false
+    preserveSourceOverflow: Boolean = false,
+    blurFitBackground: Boolean = false
 ): Bitmap? {
     // ImageDecoder applies EXIF orientation and reports dimensions after it.
     val bitmap = try {
@@ -152,7 +153,7 @@ fun retrieveBitmap(
         if (preserveSourceOverflow && scaling == ScalingType.FILL) {
             scaleToFillPreservingOverflow(it, width, height)
         } else {
-            finalizeToCanvas(it, width, height, scaling)
+            finalizeToCanvas(it, width, height, scaling, blurFitBackground)
         }
     }
 }
@@ -182,26 +183,59 @@ private fun scaleToFillPreservingOverflow(
 }
 
 /** Render the decoded bitmap onto the requested canvas; consumes [source]. */
-internal fun finalizeToCanvas(source: Bitmap, canvasW: Int, canvasH: Int, scaling: ScalingType): Bitmap {
+internal fun finalizeToCanvas(
+    source: Bitmap,
+    canvasW: Int,
+    canvasH: Int,
+    scaling: ScalingType,
+    blurFitBackground: Boolean = false
+): Bitmap {
     if (source.width == canvasW && source.height == canvasH) return source
-    val widthRatio = canvasW.toFloat() / source.width
-    val heightRatio = canvasH.toFloat() / source.height
-    val scale = when (scaling) {
-        ScalingType.FILL -> maxOf(widthRatio, heightRatio)
-        ScalingType.FIT -> minOf(widthRatio, heightRatio)
-        ScalingType.NONE, ScalingType.STRETCH -> 1f
+    fun centered(width: Float, height: Float) =
+        RectF((canvasW - width) / 2f, (canvasH - height) / 2f, (canvasW + width) / 2f, (canvasH + height) / 2f)
+    fun scaled(bitmap: Bitmap, mode: ScalingType): RectF {
+        if (mode == ScalingType.STRETCH) return centered(canvasW.toFloat(), canvasH.toFloat())
+        val widthRatio = canvasW.toFloat() / bitmap.width
+        val heightRatio = canvasH.toFloat() / bitmap.height
+        val scale = when (mode) {
+            ScalingType.FILL -> maxOf(widthRatio, heightRatio)
+            ScalingType.FIT -> minOf(widthRatio, heightRatio)
+            ScalingType.NONE, ScalingType.STRETCH -> 1f
+        }
+        return centered(bitmap.width * scale, bitmap.height * scale)
     }
-    val width = if (scaling == ScalingType.STRETCH) canvasW.toFloat() else source.width * scale
-    val height = if (scaling == ScalingType.STRETCH) canvasH.toFloat() else source.height * scale
-    val left = (canvasW - width) / 2f
-    val top = (canvasH - height) / 2f
     val result = createBitmap(canvasW, canvasH)
+    val paint = Paint(Paint.FILTER_BITMAP_FLAG)
     Canvas(result).apply {
-        drawColor(Color.BLACK)
-        drawBitmap(source, null, RectF(left, top, left + width, top + height), Paint(Paint.FILTER_BITMAP_FLAG))
+        if (scaling == ScalingType.FIT && blurFitBackground) {
+            val backdrop = createBlurredBackdrop(source)
+            drawBitmap(backdrop, null, scaled(backdrop, ScalingType.FILL), paint)
+            backdrop.recycle()
+        } else {
+            drawColor(Color.BLACK)
+        }
+        drawBitmap(source, null, scaled(source, scaling), paint)
     }
     source.recycle()
     return result
+}
+
+/**
+ * A blurred copy of [source] at most [Constants.BACKDROP_MAX_SIZE] pixels across, meant to be
+ * stretched over the screen. Halving step by step averages every pixel; a single large downscale
+ * samples only a few and turns detailed images into noise.
+ */
+fun createBlurredBackdrop(source: Bitmap): Bitmap {
+    var small = source
+    while (maxOf(small.width, small.height) > Constants.BACKDROP_MAX_SIZE) {
+        val half = small.scale(maxOf(1, small.width / 2), maxOf(1, small.height / 2))
+        if (small !== source) small.recycle()
+        small = half
+    }
+    if (small === source) small = source.copy(Bitmap.Config.ARGB_8888, false)
+    val blurred = processBitmap(small, enableBlur = true, blurPercent = Constants.BACKDROP_BLUR_PERCENT)
+    if (blurred !== small) small.recycle()
+    return blurred
 }
 
 private fun drawVignette(canvas: Canvas, width: Int, height: Int, percent: Int) {

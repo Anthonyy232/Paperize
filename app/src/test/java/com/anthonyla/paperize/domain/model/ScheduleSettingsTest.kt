@@ -69,6 +69,7 @@ class ScheduleSettingsTest {
             current.copy(lockScalingType = ScalingType.STRETCH),
             current.copy(liveScalingType = ScalingType.NONE),
             current.copy(homeScrollingEnabled = true),
+            current.copy(blurFitBackground = true),
             current.copy(homeEffects = effects),
             current.copy(lockEffects = effects),
             current.copy(liveEffects = effects),

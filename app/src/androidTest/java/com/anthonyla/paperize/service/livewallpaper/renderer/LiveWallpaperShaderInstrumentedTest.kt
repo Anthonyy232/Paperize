@@ -1,6 +1,7 @@
 package com.anthonyla.paperize.service.livewallpaper.renderer
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.opengl.EGL14
 import android.opengl.EGLConfig
@@ -169,6 +170,72 @@ class LiveWallpaperShaderInstrumentedTest {
             file.delete()
             replacement.delete()
         }
+    }
+
+    @Test
+    fun blurredFitBackgroundFillsTheBarsTheRightWayUpWithAndWithoutBlur() {
+        val app = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        val uploads = java.util.concurrent.LinkedBlockingQueue<() -> Unit>()
+        val renderer = PaperizeWallpaperRenderer(app, object : PaperizeWallpaperRenderer.Callbacks {
+            override fun queueEventOnGlThread(event: () -> Unit): Boolean = uploads.offer(event)
+            override fun requestRender() = Unit
+        })
+        val egl = javax.microedition.khronos.egl.EGLContext.getEGL() as javax.microedition.khronos.egl.EGL10
+        val gl = egl.eglGetCurrentContext().gl as javax.microedition.khronos.opengles.GL10
+        val config = com.anthonyla.paperize.service.livewallpaper.gl.WallpaperEglConfigChooser()
+            .chooseConfig(egl, egl.eglGetCurrentDisplay())
+        val file = java.io.File.createTempFile("fit-backdrop", ".png", app.cacheDir)
+        try {
+            // Wide image, red over blue, so Fit leaves bars above and below it.
+            val bitmap = Bitmap.createBitmap(SIZE * 2, SIZE, Bitmap.Config.ARGB_8888).apply {
+                eraseColor(Color.BLUE)
+                Canvas(this).drawRect(0f, 0f, SIZE * 2f, SIZE / 2f, android.graphics.Paint().apply { color = Color.RED })
+            }
+            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            bitmap.recycle()
+            renderer.onSurfaceCreated(gl, config)
+            renderer.onSurfaceChanged(gl, SIZE, SIZE)
+            renderer.updateScalingType(com.anthonyla.paperize.core.ScalingType.FIT)
+            renderer.queueWallpaper(
+                ContentUriImageLoader(
+                    app.contentResolver,
+                    android.net.Uri.fromFile(file),
+                    com.anthonyla.paperize.core.ScalingType.FIT
+                ),
+                skipCrossfade = true
+            )
+            checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS)).invoke()
+
+            renderer.onDrawFrame(gl)
+            assertEquals(Color.BLACK, readPixel(SIZE / 2, SIZE - 2))
+
+            renderer.updateBlurFitBackground(true)
+            renderer.onDrawFrame(gl)
+            assertTopRedBottomBlue()
+
+            renderer.updateEffects(com.anthonyla.paperize.domain.model.WallpaperEffects(enableBlur = true, blurPercentage = 10))
+            renderer.onDrawFrame(gl)
+            assertTopRedBottomBlue()
+
+            // A vignette over the whole screen leaves no seam where the picture meets the backdrop.
+            renderer.updateEffects(com.anthonyla.paperize.domain.model.WallpaperEffects(enableVignette = true, vignettePercentage = 100))
+            renderer.onDrawFrame(gl)
+            val inside = Color.red(readPixel(SIZE / 2, SIZE * 3 / 4 - 1))
+            val outside = Color.red(readPixel(SIZE / 2, SIZE * 3 / 4 + 1))
+            assertTrue("inside=$inside outside=$outside", kotlin.math.abs(inside - outside) <= 20)
+            GLUtil.checkGLError("blurred fit background")
+        } finally {
+            renderer.cancelLoading()
+            file.delete()
+        }
+    }
+
+    // glReadPixels counts rows from the bottom of the surface.
+    private fun assertTopRedBottomBlue() {
+        val top = readPixel(SIZE / 2, SIZE - 2)
+        val bottom = readPixel(SIZE / 2, 1)
+        assertTrue("Top bar ${Integer.toHexString(top)}", Color.red(top) > 200 && Color.blue(top) < 50)
+        assertTrue("Bottom bar ${Integer.toHexString(bottom)}", Color.blue(bottom) > 200 && Color.red(bottom) < 50)
     }
 
     @Test

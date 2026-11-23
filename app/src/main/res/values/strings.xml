@@ -117,6 +117,8 @@
   <string name="wallpaper_changer_description">Pause or resume scheduled changes without clearing your albums.</string>
   <string name="horizontal_wallpaper_scrolling">Horizontal scrolling</string>
   <string name="horizontal_wallpaper_scrolling_description">Allow wide Fill wallpapers to move between home-screen pages. Lock-screen wallpapers remain centered.</string>
+  <string name="blur_fit_background">Blurred background</string>
+  <string name="blur_fit_background_description">Fill the space around Fit wallpapers with a blurred copy of the image instead of black.</string>
   <string name="lock_album_label">Lock Album</string>
   <string name="home_album_label">Home Album</string>
   <string name="scaling">Scaling</string>
