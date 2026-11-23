@@ -406,20 +406,8 @@ fun WallpaperScreen(
     if (showEmptyAlbumWarning) {
         AlertDialog(
             onDismissRequest = { showEmptyAlbumWarning = false },
-            title = {
-                Text(
-                    text = stringResource(R.string.empty_album),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.empty_album_message),
-                    maxLines = Constants.DIALOG_MESSAGE_MAX_LINES,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
+            title = { Text(stringResource(R.string.empty_album)) },
+            text = { Text(stringResource(R.string.empty_album_message)) },
             confirmButton = {
                 TextButton(onClick = { showEmptyAlbumWarning = false }) {
                     Text(

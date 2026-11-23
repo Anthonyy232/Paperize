@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.SettingsRow
@@ -59,9 +58,7 @@ fun TimeIntervalPicker(
     SettingsRow(verticalArrangement = Arrangement.spacedBy(AppSpacing.small)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.titleMedium
         )
 
         Row(
@@ -86,9 +83,7 @@ fun TimeIntervalPicker(
         Text(
             text = stringResource(R.string.total_interval, formatIntervalComposable(minutes)),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (note != null) {
             Text(
