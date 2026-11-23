@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">તમારા આલ્બમ કાઢ્યા વિના શેડ્યૂલ કરેલા બદલાવ થોભાવો અથવા ફરી શરૂ કરો.</string>
   <string name="horizontal_wallpaper_scrolling">આડું સ્ક્રોલિંગ</string>
   <string name="horizontal_wallpaper_scrolling_description">\'ભરો\' સ્કેલિંગવાળા પહોળા વૉલપેપરને હોમ સ્ક્રીનના પેજ વચ્ચે ખસવા દો. લૉક સ્ક્રીન વૉલપેપર મધ્યમાં રહે છે.</string>
+  <string name="blur_fit_background">ઝાંખી પૃષ્ઠભૂમિ</string>
+  <string name="blur_fit_background_description">\"ફિટ\" વૉલપેપરની આસપાસની જગ્યા કાળાને બદલે છબીની ઝાંખી નકલથી ભરો.</string>
   <string name="lock_album_label">લૉક આલ્બમ</string>
   <string name="home_album_label">હોમ આલ્બમ</string>
   <string name="scaling">સ્કેલિંગ</string>

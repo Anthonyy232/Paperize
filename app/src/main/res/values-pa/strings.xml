@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">ਆਪਣੀਆਂ ਐਲਬਮਾਂ ਮਿਟਾਏ ਬਿਨਾਂ ਨਿਯਤ ਤਬਦੀਲੀਆਂ ਨੂੰ ਰੋਕੋ ਜਾਂ ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ।</string>
   <string name="horizontal_wallpaper_scrolling">ਖਿਤਿਜੀ ਸਕ੍ਰੋਲਿੰਗ</string>
   <string name="horizontal_wallpaper_scrolling_description">ਚੌੜੇ ਭਰੋ ਵਾਲਪੇਪਰਾਂ ਨੂੰ ਹੋਮ ਸਕ੍ਰੀਨ ਦੇ ਪੰਨਿਆਂ ਵਿਚਕਾਰ ਹਿਲਣ ਦਿਓ। ਲਾਕ ਸਕ੍ਰੀਨ ਵਾਲਪੇਪਰ ਵਿਚਕਾਰ ਹੀ ਰਹਿੰਦੇ ਹਨ।</string>
+  <string name="blur_fit_background">ਧੁੰਦਲਾ ਪਿਛੋਕੜ</string>
+  <string name="blur_fit_background_description">“ਫਿੱਟ” ਵਾਲਪੇਪਰਾਂ ਦੇ ਆਲੇ-ਦੁਆਲੇ ਦੀ ਥਾਂ ਨੂੰ ਕਾਲੇ ਦੀ ਬਜਾਏ ਤਸਵੀਰ ਦੀ ਧੁੰਦਲੀ ਕਾਪੀ ਨਾਲ ਭਰੋ।</string>
   <string name="lock_album_label">ਲਾਕ ਐਲਬਮ</string>
   <string name="home_album_label">ਹੋਮ ਐਲਬਮ</string>
   <string name="scaling">ਸਕੇਲਿੰਗ</string>

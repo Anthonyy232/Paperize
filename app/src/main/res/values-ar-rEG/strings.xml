@@ -120,6 +120,8 @@
   <string name="wallpaper_changer_description">وقّف أو كمّل التغييرات المجدولة من غير ما تمسح الألبومات بتاعتك.</string>
   <string name="horizontal_wallpaper_scrolling">التمرير الأفقي</string>
   <string name="horizontal_wallpaper_scrolling_description">خلّي الخلفيات العريضة بوضع الملء تتحرك بين صفحات الشاشة الرئيسية. خلفيات شاشة القفل بتفضل في النص.</string>
+  <string name="blur_fit_background">خلفية مموّهة</string>
+  <string name="blur_fit_background_description">املى المساحة اللي حوالين خلفيات «ملاءمة» بنسخة مموّهة من الصورة بدل الأسود.</string>
   <string name="lock_album_label">ألبوم شاشة القفل</string>
   <string name="home_album_label">ألبوم الشاشة الرئيسية</string>
   <string name="scaling">تغيير الحجم</string>

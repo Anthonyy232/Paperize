@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Pausa eller återuppta schemalagda byten utan att rensa dina album.</string>
   <string name="horizontal_wallpaper_scrolling">Horisontell rullning</string>
   <string name="horizontal_wallpaper_scrolling_description">Låt breda bakgrundsbilder i läget Fyll flyttas mellan startskärmens sidor. Bakgrundsbilder på låsskärmen förblir centrerade.</string>
+  <string name="blur_fit_background">Suddig bakgrund</string>
+  <string name="blur_fit_background_description">Fyll utrymmet runt bakgrundsbilder i läget ”Anpassa” med en suddig kopia av bilden i stället för svart.</string>
   <string name="lock_album_label">Låsskärmsalbum</string>
   <string name="home_album_label">Startskärmsalbum</string>
   <string name="scaling">Skalning</string>

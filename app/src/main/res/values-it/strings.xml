@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Metti in pausa o riprendi i cambi programmati senza cancellare i tuoi album.</string>
   <string name="horizontal_wallpaper_scrolling">Scorrimento orizzontale</string>
   <string name="horizontal_wallpaper_scrolling_description">Consente agli sfondi larghi in modalità Riempi di spostarsi tra le pagine della schermata Home. Gli sfondi della schermata di blocco restano centrati.</string>
+  <string name="blur_fit_background">Sfondo sfocato</string>
+  <string name="blur_fit_background_description">Riempie lo spazio attorno agli sfondi in modalità «Adatta» con una copia sfocata dell’immagine invece del nero.</string>
   <string name="lock_album_label">Album blocco</string>
   <string name="home_album_label">Album Home</string>
   <string name="scaling">Scala</string>

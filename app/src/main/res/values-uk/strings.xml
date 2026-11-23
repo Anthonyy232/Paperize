@@ -116,6 +116,8 @@
   <string name="wallpaper_changer_description">Призупиняйте або відновлюйте заплановані зміни, не очищаючи альбоми.</string>
   <string name="horizontal_wallpaper_scrolling">Горизонтальне прокручування</string>
   <string name="horizontal_wallpaper_scrolling_description">Дозволити широким шпалерам у режимі «Заповнити» рухатися між сторінками головного екрана. Шпалери екрана блокування залишаються по центру.</string>
+  <string name="blur_fit_background">Розмитий фон</string>
+  <string name="blur_fit_background_description">Заповнювати простір навколо шпалер у режимі «Вписати» розмитою копією зображення замість чорного.</string>
   <string name="lock_album_label">Альбом екрана блокування</string>
   <string name="home_album_label">Альбом головного екрана</string>
   <string name="scaling">Масштабування</string>

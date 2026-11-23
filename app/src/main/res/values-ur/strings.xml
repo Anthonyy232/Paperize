@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">اپنے البمز کو صاف کیے بغیر طے شدہ تبدیلیوں کو روکیں یا دوبارہ شروع کریں۔</string>
   <string name="horizontal_wallpaper_scrolling">افقی اسکرولنگ</string>
   <string name="horizontal_wallpaper_scrolling_description">چوڑے \"بھریں\" وال پیپرز کو ہوم اسکرین کے صفحات کے درمیان حرکت کرنے دیں۔ لاک اسکرین کے وال پیپرز مرکز میں رہتے ہیں۔</string>
+  <string name="blur_fit_background">دھندلا پس منظر</string>
+  <string name="blur_fit_background_description">”فٹ کریں“ وال پیپرز کے ارد گرد کی جگہ کو سیاہ کے بجائے تصویر کی دھندلی کاپی سے بھریں۔</string>
   <string name="lock_album_label">لاک البم</string>
   <string name="home_album_label">ہوم البم</string>
   <string name="scaling">اسکیلنگ</string>

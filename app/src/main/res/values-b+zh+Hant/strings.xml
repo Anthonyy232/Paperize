@@ -110,6 +110,8 @@
   <string name="wallpaper_changer_description">暫停或繼續定時更換，不會清除你的相簿。</string>
   <string name="horizontal_wallpaper_scrolling">水平捲動</string>
   <string name="horizontal_wallpaper_scrolling_description">讓採用「填滿」的寬幅桌布可隨主畫面頁面移動。鎖定畫面的桌布會保持置中。</string>
+  <string name="blur_fit_background">模糊背景</string>
+  <string name="blur_fit_background_description">以圖片的模糊副本填滿「完整顯示」桌布周圍的空間，而不是黑色。</string>
   <string name="lock_album_label">鎖定畫面相簿</string>
   <string name="home_album_label">主畫面相簿</string>
   <string name="scaling">縮放</string>

@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Suspendez ou reprenez les changements planifiés sans effacer vos albums.</string>
   <string name="horizontal_wallpaper_scrolling">Défilement horizontal</string>
   <string name="horizontal_wallpaper_scrolling_description">Permet aux fonds d’écran larges en mode Remplir de se déplacer entre les pages de l’écran d’accueil. Les fonds d’écran de l’écran de verrouillage restent centrés.</string>
+  <string name="blur_fit_background">Arrière-plan flouté</string>
+  <string name="blur_fit_background_description">Remplit l’espace autour des fonds d’écran en mode « Ajuster » avec une copie floutée de l’image au lieu du noir.</string>
   <string name="lock_album_label">Album de verrouillage</string>
   <string name="home_album_label">Album d’accueil</string>
   <string name="scaling">Mise à l’échelle</string>

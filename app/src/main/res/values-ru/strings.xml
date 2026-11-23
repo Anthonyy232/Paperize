@@ -116,6 +116,8 @@
   <string name="wallpaper_changer_description">Приостанавливайте и возобновляйте смену по расписанию, не очищая альбомы.</string>
   <string name="horizontal_wallpaper_scrolling">Горизонтальная прокрутка</string>
   <string name="horizontal_wallpaper_scrolling_description">Позволяет широким обоям в режиме «Заполнить» двигаться между страницами главного экрана. Обои экрана блокировки остаются по центру.</string>
+  <string name="blur_fit_background">Размытый фон</string>
+  <string name="blur_fit_background_description">Заполнять пространство вокруг обоев в режиме «Подогнать» размытой копией изображения вместо чёрного.</string>
   <string name="lock_album_label">Альбом блокировки</string>
   <string name="home_album_label">Альбом главного экрана</string>
   <string name="scaling">Масштаб</string>

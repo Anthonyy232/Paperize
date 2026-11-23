@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">अपने एल्बम हटाए बिना निर्धारित बदलावों को रोकें या फिर से शुरू करें।</string>
   <string name="horizontal_wallpaper_scrolling">क्षैतिज स्क्रॉलिंग</string>
   <string name="horizontal_wallpaper_scrolling_description">चौड़े “भरें” वॉलपेपर को होम स्क्रीन के पृष्ठों के बीच खिसकने दें। लॉक स्क्रीन के वॉलपेपर केंद्र में ही रहते हैं।</string>
+  <string name="blur_fit_background">धुंधली पृष्ठभूमि</string>
+  <string name="blur_fit_background_description">“फ़िट करें” वॉलपेपर के आसपास की जगह को काले के बजाय चित्र की धुंधली कॉपी से भरें।</string>
   <string name="lock_album_label">लॉक एल्बम</string>
   <string name="home_album_label">होम एल्बम</string>
   <string name="scaling">स्केलिंग</string>

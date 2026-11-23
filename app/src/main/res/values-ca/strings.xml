@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Posa en pausa o reprèn els canvis programats sense esborrar els àlbums.</string>
   <string name="horizontal_wallpaper_scrolling">Desplaçament horitzontal</string>
   <string name="horizontal_wallpaper_scrolling_description">Permet que els fons de pantalla amples amb Omple es moguin entre les pàgines de la pantalla d\'inici. Els fons de la pantalla de bloqueig es mantenen centrats.</string>
+  <string name="blur_fit_background">Fons difuminat</string>
+  <string name="blur_fit_background_description">Omple l\'espai al voltant dels fons de pantalla «Ajusta» amb una còpia difuminada de la imatge en lloc de negre.</string>
   <string name="lock_album_label">Àlbum de bloqueig</string>
   <string name="home_album_label">Àlbum d\'inici</string>
   <string name="scaling">Escalat</string>

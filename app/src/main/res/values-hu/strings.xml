@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Az ütemezett váltások szüneteltetése vagy folytatása az albumok törlése nélkül.</string>
   <string name="horizontal_wallpaper_scrolling">Vízszintes görgetés</string>
   <string name="horizontal_wallpaper_scrolling_description">A széles, Kitöltés módú háttérképek mozoghatnak a kezdőképernyő oldalai között. A zárolási képernyő háttérképei középre igazítva maradnak.</string>
+  <string name="blur_fit_background">Elmosott háttér</string>
+  <string name="blur_fit_background_description">Az „Illesztés” módú háttérképek körüli helyet fekete helyett a kép elmosott másolatával tölti ki.</string>
   <string name="lock_album_label">Zárolási album</string>
   <string name="home_album_label">Kezdőképernyő-album</string>
   <string name="scaling">Méretezés</string>

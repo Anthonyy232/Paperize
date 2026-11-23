@@ -110,6 +110,8 @@
   <string name="wallpaper_changer_description">アルバムを消去せずに、スケジュールされた変更を一時停止または再開します。</string>
   <string name="horizontal_wallpaper_scrolling">横スクロール</string>
   <string name="horizontal_wallpaper_scrolling_description">塗りつぶしの横長の壁紙を、ホーム画面のページ間で動かせるようにします。ロック画面の壁紙は中央に固定されます。</string>
+  <string name="blur_fit_background">ぼかし背景</string>
+  <string name="blur_fit_background_description">「フィット」の壁紙の周りを、黒ではなく画像をぼかしたもので埋めます。</string>
   <string name="lock_album_label">ロック画面のアルバム</string>
   <string name="home_album_label">ホーム画面のアルバム</string>
   <string name="scaling">拡大縮小</string>

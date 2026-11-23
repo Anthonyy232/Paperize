@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">तुमचे अल्बम न हटवता नियोजित बदल थांबवा किंवा पुन्हा सुरू करा.</string>
   <string name="horizontal_wallpaper_scrolling">आडवे स्क्रोलिंग</string>
   <string name="horizontal_wallpaper_scrolling_description">रुंद \"भरा\" वॉलपेपरना होम स्क्रीनच्या पेजदरम्यान हलू द्या. लॉक स्क्रीन वॉलपेपर मध्यभागीच राहतात.</string>
+  <string name="blur_fit_background">धूसर पार्श्वभूमी</string>
+  <string name="blur_fit_background_description">“बसवा” वॉलपेपरभोवतीची जागा काळ्याऐवजी इमेजच्या धूसर प्रतीने भरा.</string>
   <string name="lock_album_label">लॉक अल्बम</string>
   <string name="home_album_label">होम अल्बम</string>
   <string name="scaling">स्केलिंग</string>

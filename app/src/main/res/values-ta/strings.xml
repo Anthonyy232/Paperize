@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">உங்கள் ஆல்பங்களை அழிக்காமல், அட்டவணையிட்ட மாற்றங்களை இடைநிறுத்தவும் அல்லது தொடரவும்.</string>
   <string name="horizontal_wallpaper_scrolling">கிடைமட்ட உருளுதல்</string>
   <string name="horizontal_wallpaper_scrolling_description">அகலமான ‘நிரப்பு’ வால்பேப்பர்கள் முகப்புத் திரை பக்கங்களுக்கிடையே நகர அனுமதிக்கும். பூட்டுத் திரை வால்பேப்பர்கள் மையத்தில் இருக்கும்.</string>
+  <string name="blur_fit_background">மங்கலான பின்னணி</string>
+  <string name="blur_fit_background_description">‘பொருத்து’ வால்பேப்பர்களைச் சுற்றியுள்ள இடத்தைக் கருப்புக்குப் பதிலாகப் படத்தின் மங்கலான நகலால் நிரப்பவும்.</string>
   <string name="lock_album_label">பூட்டு ஆல்பம்</string>
   <string name="home_album_label">முகப்பு ஆல்பம்</string>
   <string name="scaling">அளவீடு</string>

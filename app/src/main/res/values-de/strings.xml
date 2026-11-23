@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Geplante Wechsel pausieren oder fortsetzen, ohne Ihre Alben zu löschen.</string>
   <string name="horizontal_wallpaper_scrolling">Horizontales Scrollen</string>
   <string name="horizontal_wallpaper_scrolling_description">Breite Hintergrundbilder im Modus „Füllen“ dürfen sich zwischen den Startbildschirmseiten bewegen. Hintergrundbilder des Sperrbildschirms bleiben zentriert.</string>
+  <string name="blur_fit_background">Unscharfer Hintergrund</string>
+  <string name="blur_fit_background_description">Füllt den Platz um „Anpassen“-Hintergrundbilder mit einer unscharfen Kopie des Bildes statt mit Schwarz.</string>
   <string name="lock_album_label">Sperrbildschirm-Album</string>
   <string name="home_album_label">Startbildschirm-Album</string>
   <string name="scaling">Skalierung</string>

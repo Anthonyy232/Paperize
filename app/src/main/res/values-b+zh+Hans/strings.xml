@@ -110,6 +110,8 @@
   <string name="wallpaper_changer_description">暂停或恢复定时切换，不会清除你的相册。</string>
   <string name="horizontal_wallpaper_scrolling">横向滚动</string>
   <string name="horizontal_wallpaper_scrolling_description">允许宽幅「填充」壁纸在桌面页面之间移动。锁屏壁纸保持居中。</string>
+  <string name="blur_fit_background">模糊背景</string>
+  <string name="blur_fit_background_description">用图片的模糊副本填充“适应”壁纸周围的空白，而不是黑色。</string>
   <string name="lock_album_label">锁屏相册</string>
   <string name="home_album_label">主屏幕相册</string>
   <string name="scaling">缩放</string>

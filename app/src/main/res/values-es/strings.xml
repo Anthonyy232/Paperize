@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Pausa o reanuda los cambios programados sin borrar tus álbumes.</string>
   <string name="horizontal_wallpaper_scrolling">Desplazamiento horizontal</string>
   <string name="horizontal_wallpaper_scrolling_description">Permite que los fondos anchos en modo Rellenar se muevan entre las páginas de inicio. Los fondos de la pantalla de bloqueo permanecen centrados.</string>
+  <string name="blur_fit_background">Fondo difuminado</string>
+  <string name="blur_fit_background_description">Rellena el espacio alrededor de los fondos en «Ajustar» con una copia difuminada de la imagen en lugar de negro.</string>
   <string name="lock_album_label">Álbum de bloqueo</string>
   <string name="home_album_label">Álbum de inicio</string>
   <string name="scaling">Escala</string>

@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Sæt planlagte skift på pause, eller genoptag dem, uden at rydde dine album.</string>
   <string name="horizontal_wallpaper_scrolling">Vandret rulning</string>
   <string name="horizontal_wallpaper_scrolling_description">Lad brede baggrunde med Udfyld flytte sig mellem startskærmens sider. Baggrunde på låseskærmen forbliver centreret.</string>
+  <string name="blur_fit_background">Sløret baggrund</string>
+  <string name="blur_fit_background_description">Udfyld pladsen omkring \"Tilpas\"-baggrunde med en sløret kopi af billedet i stedet for sort.</string>
   <string name="lock_album_label">Album til låseskærm</string>
   <string name="home_album_label">Album til startskærm</string>
   <string name="scaling">Skalering</string>

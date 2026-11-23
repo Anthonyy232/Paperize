@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Παύση ή συνέχιση των προγραμματισμένων αλλαγών χωρίς να διαγραφούν τα άλμπουμ σας.</string>
   <string name="horizontal_wallpaper_scrolling">Οριζόντια κύλιση</string>
   <string name="horizontal_wallpaper_scrolling_description">Επιτρέπει στις πλατιές ταπετσαρίες με Γέμισμα να μετακινούνται ανάμεσα στις σελίδες της αρχικής οθόνης. Οι ταπετσαρίες της οθόνης κλειδώματος παραμένουν κεντραρισμένες.</string>
+  <string name="blur_fit_background">Θολό φόντο</string>
+  <string name="blur_fit_background_description">Γεμίστε τον χώρο γύρω από τις ταπετσαρίες «Προσαρμογή» με ένα θολό αντίγραφο της εικόνας αντί για μαύρο.</string>
   <string name="lock_album_label">Άλμπουμ οθόνης κλειδώματος</string>
   <string name="home_album_label">Άλμπουμ αρχικής οθόνης</string>
   <string name="scaling">Κλιμάκωση</string>

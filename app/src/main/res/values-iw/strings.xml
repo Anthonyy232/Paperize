@@ -114,6 +114,8 @@
   <string name="wallpaper_changer_description">השהיה או חידוש של החלפות מתוזמנות בלי לנקות את האלבומים.</string>
   <string name="horizontal_wallpaper_scrolling">גלילה אופקית</string>
   <string name="horizontal_wallpaper_scrolling_description">מאפשר לטפטים רחבים במצב מילוי לנוע בין דפי מסך הבית. טפטים של מסך הנעילה נשארים ממורכזים.</string>
+  <string name="blur_fit_background">רקע מטושטש</string>
+  <string name="blur_fit_background_description">מילוי השטח סביב טפטים במצב „התאמה” בעותק מטושטש של התמונה במקום שחור.</string>
   <string name="lock_album_label">אלבום מסך הנעילה</string>
   <string name="home_album_label">אלבום מסך הבית</string>
   <string name="scaling">קנה מידה</string>

@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Onderbreek of hervat geplande wijzigingen zonder je albums te wissen.</string>
   <string name="horizontal_wallpaper_scrolling">Horizontaal scrollen</string>
   <string name="horizontal_wallpaper_scrolling_description">Laat brede achtergronden met Vullen bewegen tussen de pagina\'s van het startscherm. Achtergronden van het vergrendelscherm blijven gecentreerd.</string>
+  <string name="blur_fit_background">Vervaagde achtergrond</string>
+  <string name="blur_fit_background_description">Vul de ruimte rond achtergronden met \"Aanpassen\" met een vervaagde kopie van de afbeelding in plaats van zwart.</string>
   <string name="lock_album_label">Album vergrendelscherm</string>
   <string name="home_album_label">Album startscherm</string>
   <string name="scaling">Schaling</string>

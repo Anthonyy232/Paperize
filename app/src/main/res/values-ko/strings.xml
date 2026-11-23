@@ -110,6 +110,8 @@
   <string name="wallpaper_changer_description">앨범을 지우지 않고 예약된 변경을 일시중지하거나 다시 시작해요.</string>
   <string name="horizontal_wallpaper_scrolling">가로 스크롤</string>
   <string name="horizontal_wallpaper_scrolling_description">채우기로 설정한 넓은 배경화면이 홈 화면 페이지 사이에서 움직이도록 허용해요. 잠금 화면 배경화면은 가운데에 고정돼요.</string>
+  <string name="blur_fit_background">흐린 배경</string>
+  <string name="blur_fit_background_description">\'맞추기\' 배경화면 주변 공간을 검은색 대신 이미지를 흐리게 한 사본으로 채워요.</string>
   <string name="lock_album_label">잠금 화면 앨범</string>
   <string name="home_album_label">홈 화면 앨범</string>
   <string name="scaling">크기 조절</string>

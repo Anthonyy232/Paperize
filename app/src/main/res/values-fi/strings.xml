@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Keskeytä tai jatka ajastettuja vaihtoja tyhjentämättä albumeitasi.</string>
   <string name="horizontal_wallpaper_scrolling">Vaakasuuntainen vieritys</string>
   <string name="horizontal_wallpaper_scrolling_description">Anna leveiden Täytä-taustakuvien siirtyä aloitusnäytön sivujen välillä. Lukitusnäytön taustakuvat pysyvät keskitettyinä.</string>
+  <string name="blur_fit_background">Sumea tausta</string>
+  <string name="blur_fit_background_description">Täytä \"Sovita\"-taustakuvien ympärillä oleva tila kuvan sumealla kopiolla mustan sijaan.</string>
   <string name="lock_album_label">Lukitusnäytön albumi</string>
   <string name="home_album_label">Aloitusnäytön albumi</string>
   <string name="scaling">Skaalaus</string>

@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Pause ou retome as trocas agendadas sem apagar seus álbuns.</string>
   <string name="horizontal_wallpaper_scrolling">Rolagem horizontal</string>
   <string name="horizontal_wallpaper_scrolling_description">Permite que papéis de parede largos com Preencher se movam entre as páginas da tela inicial. Os papéis de parede da tela de bloqueio permanecem centralizados.</string>
+  <string name="blur_fit_background">Fundo desfocado</string>
+  <string name="blur_fit_background_description">Preenche o espaço ao redor dos papéis de parede em \"Ajustar\" com uma cópia desfocada da imagem em vez de preto.</string>
   <string name="lock_album_label">Álbum da Tela de Bloqueio</string>
   <string name="home_album_label">Álbum da Tela Inicial</string>
   <string name="scaling">Escala</string>

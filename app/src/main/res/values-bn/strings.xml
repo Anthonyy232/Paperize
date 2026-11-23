@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">অ্যালবাম না মুছে নির্ধারিত পরিবর্তন বিরতি দিন বা আবার চালু করুন।</string>
   <string name="horizontal_wallpaper_scrolling">অনুভূমিক স্ক্রলিং</string>
   <string name="horizontal_wallpaper_scrolling_description">চওড়া “পূরণ” ওয়ালপেপারকে হোম স্ক্রিনের পৃষ্ঠাগুলোর মধ্যে সরতে দিন। লক স্ক্রিনের ওয়ালপেপার মাঝখানেই থাকে।</string>
+  <string name="blur_fit_background">ঝাপসা পটভূমি</string>
+  <string name="blur_fit_background_description">“ফিট” ওয়ালপেপারের চারপাশের জায়গা কালোর বদলে ছবির একটি ঝাপসা কপি দিয়ে পূরণ করুন।</string>
   <string name="lock_album_label">লক অ্যালবাম</string>
   <string name="home_album_label">হোম অ্যালবাম</string>
   <string name="scaling">স্কেলিং</string>

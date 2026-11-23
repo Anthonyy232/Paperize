@@ -114,6 +114,8 @@
   <string name="wallpaper_changer_description">Întrerupe sau reia schimbările programate fără să ștergi albumele.</string>
   <string name="horizontal_wallpaper_scrolling">Derulare orizontală</string>
   <string name="horizontal_wallpaper_scrolling_description">Permite tapetelor late cu Umple să se miște între paginile ecranului de pornire. Tapetele ecranului de blocare rămân centrate.</string>
+  <string name="blur_fit_background">Fundal estompat</string>
+  <string name="blur_fit_background_description">Umple spațiul din jurul tapetelor „Potrivește” cu o copie estompată a imaginii în loc de negru.</string>
   <string name="lock_album_label">Album pentru ecranul de blocare</string>
   <string name="home_album_label">Album pentru ecranul de pornire</string>
   <string name="scaling">Scalare</string>

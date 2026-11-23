@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Onderbreek of hervat geskeduleerde veranderinge sonder om jou albums uit te vee.</string>
   <string name="horizontal_wallpaper_scrolling">Horisontale blaai</string>
   <string name="horizontal_wallpaper_scrolling_description">Laat wye Vul-muurpapiere tussen tuisskerm-bladsye beweeg. Sluitskerm-muurpapiere bly gesentreer.</string>
+  <string name="blur_fit_background">Vervaagde agtergrond</string>
+  <string name="blur_fit_background_description">Vul die ruimte rondom \"Pas in\"-muurpapiere met \'n vervaagde kopie van die beeld in plaas van swart.</string>
   <string name="lock_album_label">Sluitskerm-album</string>
   <string name="home_album_label">Tuisskerm-album</string>
   <string name="scaling">Skalering</string>

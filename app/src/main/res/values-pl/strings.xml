@@ -116,6 +116,8 @@
   <string name="wallpaper_changer_description">Wstrzymaj lub wznów zaplanowane zmiany bez czyszczenia albumów.</string>
   <string name="horizontal_wallpaper_scrolling">Przewijanie poziome</string>
   <string name="horizontal_wallpaper_scrolling_description">Pozwala szerokim tapetom w trybie Wypełnij przesuwać się między stronami ekranu głównego. Tapety ekranu blokady pozostają wyśrodkowane.</string>
+  <string name="blur_fit_background">Rozmyte tło</string>
+  <string name="blur_fit_background_description">Wypełnia miejsce wokół tapet w trybie „Dopasuj” rozmytą kopią obrazu zamiast czerni.</string>
   <string name="lock_album_label">Album ekranu blokady</string>
   <string name="home_album_label">Album ekranu głównego</string>
   <string name="scaling">Skalowanie</string>

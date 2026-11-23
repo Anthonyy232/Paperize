@@ -110,6 +110,8 @@
   <string name="wallpaper_changer_description">Tạm dừng hoặc tiếp tục các lần đổi theo lịch mà không phải xóa album.</string>
   <string name="horizontal_wallpaper_scrolling">Cuộn ngang</string>
   <string name="horizontal_wallpaper_scrolling_description">Cho phép hình nền rộng ở chế độ Lấp đầy di chuyển giữa các trang màn hình chính. Hình nền màn hình khóa vẫn được căn giữa.</string>
+  <string name="blur_fit_background">Nền làm mờ</string>
+  <string name="blur_fit_background_description">Lấp khoảng trống quanh hình nền \"Vừa khít\" bằng bản sao làm mờ của ảnh thay vì màu đen.</string>
   <string name="lock_album_label">Album màn hình khóa</string>
   <string name="home_album_label">Album màn hình chính</string>
   <string name="scaling">Tỷ lệ</string>

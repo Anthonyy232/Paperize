@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Sett planlagte bytter på pause eller gjenoppta dem uten å tømme albumene dine.</string>
   <string name="horizontal_wallpaper_scrolling">Horisontal rulling</string>
   <string name="horizontal_wallpaper_scrolling_description">La brede bakgrunnsbilder i Fyll-modus flyttes mellom sidene på startskjermen. Bakgrunnsbilder på låseskjermen forblir sentrert.</string>
+  <string name="blur_fit_background">Uskarp bakgrunn</string>
+  <string name="blur_fit_background_description">Fyll plassen rundt «Tilpass»-bakgrunnsbilder med en uskarp kopi av bildet i stedet for svart.</string>
   <string name="lock_album_label">Låseskjermalbum</string>
   <string name="home_album_label">Startskjermalbum</string>
   <string name="scaling">Skalering</string>

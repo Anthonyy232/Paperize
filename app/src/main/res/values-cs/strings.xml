@@ -116,6 +116,8 @@
   <string name="wallpaper_changer_description">Pozastavte nebo obnovte plánované změny, aniž byste museli vymazat alba.</string>
   <string name="horizontal_wallpaper_scrolling">Vodorovné posouvání</string>
   <string name="horizontal_wallpaper_scrolling_description">Umožní širokým tapetám v režimu Vyplnit posouvat se mezi stránkami domovské obrazovky. Tapety obrazovky zámku zůstanou vystředěné.</string>
+  <string name="blur_fit_background">Rozmazané pozadí</string>
+  <string name="blur_fit_background_description">Vyplnit prostor kolem tapet v režimu „Přizpůsobit“ rozmazanou kopií obrázku místo černé.</string>
   <string name="lock_album_label">Album zámku</string>
   <string name="home_album_label">Album domovské obrazovky</string>
   <string name="scaling">Měřítko</string>

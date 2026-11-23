@@ -112,6 +112,8 @@
   <string name="wallpaper_changer_description">Albümlerinizi temizlemeden zamanlanmış değişiklikleri duraklatın veya sürdürün.</string>
   <string name="horizontal_wallpaper_scrolling">Yatay kaydırma</string>
   <string name="horizontal_wallpaper_scrolling_description">Geniş Doldur duvar kağıtlarının ana ekran sayfaları arasında hareket etmesine izin verin. Kilit ekranı duvar kağıtları ortalanmış kalır.</string>
+  <string name="blur_fit_background">Bulanık arka plan</string>
+  <string name="blur_fit_background_description">\"Sığdır\" duvar kağıtlarının çevresindeki boşluğu siyah yerine görselin bulanık bir kopyasıyla doldurur.</string>
   <string name="lock_album_label">Kilit Ekranı Albümü</string>
   <string name="home_album_label">Ana Ekran Albümü</string>
   <string name="scaling">Ölçekleme</string>

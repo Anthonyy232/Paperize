@@ -114,6 +114,8 @@
   <string name="wallpaper_changer_description">Паузирајте или наставите заказане промене без брисања албума.</string>
   <string name="horizontal_wallpaper_scrolling">Хоризонтално померање</string>
   <string name="horizontal_wallpaper_scrolling_description">Дозволите широким тапетима са опцијом Попуни да се померају између страница почетног екрана. Тапети закључаног екрана остају центрирани.</string>
+  <string name="blur_fit_background">Замућена позадина</string>
+  <string name="blur_fit_background_description">Попуњава простор око тапета у режиму „Прилагоди“ замућеном копијом слике уместо црне.</string>
   <string name="lock_album_label">Албум закључаног екрана</string>
   <string name="home_album_label">Албум почетног екрана</string>
   <string name="scaling">Скалирање</string>

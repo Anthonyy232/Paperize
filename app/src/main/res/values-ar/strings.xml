@@ -120,6 +120,8 @@
   <string name="wallpaper_changer_description">أوقف التغييرات المجدولة مؤقتاً أو استأنفها دون مسح ألبوماتك.</string>
   <string name="horizontal_wallpaper_scrolling">التمرير الأفقي</string>
   <string name="horizontal_wallpaper_scrolling_description">السماح للخلفيات العريضة بوضع «ملء» بالتنقل بين صفحات الشاشة الرئيسية. تبقى خلفيات شاشة القفل في المنتصف.</string>
+  <string name="blur_fit_background">خلفية مموّهة</string>
+  <string name="blur_fit_background_description">املأ المساحة المحيطة بخلفيات «ملاءمة» بنسخة مموّهة من الصورة بدلاً من الأسود.</string>
   <string name="lock_album_label">ألبوم القفل</string>
   <string name="home_album_label">ألبوم الرئيسية</string>
   <string name="scaling">التحجيم</string>
