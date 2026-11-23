@@ -87,9 +87,7 @@ fun AlbumSelectionBottomSheet(
                         .padding(AppSpacing.extraLarge)
                         .align(Alignment.CenterHorizontally),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
             }

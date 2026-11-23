@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.presentation.common.theme.AppSpacing
 
 /** Related [SettingsRow]s drawn as one rounded block, split by hairline gaps instead of nested cards. */
@@ -25,9 +24,7 @@ fun SettingsGroup(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = AppSpacing.large, end = AppSpacing.large, bottom = AppSpacing.small),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                modifier = Modifier.padding(start = AppSpacing.large, end = AppSpacing.large, bottom = AppSpacing.small)
             )
         }
         Column(
@@ -105,17 +102,13 @@ fun SettingText(title: String, description: String?, modifier: Modifier = Modifi
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            color = MaterialTheme.colorScheme.onSurface
         )
         if (description != null) {
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

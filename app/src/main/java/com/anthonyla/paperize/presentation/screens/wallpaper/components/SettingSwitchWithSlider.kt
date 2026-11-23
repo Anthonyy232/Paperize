@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import com.anthonyla.paperize.R
 import com.anthonyla.paperize.core.constants.Constants
 import com.anthonyla.paperize.presentation.common.components.SettingSwitchRow
@@ -147,9 +146,7 @@ private fun PercentageSlider(
                 text = stringResource(label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                modifier = Modifier.weight(1f)
             )
             Percentage(value)
         }

@@ -25,7 +25,6 @@ object Constants {
     const val DEFAULT_GRAYSCALE_PERCENTAGE = 0
     const val MAX_EFFECT_PERCENTAGE = 100
     const val SLIDER_EFFECT_STEPS = 99
-    const val DIALOG_MESSAGE_MAX_LINES = 10
     const val MIN_EFFECT_PERCENTAGE = 0
 
     const val MIN_LIVE_INTERVAL_MINUTES = 1
