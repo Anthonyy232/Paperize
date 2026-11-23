@@ -14,7 +14,9 @@ ksp {
 
 android {
     namespace = "com.anthonyla.paperize"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) { minorApiLevel = 2 }
+    }
 
     signingConfigs {
         create("release") {
