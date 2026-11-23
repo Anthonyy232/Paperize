@@ -79,6 +79,9 @@ android {
         baseline = file("lint-baseline.xml")
         // Crowdin exports no "many" form for Romance languages; Android falls back to "other".
         disable += "MissingQuantity"
+        // App screens, not a library: a modifier no caller passes is dead weight.
+        disable += "ComposeModifierMissing"
+        warningsAsErrors = true
     }
 
     dependenciesInfo {
@@ -90,6 +93,7 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
+        allWarningsAsErrors = true
     }
 }
 
@@ -118,6 +122,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.profileinstaller)
+    lintChecks(libs.compose.lint.checks)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

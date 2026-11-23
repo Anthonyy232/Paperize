@@ -40,9 +40,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun OnboardingLayout(
     title: String,
-    modifier: Modifier = Modifier,
     iconContent: @Composable () -> Unit,
     content: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     actions: @Composable () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
