@@ -295,6 +295,48 @@ class LiveWallpaperShaderInstrumentedTest {
         }
     }
 
+    @Test
+    fun liveBlurSpreadsAnEdgeAsFarAsStaticBlur() {
+        val app = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        val uploads = java.util.concurrent.LinkedBlockingQueue<() -> Unit>()
+        val renderer = PaperizeWallpaperRenderer(app, object : PaperizeWallpaperRenderer.Callbacks {
+            override fun queueEventOnGlThread(event: () -> Unit): Boolean = uploads.offer(event)
+            override fun requestRender() = Unit
+        })
+        val egl = javax.microedition.khronos.egl.EGLContext.getEGL() as javax.microedition.khronos.egl.EGL10
+        val gl = egl.eglGetCurrentContext().gl as javax.microedition.khronos.opengles.GL10
+        val config = com.anthonyla.paperize.service.livewallpaper.gl.WallpaperEglConfigChooser()
+            .chooseConfig(egl, egl.eglGetCurrentDisplay())
+        val file = java.io.File.createTempFile("blur-edge", ".png", app.cacheDir)
+        val static = com.anthonyla.paperize.core.util.processBitmap(
+            boundaryBitmap(horizontalBoundary = true), enableBlur = true, blurPercent = 100
+        )
+        try {
+            val edge = boundaryBitmap(horizontalBoundary = true)
+            file.outputStream().use { edge.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            edge.recycle()
+            renderer.onSurfaceCreated(gl, config)
+            renderer.onSurfaceChanged(gl, SIZE, SIZE)
+            renderer.updateEffects(com.anthonyla.paperize.domain.model.WallpaperEffects(enableBlur = true, blurPercentage = 100))
+            renderer.queueWallpaper(
+                ContentUriImageLoader(app.contentResolver, android.net.Uri.fromFile(file)),
+                skipCrossfade = true
+            )
+            checkNotNull(uploads.poll(5, java.util.concurrent.TimeUnit.SECONDS)).invoke()
+            renderer.onDrawFrame(gl)
+
+            for (x in listOf(20, 24, 28, 36, 40, 44)) {
+                val live = Color.red(readPixel(x, SIZE / 2))
+                val expected = Color.red(static.getPixel(x, SIZE / 2))
+                assertTrue("x=$x live=$live static=$expected", kotlin.math.abs(live - expected) <= 16)
+            }
+        } finally {
+            renderer.cancelLoading()
+            static.recycle()
+            file.delete()
+        }
+    }
+
     private fun drawEffects(
         program: Int,
         texture: Int,

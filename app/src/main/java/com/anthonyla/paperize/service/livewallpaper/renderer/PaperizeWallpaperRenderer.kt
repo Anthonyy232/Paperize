@@ -38,6 +38,19 @@ class PaperizeWallpaperRenderer(
 
     companion object {
         private const val TAG = "PaperizeRenderer"
+
+        // Skia turns a RenderEffect blur radius into sigma = 0.57735 * radius + 0.5.
+        private const val SKIA_SIGMA_PER_RADIUS = 0.57735f
+        private const val SKIA_SIGMA_OFFSET = 0.5f
+        // BLUR_FRAGMENT_SHADER's kernel has a sigma of 1.815 radius units.
+        private const val SHADER_SIGMA_PER_RADIUS = 1.815f
+
+        /** The shader radius that blurs as much as the static path does at [percent]. */
+        private fun liveBlurRadius(percent: Int): Float {
+            if (percent == 0) return 0f
+            val staticRadius = percent / 100f * Constants.MAX_BLUR_RADIUS
+            return (SKIA_SIGMA_PER_RADIUS * staticRadius + SKIA_SIGMA_OFFSET) / SHADER_SIGMA_PER_RADIUS
+        }
     }
 
     interface Callbacks {
@@ -167,11 +180,7 @@ class PaperizeWallpaperRenderer(
             return
         }
 
-        val blurRadius = if (currentEffects.enableBlur) {
-            (currentEffects.blurPercentage / 100.0f) * Constants.MAX_BLUR_RADIUS
-        } else {
-            0f
-        }
+        val blurRadius = if (currentEffects.enableBlur) liveBlurRadius(currentEffects.blurPercentage) else 0f
 
         val crossfadeProgress = if (next != null) {
             val elapsedMs = (System.nanoTime() - crossfadeStartTimeNanos) / 1_000_000f
