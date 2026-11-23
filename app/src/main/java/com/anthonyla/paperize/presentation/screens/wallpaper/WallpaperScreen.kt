@@ -3,6 +3,7 @@ package com.anthonyla.paperize.presentation.screens.wallpaper
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -452,16 +454,21 @@ private fun AlbumSelector(albumId: String?, albums: List<AlbumSummary>, label: S
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val coverModifier = Modifier
+                .size(AppIconSizes.large)
+                .clip(MaterialTheme.shapes.small)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             if (album != null) {
                 AlbumCover(
                     album = album,
                     thumbnailSize = Constants.LIST_THUMBNAIL_SIZE,
                     placeholderTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .size(AppIconSizes.large)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    modifier = coverModifier
                 )
+            } else {
+                Box(coverModifier, contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.PhotoAlbum, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
             SettingText(
                 title = album?.name ?: stringResource(if (albumId == null) R.string.no_album_selected else R.string.loading_placeholder),
