@@ -49,6 +49,7 @@ An Android app that changes the home and lock screen wallpaper on a schedule: Ko
 - README is for users: what it does, how to get it, how to use it. No internals, no agent instructions.
 - This file is for agents: only what can't be found quickly in the code.
 - No meta docs in the repo (notes, audits, plans, reports).
+- Generated images are built from the orphan `media` branch; its README has the steps.
 
 ## Git
 
@@ -66,11 +67,10 @@ An Android app that changes the home and lock screen wallpaper on a schedule: Ko
 ## Releases
 
 - Bump commit `chore: release vX.Y.Z`; tag `vX.Y.Z`.
-- A pushed `v*` tag is the store submission. F-Droid picks the tag up by itself as soon as it is pushed, builds it, and compares its build with the release APK. CI attaches the signed `paperize-vX.Y.Z.apk` to the draft release for that tag, reusing a draft that already has the notes, but the APK is not public while the release is a draft: publish the draft as soon as CI has attached the APK, or the F-Droid comparison fails and has to be retried. Never rename a tag or asset.
+- A pushed `v*` tag is the store submission: F-Droid builds it straight away and compares the result with the release APK. CI attaches the signed APK to the tag's draft release (reusing a draft that already has notes), but a draft's APK isn't public: publish the draft as soon as CI has attached it, or the F-Droid comparison fails. Never rename a tag or asset.
 - Title `Paperize X.Y.Z`.
 - Notes: banner image first, then `### New`, `### Improved`, `### Fixed` (only those that apply). One line per change, written for users; no internals, dependency lists or test counts. End with the install links (APK, F-Droid, IzzyOnDroid) and the full changelog link.
-- Banner: generated and hosted on the orphan `media` branch; use `https://raw.githubusercontent.com/Anthonyy232/Paperize/media/releases/vX.Y.Z.png`.
-- The README, site and store listing images are built on the `media` branch too, from emulator captures; its README has the steps for both.
+- Banner: built and hosted on the `media` branch; reference its raw URL.
 - The site in `site/` hosts the privacy policy the store listing links to at `#privacy`; keep that anchor.
 
 ## Agents
