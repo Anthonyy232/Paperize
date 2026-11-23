@@ -81,6 +81,8 @@ android {
         disable += "MissingQuantity"
         // App screens, not a library: a modifier no caller passes is dead weight.
         disable += "ComposeModifierMissing"
+        // Dependabot handles updates; these fail the build whenever anything upstream releases.
+        disable += listOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable")
         warningsAsErrors = true
     }
 
