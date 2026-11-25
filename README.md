@@ -4,6 +4,14 @@
 </picture>
 
 <p align="center">
+  <a href="https://github.com/Anthonyy232/Paperize/releases/latest"><img src="https://img.shields.io/github/v/release/Anthonyy232/Paperize?style=flat-square" alt="Latest release"></a>
+  <a href="https://github.com/Anthonyy232/Paperize/releases"><img src="https://img.shields.io/github/downloads/Anthonyy232/Paperize/total?style=flat-square" alt="Total downloads"></a>
+  <a href="https://github.com/Anthonyy232/Paperize/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Anthonyy232/Paperize/build.yml?style=flat-square&label=CI" alt="CI"></a>
+  <a href="https://crowdin.com/project/paperize"><img src="https://badges.crowdin.net/paperize/localized.svg" alt="Crowdin"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Anthonyy232/Paperize?style=flat-square" alt="License"></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/Anthonyy232/Paperize/releases/latest"><b>Download the APK</b></a>
   &nbsp;·&nbsp;
   <a href="https://f-droid.org/en/packages/com.anthonyla.paperize/"><b>F-Droid</b></a>
