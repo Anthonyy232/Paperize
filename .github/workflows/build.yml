@@ -1,4 +1,4 @@
-name: Paperize CI/CD Pipeline
+name: Build
 
 on:
   push:

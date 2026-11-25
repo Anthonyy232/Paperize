@@ -104,4 +104,4 @@ jobs:
             gh pr create --base master --head "$BRANCH" --title "chore: update translations" \
               --body "Approved translations from [Crowdin](https://crowdin.com/project/paperize)."
           fi
-          gh workflow run android-release.yml --ref "$BRANCH"
+          gh workflow run build.yml --ref "$BRANCH"
